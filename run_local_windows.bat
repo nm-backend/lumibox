@@ -34,12 +34,27 @@ if "%PY%"=="" (
 )
 echo Using Python: %PY%
 
-rem --- 2. Virtual environment ---
-if not exist ".venv\Scripts\python.exe" (
-    echo [1/6] Creating virtual environment...
-    %PY% -m venv .venv || ( echo [ERROR] Could not create venv & pause & exit /b 1 )
-)
+rem --- 2. Virtual environment (auto-heal a broken/mismatched one) ---
 set "VPY=.venv\Scripts\python.exe"
+set "NEEDVENV=0"
+if not exist "%VPY%" set "NEEDVENV=1"
+if "%NEEDVENV%"=="0" (
+    rem A .venv left from another Python version has mismatched compiled
+    rem binaries and Pillow fails to import (Django error fields.E210).
+    rem Detect that and rebuild the venv clean.
+    "%VPY%" -c "from PIL import Image" >nul 2>&1 || set "NEEDVENV=1"
+)
+if "%NEEDVENV%"=="1" (
+    if exist ".venv" (
+        echo [1/6] Rebuilding virtual environment ^(was broken or wrong Python^)...
+        rmdir /s /q .venv
+    ) else (
+        echo [1/6] Creating virtual environment...
+    )
+    %PY% -m venv .venv || ( echo [ERROR] Could not create venv & pause & exit /b 1 )
+) else (
+    echo [1/6] Virtual environment OK
+)
 
 rem --- 3. Dependencies ---
 echo [2/6] Installing dependencies ^(first run may take a few minutes^)...
