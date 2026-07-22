@@ -27,8 +27,19 @@ BACKDROP_SIZE = (1600, 900)
 # Тёмная база проекта (#0b0d12) — та же, что фон сайта.
 BASE_DARK = (11, 13, 18)
 
-FONT_REGULAR = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
-FONT_BOLD = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
+# Кандидаты шрифтов по платформам: в Docker стоит DejaVu, на Windows — Arial,
+# на macOS — свой Arial. Все три содержат кириллицу. Берём первый найденный,
+# поэтому команда рисует нормальные постеры и без Docker (у заказчика Windows).
+FONT_REGULAR = [
+    "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+    "C:/Windows/Fonts/arial.ttf",
+    "/System/Library/Fonts/Supplemental/Arial.ttf",
+]
+FONT_BOLD = [
+    "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
+    "C:/Windows/Fonts/arialbd.ttf",
+    "/System/Library/Fonts/Supplemental/Arial Bold.ttf",
+]
 
 
 class Command(BaseCommand):
@@ -136,13 +147,16 @@ class Command(BaseCommand):
                 draw.line([(0, y), (width, y)], fill=color)
         return image
 
-    def _font(self, path, size):
-        try:
-            return ImageFont.truetype(path, size)
-        except OSError:
-            # Шрифта нет (например, локальный запуск без Docker) — не падаем,
-            # берём встроенный. Кириллица будет хуже, но команда отработает.
-            return ImageFont.load_default(size)
+    def _font(self, candidates, size):
+        # Перебираем кандидатов по платформам, берём первый доступный.
+        for path in candidates:
+            try:
+                return ImageFont.truetype(path, size)
+            except OSError:
+                continue
+        # Ни один шрифт не найден — не падаем, берём встроенный.
+        # Кириллица будет хуже, но команда отработает.
+        return ImageFont.load_default(size)
 
     def _wrap(self, text, font, max_width, draw):
         words = text.split()
