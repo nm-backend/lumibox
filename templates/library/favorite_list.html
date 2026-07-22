@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block page_title %}Избранное — MovieHub{% endblock %}
+
+{% block content %}
+    <div class="page-header">
+        <h1 class="page-title">Избранное</h1>
+        <p class="page-subtitle">Всего: {{ paginator.count }}</p>
+    </div>
+
+    {% if favorites %}
+        <div class="title-grid">
+            {% for favorite in favorites %}
+                {% include "includes/title_card.html" with title=favorite.title %}
+            {% endfor %}
+        </div>
+
+        {% include "includes/pagination.html" %}
+    {% else %}
+        <div class="empty-state">
+            <p class="empty-state__title">Здесь пока пусто</p>
+            <p>Нажмите «В избранное» на странице фильма — и он появится тут.</p>
+            <p class="empty-state__action">
+                <a class="button button--primary" href="{% url 'catalog:title_list' %}">Открыть каталог</a>
+            </p>
+        </div>
+    {% endif %}
+{% endblock %}

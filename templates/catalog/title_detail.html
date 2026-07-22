@@ -1,0 +1,275 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block page_title %}{{ title.get_meta_title }} ({{ title.release_year }}) — MovieHub{% endblock %}
+{% block page_description %}{{ title.get_meta_description }}{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/title-detail.css' %}">
+{% endblock %}
+
+{% comment %}
+Шапка вынесена в блок hero: она полноширинная и живёт вне .container.
+Фон — необязательный: если редактор его не загрузил, остаётся чистый
+градиент, и страница не выглядит сломанной.
+{% endcomment %}
+{% block hero %}
+<section class="film-hero">
+    {% if title.backdrop %}
+        {% comment %}
+        alt пустой и aria-hidden: это декорация, содержания в ней нет,
+        а скринридеру незачем читать «фон фильма такого-то».
+        {% endcomment %}
+        <img class="film-hero__backdrop" src="{{ title.backdrop.url }}" alt="" aria-hidden="true">
+    {% endif %}
+
+    {# Затемнение поверх фона: без него светлый кадр съедает белый текст. #}
+    <div class="film-hero__scrim" aria-hidden="true"></div>
+
+    <div class="container film-hero__inner">
+        <div class="film-hero__poster">
+            {% if title.poster %}
+                <img class="film-hero__poster-image" src="{{ title.poster.url }}" alt="Постер: {{ title.name }}">
+            {% else %}
+                <span class="card__placeholder" aria-hidden="true">{{ title.name|first }}</span>
+            {% endif %}
+        </div>
+
+        <div class="film-hero__body">
+            {% if title.logo %}
+                {% comment %}
+                Логотип заменяет текстовый заголовок, но h1 остаётся
+                в разметке для поисковика и скринридера.
+                {% endcomment %}
+                <h1 class="film-hero__name film-hero__name--logo">
+                    <img class="film-hero__logo" src="{{ title.logo.url }}" alt="{{ title.name }}">
+                </h1>
+            {% else %}
+                <h1 class="film-hero__name">{{ title.name }}</h1>
+            {% endif %}
+
+            {% if title.original_name %}
+                <p class="film-hero__original">{{ title.original_name }}</p>
+            {% endif %}
+
+            {% if title.short_description %}
+                <p class="film-hero__tagline">{{ title.short_description }}</p>
+            {% endif %}
+
+            <div class="film-hero__meta">
+                {% if title.rating_average %}
+                    <span class="score" title="Средняя оценка зрителей">
+                        <span class="score__value">{{ title.rating_average }}</span>
+                        <span class="score__max">/10</span>
+                    </span>
+                    <span class="film-hero__dot" aria-hidden="true">·</span>
+                {% endif %}
+
+                <span>{{ title.get_type_display }}</span>
+                <span class="film-hero__dot" aria-hidden="true">·</span>
+                <span>{{ title.release_year }}</span>
+
+                {% if title.duration_minutes %}
+                    <span class="film-hero__dot" aria-hidden="true">·</span>
+                    <span>{{ title.duration_minutes }} мин</span>
+                {% endif %}
+
+                {% if title.age_rating %}
+                    <span class="film-hero__age">{{ title.age_rating }}</span>
+                {% endif %}
+            </div>
+
+            {% if title.genres.all %}
+                <div class="badge-list film-hero__genres">
+                    {% for genre in title.genres.all %}
+                        <a class="badge" href="{% url 'catalog:genre_titles' genre.slug %}">{{ genre.name }}</a>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            {% if title.description %}
+                <p class="film-hero__description">{{ title.description }}</p>
+            {% endif %}
+
+            <div class="film-hero__actions">
+                {% if title.trailer_source %}
+                    {% comment %}
+                    Якорь, а не модалка: плеер ниже на странице.
+                    Модальное окно потребовало бы JS ради того же результата.
+                    {% endcomment %}
+                    <a class="button button--primary" href="#trailer">
+                        <span class="button__icon" aria-hidden="true">▶</span>
+                        Смотреть трейлер
+                    </a>
+                {% endif %}
+
+                {% if user.is_authenticated %}
+                    {% comment %}
+                    POST, а не ссылка: GET не должен менять данные.
+                    data-favorite-form подхватит скрипт и уберёт перезагрузку,
+                    но без JavaScript форма всё равно работает.
+                    {% endcomment %}
+                    <form method="post"
+                          action="{% url 'library:toggle_favorite' title.slug %}"
+                          data-favorite-form>
+                        {% csrf_token %}
+                        <input type="hidden" name="next" value="{{ request.path }}">
+                        <button class="button button--ghost {% if is_favorite %}button--active{% endif %}"
+                                type="submit" data-favorite-button>
+                            {% if is_favorite %}В избранном{% else %}В избранное{% endif %}
+                        </button>
+                    </form>
+                {% else %}
+                    <a class="button button--ghost" href="{% url 'users:login' %}?next={{ request.path }}">
+                        В избранное
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block content %}
+    {% if title.trailer_source %}
+        <section class="section" id="trailer">
+            <h2 class="section__title">Трейлер</h2>
+
+            {% if title.trailer_source == "file" %}
+                {# Своё видео: отдаём тегом video, без внешних зависимостей. #}
+                <div class="player">
+                    <video class="player__frame" controls preload="metadata"
+                           {% if title.backdrop %}poster="{{ title.backdrop.url }}"{% endif %}>
+                        <source src="{{ title.trailer_file.url }}">
+                        Ваш браузер не умеет проигрывать видео.
+                        <a href="{{ title.trailer_file.url }}">Скачать файл</a>.
+                    </video>
+                </div>
+
+            {% elif title.trailer_embed_url %}
+                {% comment %}
+                Встраиваем только проверенные хосты — список в apps/catalog/embeds.py.
+                Ссылку вводит редактор, и пускать во фрейм что попало нельзя.
+                {% endcomment %}
+                <div class="player">
+                    <iframe class="player__frame"
+                            src="{{ title.trailer_embed_url }}"
+                            title="Трейлер: {{ title.name }}"
+                            loading="lazy"
+                            referrerpolicy="strict-origin-when-cross-origin"
+                            allow="accelerometer; clipboard-write; encrypted-media; picture-in-picture"
+                            allowfullscreen></iframe>
+                </div>
+
+            {% else %}
+                {% comment %}
+                Хост незнакомый — встраивать не будем, но и ссылку не теряем.
+                rel="noopener" обязателен: без него открытая вкладка получает
+                доступ к нашей странице через window.opener.
+                {% endcomment %}
+                <p class="player-fallback">
+                    Трейлер размещён на стороннем сервисе.
+                    <a class="button button--ghost" href="{{ title.trailer_url }}"
+                       target="_blank" rel="noopener noreferrer">Открыть трейлер</a>
+                </p>
+            {% endif %}
+        </section>
+    {% endif %}
+
+    {% if title.frames.all %}
+        <section class="section">
+            <h2 class="section__title">Кадры</h2>
+            <div class="frames">
+                {% for frame in title.frames.all %}
+                    {% comment %}
+                    Подпись служит alt-текстом: без неё незрячий услышит
+                    только «изображение». Если её нет — подставляем название.
+                    {% endcomment %}
+                    <img class="frames__item"
+                         src="{{ frame.image.url }}"
+                         alt="{{ frame.caption|default:title.name }}"
+                         loading="lazy">
+                {% endfor %}
+            </div>
+        </section>
+    {% endif %}
+
+    <section class="section">
+        <h2 class="section__title">О проекте</h2>
+        <dl class="spec-list">
+            <dt class="spec-list__label">{% if title.release_date %}Дата выхода{% else %}Год{% endif %}</dt>
+            <dd class="spec-list__value">
+                {% if title.release_date %}{{ title.release_date|date:"j E Y" }}{% else %}{{ title.release_year }}{% endif %}
+            </dd>
+
+            {% if title.duration_minutes %}
+                <dt class="spec-list__label">{% if title.is_series %}Серия{% else %}Длительность{% endif %}</dt>
+                <dd class="spec-list__value">{{ title.duration_minutes }} мин</dd>
+            {% endif %}
+
+            {% if title.countries.all %}
+                <dt class="spec-list__label">Страны</dt>
+                <dd class="spec-list__value">
+                    <div class="badge-list">
+                        {% for country in title.countries.all %}
+                            <a class="badge" href="{% url 'catalog:country_titles' country.slug %}">{{ country.name }}</a>
+                        {% endfor %}
+                    </div>
+                </dd>
+            {% endif %}
+
+            {% if title.rating_average %}
+                <dt class="spec-list__label">Оценка зрителей</dt>
+                <dd class="spec-list__value">{{ title.rating_average }} / 10 ({{ title.rating_count }})</dd>
+            {% endif %}
+        </dl>
+    </section>
+
+    {% if crew_by_role %}
+        <section class="section">
+            <h2 class="section__title">Над проектом работали</h2>
+
+            {% for role_label, participations in crew_by_role %}
+                <div class="crew-group">
+                    <p class="crew-group__role">{{ role_label }}</p>
+                    <div class="crew-list">
+                        {% for participation in participations %}
+                            <a class="crew" href="{{ participation.person.get_absolute_url }}">
+                                <span class="avatar">
+                                    {% if participation.person.photo %}
+                                        <img class="avatar__image" src="{{ participation.person.photo.url }}" alt="" loading="lazy">
+                                    {% else %}
+                                        <span aria-hidden="true">{{ participation.person.initial }}</span>
+                                    {% endif %}
+                                </span>
+                                <span class="crew__body">
+                                    <span class="crew__name">{{ participation.person.name }}</span>
+                                    {% if participation.character %}
+                                        <span class="crew__character">{{ participation.character }}</span>
+                                    {% endif %}
+                                </span>
+                            </a>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endfor %}
+        </section>
+    {% endif %}
+
+    {% include "includes/reviews.html" %}
+
+    {% if similar_titles %}
+        <section class="section">
+            <h2 class="section__title">Похожее</h2>
+            <div class="title-grid">
+                {% comment %}
+                Переменная цикла названа иначе, чтобы не затирать title
+                самой страницы, и передана в карточку явно через with.
+                {% endcomment %}
+                {% for similar in similar_titles %}
+                    {% include "includes/title_card.html" with title=similar %}
+                {% endfor %}
+            </div>
+        </section>
+    {% endif %}
+{% endblock %}

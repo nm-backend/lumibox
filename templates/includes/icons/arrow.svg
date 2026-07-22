@@ -1,0 +1,5 @@
+{% comment %}Стрелка «внешняя ссылка». aria-hidden: рядом всегда есть текст.{% endcomment %}
+<svg class="icon icon--sm" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+    <path d="M6 3h7v7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M13 3 3 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+</svg>

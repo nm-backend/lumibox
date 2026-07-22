@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block page_title %}Подборки — MovieHub{% endblock %}
+{% block page_description %}Тематические подборки фильмов и сериалов.{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/collections.css' %}">
+{% endblock %}
+
+{% block content %}
+    <div class="page-header">
+        <h1 class="page-title">Подборки</h1>
+        <p class="page-subtitle">Всего: {{ paginator.count }}</p>
+    </div>
+
+    {% if collections %}
+        <div class="collection-grid">
+            {% for collection in collections %}
+                {% include "includes/collection_card.html" %}
+            {% endfor %}
+        </div>
+
+        {% include "includes/pagination.html" %}
+    {% else %}
+        <div class="empty-state">
+            <p class="empty-state__title">Подборок пока нет</p>
+            <p>Загляните позже — они появятся.</p>
+            <p class="empty-state__action">
+                <a class="button button--primary" href="{% url 'catalog:title_list' %}">Открыть каталог</a>
+            </p>
+        </div>
+    {% endif %}
+{% endblock %}

@@ -1,0 +1,131 @@
+{% comment %}
+Подвал сайта.
+
+Вынесен из base.html: разметки стало заметно больше, и держать её
+вперемешку с шапкой значит каждый раз пролистывать подвал, чтобы
+добраться до навигации.
+
+Иконки — собственные inline-SVG. Не иконочный шрифт и не библиотека:
+их здесь пять штук, а лишняя зависимость ради пяти фигур не окупается.
+Чужие логотипы не воспроизводим — рисуем свои простые формы.
+{% endcomment %}
+
+<footer class="site-footer">
+    <div class="container">
+        <div class="footer-grid">
+
+            <div class="footer-brand">
+                <a class="logo" href="{% url 'catalog:home' %}">
+                    <span class="logo__mark"></span>
+                    <span>Movie<span class="logo__accent">Hub</span></span>
+                </a>
+                <p class="footer-brand__text">
+                    Каталог фильмов и сериалов с поиском, фильтрами, подборками
+                    и личной библиотекой. Учебный проект с открытым кодом,
+                    собранный на Django и PostgreSQL.
+                </p>
+                <p class="footer-brand__stack">
+                    <span class="chip chip--muted">Django 5.2</span>
+                    <span class="chip chip--muted">PostgreSQL</span>
+                    <span class="chip chip--muted">Redis</span>
+                    <span class="chip chip--muted">Celery</span>
+                </p>
+            </div>
+
+            <nav class="footer-nav" aria-label="Разделы каталога">
+                <h2 class="footer-nav__title">Каталог</h2>
+                <ul class="footer-nav__list">
+                    <li><a class="footer-nav__link" href="{% url 'catalog:title_list' %}">Все фильмы и сериалы</a></li>
+                    <li><a class="footer-nav__link" href="{% url 'catalog:title_list' %}?type=movie">Фильмы</a></li>
+                    <li><a class="footer-nav__link" href="{% url 'catalog:title_list' %}?type=series">Сериалы</a></li>
+                    <li><a class="footer-nav__link" href="{% url 'catalog:collection_list' %}">Подборки</a></li>
+                </ul>
+            </nav>
+
+            <nav class="footer-nav" aria-label="Навигация по справочникам">
+                <h2 class="footer-nav__title">Разделы</h2>
+                <ul class="footer-nav__list">
+                    <li><a class="footer-nav__link" href="{% url 'catalog:genre_list' %}">Жанры</a></li>
+                    <li><a class="footer-nav__link" href="{% url 'catalog:country_list' %}">Страны</a></li>
+                    <li><a class="footer-nav__link" href="{% url 'catalog:title_list' %}?sort=-rating_average">Высокий рейтинг</a></li>
+                    <li><a class="footer-nav__link" href="{% url 'catalog:title_list' %}?sort=-published_at">Новинки</a></li>
+                </ul>
+            </nav>
+
+            <nav class="footer-nav" aria-label="Для разработчиков">
+                <h2 class="footer-nav__title">Разработчикам</h2>
+                <ul class="footer-nav__list">
+                    <li>
+                        <a class="footer-nav__link" href="{% url 'api:swagger-ui' %}">
+                            Swagger UI
+                            {% include "includes/icons/arrow.svg" %}
+                        </a>
+                    </li>
+                    <li>
+                        <a class="footer-nav__link" href="{% url 'api:redoc' %}">
+                            ReDoc
+                            {% include "includes/icons/arrow.svg" %}
+                        </a>
+                    </li>
+                    <li>
+                        <a class="footer-nav__link" href="{% url 'api:schema' %}">
+                            Схема OpenAPI
+                            {% include "includes/icons/arrow.svg" %}
+                        </a>
+                    </li>
+                    <li><a class="footer-nav__link" href="{% url 'admin:index' %}">Панель управления</a></li>
+                </ul>
+            </nav>
+
+            <section class="author" aria-label="Создатель проекта">
+                <p class="author__label">Создатель проекта</p>
+
+                <div class="author__row">
+                    <span class="author__avatar">
+                        {% comment %}
+                        Фотографии пока нет. Вместо неё — инициал на градиенте,
+                        тот же приём, что и у заглушек постеров: один визуальный
+                        язык вместо серого квадрата «изображение не найдено».
+                        Появится фото — замените span на <img class="author__photo">.
+                        {% endcomment %}
+                        <span aria-hidden="true">N</span>
+                    </span>
+
+                    <div class="author__body">
+                        <p class="author__name">Nurullo</p>
+                        <p class="author__role">Автор и ведущий разработчик</p>
+                    </div>
+                </div>
+
+                <div class="author__links">
+                    {% comment %}
+                    Ссылки ведут в никуда, пока не заданы настоящие адреса:
+                    git remote у проекта не настроен, а выдумывать чужой профиль
+                    нельзя. Впишите свои — разметка и стили уже готовы.
+                    {% endcomment %}
+                    <a class="author__link" href="#" rel="noopener">
+                        {% include "includes/icons/code.svg" %}
+                        <span>GitHub проекта</span>
+                    </a>
+                    <a class="author__link" href="#" rel="noopener">
+                        {% include "includes/icons/user.svg" %}
+                        <span>GitHub автора</span>
+                    </a>
+                    <a class="author__link" href="mailto:nurullomusajanov395@gmail.com">
+                        {% include "includes/icons/mail.svg" %}
+                        <span>Написать</span>
+                    </a>
+                </div>
+            </section>
+        </div>
+
+        <div class="footer-bottom">
+            <p class="footer-bottom__copy">
+                © {% now "Y" %} MovieHub. Собственный дизайн и код.
+            </p>
+            <p class="footer-bottom__note">
+                Данные о фильмах — общедоступные факты. Оформление создано для этого проекта.
+            </p>
+        </div>
+    </div>
+</footer>

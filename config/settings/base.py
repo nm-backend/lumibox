@@ -1,0 +1,309 @@
+"""
+Базовые настройки MovieHub.
+
+Здесь лежит только то, что одинаково для всех окружений.
+Всё, что различается (отладка, домены, безопасность), находится
+в development.py и production.py — они импортируют этот файл.
+"""
+
+from pathlib import Path
+
+import environ
+
+# Корень проекта — папка, в которой лежит manage.py.
+# Этот файл: config/settings/base.py, поэтому поднимаемся на три уровня вверх.
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
+
+# Описываем переменные окружения и их типы.
+# Второй элемент кортежа — значение по умолчанию, если переменной нет.
+env = environ.Env(
+    DJANGO_DEBUG=(bool, False),
+    DJANGO_ALLOWED_HOSTS=(list, []),
+    # Пустая строка означает «Redis нет» — проект поднимется и без него.
+    REDIS_URL=(str, ""),
+    # 0 — прокси перед приложением нет. Безопасное умолчание, см. NUM_PROXIES ниже.
+    DJANGO_NUM_PROXIES=(int, 0),
+)
+
+# Читаем .env из корня проекта.
+# В продакшене файла может не быть — тогда переменные придут из окружения сервера.
+environ.Env.read_env(BASE_DIR / ".env")
+
+# Секретный ключ обязателен и никогда не хранится в коде.
+# Если переменной нет — проект упадёт сразу, а не втихую с небезопасным ключом.
+SECRET_KEY = env("DJANGO_SECRET_KEY")
+
+DEBUG = env("DJANGO_DEBUG")
+
+ALLOWED_HOSTS = env("DJANGO_ALLOWED_HOSTS")
+
+
+# Приложения разделены на три группы: так сразу видно, что наше, а что чужое.
+DJANGO_APPS = [
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    # Карта сайта для поисковиков. Работает без django.contrib.sites:
+    # домен берётся из самого запроса.
+    "django.contrib.sitemaps",
+]
+
+THIRD_PARTY_APPS = [
+    "rest_framework",
+    "django_filters",
+    "drf_spectacular",
+]
+
+LOCAL_APPS = [
+    # core идёт первым: его абстрактные модели используют остальные.
+    "apps.core",
+    "apps.users",
+    "apps.catalog",
+    "apps.library",
+    "apps.reviews",
+    # api последним: он представляет модели всех остальных приложений.
+    "apps.api",
+]
+
+INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
+
+
+MIDDLEWARE = [
+    "django.middleware.security.SecurityMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
+]
+
+ROOT_URLCONF = "config.urls"
+
+TEMPLATES = [
+    {
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        # Общие шаблоны (base.html, 404.html) лежат в корневой папке templates.
+        # Шаблоны приложений Django найдёт сам благодаря APP_DIRS.
+        "DIRS": [BASE_DIR / "templates"],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
+            ],
+        },
+    },
+]
+
+WSGI_APPLICATION = "config.wsgi.application"
+
+
+# Настройки базы читаем одной строкой из DATABASE_URL.
+# Формат: postgres://пользователь:пароль@хост:порт/имя_базы
+DATABASES = {
+    "default": env.db("DATABASE_URL"),
+}
+
+
+# Кэш. Если REDIS_URL не задан, работаем на памяти процесса:
+# проект должен подниматься на машине без Redis, просто без общего кэша
+# между процессами. Код, который зовёт cache.get/set, об этом не знает.
+REDIS_URL = env("REDIS_URL")
+
+if REDIS_URL:
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.redis.RedisCache",
+            "LOCATION": REDIS_URL,
+        }
+    }
+else:
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+            "LOCATION": "moviehub-local",
+        }
+    }
+
+# Сколько живут закэшированные подборки главной страницы.
+CACHE_TTL_HOME = 60 * 5
+
+
+# Celery. Брокер — тот же Redis. Без него задачи выполнятся прямо
+# в процессе запроса (task_always_eager), и разработка не встанет.
+CELERY_BROKER_URL = REDIS_URL
+CELERY_RESULT_BACKEND = REDIS_URL
+CELERY_TASK_ALWAYS_EAGER = not REDIS_URL
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TIMEZONE = "Asia/Bishkek"
+
+# Задачи по расписанию. Пересчёт рейтингов раз в час: считать среднюю
+# оценку на каждый показ страницы дорого, когда отзывов десятки тысяч.
+CELERY_BEAT_SCHEDULE = {
+    "refresh-title-ratings": {
+        "task": "apps.catalog.tasks.refresh_title_ratings",
+        "schedule": 60 * 60,
+    },
+}
+
+
+AUTH_PASSWORD_VALIDATORS = [
+    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
+    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
+    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
+    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
+]
+
+# REST API.
+NUM_PROXIES = env("DJANGO_NUM_PROXIES")
+
+REST_FRAMEWORK = {
+    # По умолчанию читать может любой. Каждая вьюха, которая меняет данные,
+    # объявляет своё правило явно — так нельзя случайно открыть запись всем.
+    "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.AllowAny"],
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        # Сессии: тот же вход, что и на сайте. Токены добавим,
+        # когда появится мобильный клиент.
+        "rest_framework.authentication.SessionAuthentication",
+    ],
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "PAGE_SIZE": 24,
+    "DEFAULT_FILTER_BACKENDS": ["django_filters.rest_framework.DjangoFilterBackend"],
+    # Ограничение частоты запросов — раздел 7 ТЗ.
+    # Без него один скрипт выкачает весь каталог за минуту.
+    "DEFAULT_THROTTLE_CLASSES": [
+        "rest_framework.throttling.AnonRateThrottle",
+        "rest_framework.throttling.UserRateThrottle",
+    ],
+    "DEFAULT_THROTTLE_RATES": {
+        "anon": "60/minute",
+        "user": "300/minute",
+    },
+    # Сколько доверенных прокси стоит перед приложением.
+    # Задать обязательно: при значении по умолчанию (None) DRF берёт ключ
+    # лимита прямо из заголовка X-Forwarded-For, а его шлёт сам клиент.
+    # Меняя заголовок на каждый запрос, любой обходит лимит целиком.
+    # 0 — прокси нет, ключом служит REMOTE_ADDR, заголовок игнорируется.
+    # За Nginx поставить 1 через DJANGO_NUM_PROXIES, иначе все посетители
+    # склеятся в один ключ по адресу самого Nginx.
+    "NUM_PROXIES": NUM_PROXIES,
+    # Схему OpenAPI строит drf-spectacular, разбирая сериализаторы и вьюсеты.
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+}
+
+
+# Документация API. Описание собирается из кода, а не пишется руками,
+# поэтому не может разойтись с реальным поведением эндпоинтов.
+SPECTACULAR_SETTINGS = {
+    "TITLE": "MovieHub API",
+    "VERSION": "1.0.0",
+    "DESCRIPTION": (
+        "REST API каталога фильмов и сериалов MovieHub.\n\n"
+        "**Чтение доступно без авторизации.** Отзывы и избранное требуют входа: "
+        "используется та же сессия, что и на сайте — войдите на `/login/`, "
+        "и запросы из браузера начнут проходить.\n\n"
+        "**Черновики недоступны.** Записи со статусом «Черновик» не отдаются "
+        "ни в списках, ни по прямой ссылке, ни через отзывы — только `404`.\n\n"
+        "**Ограничение частоты:** 60 запросов в минуту для гостя, "
+        "300 для авторизованного. При превышении — `429`."
+    ),
+    # Схема отдаётся отдельным эндпоинтом, дублировать её внутри UI незачем.
+    "SERVE_INCLUDE_SCHEMA": False,
+    "SERVE_PERMISSIONS": ["rest_framework.permissions.AllowAny"],
+    # Убирает /api/v1/ из имён операций: путь и так виден в адресе.
+    "SCHEMA_PATH_PREFIX": "/api/v1",
+    "TAGS": [
+        {"name": "titles", "description": "Фильмы и сериалы: список, карточка, похожее, избранное"},
+        {"name": "reviews", "description": "Отзывы с оценкой по десятибалльной шкале"},
+        {"name": "collections", "description": "Тематические подборки"},
+        {"name": "genres", "description": "Справочник жанров"},
+        {"name": "countries", "description": "Справочник стран"},
+    ],
+    "SWAGGER_UI_SETTINGS": {
+        "deepLinking": True,
+        "persistAuthorization": True,
+        "displayRequestDuration": True,
+    },
+}
+
+
+# Своя модель пользователя. Задана до первой миграции — поменять её
+# на работающем проекте стоит очень дорого.
+AUTH_USER_MODEL = "users.User"
+
+# Куда отправлять неавторизованного и куда возвращать после входа.
+LOGIN_URL = "users:login"
+LOGIN_REDIRECT_URL = "catalog:home"
+LOGOUT_REDIRECT_URL = "catalog:home"
+
+
+LANGUAGE_CODE = "ru-ru"
+TIME_ZONE = "Asia/Bishkek"
+USE_I18N = True
+
+# Храним время в базе в UTC, а показываем в TIME_ZONE.
+# Это избавляет от ошибок при смене часового пояса сервера.
+USE_TZ = True
+
+
+# Статика: наши исходники лежат в static/,
+# а collectstatic соберёт всё в staticfiles/ для продакшена.
+STATIC_URL = "static/"
+STATICFILES_DIRS = [BASE_DIR / "static"]
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
+# Медиа — файлы, которые загружают пользователи и редакторы (постеры фильмов).
+MEDIA_URL = "media/"
+MEDIA_ROOT = BASE_DIR / "media"
+
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+
+# Логирование — раздел 7 ТЗ.
+# Пишем в консоль: контейнер и systemd сами собирают stdout, и складывать
+# логи в файл внутри контейнера значит однажды их потерять.
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": "{levelname} {asctime} {name} {message}",
+            "style": "{",
+        },
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "verbose",
+        },
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": "INFO",
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": False,
+        },
+        # Ошибки запросов — то, из-за чего посетитель видит 500.
+        "django.request": {
+            "handlers": ["console"],
+            "level": "ERROR",
+            "propagate": False,
+        },
+        "apps": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": False,
+        },
+    },
+}

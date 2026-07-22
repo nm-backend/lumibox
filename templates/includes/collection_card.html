@@ -1,0 +1,22 @@
+{% comment %}
+Карточка подборки. Ждёт переменную collection.
+Используется на странице подборок и на главной.
+{% endcomment %}
+
+<a class="collection-card" href="{{ collection.get_absolute_url }}">
+    <span class="collection-card__cover">
+        {% if collection.cover %}
+            <img class="collection-card__image"
+                 src="{{ collection.cover.url }}"
+                 alt=""
+                 loading="lazy">
+        {% endif %}
+    </span>
+
+    <span class="collection-card__body">
+        <span class="collection-card__name">{{ collection.name }}</span>
+        {% if collection.titles_count %}
+            <span class="collection-card__count">{{ collection.titles_count }} в подборке</span>
+        {% endif %}
+    </span>
+</a>

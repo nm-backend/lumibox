@@ -1,0 +1,22 @@
+# Всё, чему не место в образе: секреты, локальное окружение и мусор.
+# Без этого файла .env с паролями уехал бы в образ, а .venv раздул бы его.
+
+.env
+.venv/
+venv/
+
+.git/
+.gitignore
+.gitattributes
+
+__pycache__/
+*.py[cod]
+
+media/
+staticfiles/
+*.sqlite3
+*.log
+
+.vscode/
+.idea/
+README.md

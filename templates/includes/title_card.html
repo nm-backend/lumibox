@@ -1,0 +1,63 @@
+{% comment %}
+Карточка фильма или сериала. Ждёт переменную title.
+
+Используется в каталоге, на главной, в подборках, в избранном и в истории —
+поэтому вся информация берётся только из самого объекта, без внешнего контекста.
+
+Ссылка одна и покрывает постер целиком (card__link::after растягивается
+на всю карточку). Так вся площадь кликабельна, но в разметке остаётся
+единственная ссылка — скринридер не читает один и тот же фильм дважды.
+{% endcomment %}
+
+<article class="card">
+    <div class="card__poster">
+        {% if title.poster %}
+            {# loading="lazy" — браузер грузит постер, только когда до него доскроллили #}
+            <img class="card__image"
+                 src="{{ title.poster.url }}"
+                 alt="Постер: {{ title.name }}"
+                 loading="lazy">
+        {% else %}
+            <span class="card__placeholder" aria-hidden="true">{{ title.name|first }}</span>
+        {% endif %}
+
+        <span class="card__badge">{{ title.get_type_display }}</span>
+
+        {% if title.age_rating %}
+            <span class="card__age">{{ title.age_rating }}</span>
+        {% endif %}
+
+        {% comment %}
+        Рейтинг лежит готовым в поле модели — дополнительных запросов нет.
+        У неоценённых записей он пустой, и блок не отрисуется.
+        {% endcomment %}
+        {% if title.rating_average %}
+            <span class="card__rating">{{ title.rating_average }}</span>
+        {% endif %}
+
+        {% comment %}
+        Слой, который выезжает при наведении. aria-hidden: всё, что в нём
+        написано, уже есть в тексте карточки ниже — для скринридера это
+        было бы повторением.
+        {% endcomment %}
+        <div class="card__overlay" aria-hidden="true">
+            <span class="card__overlay-action">Подробнее</span>
+        </div>
+    </div>
+
+    <h3 class="card__name">{{ title.name }}</h3>
+
+    <p class="card__meta">
+        {{ title.release_year }}{% for genre in title.genres.all|slice:":1" %} · {{ genre.name }}{% endfor %}
+    </p>
+
+    {% comment %}
+    Ссылка — последним элементом и на уровне всей карточки, а не внутри
+    постера: так она покрывает карточку ровно по её границам. Пока она
+    лежала внутри .card__poster, дотянуться до названия можно было только
+    отрицательным отступом на глаз — у однострочных названий он промахивался.
+    {% endcomment %}
+    <a class="card__link" href="{{ title.get_absolute_url }}">
+        <span class="visually-hidden">{{ title.name }}, {{ title.release_year }}</span>
+    </a>
+</article>

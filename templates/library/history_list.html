@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block page_title %}История просмотров — MovieHub{% endblock %}
+
+{% block content %}
+    <div class="page-header page-header--with-action">
+        <div>
+            <h1 class="page-title">История просмотров</h1>
+            <p class="page-subtitle">Всего: {{ paginator.count }}</p>
+        </div>
+
+        {% if history %}
+            {# Очистка меняет данные, поэтому это POST-форма, а не ссылка. #}
+            <form method="post" action="{% url 'library:clear_history' %}">
+                {% csrf_token %}
+                <button class="button button--ghost" type="submit">Очистить историю</button>
+            </form>
+        {% endif %}
+    </div>
+
+    {% if history %}
+        <div class="title-grid">
+            {% for entry in history %}
+                {% include "includes/title_card.html" with title=entry.title %}
+            {% endfor %}
+        </div>
+
+        {% include "includes/pagination.html" %}
+    {% else %}
+        <div class="empty-state">
+            <p class="empty-state__title">История пуста</p>
+            <p>Здесь появятся фильмы и сериалы, страницы которых вы открывали.</p>
+            <p class="empty-state__action">
+                <a class="button button--primary" href="{% url 'catalog:title_list' %}">Открыть каталог</a>
+            </p>
+        </div>
+    {% endif %}
+{% endblock %}

@@ -1,0 +1,32 @@
+# Настройки и секреты
+.env
+
+# Виртуальное окружение
+.venv/
+venv/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.Python
+
+# Django
+*.log
+db.sqlite3
+staticfiles/
+
+# Загруженные пользователями файлы: в репозитории им не место,
+# но сама папка нужна — поэтому храним только .gitkeep внутри неё.
+media/*
+!media/.gitkeep
+
+# Редакторы
+.vscode/
+.idea/
+*.swp
+
+# Операционная система
+.DS_Store
+Thumbs.db
+.coverage

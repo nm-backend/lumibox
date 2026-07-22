@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block page_title %}{{ page_heading }} — MovieHub{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/catalog.css' %}">
+{% endblock %}
+
+{% block content %}
+    <div class="page-header">
+        {% if page_subtitle %}
+            <p class="page-subtitle">{{ page_subtitle }}</p>
+        {% endif %}
+        <h1 class="page-title">{{ page_heading }}</h1>
+    </div>
+
+    <div class="catalog">
+        {% include "includes/catalog_filters.html" %}
+
+        <div>
+            <div class="catalog__toolbar">
+                <p class="catalog__count">
+                    {% if request.GET.q %}
+                        По запросу «{{ request.GET.q }}» найдено: {{ paginator.count }}
+                    {% else %}
+                        Всего: {{ paginator.count }}
+                    {% endif %}
+                </p>
+
+                {% comment %}
+                Чипсы применённых фильтров: показывают, что включено,
+                и снимают фильтр одним кликом. Ссылку посчитала вьюха.
+                {% endcomment %}
+                {% for filter in active_filters %}
+                    <span class="chip">
+                        {{ filter.label }}
+                        <a class="chip__remove" href="{{ filter.remove_url }}" aria-label="Убрать фильтр «{{ filter.label }}»">×</a>
+                    </span>
+                {% endfor %}
+            </div>
+
+            {% if titles %}
+                <div class="title-grid">
+                    {% for title in titles %}
+                        {% include "includes/title_card.html" %}
+                    {% endfor %}
+                </div>
+
+                {% include "includes/pagination.html" %}
+            {% else %}
+                <div class="empty-state">
+                    <p class="empty-state__title">Ничего не найдено</p>
+                    <p>Попробуйте изменить условия — или посмотрите весь каталог.</p>
+                    <p class="empty-state__action">
+                        <a class="button button--ghost" href="{% url 'catalog:title_list' %}">Открыть весь каталог</a>
+                    </p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

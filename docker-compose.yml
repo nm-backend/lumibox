@@ -1,0 +1,107 @@
+# Локальная разработка. Поднимает базу, кэш, сайт и воркер.
+# Запуск: docker compose up --build
+#
+# Боевое окружение — в docker-compose.prod.yml. Разделены намеренно:
+# в бою включён SECURE_SSL_REDIRECT, и по http://localhost сайт
+# просто уводил бы на https, которого локально нет.
+
+services:
+  db:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-moviehub}
+      POSTGRES_USER: ${POSTGRES_USER:-moviehub}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Задайте POSTGRES_PASSWORD в .env}
+    ports:
+      # 5433 снаружи, а не 5432: локальный PostgreSQL уже занял этот порт.
+      # Так manage.py работает и с хоста, и внутри контейнера.
+      - "5433:5432"
+    volumes:
+      # Монтируем /var/lib/postgresql, а НЕ /var/lib/postgresql/data.
+      # Начиная с 18-го образа данные лежат в подкаталоге с номером версии,
+      # и монтирование внутрь него ломает запуск.
+      - postgres_data:/var/lib/postgresql
+    # Пока база не готова принимать запросы, сайт стартовать не должен.
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-moviehub}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:8-alpine
+    ports:
+      # 6380 по той же причине, что и 5433 у базы.
+      - "6380:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  web:
+    build:
+      context: .
+      target: development
+    # entrypoint сам применяет миграции, наполняет пустой каталог и рисует
+    # обложки — человеку после `up` остаётся только открыть браузер.
+    # Запускаем через sh, а не как исполняемый файл: бит +x не переживает
+    # bind-mount с Windows, и контейнер падал бы с «permission denied».
+    entrypoint: ["sh", "/app/docker/entrypoint.sh"]
+    command: ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings.development
+      # Внутри сети контейнеров хост базы — db, а не localhost.
+      # Эти значения важнее .env: django-environ не перетирает
+      # уже заданные переменные окружения.
+      DATABASE_URL: postgres://${POSTGRES_USER:-moviehub}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-moviehub}
+      REDIS_URL: redis://redis:6379/0
+      # Администратор создаётся автоматически, если заданы обе переменные.
+      # Пусто по умолчанию — тогда шаг просто пропускается.
+      DJANGO_SUPERUSER_EMAIL: ${DJANGO_SUPERUSER_EMAIL:-}
+      DJANGO_SUPERUSER_USERNAME: ${DJANGO_SUPERUSER_USERNAME:-admin}
+      DJANGO_SUPERUSER_PASSWORD: ${DJANGO_SUPERUSER_PASSWORD:-}
+    volumes:
+      # Папка проекта примонтирована: правки видны без пересборки.
+      - .:/app
+      # Именованный том поверх .venv — иначе виндовый venv с хоста
+      # перекрыл бы пакеты, установленные в образе для Linux.
+      - venv_guard:/app/.venv
+    ports:
+      # 8001 снаружи, а не 8000 — по той же причине, что 5433 у базы:
+      # 8000 занимает соседний проект на этой же машине, и MovieHub
+      # молча не поднимался. Внутри контейнера порт остаётся 8000.
+      - "8001:8000"
+    # Три попытки, а не «всегда»: сетевую заминку они переживут, а вот
+    # настоящую ошибку в настройках лечить перезапусками бессмысленно —
+    # пусть контейнер сдастся и покажет traceback, а не крутится вечно.
+    restart: on-failure:3
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # Воркер выполняет фоновые задачи: пересчёт рейтингов.
+  worker:
+    build:
+      context: .
+      target: development
+    command: celery -A config worker -l info --pool=solo
+    restart: on-failure:3
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings.development
+      DATABASE_URL: postgres://${POSTGRES_USER:-moviehub}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-moviehub}
+      REDIS_URL: redis://redis:6379/0
+    volumes:
+      - .:/app
+      - venv_guard:/app/.venv
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+  venv_guard:

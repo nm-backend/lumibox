@@ -1,0 +1,154 @@
+/* Каркас страницы: контейнер, шапка, подвал. */
+
+.container {
+    width: 100%;
+    max-width: var(--container-width);
+    margin: 0 auto;
+    padding: 0 var(--space-4);
+}
+
+/* ---------- Шапка ---------- */
+
+.site-header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+
+    background-color: rgba(11, 13, 18, 0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.site-header__inner {
+    min-height: var(--header-height);
+    display: flex;
+    align-items: center;
+    gap: var(--space-5);
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+
+    font-size: var(--text-lg);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+}
+
+.logo:hover {
+    color: var(--color-text);
+}
+
+/* Значок логотипа — треугольник «play», нарисованный рамками.
+   Своя графика, без картинок и внешних иконочных шрифтов. */
+.logo__mark {
+    width: 28px;
+    height: 28px;
+    display: grid;
+    place-items: center;
+
+    background-color: var(--color-accent);
+    border-radius: var(--radius-sm);
+}
+
+.logo__mark::before {
+    content: "";
+    width: 0;
+    height: 0;
+    margin-left: 3px;
+    border-style: solid;
+    border-width: 6px 0 6px 9px;
+    border-color: transparent transparent transparent var(--color-on-accent);
+}
+
+.logo__accent {
+    color: var(--color-accent);
+}
+
+.site-nav {
+    display: flex;
+    gap: var(--space-4);
+}
+
+.site-nav__link {
+    padding: var(--space-2) 0;
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    border-bottom: 2px solid transparent;
+}
+
+.site-nav__link:hover {
+    color: var(--color-text);
+}
+
+.site-nav__link--active {
+    color: var(--color-text);
+    border-bottom-color: var(--color-accent);
+}
+
+/* Поиск занимает всё свободное место между навигацией и краем */
+.site-header__search {
+    margin-left: auto;
+    flex: 0 1 320px;
+}
+
+/* ---------- Основная область ---------- */
+
+.site-main {
+    flex: 1;
+    padding: var(--space-6) 0 var(--space-8);
+}
+
+/*
+  Когда сверху показано сообщение, баннеры не должны втягивать себя вверх
+  отрицательным отступом — иначе шапка страницы наедет на текст сообщения.
+  Классы перечислены явно: селектор по всем потомкам задел бы и вложенные
+  секции, которые к баннерам отношения не имеют.
+*/
+.site-main--with-messages .showcase,
+.site-main--with-messages .film-hero {
+    margin-top: 0;
+}
+
+.page-header {
+    margin-bottom: var(--space-5);
+}
+
+.page-title {
+    font-size: var(--text-2xl);
+    letter-spacing: -0.02em;
+}
+
+.page-subtitle {
+    margin-top: var(--space-1);
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
+}
+
+/* Подвал целиком живёт в footer.css — там же, где его разметка.
+   Держать .site-footer в двух файлах значит однажды поправить не тот. */
+
+/* ---------- Телефоны ---------- */
+
+@media (max-width: 720px) {
+    .site-header__inner {
+        flex-wrap: wrap;
+        padding-top: var(--space-3);
+        padding-bottom: var(--space-3);
+        gap: var(--space-3);
+    }
+
+    /* На узком экране поиск переносится на свою строку во всю ширину */
+    .site-header__search {
+        order: 3;
+        flex-basis: 100%;
+        margin-left: 0;
+    }
+
+    .site-nav {
+        margin-left: auto;
+    }
+}

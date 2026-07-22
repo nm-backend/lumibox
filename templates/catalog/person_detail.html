@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block page_title %}{{ person.name }} — MovieHub{% endblock %}
+{% block page_description %}{{ person.name }}: фильмография, роли, биография.{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/title-detail.css' %}">
+    <link rel="stylesheet" href="{% static 'css/profile.css' %}">
+{% endblock %}
+
+{% block content %}
+    <div class="profile-header">
+        <div class="avatar avatar--large">
+            {% if person.photo %}
+                <img class="avatar__image" src="{{ person.photo.url }}" alt="Фото: {{ person.name }}">
+            {% else %}
+                <span aria-hidden="true">{{ person.initial }}</span>
+            {% endif %}
+        </div>
+
+        <div>
+            <h1 class="page-title">{{ person.name }}</h1>
+            {% if person.original_name %}
+                <p class="page-subtitle">{{ person.original_name }}</p>
+            {% endif %}
+            {% if person.birth_date %}
+                <p class="page-subtitle">Дата рождения: {{ person.birth_date|date:"j F Y" }}</p>
+            {% endif %}
+            {% if person.biography %}
+                <p class="profile-header__bio">{{ person.biography }}</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <section class="section">
+        <h2 class="section__title">Фильмография</h2>
+
+        {% if participations %}
+            <div class="title-grid">
+                {% for participation in participations %}
+                    <div>
+                        {% include "includes/title_card.html" with title=participation.title %}
+                        <p class="card__meta">
+                            {{ participation.get_role_display }}{% if participation.character %} · {{ participation.character }}{% endif %}
+                        </p>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="review-empty">Пока нет опубликованных проектов.</p>
+        {% endif %}
+    </section>
+{% endblock %}

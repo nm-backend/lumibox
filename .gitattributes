@@ -1,0 +1,15 @@
+# В репозитории переводы строк всегда LF, независимо от системы разработчика.
+# Без этого файлы, созданные на Windows, попадают в git с CRLF и ломаются
+# внутри Linux-контейнера, когда проект дойдёт до Docker.
+* text=auto eol=lf
+
+# Бинарные файлы нормализовать нельзя — git их испортит.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.ico binary
+*.gif binary
+*.woff binary
+*.woff2 binary
+*.pdf binary

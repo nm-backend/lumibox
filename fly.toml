@@ -1,0 +1,38 @@
+# Fly.io. Разворачивает тот же production-образ из Dockerfile.
+# Postgres и Redis на Fly создаются отдельно (fly postgres create,
+# Upstash Redis) и подключаются секретами DATABASE_URL / REDIS_URL.
+app = "moviehub"
+primary_region = "fra"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  DJANGO_SETTINGS_MODULE = "config.settings.production"
+  DJANGO_DEBUG = "False"
+  DJANGO_NUM_PROXIES = "1"
+
+# Миграции прогоняются до переключения трафика на новую версию.
+[deploy]
+  release_command = "python manage.py migrate --noinput"
+
+[http_service]
+  internal_port = 8000
+  force_https = true
+  auto_stop_machines = false      # не усыплять: цель — работать 24/7
+  auto_start_machines = true
+  min_machines_running = 1
+  [[http_service.checks]]
+    path = "/healthz/"
+    interval = "15s"
+    timeout = "3s"
+    grace_period = "30s"
+
+# Загруженные постеры и кадры — на постоянном томе.
+[mounts]
+  source = "moviehub_media"
+  destination = "/app/media"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "512mb"

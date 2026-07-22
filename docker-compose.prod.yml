@@ -1,0 +1,114 @@
+# Полное окружение проекта: база, кэш, приложение, воркер и планировщик.
+# Запуск: docker compose up --build
+
+services:
+  db:
+    image: postgres:18-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-moviehub}
+      POSTGRES_USER: ${POSTGRES_USER:-moviehub}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Задайте POSTGRES_PASSWORD в .env}
+    volumes:
+      # /var/lib/postgresql, а не .../data: в 18-м образе данные лежат
+      # в подкаталоге с номером версии, монтирование внутрь ломает запуск.
+      - postgres_data:/var/lib/postgresql
+    # Пока база не готова принимать запросы, приложение стартовать не должно.
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-moviehub}"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  redis:
+    image: redis:8-alpine
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  web:
+    build:
+      context: .
+      # Стадию указываем явно. Без target собирается последняя стадия
+      # Dockerfile — сейчас это production, но добавь кто-нибудь стадию
+      # ниже, и в бой уехал бы dev-образ: от root и с dev-пакетами.
+      target: production
+    command: >
+      sh -c "python manage.py migrate --noinput &&
+             python manage.py collectstatic --noinput &&
+             gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 3"
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings.production
+      DATABASE_URL: postgres://${POSTGRES_USER:-moviehub}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-moviehub}
+      REDIS_URL: redis://redis:6379/0
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:?Задайте DJANGO_SECRET_KEY в .env}
+      DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-localhost,127.0.0.1}
+      DJANGO_DEBUG: "False"
+    restart: unless-stopped
+    volumes:
+      - media_data:/app/media
+      - static_data:/app/staticfiles
+    ports:
+      - "8000:8000"
+    healthcheck:
+      # Тот же адрес, что опрашивает PaaS. urllib вместо curl: его нет
+      # в slim-образе, а Python есть всегда. healthz освобождён от SSL-редиректа.
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:8000/healthz/').status==200 else 1)"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 40s
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # Воркер выполняет фоновые задачи. Отдельный процесс, тот же образ.
+  worker:
+    build:
+      context: .
+      target: production
+    restart: unless-stopped
+    command: celery -A config worker -l info
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings.production
+      DATABASE_URL: postgres://${POSTGRES_USER:-moviehub}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-moviehub}
+      REDIS_URL: redis://redis:6379/0
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
+      DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-localhost,127.0.0.1}
+    volumes:
+      - media_data:/app/media
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # Планировщик ставит задачи в очередь по расписанию.
+  # Запускать его в единственном экземпляре: два beat продублируют задачи.
+  beat:
+    build:
+      context: .
+      target: production
+    restart: unless-stopped
+    command: celery -A config beat -l info
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings.production
+      DATABASE_URL: postgres://${POSTGRES_USER:-moviehub}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-moviehub}
+      REDIS_URL: redis://redis:6379/0
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
+    depends_on:
+      redis:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+  redis_data:
+  media_data:
+  static_data:

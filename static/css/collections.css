@@ -1,0 +1,85 @@
+/* Подборки: карточки и шапка страницы подборки. */
+
+.collection-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: var(--space-4);
+}
+
+.collection-card {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    transition: border-color var(--transition), transform var(--transition);
+}
+
+.collection-card:hover {
+    border-color: var(--color-accent);
+    transform: translateY(-3px);
+    color: var(--color-text);
+}
+
+.collection-card__cover {
+    display: block;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+
+    /* Обложки может не быть — тогда виден градиент, а не пустая дыра */
+    background: linear-gradient(135deg, var(--color-surface-hover), var(--color-bg));
+}
+
+.collection-card__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.collection-card__body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    padding: var(--space-4);
+}
+
+.collection-card__name {
+    font-size: var(--text-md);
+    font-weight: 600;
+}
+
+.collection-card__count {
+    color: var(--color-text-dim);
+    font-size: var(--text-xs);
+}
+
+/* ---------- Шапка страницы подборки ---------- */
+
+.collection-hero {
+    position: relative;
+    overflow: hidden;
+    margin-bottom: var(--space-6);
+
+    background: linear-gradient(135deg, var(--color-surface-hover), var(--color-surface));
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+}
+
+.collection-hero__image {
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
+    opacity: 0.35;
+}
+
+.collection-hero__body {
+    padding: var(--space-6);
+}
+
+.collection-hero__description {
+    margin-top: var(--space-3);
+    max-width: 68ch;
+    color: var(--color-text-muted);
+}

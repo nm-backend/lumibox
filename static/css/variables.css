@@ -1,0 +1,67 @@
+/*
+  Дизайн-токены MovieHub.
+
+  Все цвета, отступы и размеры описаны здесь один раз.
+  Остальные файлы стилей ссылаются на переменные и не содержат
+  собственных значений цвета — поменять тему можно в одном месте.
+*/
+
+:root {
+    /* Фон: от самого тёмного к более светлым слоям */
+    --color-bg: #0b0d12;
+    --color-surface: #151922;
+    --color-surface-hover: #1e2430;
+    --color-border: #262d3b;
+
+    /* Текст */
+    --color-text: #eef1f7;
+    --color-text-muted: #939cb0;
+    --color-text-dim: #646c7e;
+
+    /* Акцент — тёплый янтарный: отсылка к свету кинопроектора */
+    --color-accent: #ffc043;
+    --color-accent-hover: #ffd070;
+    --color-accent-dim: rgba(255, 192, 67, 0.12);
+    --color-on-accent: #1a1204;
+
+    /* Типографика */
+    --font-base: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+
+    --text-xs: 0.75rem;
+    --text-sm: 0.875rem;
+    --text-md: 1rem;
+    --text-lg: 1.25rem;
+    --text-xl: 1.75rem;
+    --text-2xl: 2.25rem;
+
+    /* Отступы. Шаг в 4px — сетка, на которой держится вся вёрстка */
+    --space-1: 0.25rem;
+    --space-2: 0.5rem;
+    --space-3: 0.75rem;
+    --space-4: 1rem;
+    --space-5: 1.5rem;
+    --space-6: 2rem;
+    --space-8: 3rem;
+
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 16px;
+    --radius-full: 999px;
+
+    /* Тени слоями: близкая задаёт контур, дальняя — глубину.
+       Одна тень всегда выглядит как приклеенный прямоугольник. */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 2px 4px rgba(0, 0, 0, 0.3), 0 8px 16px rgba(0, 0, 0, 0.25);
+    --shadow-card: 0 4px 8px rgba(0, 0, 0, 0.35), 0 16px 32px rgba(0, 0, 0, 0.3);
+    --shadow-accent: 0 8px 24px rgba(255, 192, 67, 0.18);
+
+    /* Разные длительности намеренно: цвет должен откликаться мгновенно,
+       а движение — успевать читаться глазом. Одинаковая длительность
+       на всё и есть та «сделанность разработчиком», которая выдаёт себя. */
+    --transition-fast: 120ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-slow: 320ms cubic-bezier(0.4, 0, 0.2, 1);
+
+    --container-width: 1280px;
+    --header-height: 68px;
+}

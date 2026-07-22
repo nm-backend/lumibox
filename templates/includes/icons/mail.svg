@@ -1,0 +1,5 @@
+{% comment %}Конверт — написать автору.{% endcomment %}
+<svg class="icon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+    <rect x="2.5" y="4.5" width="15" height="11" rx="2" stroke="currentColor" stroke-width="1.6"/>
+    <path d="m3.5 6 6.5 4.5L16.5 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

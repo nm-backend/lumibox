@@ -1,0 +1,139 @@
+/* Формы: поля, ошибки, карточка входа и регистрации. */
+
+.form__field {
+    margin-bottom: var(--space-4);
+}
+
+.form__label {
+    display: block;
+    margin-bottom: var(--space-2);
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
+    font-weight: 500;
+}
+
+.form__required {
+    color: var(--color-accent);
+}
+
+/* Одно правило на все типы полей: не придётся дописывать сюда
+   каждый новый тип, который появится в формах. */
+.form__field input:not([type="checkbox"]):not([type="file"]),
+.form__field select,
+.form__field textarea {
+    width: 100%;
+    padding: var(--space-3);
+
+    background-color: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    color: var(--color-text);
+    font-size: var(--text-sm);
+    transition: border-color var(--transition);
+}
+
+.form__field textarea {
+    resize: vertical;
+    min-height: 96px;
+}
+
+.form__field input:focus,
+.form__field select:focus,
+.form__field textarea:focus {
+    outline: none;
+    border-color: var(--color-accent);
+}
+
+.form__field input[type="file"] {
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
+}
+
+.form__help {
+    margin-top: var(--space-2);
+    color: var(--color-text-dim);
+    font-size: var(--text-xs);
+}
+
+.form__error {
+    margin-top: var(--space-2);
+    color: #ff7a6b;
+    font-size: var(--text-xs);
+}
+
+.form__errors {
+    margin-bottom: var(--space-4);
+    padding: var(--space-3);
+    background-color: rgba(255, 122, 107, 0.1);
+    border-radius: var(--radius-sm);
+    color: #ff7a6b;
+    font-size: var(--text-sm);
+}
+
+/* ---------- Карточка входа и регистрации ---------- */
+
+.auth-card {
+    max-width: 420px;
+    margin: var(--space-6) auto;
+    padding: var(--space-6);
+
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+}
+
+.auth-card__title {
+    font-size: var(--text-xl);
+}
+
+.auth-card__subtitle {
+    margin-bottom: var(--space-5);
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
+}
+
+.auth-card__submit {
+    width: 100%;
+    justify-content: center;
+    margin-top: var(--space-2);
+}
+
+.auth-card__footer {
+    margin-top: var(--space-5);
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--color-border);
+
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
+    text-align: center;
+}
+
+.auth-card__footer a {
+    color: var(--color-accent);
+    font-weight: 500;
+}
+
+/* ---------- Сообщения ---------- */
+
+.messages {
+    margin-bottom: var(--space-5);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.message {
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-sm);
+    border-left: 3px solid var(--color-accent);
+    background-color: var(--color-surface);
+    font-size: var(--text-sm);
+}
+
+.message--success {
+    border-left-color: #4ade80;
+}
+
+.message--error {
+    border-left-color: #ff7a6b;
+}

@@ -1,0 +1,35 @@
+{% comment %}
+Постраничная навигация.
+
+Ждёт page_obj, elided_page_range и ellipsis из контекста ListView.
+
+Ссылки строит встроенный тег {% querystring %} (появился в Django 5.1):
+он подставляет номер страницы и сохраняет остальные параметры запроса.
+Без него переход на вторую страницу терял бы выбранный фильтр и поиск.
+{% endcomment %}
+
+{% if page_obj.has_other_pages %}
+    <nav class="pagination" aria-label="Навигация по страницам">
+        {% if page_obj.has_previous %}
+            <a class="pagination__link"
+               href="{% querystring page=page_obj.previous_page_number %}"
+               rel="prev">Назад</a>
+        {% endif %}
+
+        {% for page_number in elided_page_range %}
+            {% if page_number == ellipsis %}
+                <span class="pagination__gap">{{ ellipsis }}</span>
+            {% elif page_number == page_obj.number %}
+                <span class="pagination__link pagination__link--current" aria-current="page">{{ page_number }}</span>
+            {% else %}
+                <a class="pagination__link" href="{% querystring page=page_number %}">{{ page_number }}</a>
+            {% endif %}
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+            <a class="pagination__link"
+               href="{% querystring page=page_obj.next_page_number %}"
+               rel="next">Вперёд</a>
+        {% endif %}
+    </nav>
+{% endif %}

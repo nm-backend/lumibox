@@ -1,0 +1,73 @@
+/* Профиль пользователя. */
+
+.profile-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-5);
+    margin-bottom: var(--space-6);
+}
+
+.profile-header__bio {
+    margin-top: var(--space-3);
+    max-width: 60ch;
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
+}
+
+/* ---------- Счётчики ---------- */
+
+.stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: var(--space-3);
+    margin-bottom: var(--space-8);
+}
+
+.stat {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    padding: var(--space-4);
+
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    transition: border-color var(--transition);
+}
+
+/* Подсвечиваем только те счётчики, которые ведут на страницу */
+a.stat:hover {
+    border-color: var(--color-accent);
+    color: var(--color-text);
+}
+
+.stat__value {
+    font-size: var(--text-xl);
+    font-weight: 700;
+    line-height: 1;
+}
+
+.stat__label {
+    color: var(--color-text-dim);
+    font-size: var(--text-xs);
+}
+
+.profile-form {
+    max-width: 480px;
+}
+
+.page-header--with-action {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-4);
+    align-items: flex-start;
+    justify-content: space-between;
+}
+
+@media (max-width: 600px) {
+    .profile-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--space-4);
+    }
+}

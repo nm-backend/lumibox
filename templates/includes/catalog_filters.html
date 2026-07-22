@@ -1,0 +1,31 @@
+{% comment %}
+Панель фильтров каталога.
+
+Ждёт filter_form. Это обычная GET-форма: выбранные значения уходят
+в адресную строку, поэтому ссылку с фильтрами можно скопировать
+и отправить другому человеку. CSRF-токен GET-форме не нужен —
+она ничего не меняет на сервере.
+
+<details> раскрывается силами браузера: на телефоне панель свёрнута,
+на широком экране CSS держит её всегда открытой. Своего JS — ноль.
+{% endcomment %}
+
+<details class="filters" open>
+    <summary class="filters__summary">Фильтры</summary>
+
+    <form class="filters__body" action="{{ request.path }}" method="get">
+        {% for field in filter_form %}
+            <div class="filters__field">
+                <label class="filters__label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+            </div>
+        {% endfor %}
+
+        <div class="filters__actions">
+            <button class="button button--primary" type="submit">Показать</button>
+            {% if active_filters or request.GET.q %}
+                <a class="button button--ghost" href="{{ request.path }}">Сбросить</a>
+            {% endif %}
+        </div>
+    </form>
+</details>

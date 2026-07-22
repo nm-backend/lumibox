@@ -1,0 +1,330 @@
+/*
+  Страница фильма: полноширинная шапка с фоном, плеер трейлера,
+  характеристики и съёмочная группа.
+
+  Старые классы .title-detail* удалены вместе с прежней плоской вёрсткой —
+  разметку заменила .film-hero, и держать неиспользуемые правила незачем.
+*/
+
+/* ---------- Шапка с фоном ---------- */
+
+.film-hero {
+    position: relative;
+    overflow: hidden;
+    /* Отрицательный отступ съедает верхний padding .site-main:
+       шапка должна начинаться сразу под навигацией, без белой полосы. */
+    margin-top: calc(var(--space-6) * -1);
+    padding: var(--space-8) 0 var(--space-6);
+    background-color: var(--color-surface);
+}
+
+.film-hero__backdrop {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    /* Фон приглушён: он атмосфера, а не содержание. На полной яркости
+       текст поверх него читался бы плохо на любой картинке. */
+    opacity: 0.32;
+}
+
+.film-hero__scrim {
+    position: absolute;
+    inset: 0;
+    /* Два градиента: вертикальный растворяет фон в странице снизу,
+       горизонтальный затемняет левую часть под текстом. */
+    background:
+        linear-gradient(180deg, rgba(11, 13, 18, 0.55) 0%, var(--color-bg) 100%),
+        linear-gradient(90deg, rgba(11, 13, 18, 0.9) 0%, rgba(11, 13, 18, 0.25) 70%);
+}
+
+.film-hero__inner {
+    position: relative;
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    gap: var(--space-6);
+    align-items: start;
+}
+
+.film-hero__poster {
+    aspect-ratio: 2 / 3;
+    overflow: hidden;
+    display: grid;
+    place-items: center;
+
+    background-color: var(--color-surface);
+    border-radius: var(--radius-lg);
+    /* Плотная тень отрывает постер от фона — приём афиш и стриминга. */
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55), 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.film-hero__poster-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.film-hero__name {
+    font-size: clamp(1.9rem, 4vw, 3rem);
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+    text-wrap: balance;
+}
+
+/* Логотип вместо текстового заголовка. Высота ограничена, ширина свободна:
+   логотипы бывают и вытянутыми, и почти квадратными. */
+.film-hero__name--logo {
+    line-height: 1;
+}
+
+.film-hero__logo {
+    max-height: 120px;
+    max-width: min(100%, 460px);
+    object-fit: contain;
+}
+
+.film-hero__tagline {
+    margin-top: var(--space-3);
+    max-width: 52ch;
+    color: var(--color-text);
+    font-size: var(--text-lg);
+    font-weight: 500;
+    line-height: 1.4;
+    text-wrap: balance;
+}
+
+/* ---------- Галерея кадров ---------- */
+
+.frames {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--space-3);
+}
+
+.frames__item {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-border);
+    transition: transform var(--transition), box-shadow var(--transition),
+                border-color var(--transition-fast);
+}
+
+.frames__item:hover {
+    transform: translateY(-4px);
+    border-color: var(--color-accent);
+    box-shadow: var(--shadow-card);
+}
+
+.film-hero__original {
+    margin-top: var(--space-2);
+    color: var(--color-text-dim);
+    font-size: var(--text-md);
+}
+
+.film-hero__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+    margin-top: var(--space-4);
+
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
+}
+
+.film-hero__dot {
+    color: var(--color-text-dim);
+}
+
+.film-hero__age {
+    padding: 1px var(--space-2);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    font-size: var(--text-xs);
+}
+
+.film-hero__genres {
+    margin-top: var(--space-4);
+}
+
+.film-hero__description {
+    margin-top: var(--space-4);
+    max-width: 62ch;
+    color: var(--color-text-muted);
+    line-height: 1.7;
+}
+
+.film-hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin-top: var(--space-5);
+}
+
+.button__icon {
+    /* Треугольник «play» мельче текста: рядом с буквами он визуально
+       крупнее из-за сплошной заливки. */
+    font-size: 0.75em;
+}
+
+/* ---------- Оценка ---------- */
+
+.score {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 2px;
+    padding: var(--space-1) var(--space-3);
+
+    background-color: var(--color-accent-dim);
+    border-radius: var(--radius-sm);
+}
+
+.score__value {
+    color: var(--color-accent);
+    font-size: var(--text-md);
+    font-weight: 700;
+}
+
+.score__max {
+    color: var(--color-accent);
+    font-size: var(--text-xs);
+    opacity: 0.7;
+}
+
+/* ---------- Плеер ---------- */
+
+.player {
+    max-width: 900px;
+    /* aspect-ratio на обёртке, а не на iframe: так блок держит высоту
+       ещё до загрузки видео и страница не «прыгает». */
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+
+    background-color: #000;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-card);
+}
+
+.player__frame {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    display: block;
+}
+
+.player-fallback {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-3);
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
+}
+
+/* ---------- Характеристики ---------- */
+
+.spec-list {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: var(--space-3) var(--space-5);
+    align-items: baseline;
+}
+
+.spec-list__label {
+    color: var(--color-text-dim);
+    font-size: var(--text-sm);
+}
+
+.spec-list__value {
+    font-size: var(--text-sm);
+}
+
+/* ---------- Съёмочная группа ---------- */
+
+.crew-group {
+    margin-bottom: var(--space-5);
+}
+
+.crew-group__role {
+    margin-bottom: var(--space-3);
+    color: var(--color-text-dim);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.crew-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+    gap: var(--space-3);
+}
+
+.crew {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-2) var(--space-3);
+
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    transition: border-color var(--transition-fast), background-color var(--transition-fast);
+}
+
+.crew:hover {
+    background-color: var(--color-surface-hover);
+    border-color: var(--color-accent);
+    color: var(--color-text);
+}
+
+.crew__body {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.crew__name {
+    font-size: var(--text-sm);
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.crew__character {
+    color: var(--color-text-dim);
+    font-size: var(--text-xs);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ---------- Планшет и телефон ---------- */
+
+@media (max-width: 860px) {
+    .film-hero {
+        padding-top: var(--space-6);
+    }
+
+    .film-hero__inner {
+        grid-template-columns: 1fr;
+        gap: var(--space-5);
+    }
+
+    /* На узком экране постер во всю ширину громоздок — оставляем
+       компактный, как на карточке в каталоге. */
+    .film-hero__poster {
+        width: 160px;
+    }
+
+    .film-hero__scrim {
+        /* Горизонтальное затемнение на телефоне не нужно: текст под
+           постером, а не сбоку от него. */
+        background: linear-gradient(180deg, rgba(11, 13, 18, 0.6) 0%, var(--color-bg) 100%);
+    }
+}

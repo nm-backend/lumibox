@@ -1,0 +1,53 @@
+/*
+  Рекламное место в правом поле страницы.
+
+  Всё, что касается рекламы, живёт в одном файле и одном include — так рекламу
+  можно убрать целиком, не задев остальной сайт. Разметка в
+  templates/includes/ad_rail.html.
+*/
+
+/*
+  По умолчанию скрыто. Показываем только там, где сбоку реально пусто:
+  контейнер сайта — 1280px, баннер — 160px плюс отступ. Чтобы баннер не наехал
+  на контент, с каждой стороны нужно (1680 − 1280) / 2 = 200px поля. Отсюда
+  порог 1650px: у́же — места нет, и рекламу прячем, а не ломаем вёрстку.
+*/
+.ad-rail {
+    display: none;
+}
+
+@media (min-width: 1650px) {
+    .ad-rail {
+        display: block;
+        position: fixed;
+        top: 50%;
+        right: var(--space-4);
+        transform: translateY(-50%);
+        /* Ниже шапки-стики и выпадающих меню, но над фоном страницы. */
+        z-index: 5;
+    }
+
+    .ad-rail__label {
+        margin-bottom: var(--space-1);
+        color: var(--color-text-dim);
+        font-size: var(--text-xs);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        text-align: center;
+    }
+
+    .ad-rail__banner {
+        display: block;
+        width: 160px;
+        height: 600px;
+        border-radius: var(--radius-md);
+        border: 1px solid var(--color-border);
+    }
+}
+
+/* На печати реклама не нужна. */
+@media print {
+    .ad-rail {
+        display: none;
+    }
+}

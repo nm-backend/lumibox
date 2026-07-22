@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block page_title %}Страница не найдена — MovieHub{% endblock %}
+
+{% block content %}
+    <div class="empty-state">
+        <p class="empty-state__title">Страница не найдена</p>
+        <p>Возможно, запись удалили или ссылка набрана с ошибкой.</p>
+        <p class="empty-state__action">
+            <a class="button button--primary" href="{% url 'catalog:title_list' %}">Открыть каталог</a>
+        </p>
+    </div>
+{% endblock %}

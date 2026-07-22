@@ -1,0 +1,63 @@
+name: CI
+
+# Гоняем проверки на каждый push и pull request в main.
+# Зелёный прогон = код готов к деплою: линт, миграции, боевые проверки, тесты.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      db:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_DB: moviehub
+          POSTGRES_USER: moviehub
+          POSTGRES_PASSWORD: postgres
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U moviehub"
+          --health-interval 5s --health-timeout 3s --health-retries 10
+      redis:
+        image: redis:8-alpine
+        ports: ["6379:6379"]
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s --health-timeout 3s --health-retries 10
+
+    env:
+      DATABASE_URL: postgres://moviehub:postgres@localhost:5432/moviehub
+      REDIS_URL: redis://localhost:6379/0
+      DJANGO_SECRET_KEY: ci-secret-key-not-used-in-production-0123456789
+      DJANGO_ALLOWED_HOSTS: localhost,127.0.0.1
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+
+      - name: Установка зависимостей
+        run: pip install -r requirements/development.txt
+
+      - name: Линт (ruff)
+        run: ruff check apps config scripts
+
+      - name: Проверка проекта
+        run: python manage.py check
+
+      - name: Миграции без пропусков
+        run: python manage.py makemigrations --check --dry-run
+
+      - name: Боевые проверки безопасности
+        run: python manage.py check --deploy --settings=config.settings.production
+
+      - name: Тесты
+        run: python manage.py test apps

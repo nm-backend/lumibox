@@ -1,0 +1,144 @@
+{% load static %}<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>{% block page_title %}MovieHub — каталог фильмов и сериалов{% endblock %}</title>
+    <meta name="description" content="{% block page_description %}Каталог фильмов и сериалов: поиск, фильтры, подборки.{% endblock %}">
+
+    <link rel="stylesheet" href="{% static 'css/variables.css' %}">
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'css/layout.css' %}">
+    <link rel="stylesheet" href="{% static 'css/components.css' %}">
+    <link rel="stylesheet" href="{% static 'css/footer.css' %}">
+    <link rel="stylesheet" href="{% static 'css/ads.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <header class="site-header">
+        <div class="container site-header__inner">
+            <a class="logo" href="{% url 'catalog:home' %}">
+                <span class="logo__mark"></span>
+                <span>Movie<span class="logo__accent">Hub</span></span>
+            </a>
+
+            <nav class="site-nav" aria-label="Основная навигация">
+                {# Ссылки ведут в один и тот же каталог с разным фильтром по типу #}
+                <a class="site-nav__link {% if request.resolver_match.url_name == 'title_list' and not request.GET.type %}site-nav__link--active{% endif %}"
+                   href="{% url 'catalog:title_list' %}">Всё</a>
+                <a class="site-nav__link {% if request.GET.type == 'movie' %}site-nav__link--active{% endif %}"
+                   href="{% url 'catalog:title_list' %}?type=movie">Фильмы</a>
+                <a class="site-nav__link {% if request.GET.type == 'series' %}site-nav__link--active{% endif %}"
+                   href="{% url 'catalog:title_list' %}?type=series">Сериалы</a>
+                <a class="site-nav__link {% if request.resolver_match.url_name == 'genre_list' %}site-nav__link--active{% endif %}"
+                   href="{% url 'catalog:genre_list' %}">Жанры</a>
+                <a class="site-nav__link {% if request.resolver_match.url_name == 'country_list' %}site-nav__link--active{% endif %}"
+                   href="{% url 'catalog:country_list' %}">Страны</a>
+            </nav>
+
+            <form class="search site-header__search" action="{% url 'catalog:title_list' %}" method="get" role="search">
+                <label class="visually-hidden" for="search-input">Поиск по каталогу</label>
+                <input class="search__input"
+                       id="search-input"
+                       type="search"
+                       name="q"
+                       value="{{ request.GET.q|default:'' }}"
+                       placeholder="Название фильма или сериала"
+                       autocomplete="off">
+                <button class="search__submit" type="submit">Найти</button>
+            </form>
+
+            {% if user.is_authenticated %}
+                {# details/summary даёт выпадающее меню без единой строки JS #}
+                <details class="user-menu">
+                    {% comment %}
+                    aria-label обязателен: внутри только аватар. Картинка идёт
+                    с пустым alt, буква-заглушка скрыта aria-hidden — то есть
+                    у кнопки не остаётся ни одного источника имени, и скринридер
+                    объявляет её безымянной. А это единственный вход в профиль,
+                    избранное, историю и выход.
+                    {% endcomment %}
+                    <summary class="user-menu__trigger" aria-label="Меню пользователя">
+                        <span class="avatar">
+                            {% if user.avatar %}
+                                <img class="avatar__image" src="{{ user.avatar.url }}" alt="">
+                            {% else %}
+                                <span aria-hidden="true">{{ user.initial }}</span>
+                            {% endif %}
+                        </span>
+                    </summary>
+
+                    <div class="user-menu__dropdown">
+                        <p class="user-menu__name">{{ user.display_name }}</p>
+                        <a class="user-menu__link" href="{% url 'users:profile' %}">Профиль</a>
+                        <a class="user-menu__link" href="{% url 'library:favorites' %}">Избранное</a>
+                        <a class="user-menu__link" href="{% url 'library:history' %}">История</a>
+
+                        {% comment %}
+                        Выход — POST: по GET-ссылке пользователя мог бы
+                        разлогинить любой чужой сайт картинкой.
+                        {% endcomment %}
+                        <form method="post" action="{% url 'users:logout' %}">
+                            {% csrf_token %}
+                            <button class="user-menu__link user-menu__link--button" type="submit">Выйти</button>
+                        </form>
+                    </div>
+                </details>
+            {% else %}
+                <a class="button button--primary site-header__login" href="{% url 'users:login' %}">Войти</a>
+            {% endif %}
+        </div>
+    </header>
+
+    {% comment %}
+    Модификатор нужен из-за отрицательного margin-top у баннера: он съедает
+    верхний отступ .site-main, чтобы шапка начиналась сразу под навигацией.
+    Когда сверху есть сообщение, этот же отступ баннеру уже не нужен —
+    иначе он наедет на текст сообщения.
+    {% endcomment %}
+    <main class="site-main{% if messages %} site-main--with-messages{% endif %}">
+        {% comment %}
+        Сообщения идут ПЕРВЫМИ, до баннера. Раньше они стояли внутри
+        .container, то есть ниже полноэкранной шапки: после «Отзыв сохранён»
+        пользователя возвращало на страницу фильма, и подтверждение
+        оказывалось за пределами экрана — человек не понимал, сработало ли.
+        {% endcomment %}
+        {% if messages %}
+            <div class="container">
+                <ul class="messages">
+                    {% for message in messages %}
+                        <li class="message message--{{ message.tags }}">{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+
+        {% comment %}
+        Блок вне .container — для полноширинных секций (шапка страницы
+        фильма с фоном). Внутри контейнера такую растянуть нельзя,
+        а ломать её отрицательными отступами — трюк, который потом
+        всплывает багами на узких экранах.
+        {% endcomment %}
+        {% block hero %}{% endblock %}
+
+        <div class="container">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    {% comment %}
+    Рекламное место. Одна строка — весь блок: удалите её, и рекламы на сайте
+    не будет. Логика показа и стили — в includes/ad_rail.html и css/ads.css.
+    {% endcomment %}
+    {% include "includes/ad_rail.html" %}
+
+    {% include "includes/footer.html" %}
+
+    {% comment %}
+    defer: скрипт не блокирует отрисовку страницы и выполнится,
+    когда HTML уже разобран. Всё на сайте работает и без него.
+    {% endcomment %}
+    <script src="{% static 'js/favorite.js' %}" defer></script>
+</body>
+</html>

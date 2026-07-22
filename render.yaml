@@ -1,0 +1,105 @@
+# MovieHub — Render Blueprint. Один файл поднимает всё окружение:
+# web-сервис, фоновый воркер с планировщиком, PostgreSQL и Redis (Key Value).
+# Render сам выдаёт HTTPS, следит за здоровьем и перезапускает упавшее.
+#
+# Задеплоить может только владелец аккаунта Render — это его сервер и биллинг.
+# Шаги в DEPLOY.md; коротко:
+#   1) залить репозиторий на GitHub;
+#   2) Render → New → Blueprint → выбрать репозиторий (он прочитает этот файл);
+#   3) заполнить переменные с sync:false и нажать Apply.
+
+databases:
+  - name: moviehub-db
+    databaseName: moviehub
+    user: moviehub
+    plan: free              # бесплатная база живёт 30 дней; для 24/7 нужен платный план
+    postgresMajorVersion: "16"
+
+services:
+  # Redis-совместимое хранилище: кэш страниц и брокер задач Celery.
+  - type: keyvalue
+    name: moviehub-redis
+    plan: free
+    ipAllowList: []         # доступ только из внутренней сети Render
+    maxmemoryPolicy: noeviction
+
+  # -------- Веб-сервис (Django + Gunicorn) --------
+  - type: web
+    name: moviehub-web
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    # free-план усыпляет сервис после 15 минут тишины — это нарушает «24/7».
+    # starter (~$7/мес) держит его всегда включённым. Выбор и оплата — за вами.
+    plan: starter
+    healthCheckPath: /healthz/
+    # Загруженные постеры и кадры переживают перезапуск и новый деплой.
+    disk:
+      name: moviehub-media
+      mountPath: /app/media
+      sizeGB: 1
+    # Выполняется до переключения трафика на новую версию: миграции и,
+    # при первом пустом каталоге, демоданные. Статика уже собрана в образ.
+    preDeployCommand: "python manage.py migrate --noinput && python manage.py ensure_demo_data"
+    dockerCommand: sh -c "gunicorn config.wsgi:application --bind 0.0.0.0:$PORT --workers 3 --timeout 60"
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: config.settings.production
+      - key: DJANGO_SECRET_KEY
+        generateValue: true              # Render сгенерирует и сохранит сам
+      - key: DJANGO_DEBUG
+        value: "False"
+      # Свой домен впишите сюда, когда подключите его. Домен *.onrender.com
+      # приложение добавляет в разрешённые само (см. production.py), так что
+      # для первого запуска это поле можно оставить пустым.
+      - key: DJANGO_ALLOWED_HOSTS
+        sync: false
+      - key: DATABASE_URL
+        fromDatabase:
+          name: moviehub-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: keyvalue
+          name: moviehub-redis
+          property: connectionString
+      # Перед Django стоит прокси Render — иначе все посетители склеятся
+      # в один ключ лимита частоты по адресу прокси.
+      - key: DJANGO_NUM_PROXIES
+        value: "1"
+      # Первый администратор создаётся при первом деплое, если заданы обе.
+      - key: DJANGO_SUPERUSER_EMAIL
+        sync: false
+      - key: DJANGO_SUPERUSER_USERNAME
+        sync: false
+      - key: DJANGO_SUPERUSER_PASSWORD
+        sync: false
+
+  # -------- Фоновый воркер (Celery + встроенный планировщик) --------
+  - type: worker
+    name: moviehub-worker
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    plan: starter
+    # -B поднимает планировщик прямо в воркере. Так допустимо только потому,
+    # что воркер один: два экземпляра с -B продублировали бы задачи.
+    dockerCommand: celery -A config worker -B -l info
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: config.settings.production
+      # Тот же ключ, что и у web: подписи сессий и токенов должны совпадать.
+      - key: DJANGO_SECRET_KEY
+        fromService:
+          type: web
+          name: moviehub-web
+          envVarKey: DJANGO_SECRET_KEY
+      - key: DATABASE_URL
+        fromDatabase:
+          name: moviehub-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: keyvalue
+          name: moviehub-redis
+          property: connectionString

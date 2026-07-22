@@ -1,0 +1,66 @@
+{% comment %}
+Отзывы на странице фильма.
+
+Ждёт title, reviews, review_form, user_review.
+Обычные формы с CSRF — JavaScript здесь ничего не улучшил бы.
+{% endcomment %}
+
+<section class="section" id="reviews">
+    <h2 class="section__title">Отзывы {% if title.rating_count %}<span class="section__count">{{ title.rating_count }}</span>{% endif %}</h2>
+
+    {% if user.is_authenticated %}
+        <form class="review-form" method="post" action="{% url 'reviews:save' title.slug %}" novalidate>
+            {% csrf_token %}
+            <p class="review-form__title">
+                {% if user_review %}Изменить свой отзыв{% else %}Оставить отзыв{% endif %}
+            </p>
+            {% include "includes/form_fields.html" with form=review_form %}
+
+            <div class="review-form__actions">
+                <button class="button button--primary" type="submit">
+                    {% if user_review %}Сохранить{% else %}Отправить{% endif %}
+                </button>
+            </div>
+        </form>
+
+        {% if user_review %}
+            <form method="post" action="{% url 'reviews:delete' user_review.pk %}" class="review-form__delete">
+                {% csrf_token %}
+                <button class="button button--ghost" type="submit">Удалить мой отзыв</button>
+            </form>
+        {% endif %}
+    {% else %}
+        <p class="review-login">
+            <a href="{% url 'users:login' %}?next={{ request.path }}">Войдите</a>, чтобы оставить отзыв.
+        </p>
+    {% endif %}
+
+    {% if reviews %}
+        <ul class="review-list">
+            {% for review in reviews %}
+                <li class="review">
+                    <div class="avatar">
+                        {% if review.user.avatar %}
+                            <img class="avatar__image" src="{{ review.user.avatar.url }}" alt="">
+                        {% else %}
+                            <span aria-hidden="true">{{ review.user.initial }}</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="review__body">
+                        <div class="review__head">
+                            <span class="review__author">{{ review.user.display_name }}</span>
+                            <span class="review__rating">{{ review.rating }}/10</span>
+                            <time class="review__date" datetime="{{ review.created_at|date:'c' }}">
+                                {{ review.created_at|date:"j F Y" }}
+                            </time>
+                        </div>
+                        {% if review.text %}<p class="review__text">{{ review.text|linebreaksbr }}</p>{% endif %}
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p class="review-empty">Отзывов пока нет. Будьте первым.</p>
+    {% endif %}
+</section>

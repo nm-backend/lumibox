@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block page_title %}{{ collection.get_meta_title }} — MovieHub{% endblock %}
+{% block page_description %}{{ collection.get_meta_description }}{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/collections.css' %}">
+{% endblock %}
+
+{% block content %}
+    <div class="collection-hero">
+        {% if collection.cover %}
+            <img class="collection-hero__image" src="{{ collection.cover.url }}" alt="">
+        {% endif %}
+
+        <div class="collection-hero__body">
+            <p class="hero__label">Подборка</p>
+            <h1 class="page-title">{{ collection.name }}</h1>
+            {% if collection.description %}
+                <p class="collection-hero__description">{{ collection.description }}</p>
+            {% endif %}
+            <p class="page-subtitle">Записей: {{ paginator.count }}</p>
+        </div>
+    </div>
+
+    {% if titles %}
+        <div class="title-grid">
+            {% for title in titles %}
+                {% include "includes/title_card.html" %}
+            {% endfor %}
+        </div>
+
+        {% include "includes/pagination.html" %}
+    {% else %}
+        <div class="empty-state">
+            <p class="empty-state__title">Подборка пока пуста</p>
+        </div>
+    {% endif %}
+{% endblock %}

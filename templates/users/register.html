@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block page_title %}Регистрация — MovieHub{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/forms.css' %}">
+{% endblock %}
+
+{% block content %}
+    <div class="auth-card">
+        <h1 class="auth-card__title">Регистрация</h1>
+        <p class="auth-card__subtitle">Избранное, история просмотров и отзывы.</p>
+
+        <form method="post" novalidate>
+            {% csrf_token %}
+            {% include "includes/form_fields.html" %}
+            <button class="button button--primary auth-card__submit" type="submit">Создать аккаунт</button>
+        </form>
+
+        <p class="auth-card__footer">
+            Уже есть аккаунт? <a href="{% url 'users:login' %}">Войдите</a>
+        </p>
+    </div>
+{% endblock %}

@@ -1,0 +1,188 @@
+/* Страница каталога: боковая панель фильтров и результаты. */
+
+.catalog {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: var(--space-6);
+    align-items: start;
+}
+
+/* ---------- Панель фильтров ---------- */
+
+.filters {
+    position: sticky;
+    top: calc(var(--header-height) + var(--space-4));
+
+    padding: var(--space-5);
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+}
+
+.filters__field {
+    margin-bottom: var(--space-4);
+}
+
+.filters__label {
+    display: block;
+    margin-bottom: var(--space-2);
+    color: var(--color-text-dim);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Оформляем select сами: браузерный вид ломает тёмную тему */
+.filters__field select,
+.filters__field input[type="text"] {
+    width: 100%;
+    padding: var(--space-2) var(--space-3);
+
+    background-color: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    color: var(--color-text);
+    font-size: var(--text-sm);
+
+    /* Убираем родную стрелку и рисуем свою фоном */
+    appearance: none;
+}
+
+.filters__field select {
+    padding-right: var(--space-6);
+    background-image: linear-gradient(45deg, transparent 50%, var(--color-text-dim) 50%),
+                      linear-gradient(135deg, var(--color-text-dim) 50%, transparent 50%);
+    background-position: right 16px center, right 11px center;
+    background-size: 5px 5px, 5px 5px;
+    background-repeat: no-repeat;
+    cursor: pointer;
+}
+
+.filters__field select:focus,
+.filters__field input[type="text"]:focus {
+    outline: none;
+    border-color: var(--color-accent);
+}
+
+.filters__actions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    margin-top: var(--space-5);
+}
+
+.filters__actions .button {
+    justify-content: center;
+}
+
+/* ---------- Результаты ---------- */
+
+.catalog__toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    align-items: center;
+    margin-bottom: var(--space-5);
+}
+
+.catalog__count {
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
+}
+
+/* .chip и .chip__remove переехали в components.css: их использует и подвал,
+   а подвал есть на каждой странице, где catalog.css не грузится. */
+
+/* ---------- Справочники: жанры и страны ---------- */
+
+.reference-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: var(--space-3);
+}
+
+.reference-card {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-3);
+    padding: var(--space-4);
+
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    transition: border-color var(--transition), background-color var(--transition);
+}
+
+.reference-card:hover {
+    background-color: var(--color-surface-hover);
+    border-color: var(--color-accent);
+    color: var(--color-text);
+}
+
+.reference-card__name {
+    font-size: var(--text-sm);
+    font-weight: 600;
+}
+
+.reference-card__count {
+    color: var(--color-text-dim);
+    font-size: var(--text-xs);
+}
+
+/* ---------- Планшет и телефон ---------- */
+
+@media (max-width: 900px) {
+    .catalog {
+        grid-template-columns: 1fr;
+    }
+
+    .filters {
+        position: static;
+    }
+
+    /* На узком экране панель фильтров сворачивается в <details>.
+       Раскрытие делает браузер — свой JavaScript не нужен. */
+    .filters__summary {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        cursor: pointer;
+        font-weight: 600;
+        list-style: none;
+    }
+
+    .filters__summary::-webkit-details-marker {
+        display: none;
+    }
+
+    .filters__summary::after {
+        content: "▾";
+        color: var(--color-text-dim);
+        transition: transform var(--transition);
+    }
+
+    .filters[open] .filters__summary::after {
+        transform: rotate(180deg);
+    }
+
+    .filters__body {
+        margin-top: var(--space-4);
+    }
+}
+
+/* На большом экране details всегда раскрыт, заголовок не кликабелен */
+@media (min-width: 901px) {
+    .filters__summary {
+        list-style: none;
+        pointer-events: none;
+        font-size: var(--text-md);
+        font-weight: 600;
+        margin-bottom: var(--space-4);
+    }
+
+    .filters__summary::-webkit-details-marker {
+        display: none;
+    }
+}
