@@ -1,0 +1,86 @@
+# MovieHub — Render Blueprint, ПЛАТНЫЙ always-on вариант.
+# Чтобы использовать: переименуйте этот файл в render.yaml (Render читает
+# Blueprint именно с таким именем) и задеплойте.
+#
+# Отличия от бесплатного render.yaml: web и воркер не засыпают, есть Redis
+# (общий кэш и брокер Celery), отдельный воркер с планировщиком и постоянный
+# диск под загруженные медиа. Стоит примерно $7/мес за сервис — оплата за вами.
+
+databases:
+  - name: moviehub-db
+    databaseName: moviehub
+    user: moviehub
+    plan: starter
+    postgresMajorVersion: "16"
+
+services:
+  - type: keyvalue
+    name: moviehub-redis
+    plan: starter
+    ipAllowList: []
+    maxmemoryPolicy: noeviction
+
+  - type: web
+    name: moviehub-web
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    plan: starter
+    healthCheckPath: /healthz/
+    disk:
+      name: moviehub-media
+      mountPath: /app/media
+      sizeGB: 1
+    preDeployCommand: "python manage.py migrate --noinput && python manage.py ensure_demo_data"
+    dockerCommand: sh -c "gunicorn config.wsgi:application --bind 0.0.0.0:$PORT --workers 3 --timeout 60"
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: config.settings.production
+      - key: DJANGO_SECRET_KEY
+        generateValue: true
+      - key: DJANGO_DEBUG
+        value: "False"
+      - key: DJANGO_ALLOWED_HOSTS
+        sync: false
+      - key: DATABASE_URL
+        fromDatabase:
+          name: moviehub-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: keyvalue
+          name: moviehub-redis
+          property: connectionString
+      - key: DJANGO_NUM_PROXIES
+        value: "1"
+      - key: DJANGO_SUPERUSER_EMAIL
+        sync: false
+      - key: DJANGO_SUPERUSER_USERNAME
+        sync: false
+      - key: DJANGO_SUPERUSER_PASSWORD
+        sync: false
+
+  - type: worker
+    name: moviehub-worker
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    plan: starter
+    dockerCommand: celery -A config worker -B -l info
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: config.settings.production
+      - key: DJANGO_SECRET_KEY
+        fromService:
+          type: web
+          name: moviehub-web
+          envVarKey: DJANGO_SECRET_KEY
+      - key: DATABASE_URL
+        fromDatabase:
+          name: moviehub-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: keyvalue
+          name: moviehub-redis
+          property: connectionString
