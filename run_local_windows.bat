@@ -8,8 +8,15 @@ rem ============================================================
 setlocal
 cd /d "%~dp0"
 
+rem Force our own settings. Without this a DJANGO_SETTINGS_MODULE left over
+rem from another project (e.g. kinogo's config.settings.dev) would hijack us
+rem and crash with "no such table". This project uses development settings.
+set "DJANGO_SETTINGS_MODULE=config.settings.development"
+
 echo ============================================
 echo   MovieHub - local run (no Docker)
+echo ============================================
+echo   Folder: %CD%
 echo ============================================
 echo.
 
