@@ -1,4 +1,4 @@
-/* Подборки: карточки и шапка страницы подборки. */
+/* Collections: grid of collection cards */
 
 .collection-grid {
     display: grid;
@@ -7,35 +7,40 @@
 }
 
 .collection-card {
+    position: relative;
     display: flex;
     flex-direction: column;
     overflow: hidden;
-
-    background-color: var(--color-surface);
+    background: var(--color-surface);
     border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    transition: border-color var(--transition), transform var(--transition);
+    border-radius: var(--radius-lg);
+    transition: transform var(--transition), border-color var(--transition), box-shadow var(--transition);
+    text-decoration: none;
+    color: var(--color-text);
 }
 
 .collection-card:hover {
+    transform: translateY(-4px);
     border-color: var(--color-accent);
-    transform: translateY(-3px);
+    box-shadow: var(--shadow-card);
     color: var(--color-text);
 }
 
 .collection-card__cover {
-    display: block;
     aspect-ratio: 16 / 9;
     overflow: hidden;
-
-    /* Обложки может не быть — тогда виден градиент, а не пустая дыра */
-    background: linear-gradient(135deg, var(--color-surface-hover), var(--color-bg));
+    background: linear-gradient(145deg, var(--color-surface-hover), var(--color-surface));
 }
 
 .collection-card__image {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    transition: transform var(--transition-slow);
+}
+
+.collection-card:hover .collection-card__image {
+    transform: scale(1.05);
 }
 
 .collection-card__body {
@@ -46,8 +51,14 @@
 }
 
 .collection-card__name {
-    font-size: var(--text-md);
+    font-size: var(--text-sm);
     font-weight: 600;
+    line-height: 1.35;
+    transition: color var(--transition-fast);
+}
+
+.collection-card:hover .collection-card__name {
+    color: var(--color-accent);
 }
 
 .collection-card__count {
@@ -55,31 +66,35 @@
     font-size: var(--text-xs);
 }
 
-/* ---------- Шапка страницы подборки ---------- */
-
-.collection-hero {
-    position: relative;
-    overflow: hidden;
+/* Collection detail: header */
+.collection-header {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
     margin-bottom: var(--space-6);
-
-    background: linear-gradient(135deg, var(--color-surface-hover), var(--color-surface));
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-lg);
+    padding-bottom: var(--space-5);
+    border-bottom: 1px solid var(--color-border);
 }
 
-.collection-hero__image {
-    width: 100%;
-    height: 220px;
-    object-fit: cover;
-    opacity: 0.35;
+.collection-header__title {
+    font-size: var(--text-2xl);
+    letter-spacing: -0.02em;
 }
 
-.collection-hero__body {
-    padding: var(--space-6);
-}
-
-.collection-hero__description {
-    margin-top: var(--space-3);
-    max-width: 68ch;
+.collection-header__desc {
     color: var(--color-text-muted);
+    font-size: var(--text-sm);
+    max-width: 62ch;
+    line-height: 1.7;
+}
+
+.collection-header__meta {
+    color: var(--color-text-dim);
+    font-size: var(--text-xs);
+}
+
+@media (max-width: 560px) {
+    .collection-grid {
+        grid-template-columns: 1fr;
+    }
 }

@@ -1,0 +1,26 @@
+{% load i18n %}
+{% get_current_language as current_language %}
+{% get_available_languages as available_languages %}
+
+<details class="lang-menu" data-lang-switcher>
+    <summary class="lang-menu__trigger" aria-label="{% trans 'Switch language' %}">
+        {% for code, name in LANGUAGES %}
+            {% if code == current_language %}
+                <span class="lang-menu__current">{{ code|upper }}</span>
+            {% endif %}
+        {% endfor %}
+    </summary>
+    <div class="lang-menu__dropdown">
+        {% for code, name in LANGUAGES %}
+            <form method="post" action="{% url 'set_language' %}">
+                {% csrf_token %}
+                <input name="language" type="hidden" value="{{ code }}">
+                <button class="lang-menu__link {% if code == current_language %}lang-menu__link--active{% endif %}"
+                        type="submit"
+                        {% if code == current_language %}aria-current="true"{% endif %}>
+                    {{ name }}
+                </button>
+            </form>
+        {% endfor %}
+    </div>
+</details>

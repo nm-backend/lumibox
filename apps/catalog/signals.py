@@ -12,8 +12,8 @@ queryset.update(). Массовые действия админки сбрасы
 from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 
-from apps.catalog.models import Collection, CollectionItem, Title
-from apps.catalog.services import clear_home_cache
+from apps.catalog.models import Collection, CollectionItem, Country, Genre, Title
+from apps.catalog.services import clear_home_cache, clear_reference_cache
 
 
 @receiver(post_save, sender=Title)
@@ -24,3 +24,16 @@ from apps.catalog.services import clear_home_cache
 @receiver(post_delete, sender=CollectionItem)
 def reset_home_cache(sender, instance, **kwargs):
     clear_home_cache()
+
+
+@receiver(post_save, sender=Genre)
+@receiver(post_delete, sender=Genre)
+@receiver(post_save, sender=Country)
+@receiver(post_delete, sender=Country)
+def reset_reference_cache(sender, instance, **kwargs):
+    """
+    Сбрасывает кэш списков жанров и стран при их изменении.
+
+    Новый жанр должен появиться на странице жанров сразу, а не через час.
+    """
+    clear_reference_cache()

@@ -1,5 +1,6 @@
-{% load static %}<!DOCTYPE html>
-<html lang="ru">
+{% load static i18n %}<!DOCTYPE html>
+{% get_current_language as LANGUAGE_CODE %}
+<html lang="{{ LANGUAGE_CODE }}" data-theme="">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -23,8 +24,7 @@
                 <span>Movie<span class="logo__accent">Hub</span></span>
             </a>
 
-            <nav class="site-nav" aria-label="Основная навигация">
-                {# Ссылки ведут в один и тот же каталог с разным фильтром по типу #}
+            <nav class="site-nav site-nav__desktop" aria-label="Основная навигация">
                 <a class="site-nav__link {% if request.resolver_match.url_name == 'title_list' and not request.GET.type %}site-nav__link--active{% endif %}"
                    href="{% url 'catalog:title_list' %}">Всё</a>
                 <a class="site-nav__link {% if request.GET.type == 'movie' %}site-nav__link--active{% endif %}"
@@ -32,33 +32,39 @@
                 <a class="site-nav__link {% if request.GET.type == 'series' %}site-nav__link--active{% endif %}"
                    href="{% url 'catalog:title_list' %}?type=series">Сериалы</a>
                 <a class="site-nav__link {% if request.resolver_match.url_name == 'genre_list' %}site-nav__link--active{% endif %}"
-                   href="{% url 'catalog:genre_list' %}">Жанры</a>
-                <a class="site-nav__link {% if request.resolver_match.url_name == 'country_list' %}site-nav__link--active{% endif %}"
-                   href="{% url 'catalog:country_list' %}">Страны</a>
+                   href="{% url 'catalog:genre_list' %}"{% if request.resolver_match.url_name == 'genre_list' %} aria-current="page"{% endif %}>Жанры</a>
+                <a class="site-nav__link {% if request.resolver_match.url_name == 'collection_list' %}site-nav__link--active{% endif %}"
+                   href="{% url 'catalog:collection_list' %}"{% if request.resolver_match.url_name == 'collection_list' %} aria-current="page"{% endif %}>Подборки</a>
             </nav>
 
-            <form class="search site-header__search" action="{% url 'catalog:title_list' %}" method="get" role="search">
-                <label class="visually-hidden" for="search-input">Поиск по каталогу</label>
-                <input class="search__input"
-                       id="search-input"
-                       type="search"
-                       name="q"
-                       value="{{ request.GET.q|default:'' }}"
-                       placeholder="Название фильма или сериала"
-                       autocomplete="off">
-                <button class="search__submit" type="submit">Найти</button>
-            </form>
+            <div class="search-wrapper site-header__search">
+                <form class="search" action="{% url 'catalog:title_list' %}" method="get" role="search" data-search-form>
+                    <label class="visually-hidden" for="search-input">Поиск по каталогу</label>
+                    <input class="search__input"
+                           id="search-input"
+                           type="search"
+                           name="q"
+                           value="{{ request.GET.q|default:'' }}"
+                           placeholder="Поиск..."
+                           autocomplete="off"
+                           data-search-input>
+                    <button class="search__submit" type="submit" aria-label="Найти">🔍</button>
+                </form>
+                <div class="search__dropdown" data-search-dropdown></div>
+            </div>
+
+            <button class="theme-toggle" type="button" data-theme-toggle aria-label="{% trans 'Toggle theme' %}">🌙</button>
+
+            {% include "includes/language_switcher.html" %}
+
+            <button class="hamburger" type="button" data-hamburger aria-label="Меню" aria-expanded="false">
+                <span class="hamburger__line"></span>
+                <span class="hamburger__line"></span>
+                <span class="hamburger__line"></span>
+            </button>
 
             {% if user.is_authenticated %}
-                {# details/summary даёт выпадающее меню без единой строки JS #}
                 <details class="user-menu">
-                    {% comment %}
-                    aria-label обязателен: внутри только аватар. Картинка идёт
-                    с пустым alt, буква-заглушка скрыта aria-hidden — то есть
-                    у кнопки не остаётся ни одного источника имени, и скринридер
-                    объявляет её безымянной. А это единственный вход в профиль,
-                    избранное, историю и выход.
-                    {% endcomment %}
                     <summary class="user-menu__trigger" aria-label="Меню пользователя">
                         <span class="avatar">
                             {% if user.avatar %}
@@ -74,11 +80,6 @@
                         <a class="user-menu__link" href="{% url 'users:profile' %}">Профиль</a>
                         <a class="user-menu__link" href="{% url 'library:favorites' %}">Избранное</a>
                         <a class="user-menu__link" href="{% url 'library:history' %}">История</a>
-
-                        {% comment %}
-                        Выход — POST: по GET-ссылке пользователя мог бы
-                        разлогинить любой чужой сайт картинкой.
-                        {% endcomment %}
                         <form method="post" action="{% url 'users:logout' %}">
                             {% csrf_token %}
                             <button class="user-menu__link user-menu__link--button" type="submit">Выйти</button>
@@ -91,19 +92,25 @@
         </div>
     </header>
 
-    {% comment %}
-    Модификатор нужен из-за отрицательного margin-top у баннера: он съедает
-    верхний отступ .site-main, чтобы шапка начиналась сразу под навигацией.
-    Когда сверху есть сообщение, этот же отступ баннеру уже не нужен —
-    иначе он наедет на текст сообщения.
-    {% endcomment %}
+    {# Mobile drawer nav #}
+    <nav class="mobile-nav" data-mobile-nav aria-label="Мобильная навигация">
+        <a class="mobile-nav__link" href="{% url 'catalog:home' %}">Главная</a>
+        <a class="mobile-nav__link" href="{% url 'catalog:title_list' %}">Весь каталог</a>
+        <a class="mobile-nav__link" href="{% url 'catalog:title_list' %}?type=movie">Фильмы</a>
+        <a class="mobile-nav__link" href="{% url 'catalog:title_list' %}?type=series">Сериалы</a>
+        <a class="mobile-nav__link" href="{% url 'catalog:genre_list' %}">Жанры</a>
+        <a class="mobile-nav__link" href="{% url 'catalog:collection_list' %}">Подборки</a>
+        <a class="mobile-nav__link" href="{% url 'catalog:title_list' %}?sort=-rating_average">Высокий рейтинг</a>
+        <a class="mobile-nav__link" href="{% url 'catalog:title_list' %}?sort=-published_at">Новинки</a>
+        {% if user.is_authenticated %}
+            <hr style="border-color: var(--color-border); margin: var(--space-2) 0;">
+            <a class="mobile-nav__link" href="{% url 'users:profile' %}">Профиль</a>
+            <a class="mobile-nav__link" href="{% url 'library:favorites' %}">Избранное</a>
+            <a class="mobile-nav__link" href="{% url 'library:history' %}">История</a>
+        {% endif %}
+    </nav>
+
     <main class="site-main{% if messages %} site-main--with-messages{% endif %}">
-        {% comment %}
-        Сообщения идут ПЕРВЫМИ, до баннера. Раньше они стояли внутри
-        .container, то есть ниже полноэкранной шапки: после «Отзыв сохранён»
-        пользователя возвращало на страницу фильма, и подтверждение
-        оказывалось за пределами экрана — человек не понимал, сработало ли.
-        {% endcomment %}
         {% if messages %}
             <div class="container">
                 <ul class="messages">
@@ -114,12 +121,6 @@
             </div>
         {% endif %}
 
-        {% comment %}
-        Блок вне .container — для полноширинных секций (шапка страницы
-        фильма с фоном). Внутри контейнера такую растянуть нельзя,
-        а ломать её отрицательными отступами — трюк, который потом
-        всплывает багами на узких экранах.
-        {% endcomment %}
         {% block hero %}{% endblock %}
 
         <div class="container">
@@ -127,19 +128,44 @@
         </div>
     </main>
 
-    {% comment %}
-    Рекламное место. Одна строка — весь блок: удалите её, и рекламы на сайте
-    не будет. Логика показа и стили — в includes/ad_rail.html и css/ads.css.
-    {% endcomment %}
-    {% include "includes/ad_rail.html" %}
+    {# Lightbox #}
+    <div class="lightbox" data-lightbox role="dialog" aria-modal="true" aria-label="Просмотр изображения">
+        <button class="lightbox__close" type="button" data-lightbox-close aria-label="Закрыть">✕</button>
+        <img class="lightbox__img" src="" alt="" data-lightbox-img>
+    </div>
 
+    {# Bottom nav for mobile #}
+    <nav class="bottom-nav" aria-label="Быстрая навигация">
+        <a class="bottom-nav__link" href="{% url 'catalog:home' %}">
+            <span class="bottom-nav__icon">🏠</span>
+            Главная
+        </a>
+        <a class="bottom-nav__link" href="{% url 'catalog:title_list' %}">
+            <span class="bottom-nav__icon">🎬</span>
+            Каталог
+        </a>
+        <a class="bottom-nav__link" href="{% url 'catalog:genre_list' %}">
+            <span class="bottom-nav__icon">🏷️</span>
+            Жанры
+        </a>
+        {% if user.is_authenticated %}
+            <a class="bottom-nav__link" href="{% url 'library:favorites' %}">
+                <span class="bottom-nav__icon">❤️</span>
+                Избранное
+            </a>
+        {% else %}
+            <a class="bottom-nav__link" href="{% url 'users:login' %}">
+                <span class="bottom-nav__icon">👤</span>
+                Войти
+            </a>
+        {% endif %}
+    </nav>
+
+    {% include "includes/ad_rail.html" %}
     {% include "includes/footer.html" %}
 
-    {% comment %}
-    defer: скрипт не блокирует отрисовку страницы и выполнится,
-    когда HTML уже разобран. Всё на сайте работает и без него.
-    {% endcomment %}
     <script src="{% static 'js/favorite.js' %}" defer></script>
+    <script src="{% static 'js/app.js' %}" defer></script>
     {% block extra_js %}{% endblock %}
 </body>
 </html>

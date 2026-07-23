@@ -10,7 +10,6 @@ from django.utils import timezone
 
 from apps.core.models import TimeStampedModel
 
-
 PROMO_CODE_VALIDATOR = RegexValidator(
     regex=r"^[A-Z0-9][A-Z0-9_-]{2,31}$",
     message="Промокод состоит из 3–32 прописных латинских букв, цифр, дефисов или подчёркиваний.",
@@ -100,6 +99,8 @@ class Subscription(TimeStampedModel):
         verbose_name_plural = "Подписки"
         indexes = [
             models.Index(fields=["user", "status", "current_period_end"], name="subscription_access_idx"),
+            # Проверка активной подписки: SELECT ... WHERE user=%s AND status='active'.
+            models.Index(fields=["user", "status"], name="subscription_user_status_idx"),
         ]
 
     def __str__(self) -> str:
@@ -132,6 +133,8 @@ class Entitlement(TimeStampedModel):
         verbose_name_plural = "Права доступа"
         indexes = [
             models.Index(fields=["user", "asset", "expires_at"], name="entitlement_access_idx"),
+            # Проверка активного права: SELECT ... WHERE user=%s AND asset=%s AND revoked_at IS NULL.
+            models.Index(fields=["user", "asset", "revoked_at"], name="entitlement_active_idx"),
         ]
 
     def __str__(self) -> str:
@@ -209,7 +212,9 @@ class Payment(TimeStampedModel):
         REFUNDED = "refunded", "Возвращён"
 
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="payments")
-    subscription = models.ForeignKey(Subscription, on_delete=models.PROTECT, null=True, blank=True, related_name="payments")
+    subscription = models.ForeignKey(
+        Subscription, on_delete=models.PROTECT, null=True, blank=True, related_name="payments"
+    )
     offer = models.ForeignKey(ContentOffer, on_delete=models.PROTECT, null=True, blank=True, related_name="payments")
     provider = models.CharField("Провайдер", max_length=20, choices=Provider.choices)
     provider_payment_id = models.CharField("Идентификатор платежа", max_length=255, unique=True)
@@ -223,6 +228,8 @@ class Payment(TimeStampedModel):
         verbose_name_plural = "Платежи"
         indexes = [
             models.Index(fields=["user", "status", "-created_at"], name="payment_user_status_idx"),
+            # Список платежей пользователя: SELECT ... WHERE user=%s ORDER BY created_at DESC.
+            models.Index(fields=["user", "-created_at"], name="payment_user_date_idx"),
         ]
 
     def __str__(self) -> str:
@@ -254,7 +261,9 @@ class ReferralProfile(TimeStampedModel):
 
 class Referral(TimeStampedModel):
     referrer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="referrals_made")
-    referred_user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="referral_received")
+    referred_user = models.OneToOneField(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="referral_received"
+    )
     reward_granted_at = models.DateTimeField("Награда выдана", null=True, blank=True)
 
     class Meta:

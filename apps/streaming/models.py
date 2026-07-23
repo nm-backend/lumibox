@@ -10,7 +10,6 @@ from django.utils import timezone
 
 from apps.core.models import TimeStampedModel
 
-
 STORAGE_KEY_VALIDATOR = RegexValidator(
     regex=r"^[A-Za-z0-9][A-Za-z0-9._/-]*$",
     message="Ключ файла может содержать только латинские буквы, цифры, точки, подчёркивания, дефисы и слеши.",
@@ -215,7 +214,8 @@ class VideoAsset(TimeStampedModel):
         ]
         constraints = [
             models.CheckConstraint(
-                condition=(Q(title__isnull=False, episode__isnull=True) | Q(title__isnull=True, episode__isnull=False)),
+                condition=Q(title__isnull=False, episode__isnull=True)
+                | Q(title__isnull=True, episode__isnull=False),
                 name="asset_has_exactly_one_content",
             ),
         ]
@@ -321,7 +321,9 @@ class PlaybackPreference(TimeStampedModel):
 
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="playback_preference")
     autoplay_next = models.BooleanField("Автозапуск следующей серии", default=True)
-    default_quality = models.CharField("Качество по умолчанию", max_length=8, choices=Quality.choices, default=Quality.AUTO)
+    default_quality = models.CharField(
+        "Качество по умолчанию", max_length=8, choices=Quality.choices, default=Quality.AUTO
+    )
     default_speed = models.DecimalField(
         "Скорость по умолчанию",
         max_digits=3,

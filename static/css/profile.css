@@ -1,73 +1,206 @@
-/* Профиль пользователя. */
+/* Profile page — tabbed layout with sidebar stats */
 
-.profile-header {
-    display: flex;
-    align-items: center;
-    gap: var(--space-5);
-    margin-bottom: var(--space-6);
-}
-
-.profile-header__bio {
-    margin-top: var(--space-3);
-    max-width: 60ch;
-    color: var(--color-text-muted);
-    font-size: var(--text-sm);
-}
-
-/* ---------- Счётчики ---------- */
-
-.stat-grid {
+.profile-layout {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: var(--space-3);
-    margin-bottom: var(--space-8);
+    grid-template-columns: 280px 1fr;
+    gap: var(--space-6);
+    align-items: start;
 }
 
-.stat {
+/* Sidebar */
+.profile-sidebar {
+    position: sticky;
+    top: calc(var(--header-height) + var(--space-4));
     display: flex;
     flex-direction: column;
-    gap: var(--space-1);
-    padding: var(--space-4);
-
-    background-color: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    transition: border-color var(--transition);
+    gap: var(--space-4);
 }
 
-/* Подсвечиваем только те счётчики, которые ведут на страницу */
-a.stat:hover {
-    border-color: var(--color-accent);
-    color: var(--color-text);
+.profile-card {
+    padding: var(--space-6);
+    text-align: center;
 }
 
-.stat__value {
-    font-size: var(--text-xl);
+.profile-card__avatar {
+    margin-bottom: var(--space-4);
+}
+
+.profile-card__name {
+    font-size: var(--text-lg);
     font-weight: 700;
-    line-height: 1;
+    letter-spacing: -0.01em;
+    margin-bottom: var(--space-2);
 }
 
-.stat__label {
+.profile-card__bio {
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
+    line-height: 1.6;
+    margin-bottom: var(--space-3);
+}
+
+.profile-card__email {
+    color: var(--color-text-dim);
+    font-size: var(--text-xs);
+    margin-bottom: var(--space-1);
+}
+
+.profile-card__joined {
     color: var(--color-text-dim);
     font-size: var(--text-xs);
 }
 
+/* Stats */
+.profile-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    overflow: hidden;
+    padding: var(--space-4);
+    text-align: center;
+}
+
+.profile-stat {
+    padding: var(--space-2);
+}
+
+.profile-stat + .profile-stat {
+    border-left: 1px solid var(--color-border);
+}
+
+.profile-stat__value {
+    display: block;
+    font-size: var(--text-xl);
+    font-weight: 800;
+    color: var(--color-accent);
+    line-height: 1.1;
+}
+
+.profile-stat__label {
+    display: block;
+    color: var(--color-text-dim);
+    font-size: var(--text-xs);
+    margin-top: var(--space-1);
+}
+
+/* Main content */
+.profile-main {
+    min-width: 0;
+}
+
 .profile-form {
     max-width: 480px;
+    padding: var(--space-5);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
 }
 
-.page-header--with-action {
+/* Profile header (person page) */
+.profile-header {
     display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-4);
+    gap: var(--space-5);
     align-items: flex-start;
-    justify-content: space-between;
+    margin-bottom: var(--space-6);
+    padding: var(--space-5);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
 }
 
-@media (max-width: 600px) {
-    .profile-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: var(--space-4);
+.profile-header__bio {
+    margin-top: var(--space-3);
+    max-width: 62ch;
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
+    line-height: 1.7;
+}
+
+/* ---------- Awards ---------- */
+
+.award-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.award-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    transition: border-color var(--transition-fast);
+}
+
+.award-item:hover {
+    border-color: var(--color-accent);
+}
+
+.award-item__icon {
+    flex-shrink: 0;
+    font-size: 1.2rem;
+}
+
+.award-item__body {
+    flex: 1;
+    min-width: 0;
+}
+
+.award-item__name {
+    font-size: var(--text-sm);
+    font-weight: 600;
+}
+
+.award-item__category {
+    display: block;
+    color: var(--color-text-muted);
+    font-size: var(--text-xs);
+}
+
+.award-item__year {
+    color: var(--color-text-dim);
+    font-size: var(--text-xs);
+}
+
+.award-item__title {
+    color: var(--color-text-dim);
+    font-size: var(--text-xs);
+}
+
+.award-item__result {
+    flex-shrink: 0;
+    padding: var(--space-1) var(--space-2);
+    border-radius: var(--radius-sm);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.award-item__result--won {
+    background: var(--color-accent-dim);
+    color: var(--color-accent);
+}
+
+.award-item__result--nominated {
+    background: var(--color-surface-hover);
+    color: var(--color-text-muted);
+}
+
+/* ---------- Телефон ---------- */
+
+@media (max-width: 860px) {
+    .profile-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .profile-sidebar {
+        position: static;
+    }
+
+    .profile-stats {
+        grid-template-columns: repeat(3, 1fr);
     }
 }

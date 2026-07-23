@@ -1,5 +1,5 @@
 {% comment %}
-Подборка на главной: заголовок, ссылка «Все» и сетка карточек.
+Подборка на главной: заголовок, ссылка «Все» и карусель карточек.
 
 Ждёт section_title, section_titles и section_url.
 Вынесена отдельно, потому что на главной таких блоков несколько,
@@ -7,7 +7,7 @@
 {% endcomment %}
 
 {% if section_titles %}
-    <section class="section">
+    <section class="section reveal">
         <div class="section__header">
             <h2 class="section__title">{{ section_title }}</h2>
             {% if section_url %}
@@ -15,10 +15,14 @@
             {% endif %}
         </div>
 
-        <div class="title-grid">
-            {% for title in section_titles %}
-                {% include "includes/title_card.html" %}
-            {% endfor %}
+        <div class="carousel">
+            <button class="carousel__btn carousel__btn--prev" type="button" aria-label="Назад">‹</button>
+            <div class="carousel__track">
+                {% for title in section_titles %}
+                    {% include "includes/title_card.html" %}
+                {% endfor %}
+            </div>
+            <button class="carousel__btn carousel__btn--next" type="button" aria-label="Вперёд">›</button>
         </div>
     </section>
 {% endif %}

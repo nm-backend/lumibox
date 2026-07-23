@@ -1,8 +1,5 @@
 /*
   Главная страница: полноширинный баннер и ряды подборок.
-
-  Старые классы .hero* удалены вместе с прежней двухколоночной вёрсткой
-  (постер слева, текст справа) — её заменил .showcase с фоном во всю ширину.
 */
 
 /* ---------- Баннер ---------- */
@@ -10,15 +7,12 @@
 .showcase {
     position: relative;
     overflow: hidden;
-    /* Съедает верхний отступ .site-main: баннер должен начинаться
-       сразу под шапкой, без полосы фона между ними. */
     margin-top: calc(var(--space-6) * -1);
     margin-bottom: var(--space-8);
     padding: var(--space-8) 0;
-    min-height: 460px;
+    min-height: 500px;
     display: flex;
     align-items: center;
-
     background-color: var(--color-surface);
 }
 
@@ -28,16 +22,27 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
-    /* Фон приглушён: он атмосфера, а не содержание. На полной яркости
-       белый текст поверх светлого кадра стал бы нечитаемым. */
     opacity: 0.38;
+    transition: transform 6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.showcase:hover .showcase__backdrop {
+    transform: scale(1.03);
+}
+
+/* Trailer video in hero */
+.showcase__trailer {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.35;
 }
 
 .showcase__scrim {
     position: absolute;
     inset: 0;
-    /* Вертикальный градиент растворяет баннер в странице, горизонтальный
-       затемняет левую часть, где лежит текст. */
     background:
         linear-gradient(180deg, rgba(11, 13, 18, 0.45) 0%, var(--color-bg) 100%),
         linear-gradient(90deg, rgba(11, 13, 18, 0.92) 0%, rgba(11, 13, 18, 0.2) 65%);
@@ -46,6 +51,7 @@
 .showcase__inner {
     position: relative;
     max-width: var(--container-width);
+    animation: fadeUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) both;
 }
 
 .showcase__label {
@@ -59,12 +65,21 @@
 
 .showcase__name {
     max-width: 18ch;
-    /* clamp вместо медиазапросов: размер плавно тянется от телефона
-       до широкого монитора, без ступенек на промежуточных ширинах. */
     font-size: clamp(2.2rem, 5.5vw, 4rem);
     line-height: 1.05;
     letter-spacing: -0.035em;
     text-wrap: balance;
+}
+
+.showcase__logo-title {
+    line-height: 1;
+    margin-bottom: 0;
+}
+
+.showcase__logo {
+    max-height: 140px;
+    max-width: min(100%, 520px);
+    object-fit: contain;
 }
 
 .showcase__meta {
@@ -73,7 +88,6 @@
     align-items: center;
     gap: var(--space-2);
     margin-top: var(--space-4);
-
     color: var(--color-text-muted);
     font-size: var(--text-sm);
 }
@@ -87,9 +101,6 @@
     max-width: 58ch;
     color: var(--color-text-muted);
     line-height: 1.7;
-
-    /* Обрезаем тремя строками: баннер держит высоту независимо
-       от длины описания, и ряды ниже не «прыгают». */
     display: -webkit-box;
     -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
@@ -101,6 +112,43 @@
     flex-wrap: wrap;
     gap: var(--space-3);
     margin-top: var(--space-5);
+}
+
+/* Rating badge on hero */
+.showcase__badge {
+    position: absolute;
+    top: var(--space-6);
+    right: var(--space-6);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: var(--space-3) var(--space-4);
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    animation: fadeUp 0.8s 0.3s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+.showcase__badge-value {
+    font-size: var(--text-xl);
+    font-weight: 800;
+    color: var(--color-accent);
+    line-height: 1;
+}
+
+.showcase__badge-label {
+    font-size: var(--text-xs);
+    color: var(--color-text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+@media (max-width: 720px) {
+    .showcase__badge {
+        display: none;
+    }
 }
 
 /* ---------- Ряды подборок ---------- */
@@ -130,6 +178,113 @@
     transform: translateX(2px);
 }
 
+/* ---------- Продолжить просмотр ---------- */
+
+.continue-grid {
+    display: flex;
+    gap: var(--space-4);
+}
+
+.continue-card {
+    min-width: 220px;
+    max-width: 260px;
+    flex: 0 0 auto;
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    transition: transform .2s ease, border-color .2s ease;
+    scroll-snap-align: start;
+}
+
+.continue-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--color-accent);
+}
+
+.continue-card__link {
+    position: relative;
+    display: block;
+    aspect-ratio: 16 / 10;
+    color: #fff;
+    text-decoration: none;
+}
+
+.continue-card__image,
+.continue-card__placeholder {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.continue-card__placeholder {
+    display: grid;
+    place-items: center;
+    background: var(--color-accent-dim);
+    font-size: 2rem;
+    color: var(--color-accent);
+}
+
+.continue-card__shade {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(0deg, rgba(4, 6, 12, .9), transparent 70%);
+}
+
+.continue-card__play {
+    position: absolute;
+    top: .75rem;
+    right: .75rem;
+    display: grid;
+    width: 2rem;
+    height: 2rem;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--color-accent);
+    color: var(--color-on-accent);
+    font-size: .75rem;
+}
+
+.continue-card__body {
+    position: absolute;
+    right: .75rem;
+    bottom: 1.2rem;
+    left: .75rem;
+    display: grid;
+    gap: .15rem;
+}
+
+.continue-card__body strong {
+    font-size: var(--text-sm);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.continue-card__body small {
+    color: rgba(255, 255, 255, .65);
+    font-size: var(--text-xs);
+}
+
+.continue-card__progress {
+    position: absolute;
+    right: .75rem;
+    bottom: .45rem;
+    left: .75rem;
+    height: .2rem;
+    overflow: hidden;
+    border-radius: 2rem;
+    background: rgba(255, 255, 255, .2);
+}
+
+.continue-card__progress span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: var(--color-accent);
+    transition: width .3s ease;
+}
+
 /* ---------- Телефон ---------- */
 
 @media (max-width: 720px) {
@@ -139,8 +294,6 @@
     }
 
     .showcase__scrim {
-        /* Горизонтальное затемнение на узком экране не нужно:
-           текст занимает всю ширину, а не левую половину. */
         background: linear-gradient(180deg, rgba(11, 13, 18, 0.5) 0%, var(--color-bg) 100%);
     }
 
@@ -151,31 +304,8 @@
     .showcase__actions .button {
         flex: 1;
     }
+
+    .continue-card {
+        min-width: 180px;
+    }
 }
- .continue-grid {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 1rem;
- }
-
- .continue-card {
-    min-width: 0;
-    overflow: hidden;
-    border: 1px solid var(--color-border);
-    border-radius: .9rem;
-    background: var(--color-surface);
-    transition: transform .2s ease, border-color .2s ease;
- }
-
- .continue-card:hover { transform: translateY(-3px); border-color: var(--color-accent); }
- .continue-card__link { position: relative; display: block; aspect-ratio: 16 / 10; color: #fff; text-decoration: none; }
- .continue-card__image, .continue-card__placeholder { width: 100%; height: 100%; object-fit: cover; }
- .continue-card__placeholder { display: grid; place-items: center; background: var(--color-accent); font-size: 2rem; }
- .continue-card__shade { position: absolute; inset: 0; background: linear-gradient(0deg, rgba(4, 6, 12, .9), transparent 70%); }
- .continue-card__play { position: absolute; top: 1rem; right: 1rem; display: grid; width: 2.3rem; height: 2.3rem; place-items: center; border-radius: 50%; background: var(--color-accent); }
- .continue-card__body { position: absolute; right: .75rem; bottom: .85rem; left: .75rem; display: grid; gap: .15rem; }
- .continue-card__body small { color: rgba(255, 255, 255, .7); }
- .continue-card__progress { position: absolute; right: .75rem; bottom: .35rem; left: .75rem; height: .22rem; overflow: hidden; border-radius: 2rem; background: rgba(255, 255, 255, .28); }
- .continue-card__progress span { display: block; height: 100%; border-radius: inherit; background: var(--color-accent); }
- @media (max-width: 900px) { .continue-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
- @media (max-width: 480px) { .continue-grid { grid-template-columns: 1fr; } }

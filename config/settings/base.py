@@ -75,7 +75,11 @@ INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    # Сжатие ответов gzip — уменьшает размер HTML/JSON/CSS/JS.
+    "django.middleware.gzip.GZipMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    # Локализация: определяет язык по сессии, cookie или Accept-Language.
+    "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -95,6 +99,7 @@ TEMPLATES = [
         "OPTIONS": {
             "context_processors": [
                 "django.template.context_processors.request",
+                "django.template.context_processors.i18n",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
             ],
@@ -134,6 +139,8 @@ else:
 
 # Сколько живут закэшированные подборки главной страницы.
 CACHE_TTL_HOME = 60 * 5
+# Справочники (жанры, страны) меняются редко — кэш на час.
+CACHE_TTL_REFERENCE = 60 * 60
 
 # Провайдеры видео задаются только конфигурацией окружения/инфраструктуры. В БД
 # хранится ключ ресурса, а не URL, поэтому редактор не может добавить произвольный
@@ -257,9 +264,18 @@ LOGIN_REDIRECT_URL = "catalog:home"
 LOGOUT_REDIRECT_URL = "catalog:home"
 
 
-LANGUAGE_CODE = "ru-ru"
+# Поддерживаемые языки: русский, английский, кыргызский.
+LANGUAGE_CODE = "ru"
+LANGUAGES = [
+    ("ru", "Русский"),
+    ("en", "English"),
+    ("ky", "Кыргызча"),
+]
+LOCALE_PATHS = [BASE_DIR / "locale"]
+
 TIME_ZONE = "Asia/Bishkek"
 USE_I18N = True
+USE_TZ = True
 
 # Храним время в базе в UTC, а показываем в TIME_ZONE.
 # Это избавляет от ошибок при смене часового пояса сервера.

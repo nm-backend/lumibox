@@ -4,6 +4,7 @@ from django.utils import timezone
 from django.utils.html import format_html
 
 from apps.catalog.models import (
+    Award,
     Collection,
     CollectionItem,
     Country,
@@ -11,7 +12,6 @@ from apps.catalog.models import (
     Genre,
     Participation,
     Person,
-    Award,
     Studio,
     Title,
     TitleAward,

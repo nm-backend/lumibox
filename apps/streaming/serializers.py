@@ -1,4 +1,5 @@
 from django.urls import reverse
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
 from apps.streaming.models import VideoAsset
@@ -50,10 +51,23 @@ class ContinueWatchingSerializer(serializers.Serializer):
     position_seconds = serializers.IntegerField()
     duration_seconds = serializers.IntegerField()
 
+    @extend_schema_field(
+        serializers.DictField(
+            child=serializers.CharField(allow_null=True),
+            help_text="{\"name\": str, \"slug\": str, \"poster\": str|null}",
+        )
+    )
     def get_title(self, progress):
         title = progress.video_asset.title_object
         return {"name": title.name, "slug": title.slug, "poster": title.poster.url if title.poster else None}
 
+    @extend_schema_field(
+        serializers.DictField(
+            child=serializers.CharField(allow_null=True),
+            allow_null=True,
+            help_text="{\"season\": int, \"number\": int, \"name\": str}|null",
+        )
+    )
     def get_episode(self, progress):
         episode = progress.video_asset.episode
         if episode is None:
@@ -64,6 +78,7 @@ class ContinueWatchingSerializer(serializers.Serializer):
             "name": episode.name,
         }
 
+    @extend_schema_field(serializers.URLField(allow_null=True))
     def get_watch_url(self, progress):
         episode = progress.video_asset.episode
         if episode:

@@ -176,6 +176,11 @@ def get_home_sections():
     return sections
 
 
+# Ключи кэша справочников — вынесены в константы для использования в signals.py
+REFERENCE_GENRE_CACHE_KEY = "catalog:genre_list:v1"
+REFERENCE_COUNTRY_CACHE_KEY = "catalog:country_list:v1"
+
+
 def clear_home_cache():
     """
     Сбрасывает кэши, зависящие от состава каталога.
@@ -189,3 +194,13 @@ def clear_home_cache():
     from apps.catalog.forms import YEAR_CHOICES_CACHE_KEY
 
     cache.delete_many([HOME_CACHE_KEY, YEAR_CHOICES_CACHE_KEY])
+
+
+def clear_reference_cache():
+    """
+    Сбрасывает кэш списков жанров и стран.
+
+    Зовётся при добавлении/удалении Genre или Country: новый жанр должен
+    появиться в списке на сайте сразу, а не через час.
+    """
+    cache.delete_many([REFERENCE_GENRE_CACHE_KEY, REFERENCE_COUNTRY_CACHE_KEY])

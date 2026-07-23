@@ -71,7 +71,13 @@ class Review(TimeStampedModel):
             models.UniqueConstraint(fields=["user", "title"], name="unique_review_per_user"),
         ]
         indexes = [
+            # Каталог показывает отзывы только определённого статуса для конкретного фильма.
             models.Index(fields=["title", "status"], name="review_title_status_idx"),
+            # Профиль пользователя показывает его отзывы — нужен индекс по user.
+            models.Index(fields=["user"], name="review_user_idx"),
+            # Подсчёт рейтинга: SELECT AVG(rating) WHERE title=%s AND status='published'.
+            # Покрывающий индекс закрывает и фильтрацию, и агрегацию.
+            models.Index(fields=["title", "status", "rating"], name="review_rating_idx"),
         ]
 
     def __str__(self):

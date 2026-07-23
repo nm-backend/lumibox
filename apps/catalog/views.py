@@ -1,5 +1,7 @@
 from random import randrange
 
+from django.conf import settings
+from django.core.cache import cache
 from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
@@ -9,6 +11,8 @@ from apps.catalog.forms import CatalogFilterForm
 from apps.catalog.models import Award, Collection, Country, Genre, Person, Studio, Title
 from apps.catalog.models.person import Participation
 from apps.catalog.services import (
+    REFERENCE_COUNTRY_CACHE_KEY,
+    REFERENCE_GENRE_CACHE_KEY,
     get_crew_by_role,
     get_featured_collections,
     get_home_sections,
@@ -191,11 +195,41 @@ class GenreListView(ReferenceListView):
     page_heading = "Жанры"
     detail_url_name = "catalog:genre_titles"
 
+    def get_queryset(self):
+        """
+        Кэшированный список жанров.
+
+        Возвращает list — это корректно для ReferenceListView, у которого
+        нет пагинации и method в контексте. Шаблон только итерирует
+        по references и читает атрибуты. Сохраняем аннотацию titles_count
+        и избегаем лишних запросов к БД при попадании в кэш.
+        """
+        cached = cache.get(REFERENCE_GENRE_CACHE_KEY)
+        if cached is not None:
+            return cached
+        qs = list(super().get_queryset())
+        cache.set(REFERENCE_GENRE_CACHE_KEY, qs, settings.CACHE_TTL_REFERENCE)
+        return qs
+
 
 class CountryListView(ReferenceListView):
     model = Country
     page_heading = "Страны"
     detail_url_name = "catalog:country_titles"
+
+    def get_queryset(self):
+        """
+        Кэшированный список стран.
+
+        Возвращает list — это корректно для ReferenceListView, у которого
+        нет пагинации. Шаблон только итерирует и читает атрибуты.
+        """
+        cached = cache.get(REFERENCE_COUNTRY_CACHE_KEY)
+        if cached is not None:
+            return cached
+        qs = list(super().get_queryset())
+        cache.set(REFERENCE_COUNTRY_CACHE_KEY, qs, settings.CACHE_TTL_REFERENCE)
+        return qs
 
 
 class TitleDetailView(DetailView):
@@ -208,7 +242,11 @@ class TitleDetailView(DetailView):
     # with_crew подтягивает съёмочную группу заранее — иначе шаблон
     # сходит в базу за каждым именем отдельно.
     # Рейтинг брать неоткуда не нужно: он лежит готовым в полях модели.
-    queryset = Title.objects.published().with_related().with_crew()
+    # prefetch_related("seasons__episodes__video_asset") подтягивает
+    # сезоны с сериями и их видеоресурсами — без N+1 во вкладке сезонов.
+    queryset = Title.objects.published().with_related().with_crew().prefetch_related(
+        "seasons__episodes__video_asset"
+    )
 
     def get(self, request, *args, **kwargs):
         response = super().get(request, *args, **kwargs)

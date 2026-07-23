@@ -1,33 +1,18 @@
-{% comment %}
-Страница ошибки сервера.
+{% extends "base.html" %}
+{% load static %}
 
-Намеренно НЕ наследует base.html: если сбой произошёл в настройках,
-контекстных процессорах или маршрутах, base.html может не отрендериться,
-и вместо страницы ошибки посетитель увидит вторую ошибку.
-Django отдаёт этот шаблон с пустым контекстом, поэтому переменных здесь нет.
-{% endcomment %}
-{% load static %}<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Ошибка сервера — MovieHub</title>
-    <link rel="stylesheet" href="{% static 'css/variables.css' %}">
-    <link rel="stylesheet" href="{% static 'css/base.css' %}">
-    <link rel="stylesheet" href="{% static 'css/layout.css' %}">
-    <link rel="stylesheet" href="{% static 'css/components.css' %}">
-</head>
-<body>
-    <main class="site-main">
-        <div class="container">
-            <div class="empty-state">
-                <p class="empty-state__title">Что-то сломалось</p>
-                <p>Мы уже знаем о проблеме. Попробуйте обновить страницу чуть позже.</p>
-                <p class="empty-state__action">
-                    <a class="button button--primary" href="/">На главную</a>
-                </p>
-            </div>
-        </div>
-    </main>
-</body>
-</html>
+{% block page_title %}Ошибка сервера (500) — MovieHub{% endblock %}
+
+{% block content %}
+    <div class="empty-state" style="padding: var(--space-8) 0;">
+        <p style="font-size: 5rem; font-weight: 800; color: var(--color-accent); line-height: 1; margin-bottom: var(--space-2);">500</p>
+        <p class="empty-state__title">Что-то пошло не так</p>
+        <p style="max-width: 40ch; margin: 0 auto; color: var(--color-text-muted);">
+            Мы уже знаем об этой ошибке и работаем над её исправлением. Попробуйте обновить страницу позже.
+        </p>
+        <p class="empty-state__action" style="display: flex; flex-wrap: wrap; gap: var(--space-3); justify-content: center;">
+            <a class="button button--primary" href="{% url 'catalog:home' %}">На главную</a>
+            <a class="button button--ghost" href="{% url 'catalog:title_list' %}">Весь каталог</a>
+        </p>
+    </div>
+{% endblock %}

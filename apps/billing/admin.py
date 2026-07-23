@@ -18,6 +18,7 @@ from apps.billing.models import (
 class SubscriptionPlanAdmin(admin.ModelAdmin):
     list_display = ["name", "level", "period", "price_minor", "currency", "is_active"]
     list_filter = ["level", "period", "is_active"]
+    search_fields = ["name", "slug"]
     prepopulated_fields = {"slug": ["name"]}
 
 
@@ -25,6 +26,7 @@ class SubscriptionPlanAdmin(admin.ModelAdmin):
 class ContentOfferAdmin(admin.ModelAdmin):
     list_display = ["asset", "kind", "price_minor", "currency", "rental_hours", "is_active"]
     list_filter = ["kind", "is_active", "currency"]
+    search_fields = ["asset__title__name", "asset__episode__name"]
     autocomplete_fields = ["asset"]
 
 

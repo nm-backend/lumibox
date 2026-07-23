@@ -1,7 +1,15 @@
 from django.db import IntegrityError
+from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from drf_spectacular.utils import OpenApiExample, OpenApiResponse, extend_schema, extend_schema_view
+from drf_spectacular.utils import (
+    OpenApiExample,
+    OpenApiParameter,
+    OpenApiResponse,
+    extend_schema,
+    extend_schema_field,
+    extend_schema_view,
+)
 from rest_framework import filters, mixins, permissions, serializers, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -36,6 +44,21 @@ class StableOrderingFilter(filters.OrderingFilter):
         if ordering and "pk" not in ordering and "-pk" not in ordering:
             return [*ordering, "pk"]
         return ordering
+
+
+class SearchResultSerializer(serializers.Serializer):
+    """Результат глобального поиска по каталогу."""
+    id = serializers.IntegerField()
+    name = serializers.CharField()
+    slug = serializers.SlugField()
+    type = serializers.CharField()
+    release_year = serializers.IntegerField()
+    poster = serializers.SerializerMethodField()
+    url = serializers.CharField(source="get_absolute_url", read_only=True)
+
+    @extend_schema_field(serializers.URLField(allow_null=True))
+    def get_poster(self, obj):
+        return obj.poster.url if obj.poster else None
 
 
 class FavoriteResponseSerializer(serializers.Serializer):
@@ -99,6 +122,46 @@ class TitleViewSet(viewsets.ReadOnlyModelViewSet):
         if self.action == "retrieve":
             return TitleDetailSerializer
         return TitleListSerializer
+
+    @extend_schema(
+        summary="Поиск по каталогу",
+        description=(
+            "Глобальный поиск по названию и оригинальному названию. "
+            "Возвращает компактные результаты для автодополнения в поисковой строке. "
+            "Максимум limit записей."
+        ),
+        parameters=[
+            OpenApiParameter(name="q", type=str, required=True, description="Поисковый запрос, минимум 2 символа"),
+            OpenApiParameter(name="limit", type=int, required=False, default=6, description="Максимум результатов"),
+        ],
+        responses=SearchResultSerializer(many=True),
+        tags=["titles"],
+    )
+    @action(detail=False, methods=["get"])
+    def search(self, request):
+        q = request.query_params.get("q", "").strip()
+        limit = min(int(request.query_params.get("limit", 6)), 20)
+        results = []
+        if len(q) >= 2:
+            titles = (
+                Title.objects.published()
+                .filter(Q(name__icontains=q) | Q(original_name__icontains=q))
+                .only("id", "name", "slug", "type", "release_year", "poster")
+                .order_by("-release_year")[:limit]
+            )
+            results = [
+                {
+                    "id": t.id,
+                    "name": t.name,
+                    "slug": t.slug,
+                    "type": t.type,
+                    "release_year": t.release_year,
+                    "poster": t.poster.url if t.poster else None,
+                    "url": t.get_absolute_url(),
+                }
+                for t in titles
+            ]
+        return Response(results)
 
     @extend_schema(
         summary="Похожие записи",
