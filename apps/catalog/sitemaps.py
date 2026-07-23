@@ -1,7 +1,7 @@
 from django.contrib.sitemaps import Sitemap
 from django.urls import reverse
 
-from apps.catalog.models import Country, Genre, Title
+from apps.catalog.models import Award, Country, Genre, Studio, Title
 
 
 class TitleSitemap(Sitemap):
@@ -45,6 +45,16 @@ class CountrySitemap(ReferenceSitemap):
     url_name = "catalog:country_titles"
 
 
+class StudioSitemap(ReferenceSitemap):
+    model = Studio
+    url_name = "catalog:studio_detail"
+
+
+class AwardSitemap(ReferenceSitemap):
+    model = Award
+    url_name = "catalog:award_detail"
+
+
 class StaticSitemap(Sitemap):
     """Постоянные страницы: главная, каталог, списки жанров и стран."""
 
@@ -52,7 +62,16 @@ class StaticSitemap(Sitemap):
     priority = 1.0
 
     def items(self):
-        return ["catalog:home", "catalog:title_list", "catalog:genre_list", "catalog:country_list"]
+        return [
+            "catalog:home",
+            "catalog:title_list",
+            "catalog:genre_list",
+            "catalog:country_list",
+            "catalog:actor_list",
+            "catalog:director_list",
+            "catalog:studio_list",
+            "catalog:award_list",
+        ]
 
     def location(self, url_name):
         return reverse(url_name)
@@ -64,4 +83,6 @@ sitemaps = {
     "titles": TitleSitemap,
     "genres": GenreSitemap,
     "countries": CountrySitemap,
+    "studios": StudioSitemap,
+    "awards": AwardSitemap,
 }

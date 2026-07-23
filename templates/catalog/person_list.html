@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block page_title %}{{ page_heading }} — MovieHub{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/catalog.css' %}">
+    <link rel="stylesheet" href="{% static 'css/profile.css' %}">
+{% endblock %}
+
+{% block content %}
+    <div class="page-header"><h1 class="page-title">{{ page_heading }}</h1></div>
+    <div class="crew-list">
+        {% for person in persons %}
+            <a class="crew" href="{{ person.get_absolute_url }}">
+                <span class="avatar">
+                    {% if person.photo %}<img class="avatar__image" src="{{ person.photo.url }}" alt="">{% else %}<span aria-hidden="true">{{ person.initial }}</span>{% endif %}
+                </span>
+                <span class="crew__body"><strong class="crew__name">{{ person.name }}</strong><span class="crew__character">{{ person.titles_count }} произведений</span></span>
+            </a>
+        {% empty %}
+            <p class="empty-state">Пока нет персон.</p>
+        {% endfor %}
+    </div>
+{% endblock %}

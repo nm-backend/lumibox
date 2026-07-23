@@ -8,6 +8,7 @@
 
 from apps.catalog.models.collection import Collection, CollectionItem
 from apps.catalog.models.frame import Frame
+from apps.catalog.models.industry import Award, Studio, TitleAward
 from apps.catalog.models.person import Participation, Person
 from apps.catalog.models.reference import Country, Genre
 from apps.catalog.models.title import Title
@@ -18,7 +19,10 @@ __all__ = [
     "Country",
     "Frame",
     "Genre",
+    "Award",
     "Participation",
     "Person",
+    "Studio",
     "Title",
+    "TitleAward",
 ]

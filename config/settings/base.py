@@ -64,6 +64,8 @@ LOCAL_APPS = [
     "apps.catalog",
     "apps.library",
     "apps.reviews",
+    "apps.streaming",
+    "apps.billing",
     # api последним: он представляет модели всех остальных приложений.
     "apps.api",
 ]
@@ -132,6 +134,17 @@ else:
 
 # Сколько живут закэшированные подборки главной страницы.
 CACHE_TTL_HOME = 60 * 5
+
+# Провайдеры видео задаются только конфигурацией окружения/инфраструктуры. В БД
+# хранится ключ ресурса, а не URL, поэтому редактор не может добавить произвольный
+# источник в плеер. Для локальных файлов URL строится защищённым Django-маршрутом.
+STREAMING_PROVIDER_CONFIG = {
+    "cloudflare_stream": {"delivery_base_url": env("CLOUDFLARE_STREAM_DELIVERY_BASE_URL", default="")},
+    "cloudflare_r2": {"delivery_base_url": env("CLOUDFLARE_R2_DELIVERY_BASE_URL", default="")},
+    "aws_s3": {"delivery_base_url": env("AWS_S3_DELIVERY_BASE_URL", default="")},
+    "backblaze_b2": {"delivery_base_url": env("BACKBLAZE_B2_DELIVERY_BASE_URL", default="")},
+    "minio": {"delivery_base_url": env("MINIO_DELIVERY_BASE_URL", default="")},
+}
 
 
 # Celery. Брокер — тот же Redis. Без него задачи выполнятся прямо

@@ -140,5 +140,6 @@
     когда HTML уже разобран. Всё на сайте работает и без него.
     {% endcomment %}
     <script src="{% static 'js/favorite.js' %}" defer></script>
+    {% block extra_js %}{% endblock %}
 </body>
 </html>

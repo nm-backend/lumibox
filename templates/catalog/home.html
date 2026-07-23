@@ -56,6 +56,10 @@
 {% endblock %}
 
 {% block content %}
+    {% if continue_watching %}
+        {% include "includes/continue_watching_section.html" %}
+    {% endif %}
+
     {% if collections %}
         <section class="section">
             <div class="section__header">

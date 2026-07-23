@@ -92,12 +92,18 @@
             {% endif %}
 
             <div class="film-hero__actions">
+                {% if watch_url %}
+                    <a class="button button--primary" href="{{ watch_url }}">
+                        <span class="button__icon" aria-hidden="true">▶</span>
+                        Смотреть
+                    </a>
+                {% endif %}
                 {% if title.trailer_source %}
                     {% comment %}
                     Якорь, а не модалка: плеер ниже на странице.
                     Модальное окно потребовало бы JS ради того же результата.
                     {% endcomment %}
-                    <a class="button button--primary" href="#trailer">
+                    <a class="button {% if watch_url %}button--ghost{% else %}button--primary{% endif %}" href="#trailer">
                         <span class="button__icon" aria-hidden="true">▶</span>
                         Смотреть трейлер
                     </a>

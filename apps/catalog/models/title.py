@@ -156,6 +156,12 @@ class Title(SeoModel, TimeStampedModel):
         related_name="titles",
         blank=True,
     )
+    studios = models.ManyToManyField(
+        "catalog.Studio",
+        verbose_name="Студии",
+        related_name="titles",
+        blank=True,
+    )
     persons = models.ManyToManyField(
         Person,
         verbose_name="Съёмочная группа",

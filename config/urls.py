@@ -10,10 +10,9 @@ from django.contrib import admin
 from django.contrib.sitemaps.views import sitemap
 from django.urls import include, path, re_path
 from django.views.generic import TemplateView
-from django.views.static import serve
 
 from apps.catalog.sitemaps import sitemaps
-from apps.core.views import health_check
+from apps.core.views import health_check, serve_public_media
 
 urlpatterns = [
     # Проба живости для хостинга и мониторинга. Первой в списке и без
@@ -30,6 +29,7 @@ urlpatterns = [
     path("", include("apps.users.urls")),
     path("", include("apps.library.urls")),
     path("", include("apps.reviews.urls")),
+    path("", include("apps.streaming.urls")),
     # Каталог подключаем последним: у него маршрут "" для главной,
     # и он не должен перехватывать адреса остальных приложений.
     path("", include("apps.catalog.urls")),
@@ -42,5 +42,5 @@ urlpatterns = [
 # медиа не для больших нагрузок: когда файлов станет много, их выносят
 # в объектное хранилище (S3/R2) через django-storages, и маршрут убирают.
 urlpatterns += [
-    re_path(r"^media/(?P<path>.*)$", serve, {"document_root": settings.MEDIA_ROOT}),
+    re_path(r"^media/(?P<path>.*)$", serve_public_media, {"document_root": settings.MEDIA_ROOT}),
 ]

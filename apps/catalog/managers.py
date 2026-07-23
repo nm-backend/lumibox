@@ -31,7 +31,7 @@ class TitleQuerySet(models.QuerySet):
         Без этого список из 24 карточек делает 48 лишних запросов
         к базе — по одному на жанры и страны каждой карточки.
         """
-        return self.prefetch_related("genres", "countries")
+        return self.prefetch_related("genres", "countries", "studios")
 
     def with_crew(self):
         """

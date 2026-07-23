@@ -1,0 +1,34 @@
+<section class="section">
+    <div class="section__header">
+        <h2 class="section__title">Продолжить просмотр</h2>
+        <a class="section__link" href="{% url 'library:history' %}">История →</a>
+    </div>
+    <div class="continue-grid">
+        {% for progress in continue_watching %}
+            {% with watch_title=progress.video_asset.title_object episode=progress.video_asset.episode %}
+                <article class="continue-card">
+                    {% if episode %}
+                        <a class="continue-card__link" href="{{ episode.get_absolute_url }}">
+                    {% else %}
+                        <a class="continue-card__link" href="{% url 'streaming:watch_title' watch_title.slug %}">
+                    {% endif %}
+                        {% if watch_title.backdrop %}
+                            <img class="continue-card__image" src="{{ watch_title.backdrop.url }}" alt="{{ watch_title.name }}" loading="lazy">
+                        {% elif watch_title.poster %}
+                            <img class="continue-card__image" src="{{ watch_title.poster.url }}" alt="{{ watch_title.name }}" loading="lazy">
+                        {% else %}
+                            <span class="continue-card__placeholder" aria-hidden="true">{{ watch_title.initial }}</span>
+                        {% endif %}
+                        <span class="continue-card__shade" aria-hidden="true"></span>
+                        <span class="continue-card__play" aria-hidden="true">▶</span>
+                        <span class="continue-card__progress"><span style="width: {{ progress.percentage }}%"></span></span>
+                        <span class="continue-card__body">
+                            <strong>{{ watch_title.name }}</strong>
+                            <small>{% if episode %}{{ episode.season.display_name }}, серия {{ episode.number }}{% else %}Осталось {{ progress.duration_seconds|add:"-1"|floatformat:0 }} сек.{% endif %}</small>
+                        </span>
+                    </a>
+                </article>
+            {% endwith %}
+        {% endfor %}
+    </div>
+</section>

@@ -11,7 +11,10 @@ from apps.catalog.models import (
     Genre,
     Participation,
     Person,
+    Award,
+    Studio,
     Title,
+    TitleAward,
 )
 from apps.catalog.services import clear_home_cache
 
@@ -115,6 +118,13 @@ class CollectionItemInline(admin.TabularInline):
     fields = ["title", "order"]
 
 
+class TitleAwardInline(admin.TabularInline):
+    model = TitleAward
+    extra = 0
+    autocomplete_fields = ["award", "person"]
+    fields = ["award", "person", "year", "category", "result"]
+
+
 @admin.register(Collection)
 class CollectionAdmin(admin.ModelAdmin):
     """Тематические подборки — раздел 5 ТЗ."""
@@ -144,7 +154,7 @@ class CollectionAdmin(admin.ModelAdmin):
 class TitleAdmin(admin.ModelAdmin):
     """Админка фильмов и сериалов — основное рабочее место редактора."""
 
-    inlines = [ParticipationInline, FrameInline]
+    inlines = [ParticipationInline, FrameInline, TitleAwardInline]
 
     # Похожие вручную ищутся автодополнением: список из тысяч фильмов
     # в обычном multi-select нерабочий.
@@ -159,7 +169,7 @@ class TitleAdmin(admin.ModelAdmin):
     prepopulated_fields = {"slug": ["name"]}
 
     # Удобный выбор жанров и стран двумя списками вместо неудобного multi-select.
-    filter_horizontal = ["genres", "countries"]
+    filter_horizontal = ["genres", "countries", "studios"]
 
     readonly_fields = [
         "poster_preview",
@@ -198,6 +208,7 @@ class TitleAdmin(admin.ModelAdmin):
                     "age_rating",
                     "genres",
                     "countries",
+                    "studios",
                     "rating_display",
                 ],
             },
@@ -333,3 +344,41 @@ class TitleAdmin(admin.ModelAdmin):
         updated = queryset.update(status=Title.Status.DRAFT)
         clear_home_cache()
         self.message_user(request, f"Снято с публикации: {updated}")
+
+
+@admin.register(Studio)
+class StudioAdmin(admin.ModelAdmin):
+    list_display = ["name", "titles_count", "website"]
+    search_fields = ["name"]
+    prepopulated_fields = {"slug": ["name"]}
+    readonly_fields = ["created_at", "updated_at"]
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).annotate(_titles_count=Count("titles"))
+
+    @admin.display(description="Произведений", ordering="_titles_count")
+    def titles_count(self, studio):
+        return studio._titles_count
+
+
+@admin.register(Award)
+class AwardAdmin(admin.ModelAdmin):
+    list_display = ["name", "entries_count", "website"]
+    search_fields = ["name"]
+    prepopulated_fields = {"slug": ["name"]}
+    readonly_fields = ["created_at", "updated_at"]
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).annotate(_entries_count=Count("title_entries"))
+
+    @admin.display(description="Номинаций", ordering="_entries_count")
+    def entries_count(self, award):
+        return award._entries_count
+
+
+@admin.register(TitleAward)
+class TitleAwardAdmin(admin.ModelAdmin):
+    list_display = ["award", "title", "person", "year", "category", "result"]
+    list_filter = ["award", "result", "year"]
+    search_fields = ["title__name", "person__name", "category"]
+    autocomplete_fields = ["award", "title", "person"]

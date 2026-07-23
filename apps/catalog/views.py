@@ -1,10 +1,12 @@
+from random import randrange
+
 from django.db.models import Count, Q
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
 from django.views.generic import DetailView, ListView, TemplateView
 
 from apps.catalog.forms import CatalogFilterForm
-from apps.catalog.models import Collection, Country, Genre, Person, Title
+from apps.catalog.models import Award, Collection, Country, Genre, Person, Studio, Title
 from apps.catalog.models.person import Participation
 from apps.catalog.services import (
     get_crew_by_role,
@@ -18,6 +20,7 @@ from apps.library.models import Favorite
 from apps.library.services import remember_view
 from apps.reviews.forms import ReviewForm
 from apps.reviews.models import Review
+from apps.streaming.services import get_continue_watching, get_watch_url
 
 # Условие «считать только опубликованное» для annotate(Count(...)).
 # Вынесено в константу: используется и для жанров, и для стран.
@@ -54,6 +57,7 @@ class HomeView(TemplateView):
         # лишний запрос на каждой загрузке главной ни к чему.
         if self.request.user.is_authenticated:
             context["recommendations"] = get_recommendations(self.request.user)
+            context["continue_watching"] = get_continue_watching(self.request.user)
 
         context["collections"] = get_featured_collections()
 
@@ -222,6 +226,7 @@ class TitleDetailView(DetailView):
         context["review_form"] = ReviewForm(instance=user_review)
         context["user_review"] = user_review
         context["is_favorite"] = self.is_favorite()
+        context["watch_url"] = get_watch_url(self.object)
         return context
 
     def get_user_review(self):
@@ -261,7 +266,134 @@ class PersonDetailView(DetailView):
             .prefetch_related("title__genres")
             .order_by("-title__release_year")
         )
+        context["awards"] = self.object.award_entries.select_related("award", "title")[:12]
         return context
+
+
+class PersonDirectoryView(ListView):
+    """Каталог актёров или режиссёров с количеством опубликованных работ."""
+
+    template_name = "catalog/person_list.html"
+    context_object_name = "persons"
+    role = Participation.Role.ACTOR
+    page_heading = "Актёры"
+
+    def get_queryset(self):
+        published_role = Q(
+            participations__role=self.role,
+            participations__title__status=Title.Status.PUBLISHED,
+        )
+        return (
+            Person.objects.annotate(titles_count=Count("participations__title", filter=published_role, distinct=True))
+            .filter(titles_count__gt=0)
+            .order_by("name")
+        )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["page_heading"] = self.page_heading
+        return context
+
+
+class ActorListView(PersonDirectoryView):
+    role = Participation.Role.ACTOR
+    page_heading = "Актёры"
+
+
+class DirectorListView(PersonDirectoryView):
+    role = Participation.Role.DIRECTOR
+    page_heading = "Режиссёры"
+
+
+class StudioListView(ListView):
+    template_name = "catalog/reference_list.html"
+    context_object_name = "references"
+
+    def get_queryset(self):
+        return (
+            Studio.objects.annotate(titles_count=Count("titles", filter=PUBLISHED_TITLES))
+            .filter(titles_count__gt=0)
+            .order_by("name")
+        )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["page_heading"] = "Студии"
+        context["detail_url_name"] = "catalog:studio_detail"
+        return context
+
+
+class StudioDetailView(ElidedPaginationMixin, ListView):
+    template_name = "catalog/industry_detail.html"
+    context_object_name = "titles"
+    paginate_by = 24
+
+    def get_queryset(self):
+        self.studio = get_object_or_404(Studio, slug=self.kwargs["slug"])
+        return Title.objects.published().with_related().filter(studios=self.studio)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["entity"] = self.studio
+        context["entity_label"] = "Студия"
+        return context
+
+
+class AwardListView(ListView):
+    template_name = "catalog/reference_list.html"
+    context_object_name = "references"
+
+    def get_queryset(self):
+        return (
+            Award.objects.annotate(
+                titles_count=Count(
+                    "title_entries__title",
+                    filter=Q(title_entries__title__status=Title.Status.PUBLISHED),
+                    distinct=True,
+                )
+            )
+            .filter(titles_count__gt=0)
+            .order_by("name")
+        )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["page_heading"] = "Награды"
+        context["detail_url_name"] = "catalog:award_detail"
+        return context
+
+
+class AwardDetailView(ElidedPaginationMixin, ListView):
+    template_name = "catalog/industry_detail.html"
+    context_object_name = "titles"
+    paginate_by = 24
+
+    def get_queryset(self):
+        self.award = get_object_or_404(Award, slug=self.kwargs["slug"])
+        return (
+            Title.objects.published()
+            .with_related()
+            .filter(award_entries__award=self.award)
+            .order_by("-award_entries__year", "name")
+            .distinct()
+        )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["entity"] = self.award
+        context["entity_label"] = "Премия"
+        return context
+
+
+class RandomTitleView(ListView):
+    """Перенаправляет на случайное опубликованное произведение без сортировки ORDER BY RANDOM()."""
+
+    def get(self, request, *args, **kwargs):
+        queryset = Title.objects.published().order_by("pk")
+        count = queryset.count()
+        if not count:
+            return redirect("catalog:title_list")
+        return redirect(queryset[randrange(count)].get_absolute_url())
 
 
 class CollectionListView(ElidedPaginationMixin, ListView):
