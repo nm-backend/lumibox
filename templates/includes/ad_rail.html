@@ -1,4 +1,17 @@
 {% load i18n static %}
+{% get_current_language as LANGUAGE_CODE %}
+
+{# Left rail ad — only on large screens #}
+<aside class="ad-rail--left" role="complementary" aria-label="{% trans 'Реклама' %}">
+    <p class="ad-rail__label">{% trans "Реклама" %}</p>
+    <img class="ad-rail__banner"
+         src="{% static 'img/ad-placeholder.svg' %}"
+         width="160" height="600"
+         alt="{% trans 'Рекламный баннер' %}"
+         loading="lazy">
+</aside>
+
+{# Right rail ad — only on large screens #}
 <aside class="ad-rail" role="complementary" aria-label="{% trans 'Реклама' %}">
     <p class="ad-rail__label">{% trans "Реклама" %}</p>
     <img class="ad-rail__banner"

@@ -105,6 +105,10 @@ class Participation(models.Model):
             ),
         ]
         indexes = [
+            # Страница персоны: фильтрация по person + JOIN к title.
+            # title здесь не нужен — это отдельный индекс для персон.
+            models.Index(fields=["person", "role"], name="participation_person_role_idx"),
+            # Страница фильма: фильтрация по title + role + сортировка.
             models.Index(fields=["title", "role", "order"], name="participation_title_idx"),
         ]
 

@@ -73,6 +73,7 @@
                     <div class="stream-player__timeline">
                         <input class="stream-player__range" data-player-progress type="range" min="0" max="100" value="0" step="0.1" aria-label="{% trans 'Позиция воспроизведения' %}">
                         <div class="stream-player__buffer" data-player-buffer aria-hidden="true"></div>
+                        <span class="stream-player__tooltip" data-player-tooltip hidden aria-hidden="true">0:00</span>
                     </div>
                     <div class="stream-player__toolbar">
                         <button class="stream-player__control" type="button" data-player-toggle aria-label="{% trans 'Воспроизвести' %}">▶</button>
@@ -103,6 +104,7 @@
                         <button class="stream-player__control" type="button" data-player-help aria-label="{% trans 'Горячие клавиши' %}">❓</button>
                     </div>
                 </div>
+                <span class="stream-player__speed-toast" data-player-speed-toast hidden>1×</span>
                 <p class="stream-player__status" data-player-status aria-live="polite">{% trans "Подготовка плеера…" %}</p>
             </div>
         </div>
@@ -124,7 +126,7 @@
 {% endblock %}
 
 {% block extra_js %}
-    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@v1.6.0" crossorigin="anonymous"></script>
     <script>
     window.Hls = window.Hls || (typeof Hls !== 'undefined' ? Hls : null);
     </script>

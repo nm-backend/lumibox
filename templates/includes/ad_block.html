@@ -1,0 +1,14 @@
+{% load i18n static %}
+{% get_current_language as LANGUAGE_CODE %}
+
+{# Inline ad block — shows between content sections #}
+<section class="ad-block" aria-label="{% trans 'Реклама' %}">
+    <div class="ad-block__item">
+        <p class="ad-block__label">{% trans "Ваша реклама" %}</p>
+        <img class="ad-block__banner ad-block__banner--leaderboard"
+             src="{% static 'img/ad-leaderboard-placeholder.svg' %}"
+             width="728" height="90"
+             alt="{% trans 'Рекламный баннер 728×90' %}"
+             loading="lazy">
+    </div>
+</section>

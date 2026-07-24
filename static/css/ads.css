@@ -1,29 +1,40 @@
 /*
-  Рекламное место в правом поле страницы.
+  Рекламные места MovieHub.
 
-  Всё, что касается рекламы, живёт в одном файле и одном include — так рекламу
-  можно убрать целиком, не задев остальной сайт. Разметка в
-  templates/includes/ad_rail.html.
+  Всё, что касается рекламы, живёт в одном файле — так рекламу
+  можно убрать целиком, не задев остальной сайт.
+  Разметка в templates/includes/ad_rail.html.
 */
 
+/* ===== Боковые рельсы (левая + правая) ===== */
+
 /*
-  По умолчанию скрыто. Показываем только там, где сбоку реально пусто:
+  По умолчанию скрыты. Показываем только там, где сбоку реально пусто:
   контейнер сайта — 1280px, баннер — 160px плюс отступ. Чтобы баннер не наехал
   на контент, с каждой стороны нужно (1680 − 1280) / 2 = 200px поля. Отсюда
   порог 1650px: у́же — места нет, и рекламу прячем, а не ломаем вёрстку.
 */
-.ad-rail {
+.ad-rail,
+.ad-rail--left {
     display: none;
 }
 
-@media (min-width: 1650px) {
+@media (min-width: 1750px) {
     .ad-rail {
         display: block;
         position: fixed;
         top: 50%;
         right: var(--space-4);
         transform: translateY(-50%);
-        /* Ниже шапки-стики и выпадающих меню, но над фоном страницы. */
+        z-index: 5;
+    }
+
+    .ad-rail--left {
+        display: block;
+        position: fixed;
+        top: 50%;
+        left: var(--space-4);
+        transform: translateY(-50%);
         z-index: 5;
     }
 
@@ -42,12 +53,69 @@
         height: 600px;
         border-radius: var(--radius-md);
         border: 1px solid var(--color-border);
+        transition: border-color 0.2s ease, opacity 0.2s ease;
     }
+
+    .ad-rail__banner:hover {
+        border-color: var(--color-accent);
+        opacity: 0.9;
+    }
+}
+
+/* ===== Горизонтальный рекламный блок между секциями ===== */
+
+.ad-block {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: var(--space-4);
+    padding: var(--space-4) 0;
+    margin: var(--space-6) 0;
+    border-block: 1px solid var(--color-border);
+    background: var(--color-surface);
+    border-radius: var(--radius-lg);
+}
+
+.ad-block__item {
+    flex: 0 0 auto;
+    text-align: center;
+}
+
+.ad-block__item--leaderboard {
+    flex: 1 1 auto;
+    max-width: 728px;
+}
+
+.ad-block__label {
+    margin: 0 0 var(--space-1);
+    color: var(--color-text-dim);
+    font-size: var(--text-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.ad-block__banner {
+    display: block;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-border);
+    transition: border-color 0.2s ease;
+}
+
+.ad-block__banner:hover {
+    border-color: var(--color-accent);
+}
+
+.ad-block__banner--leaderboard {
+    width: 100%;
+    height: 90px;
+    max-width: 728px;
 }
 
 /* На печати реклама не нужна. */
 @media print {
-    .ad-rail {
+    .ad-rail,
+    .ad-rail--left,
+    .ad-block {
         display: none;
     }
 }

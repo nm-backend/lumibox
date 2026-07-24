@@ -35,6 +35,9 @@
     let nextTimer = null;
     let resumed = false;
     let controlsTimer = null;
+    let cursorTimer = null;
+    let hlsRecoveryAttempts = 0;
+    const MAX_HLS_RECOVERY = 3;
 
     /* ---------- Helpers ---------- */
 
@@ -51,6 +54,16 @@
         return hours
             ? `${hours}:${String(minutes).padStart(2, "0")}:${String(remaining).padStart(2, "0")}`
             : `${minutes}:${String(remaining).padStart(2, "0")}`;
+    };
+
+    const formatResolutionLabel = (height) => {
+        if (height >= 2160) return '4K';
+        if (height >= 1440) return '1440p';
+        if (height >= 1080) return '1080p';
+        if (height >= 720) return '720p';
+        if (height >= 480) return '480p';
+        if (height >= 360) return '360p';
+        return `${height}p`;
     };
 
     const getCookie = (name) => {
@@ -81,7 +94,9 @@
 
     const hideControlsNow = () => {
         stage.classList.remove("stream-player__stage--active");
+        stage.style.cursor = "none";
         window.clearTimeout(controlsTimer);
+        window.clearTimeout(cursorTimer);
     };
 
     stage.addEventListener("mousemove", showControls);
@@ -120,16 +135,52 @@
 
     /* ---------- Quality ---------- */
 
+    const updateQualityFromHls = () => {
+        if (!hls || !quality) return;
+        const level = hls.currentLevel;
+        if (level < 0) {
+            quality.value = "auto";
+            return;
+        }
+        const levelInfo = hls.levels[level];
+        if (levelInfo) {
+            const label = formatResolutionLabel(levelInfo.height);
+            if ([...quality.options].some(opt => opt.value === label)) {
+                quality.value = label;
+            }
+        }
+    };
+
     const setQualityOptions = () => {
+        if (hls && hls.levels && hls.levels.length) {
+            const seen = new Set(['auto']);
+            const items = ['auto', ...hls.levels
+                .map(l => formatResolutionLabel(l.height))
+                .filter(label => {
+                    if (seen.has(label)) return false;
+                    seen.add(label);
+                    return true;
+                })
+            ];
+            quality.replaceChildren(
+                ...items.map((value) => {
+                    const opt = new Option(
+                        value === "auto" ? "Авто" : value,
+                        value,
+                        false,
+                        value === (config.defaultQuality === 'auto' ? 'auto' : formatResolutionLabel(parseInt(config.defaultQuality, 10)))
+                    );
+                    return opt;
+                })
+            );
+            return;
+        }
+        // Fallback: use configured qualities
         const values = [...new Set(["auto", ...(config.qualities || [])])];
         quality.replaceChildren(
             ...values.map((value) => {
-                const opt = new Option(
-                    value === "auto" ? "Качество: авто" : value,
-                    value,
-                    false,
-                    value === config.defaultQuality
-                );
+                const label = value === "auto" ? "Авто" : value;
+                const opt = new Option(label, value, false, value === (config.defaultQuality || 'auto'));
                 return opt;
             })
         );
@@ -141,8 +192,11 @@
             hls.currentLevel = -1;
             return;
         }
+        // Find level by resolution label
+        const targetHeight = parseInt(quality.value, 10);
+        if (isNaN(targetHeight)) return;
         const level = hls.levels.findIndex(
-            (item) => item.height === parseInt(quality.value, 10)
+            (item) => item.height === targetHeight
         );
         if (level >= 0) hls.currentLevel = level;
     };
@@ -171,6 +225,36 @@
         });
     };
 
+    /* ---------- HLS Error Recovery ---------- */
+
+    const recoverHlsError = (data) => {
+        if (!data.fatal) return;
+
+        hlsRecoveryAttempts += 1;
+
+        if (data.type === window.Hls.ErrorTypes.NETWORK_ERROR && hlsRecoveryAttempts <= MAX_HLS_RECOVERY) {
+            setStatus(`Проблема с сетью. Повторная попытка ${hlsRecoveryAttempts}/${MAX_HLS_RECOVERY}…`);
+            hls.startLoad();
+            return;
+        }
+
+        if (data.type === window.Hls.ErrorTypes.MEDIA_ERROR && hlsRecoveryAttempts <= MAX_HLS_RECOVERY) {
+            setStatus(`Восстановление… ${hlsRecoveryAttempts}/${MAX_HLS_RECOVERY}`);
+            hls.recoverMediaError();
+            return;
+        }
+
+        // Fatal: try level fallback
+        if (hls.levels && hls.currentLevel > 0) {
+            setStatus("Переключение на более низкое качество…");
+            hls.currentLevel = Math.max(0, hls.currentLevel - 1);
+            hls.startLoad();
+            return;
+        }
+
+        setStatus("Не удалось загрузить видео. Попробуйте позже.");
+    };
+
     /* ---------- Source loading ---------- */
 
     const attachSource = () => {
@@ -179,6 +263,8 @@
             setStatus("Источник видео пока недоступен.");
             return;
         }
+
+        root.classList.add("stream-player--loading");
 
         if (source.type === "hls" && video.canPlayType("application/vnd.apple.mpegurl")) {
             // Safari native HLS
@@ -194,17 +280,22 @@
                 backbufferLength: 30,
                 maxBufferLength: 30,
             });
+            hlsRecoveryAttempts = 0;
             hls.loadSource(source.url);
             hls.attachMedia(video);
             hls.on(window.Hls.Events.MANIFEST_PARSED, () => {
+                root.classList.remove("stream-player--loading");
+                setQualityOptions();
                 setAdaptiveQuality();
                 video.play().catch(() => {});
             });
-            hls.on(window.Hls.Events.ERROR, (_event, data) => {
-                if (data.fatal) {
-                    setStatus("Ошибка HLS. Попробуйте перезагрузить страницу.");
+            hls.on(window.Hls.Events.LEVEL_SWITCHED, (_event, data) => {
+                const levelInfo = hls.levels[data.level];
+                if (levelInfo) {
+                    updateQualityFromHls();
                 }
             });
+            hls.on(window.Hls.Events.ERROR, recoverHlsError);
             setStatus("");
             return;
         }
@@ -377,13 +468,50 @@
     );
 
     // Progress bar
+    // Progress bar — show preview time on hover
+    let tooltipTimer = null;
+    const tooltip = root.querySelector("[data-player-tooltip]");
+
     progress.addEventListener("input", () => {
         video.currentTime = Number(progress.value);
     });
 
+    progress.addEventListener("mouseenter", () => {
+        tooltip.hidden = false;
+    });
+
+    progress.addEventListener("mouseleave", () => {
+        tooltip.hidden = true;
+    });
+
+    progress.addEventListener("mousemove", (e) => {
+        const rect = progress.getBoundingClientRect();
+        const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+        const hoverTime = ratio * (video.duration || config.duration || 0);
+        tooltip.textContent = formatTime(hoverTime);
+        tooltip.style.left = `${ratio * 100}%`;
+    });
+
     // Speed
+    const speedToast = root.querySelector("[data-player-speed-toast]");
+    let speedToastTimer = null;
+
+    const showSpeedToast = (value) => {
+        if (!speedToast) return;
+        speedToast.textContent = `${value}×`;
+        speedToast.hidden = false;
+        speedToast.classList.remove('stream-player__speed-toast--out');
+        void speedToast.offsetHeight;
+        window.clearTimeout(speedToastTimer);
+        speedToastTimer = window.setTimeout(() => {
+            speedToast.classList.add('stream-player__speed-toast--out');
+            window.setTimeout(() => { speedToast.hidden = true; }, 300);
+        }, 1200);
+    };
+
     speed.addEventListener("change", () => {
         video.playbackRate = Number(speed.value);
+        showSpeedToast(speed.value);
     });
 
     // Quality
@@ -401,14 +529,23 @@
         }
     });
 
-    // Fullscreen
-    root.querySelector("[data-player-fullscreen]").addEventListener("click", async () => {
+    // Toggle fullscreen helper
+    const toggleFullscreen = async () => {
         if (document.fullscreenElement) {
             await document.exitFullscreen();
         } else {
             await stage.requestFullscreen();
         }
         showControls();
+    };
+
+    root.querySelector("[data-player-fullscreen]").addEventListener("click", toggleFullscreen);
+
+    // Double-click to toggle fullscreen (Netflix standard)
+    stage.addEventListener("dblclick", (e) => {
+        // Don't toggle if clicking controls
+        if (e.target.closest(".stream-player__controls")) return;
+        toggleFullscreen();
     });
 
     // Cancel next
@@ -450,8 +587,12 @@
     /* ---------- Video events ---------- */
 
     video.addEventListener("loadedmetadata", () => {
+        root.classList.remove("stream-player--loading");
         if (!resumed && config.resumeAt > 0 && config.resumeAt < video.duration - 15) {
             video.currentTime = config.resumeAt;
+            // Show a brief "Resuming" indicator
+            setStatus(`Продолжить с ${formatTime(config.resumeAt)}`);
+            window.setTimeout(() => setStatus(""), 2500);
         }
         resumed = true;
         speed.value = String(config.defaultSpeed);
@@ -482,13 +623,23 @@
     video.addEventListener("ended", () => {
         saveProgress(true);
         setPlayButtons();
+        root.classList.remove("stream-player--loading");
         startNextCountdown();
         stage.classList.add("stream-player__stage--active");
     });
 
-    video.addEventListener("waiting", () => setStatus("Буферизация…"));
-    video.addEventListener("playing", () => setStatus(""));
-    video.addEventListener("canplay", () => setStatus(""));
+    video.addEventListener("waiting", () => {
+        setStatus("Буферизация…");
+        root.classList.add("stream-player--loading");
+    });
+    video.addEventListener("playing", () => {
+        setStatus("");
+        root.classList.remove("stream-player--loading");
+    });
+    video.addEventListener("canplay", () => {
+        setStatus("");
+        root.classList.remove("stream-player--loading");
+    });
 
     video.addEventListener("error", () => {
         const error = video.error;
@@ -513,6 +664,21 @@
 
     window.addEventListener("pagehide", () => saveProgress());
 
+    /* ---------- Cursor auto-hide ---------- */
+
+    const showCursor = () => {
+        stage.style.cursor = "default";
+        window.clearTimeout(cursorTimer);
+        if (!video.paused) {
+            cursorTimer = window.setTimeout(() => {
+                stage.style.cursor = "none";
+            }, 2500);
+        }
+    };
+
+    stage.addEventListener("mousemove", showCursor);
+    stage.addEventListener("mousedown", showCursor);
+
     /* ---------- Keyboard shortcuts ---------- */
 
     document.addEventListener("keydown", (event) => {
@@ -532,10 +698,12 @@
             case "ArrowLeft":
                 event.preventDefault();
                 seek(-10);
+                showCenterIcon("↶ 10");
                 break;
             case "ArrowRight":
                 event.preventDefault();
                 seek(10);
+                showCenterIcon("10 ↷");
                 break;
             case "ArrowUp":
                 event.preventDefault();
@@ -552,11 +720,7 @@
                 updateVolumeUI();
                 break;
             case "KeyF":
-                if (document.fullscreenElement) {
-                    document.exitFullscreen();
-                } else {
-                    stage.requestFullscreen();
-                }
+                toggleFullscreen();
                 break;
             case "KeyP":
                 if (document.pictureInPictureElement) {
@@ -572,6 +736,11 @@
                 if (!event.shiftKey) {
                     shortcutsPanel.hidden = !shortcutsPanel.hidden;
                 }
+                break;
+            case "Digit0":
+            case "Numpad0":
+                event.preventDefault();
+                video.currentTime = 0;
                 break;
         }
     });

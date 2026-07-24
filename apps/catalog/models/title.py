@@ -216,6 +216,16 @@ class Title(SeoModel, TimeStampedModel):
             models.Index(fields=["status", "type"], name="title_status_type_idx"),
             # Фильтр и сортировка по годам.
             models.Index(fields=["-release_year"], name="title_year_idx"),
+            # Сортировка «новинки»: ORDER BY -published_at LIMIT 12.
+            # На прогретом кэше этот индекс не нужен, но первый посетитель
+            # после публикации стоит без него скана всей таблицы.
+            models.Index(fields=["-published_at"], name="title_published_at_idx"),
+            # Сортировка «по рейтингу»: ORDER BY -rating_average, -rating_count.
+            # Комбинированный индекс: фильтр по статусу + сортировка.
+            models.Index(
+                fields=["status", "-rating_average", "-rating_count"],
+                name="title_status_rating_idx",
+            ),
         ]
 
     def __str__(self):

@@ -70,3 +70,25 @@ SECURE_CONTENT_TYPE_NOSNIFF = True
 
 # Запрещаем показывать сайт внутри чужого iframe — защита от clickjacking.
 X_FRAME_OPTIONS = "DENY"
+
+# Referrer-Policy: не передаём URL страницы на внешние сайты.
+SECURE_REFERRER_POLICY = "same-origin"
+
+# Cookie CSRF и сессии — только HTTP (не читаются из JavaScript).
+# CSRF_COOKIE_SAMESITE = 'Lax' уже проставлен по умолчанию в Django.
+SESSION_COOKIE_HTTPONLY = True
+CSRF_COOKIE_HTTPONLY = True
+
+# Сессия живёт 2 недели (явное указание вместо умолчания).
+SESSION_COOKIE_AGE = 1209600  # 14 дней
+SESSION_SAVE_EVERY_REQUEST = False
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+
+
+# Content-Security-Policy: защита от XSS и инжекции.
+# Разрешаем скрипты и стили только с собственного домена.
+# unsafe-inline для стилей нужен, так как Django-админка и некоторые
+# плагины используют инлайновые стили.
+MIDDLEWARE += [  # noqa: F405
+    "apps.core.middleware.ContentSecurityPolicyMiddleware",
+]

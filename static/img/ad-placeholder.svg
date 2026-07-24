@@ -1,25 +1,28 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="160" height="600" viewBox="0 0 160 600" role="img" aria-label="Место для рекламного баннера 160 на 600">
-  <!--
-    Оригинальная заглушка рекламного места. Своя графика, без внешних
-    картинок и шрифтов. Контент-менеджер заменяет этот файл на реальный
-    баннер 160×600 — размер и путь остаются те же, вёрстку менять не нужно.
-  -->
+<svg xmlns="http://www.w3.org/2000/svg" width="160" height="600" viewBox="0 0 160 600" role="img" aria-label="Рекламное место 160 на 600">
   <defs>
     <linearGradient id="ad-bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#141821"/>
-      <stop offset="1" stop-color="#0b0d12"/>
+      <stop offset="0" stop-color="#1a1f2e"/>
+      <stop offset="1" stop-color="#0d0f16"/>
+    </linearGradient>
+    <linearGradient id="ad-border" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffc043" stop-opacity="0.3"/>
+      <stop offset="1" stop-color="#e11d48" stop-opacity="0.3"/>
     </linearGradient>
   </defs>
 
-  <rect x="1" y="1" width="158" height="598" rx="12" fill="url(#ad-bg)" stroke="#242a36" stroke-width="1"/>
-  <rect x="12" y="12" width="136" height="576" rx="8" fill="none" stroke="#ffc043" stroke-width="1" stroke-dasharray="5 6" opacity="0.5"/>
+  <rect x="1" y="1" width="158" height="598" rx="12" fill="url(#ad-bg)" stroke="url(#ad-border)" stroke-width="1"/>
 
-  <g fill="#ffc043" opacity="0.9">
-    <rect x="66" y="250" width="28" height="28" rx="6"/>
-    <path d="M74 258 l10 6 l-10 6 z" fill="#0b0d12"/>
+  <g fill="#ffc043" opacity="0.15">
+    <circle cx="80" cy="200" r="60"/>
+    <circle cx="80" cy="400" r="80"/>
   </g>
 
-  <text x="80" y="312" text-anchor="middle" fill="#e8eaed" font-family="Arial, sans-serif" font-size="15" font-weight="700">Ваш баннер</text>
-  <text x="80" y="334" text-anchor="middle" fill="#8b909b" font-family="Arial, sans-serif" font-size="12">160 × 600</text>
-  <text x="80" y="356" text-anchor="middle" fill="#5c616c" font-family="Arial, sans-serif" font-size="11">замените этот файл</text>
+  <g stroke="#ffc043" stroke-width="1" stroke-dasharray="4 5" opacity="0.4">
+    <rect x="20" y="180" width="120" height="40" rx="6" fill="none"/>
+    <rect x="20" y="380" width="120" height="40" rx="6" fill="none"/>
+  </g>
+
+  <text x="80" y="300" text-anchor="middle" fill="#e8eaed" font-family="Arial, sans-serif" font-size="18" font-weight="700">Ваша реклама</text>
+  <text x="80" y="324" text-anchor="middle" fill="#ffc043" font-family="Arial, sans-serif" font-size="12" opacity="0.8">160 × 600</text>
+  <text x="80" y="348" text-anchor="middle" fill="#5c616c" font-family="Arial, sans-serif" font-size="11">замените этот файл</text>
 </svg>

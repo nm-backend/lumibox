@@ -36,6 +36,27 @@
     position: relative;
 }
 
+/* Loading skeleton */
+.stream-player--loading .stream-player__stage::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 8;
+    background: linear-gradient(110deg,
+        rgba(255,255,255,0) 30%,
+        rgba(255,255,255,0.04) 50%,
+        rgba(255,255,255,0) 70%
+    );
+    background-size: 200% 100%;
+    animation: loadingShimmer 1.5s ease-in-out infinite;
+    pointer-events: none;
+}
+
+@keyframes loadingShimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
 .stream-player__stage {
     position: relative;
     display: grid;
@@ -396,6 +417,58 @@
     backdrop-filter: blur(4px);
 }
 
+/* ---------- Timeline tooltip (preview time) ---------- */
+
+.stream-player__tooltip {
+    position: absolute;
+    bottom: 100%;
+    transform: translateX(-50%);
+    margin-bottom: 0.4rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 0.3rem;
+    background: rgba(0, 0, 0, 0.75);
+    color: #fff;
+    font-size: 0.75rem;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    pointer-events: none;
+    z-index: 2;
+    backdrop-filter: blur(4px);
+}
+
+/* ---------- Speed toast (brief overlay) ---------- */
+
+.stream-player__speed-toast {
+    position: absolute;
+    bottom: 5.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    background: rgba(0, 0, 0, 0.72);
+    color: #fff;
+    font-size: 1.1rem;
+    font-weight: 700;
+    z-index: 5;
+    pointer-events: none;
+    backdrop-filter: blur(4px);
+    animation: speedToastIn 0.2s ease;
+}
+
+@keyframes speedToastIn {
+    from { opacity: 0; transform: translateX(-50%) translateY(8px); }
+    to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+.stream-player__speed-toast--out {
+    animation: speedToastOut 0.3s ease forwards;
+}
+
+@keyframes speedToastOut {
+    from { opacity: 1; }
+    to { opacity: 0; transform: translateX(-50%) translateY(-8px); }
+}
+
 /* ---------- Skip buttons ---------- */
 
 .stream-player__skip-actions {
@@ -636,6 +709,10 @@
     .stream-player__control {
         padding: 0.25rem 0.35rem;
         min-width: 1.8rem;
+    }
+
+.stream-player__speed-toast {
+        display: none;
     }
 
     .stream-player__skip-actions,

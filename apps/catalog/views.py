@@ -30,6 +30,31 @@ from apps.streaming.services import get_continue_watching, get_watch_url
 # Вынесено в константу: используется и для жанров, и для стран.
 PUBLISHED_TITLES = Q(titles__status=Title.Status.PUBLISHED)
 
+# Ключ кэша для списка жанров в навигации.
+# Отдельный от GenreListView — там данные другие (titles_count sorted).
+GENRE_CHIPS_CACHE_KEY = "catalog:genre_chips:v2"
+
+
+def _get_cached_genre_chip_list(limit=50):
+    """
+    Кэшированный список жанров с количеством фильмов.
+
+    Этот запрос выполняется на каждой загрузке главной и каталога.
+    Жанры меняются редко — кэш на час.
+    Возвращает list для совместимости с шаблоном (можно итерировать).
+    """
+    cached = cache.get(GENRE_CHIPS_CACHE_KEY)
+    if cached is not None:
+        return cached[:limit] if len(cached) > limit else cached
+
+    qs = list(
+        Genre.objects.annotate(titles_count=Count("titles", filter=PUBLISHED_TITLES))
+        .filter(titles_count__gt=0)
+        .order_by("name")
+    )
+    cache.set(GENRE_CHIPS_CACHE_KEY, qs, 60 * 60)
+    return qs[:limit] if len(qs) > limit else qs
+
 
 class HomeView(TemplateView):
     """
@@ -65,11 +90,7 @@ class HomeView(TemplateView):
 
         context["collections"] = get_featured_collections()
 
-        context["genres"] = (
-            Genre.objects.annotate(titles_count=Count("titles", filter=PUBLISHED_TITLES))
-            .filter(titles_count__gt=0)
-            .order_by("-titles_count")[:12]
-        )
+        context["genres"] = _get_cached_genre_chip_list(12)
         return context
 
 
@@ -97,7 +118,10 @@ class TitleListView(ElidedPaginationMixin, ListView):
 
     def get_base_queryset(self):
         """Точка расширения для страниц жанра и страны."""
-        return Title.objects.published().with_related()
+        # defer("description"): на списке не нужно описание, только в карточке.
+        # Без этого текстовое поле тянется на каждую из 24 записей —
+        # лишние мегабайты в ответе сервера.
+        return Title.objects.published().with_related().defer("description")
 
     def get_queryset(self):
         return self.get_filter_form().filter(self.get_base_queryset())
@@ -111,11 +135,7 @@ class TitleListView(ElidedPaginationMixin, ListView):
         context["page_heading"] = self.page_heading
         context["page_subtitle"] = self.page_subtitle
         # Genre chips for quick filter navigation
-        context["genres"] = (
-            Genre.objects.annotate(titles_count=Count("titles", filter=PUBLISHED_TITLES))
-            .filter(titles_count__gt=0)
-            .order_by("name")
-        )
+        context["genres"] = _get_cached_genre_chip_list()
         return context
 
     def build_active_filters(self, form):
@@ -374,7 +394,7 @@ class StudioDetailView(ElidedPaginationMixin, ListView):
 
     def get_queryset(self):
         self.studio = get_object_or_404(Studio, slug=self.kwargs["slug"])
-        return Title.objects.published().with_related().filter(studios=self.studio)
+        return Title.objects.published().with_related().filter(studios=self.studio).defer("description")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -414,12 +434,18 @@ class AwardDetailView(ElidedPaginationMixin, ListView):
 
     def get_queryset(self):
         self.award = get_object_or_404(Award, slug=self.kwargs["slug"])
+        award_pks = (
+            Title.objects.published()
+            .filter(award_entries__award=self.award)
+            .values_list("pk", flat=True)
+            .distinct()
+        )
         return (
             Title.objects.published()
             .with_related()
-            .filter(award_entries__award=self.award)
+            .filter(pk__in=award_pks)
             .order_by("-award_entries__year", "name")
-            .distinct()
+            .defer("description")
         )
 
     def get_context_data(self, **kwargs):
@@ -475,7 +501,7 @@ class CollectionDetailView(ElidedPaginationMixin, ListView):
         self.collection = get_object_or_404(
             Collection.objects.published(), slug=self.kwargs["slug"]
         )
-        return Title.objects.published().with_related().in_collection(self.collection)
+        return Title.objects.published().with_related().in_collection(self.collection).defer("description")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

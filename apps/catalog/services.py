@@ -219,11 +219,13 @@ def clear_home_cache():
     # Импорт внутри функции: forms импортирует models, а services —
     # forms, и на уровне модуля это замкнулось бы в круг.
     from apps.catalog.forms import YEAR_CHOICES_CACHE_KEY
+    from apps.catalog.views import GENRE_CHIPS_CACHE_KEY
 
     cache.delete_many([
         HOME_CACHE_KEY,
         YEAR_CHOICES_CACHE_KEY,
         COLLECTIONS_CACHE_KEY,
+        GENRE_CHIPS_CACHE_KEY,
     ])
 
 

@@ -55,6 +55,8 @@ THIRD_PARTY_APPS = [
     "rest_framework",
     "django_filters",
     "drf_spectacular",
+    # Блокировка аккаунта после неудачных попыток входа.
+    "axes",
 ]
 
 LOCAL_APPS = [
@@ -85,6 +87,8 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    # Защита от brute-force: считает неудачные попытки и блокирует.
+    "axes.middleware.AxesMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -190,6 +194,32 @@ CELERY_BEAT_SCHEDULE = {
     },
 }
 
+
+# Пароли хешируются Argon2 — самым устойчивым к GPU-атакам алгоритмом.
+# PBKDF2 и BCrypt оставлены как fallback для старых хешей при обновлении.
+PASSWORD_HASHERS = [
+    "django.contrib.auth.hashers.Argon2PasswordHasher",
+    "django.contrib.auth.hashers.PBKDF2PasswordHasher",
+    "django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher",
+    "django.contrib.auth.hashers.BCryptSHA256PasswordHasher",
+]
+
+# Сколько неудачных попыток входа блокируют аккаунт (через django-axes).
+# 5 попыток — стандарт OWASP. После блокировки аккаунт открывается
+# через час или вручную из админки.
+AXES_FAILURE_LIMIT = 5
+AXES_COOLOFF_TIME = 1  # часов
+AXES_RESET_ON_SUCCESS = True
+# Блокируем по связке (username, IP) — чтобы разные пользователи
+# с одного IP не блокировали друг друга.
+AXES_LOCKOUT_PARAMETERS = [["username", "ip_address"]]
+
+# Authentication backends: django-axes должен быть ПЕРВЫМ,
+# чтобы он обрабатывал запрос до стандартного бэкенда.
+AUTHENTICATION_BACKENDS = [
+    "axes.backends.AxesStandaloneBackend",
+    "django.contrib.auth.backends.ModelBackend",
+]
 
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
@@ -338,6 +368,13 @@ LOGGING = {
         "django": {
             "handlers": ["console"],
             "level": "INFO",
+            "propagate": False,
+        },
+        # События безопасности: попытки подбора пароля, CSRF-атаки,
+        # доступ к несуществующим ресурсам с подозрительными адресами.
+        "django.security": {
+            "handlers": ["console"],
+            "level": "WARNING",
             "propagate": False,
         },
         # Ошибки запросов — то, из-за чего посетитель видит 500.
