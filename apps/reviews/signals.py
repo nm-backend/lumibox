@@ -14,14 +14,17 @@ from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 
 from apps.catalog.services import update_title_rating
+from apps.core.cache import invalidate_for_model
 from apps.reviews.models import Review
 
 
 @receiver(post_save, sender=Review)
 def update_rating_on_save(sender, instance, **kwargs):
     update_title_rating(instance.title)
+    invalidate_for_model("reviews.review")
 
 
 @receiver(post_delete, sender=Review)
 def update_rating_on_delete(sender, instance, **kwargs):
     update_title_rating(instance.title)
+    invalidate_for_model("reviews.review")

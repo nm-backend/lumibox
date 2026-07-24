@@ -110,6 +110,12 @@ class TitleListView(ElidedPaginationMixin, ListView):
         context["active_filters"] = self.build_active_filters(form)
         context["page_heading"] = self.page_heading
         context["page_subtitle"] = self.page_subtitle
+        # Genre chips for quick filter navigation
+        context["genres"] = (
+            Genre.objects.annotate(titles_count=Count("titles", filter=PUBLISHED_TITLES))
+            .filter(titles_count__gt=0)
+            .order_by("name")
+        )
         return context
 
     def build_active_filters(self, form):

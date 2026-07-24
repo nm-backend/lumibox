@@ -1,12 +1,12 @@
-{% load static i18n %}<!DOCTYPE html>
+{% load static i18n cache %}<!DOCTYPE html>
 {% get_current_language as LANGUAGE_CODE %}
 <html lang="{{ LANGUAGE_CODE }}" data-theme="">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>{% block page_title %}MovieHub — каталог фильмов и сериалов{% endblock %}</title>
-    <meta name="description" content="{% block page_description %}Каталог фильмов и сериалов: поиск, фильтры, подборки.{% endblock %}">
+    <title>{% block page_title %}{% trans "MovieHub — каталог фильмов и сериалов" %}{% endblock %}</title>
+    <meta name="description" content="{% block page_description %}{% trans "Каталог фильмов и сериалов: поиск, фильтры, подборки." %}{% endblock %}">
 
     <link rel="stylesheet" href="{% static 'css/variables.css' %}">
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
@@ -17,6 +17,7 @@
     {% block extra_css %}{% endblock %}
 </head>
 <body>
+    <div class="cinema-glow" aria-hidden="true"></div>
     <header class="site-header">
         <div class="container site-header__inner">
             <a class="logo" href="{% url 'catalog:home' %}">
@@ -24,31 +25,33 @@
                 <span>Movie<span class="logo__accent">Hub</span></span>
             </a>
 
-            <nav class="site-nav site-nav__desktop" aria-label="Основная навигация">
+            {% cache 3600 site_nav request.path using="default" %}
+            <nav class="site-nav site-nav__desktop" aria-label="{% trans "Основная навигация" %}">
                 <a class="site-nav__link {% if request.resolver_match.url_name == 'title_list' and not request.GET.type %}site-nav__link--active{% endif %}"
-                   href="{% url 'catalog:title_list' %}">Всё</a>
+                   href="{% url 'catalog:title_list' %}">{% trans "Всё" %}</a>
                 <a class="site-nav__link {% if request.GET.type == 'movie' %}site-nav__link--active{% endif %}"
-                   href="{% url 'catalog:title_list' %}?type=movie">Фильмы</a>
+                   href="{% url 'catalog:title_list' %}?type=movie">{% trans "Фильмы" %}</a>
                 <a class="site-nav__link {% if request.GET.type == 'series' %}site-nav__link--active{% endif %}"
-                   href="{% url 'catalog:title_list' %}?type=series">Сериалы</a>
+                   href="{% url 'catalog:title_list' %}?type=series">{% trans "Сериалы" %}</a>
                 <a class="site-nav__link {% if request.resolver_match.url_name == 'genre_list' %}site-nav__link--active{% endif %}"
-                   href="{% url 'catalog:genre_list' %}"{% if request.resolver_match.url_name == 'genre_list' %} aria-current="page"{% endif %}>Жанры</a>
+                   href="{% url 'catalog:genre_list' %}"{% if request.resolver_match.url_name == 'genre_list' %} aria-current="page"{% endif %}>{% trans "Жанры" %}</a>
                 <a class="site-nav__link {% if request.resolver_match.url_name == 'collection_list' %}site-nav__link--active{% endif %}"
-                   href="{% url 'catalog:collection_list' %}"{% if request.resolver_match.url_name == 'collection_list' %} aria-current="page"{% endif %}>Подборки</a>
+                   href="{% url 'catalog:collection_list' %}"{% if request.resolver_match.url_name == 'collection_list' %} aria-current="page"{% endif %}>{% trans "Подборки" %}</a>
             </nav>
+            {% endcache %}
 
             <div class="search-wrapper site-header__search">
                 <form class="search" action="{% url 'catalog:title_list' %}" method="get" role="search" data-search-form>
-                    <label class="visually-hidden" for="search-input">Поиск по каталогу</label>
+                    <label class="visually-hidden" for="search-input">{% trans "Поиск по каталогу" %}</label>
                     <input class="search__input"
                            id="search-input"
                            type="search"
                            name="q"
                            value="{{ request.GET.q|default:'' }}"
-                           placeholder="Поиск..."
+                           placeholder="{% trans 'Поиск...' %}"
                            autocomplete="off"
                            data-search-input>
-                    <button class="search__submit" type="submit" aria-label="Найти">🔍</button>
+                    <button class="search__submit" type="submit" aria-label="{% trans 'Найти' %}">🔍</button>
                 </form>
                 <div class="search__dropdown" data-search-dropdown></div>
             </div>
@@ -57,7 +60,7 @@
 
             {% include "includes/language_switcher.html" %}
 
-            <button class="hamburger" type="button" data-hamburger aria-label="Меню" aria-expanded="false">
+            <button class="hamburger" type="button" data-hamburger aria-label="{% trans 'Меню' %}" aria-expanded="false">
                 <span class="hamburger__line"></span>
                 <span class="hamburger__line"></span>
                 <span class="hamburger__line"></span>
@@ -65,7 +68,7 @@
 
             {% if user.is_authenticated %}
                 <details class="user-menu">
-                    <summary class="user-menu__trigger" aria-label="Меню пользователя">
+                    <summary class="user-menu__trigger" aria-label="{% trans 'Меню пользователя' %}">
                         <span class="avatar">
                             {% if user.avatar %}
                                 <img class="avatar__image" src="{{ user.avatar.url }}" alt="">
@@ -77,36 +80,36 @@
 
                     <div class="user-menu__dropdown">
                         <p class="user-menu__name">{{ user.display_name }}</p>
-                        <a class="user-menu__link" href="{% url 'users:profile' %}">Профиль</a>
-                        <a class="user-menu__link" href="{% url 'library:favorites' %}">Избранное</a>
-                        <a class="user-menu__link" href="{% url 'library:history' %}">История</a>
+                        <a class="user-menu__link" href="{% url 'users:profile' %}">{% trans "Профиль" %}</a>
+                        <a class="user-menu__link" href="{% url 'library:favorites' %}">{% trans "Избранное" %}</a>
+                        <a class="user-menu__link" href="{% url 'library:history' %}">{% trans "История" %}</a>
                         <form method="post" action="{% url 'users:logout' %}">
                             {% csrf_token %}
-                            <button class="user-menu__link user-menu__link--button" type="submit">Выйти</button>
+                            <button class="user-menu__link user-menu__link--button" type="submit">{% trans "Выйти" %}</button>
                         </form>
                     </div>
                 </details>
             {% else %}
-                <a class="button button--primary site-header__login" href="{% url 'users:login' %}">Войти</a>
+                <a class="button button--primary site-header__login" href="{% url 'users:login' %}">{% trans "Войти" %}</a>
             {% endif %}
         </div>
     </header>
 
     {# Mobile drawer nav #}
-    <nav class="mobile-nav" data-mobile-nav aria-label="Мобильная навигация">
-        <a class="mobile-nav__link" href="{% url 'catalog:home' %}">Главная</a>
-        <a class="mobile-nav__link" href="{% url 'catalog:title_list' %}">Весь каталог</a>
-        <a class="mobile-nav__link" href="{% url 'catalog:title_list' %}?type=movie">Фильмы</a>
-        <a class="mobile-nav__link" href="{% url 'catalog:title_list' %}?type=series">Сериалы</a>
-        <a class="mobile-nav__link" href="{% url 'catalog:genre_list' %}">Жанры</a>
-        <a class="mobile-nav__link" href="{% url 'catalog:collection_list' %}">Подборки</a>
-        <a class="mobile-nav__link" href="{% url 'catalog:title_list' %}?sort=-rating_average">Высокий рейтинг</a>
-        <a class="mobile-nav__link" href="{% url 'catalog:title_list' %}?sort=-published_at">Новинки</a>
+    <nav class="mobile-nav" data-mobile-nav aria-label="{% trans 'Мобильная навигация' %}">
+        <a class="mobile-nav__link" href="{% url 'catalog:home' %}">{% trans "Главная" %}</a>
+        <a class="mobile-nav__link" href="{% url 'catalog:title_list' %}">{% trans "Весь каталог" %}</a>
+        <a class="mobile-nav__link" href="{% url 'catalog:title_list' %}?type=movie">{% trans "Фильмы" %}</a>
+        <a class="mobile-nav__link" href="{% url 'catalog:title_list' %}?type=series">{% trans "Сериалы" %}</a>
+        <a class="mobile-nav__link" href="{% url 'catalog:genre_list' %}">{% trans "Жанры" %}</a>
+        <a class="mobile-nav__link" href="{% url 'catalog:collection_list' %}">{% trans "Подборки" %}</a>
+        <a class="mobile-nav__link" href="{% url 'catalog:title_list' %}?sort=-rating_average">{% trans "Высокий рейтинг" %}</a>
+        <a class="mobile-nav__link" href="{% url 'catalog:title_list' %}?sort=-published_at">{% trans "Новинки" %}</a>
         {% if user.is_authenticated %}
             <hr style="border-color: var(--color-border); margin: var(--space-2) 0;">
-            <a class="mobile-nav__link" href="{% url 'users:profile' %}">Профиль</a>
-            <a class="mobile-nav__link" href="{% url 'library:favorites' %}">Избранное</a>
-            <a class="mobile-nav__link" href="{% url 'library:history' %}">История</a>
+            <a class="mobile-nav__link" href="{% url 'users:profile' %}">{% trans "Профиль" %}</a>
+            <a class="mobile-nav__link" href="{% url 'library:favorites' %}">{% trans "Избранное" %}</a>
+            <a class="mobile-nav__link" href="{% url 'library:history' %}">{% trans "История" %}</a>
         {% endif %}
     </nav>
 
@@ -128,38 +131,43 @@
         </div>
     </main>
 
+    {# Toast notifications #}
+    <div class="toast-container" data-toast-container></div>
+
     {# Lightbox #}
-    <div class="lightbox" data-lightbox role="dialog" aria-modal="true" aria-label="Просмотр изображения">
-        <button class="lightbox__close" type="button" data-lightbox-close aria-label="Закрыть">✕</button>
+    <div class="lightbox" data-lightbox role="dialog" aria-modal="true" aria-label="{% trans 'Просмотр изображения' %}">
+        <button class="lightbox__close" type="button" data-lightbox-close aria-label="{% trans 'Закрыть' %}">✕</button>
         <img class="lightbox__img" src="" alt="" data-lightbox-img>
     </div>
 
+    {% cache 3600 bottom_nav using="default" %}
     {# Bottom nav for mobile #}
-    <nav class="bottom-nav" aria-label="Быстрая навигация">
+    <nav class="bottom-nav" aria-label="{% trans 'Быстрая навигация' %}">
         <a class="bottom-nav__link" href="{% url 'catalog:home' %}">
             <span class="bottom-nav__icon">🏠</span>
-            Главная
+            {% trans "Главная" %}
         </a>
         <a class="bottom-nav__link" href="{% url 'catalog:title_list' %}">
             <span class="bottom-nav__icon">🎬</span>
-            Каталог
+            {% trans "Каталог" %}
         </a>
         <a class="bottom-nav__link" href="{% url 'catalog:genre_list' %}">
             <span class="bottom-nav__icon">🏷️</span>
-            Жанры
+            {% trans "Жанры" %}
         </a>
         {% if user.is_authenticated %}
             <a class="bottom-nav__link" href="{% url 'library:favorites' %}">
                 <span class="bottom-nav__icon">❤️</span>
-                Избранное
+                {% trans "Избранное" %}
             </a>
         {% else %}
             <a class="bottom-nav__link" href="{% url 'users:login' %}">
                 <span class="bottom-nav__icon">👤</span>
-                Войти
+                {% trans "Войти" %}
             </a>
         {% endif %}
     </nav>
+    {% endcache %}
 
     {% include "includes/ad_rail.html" %}
     {% include "includes/footer.html" %}

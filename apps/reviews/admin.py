@@ -2,6 +2,7 @@ from django.contrib import admin
 
 from apps.catalog.models import Title
 from apps.catalog.services import update_title_rating
+from apps.core.cache import invalidate_for_model
 from apps.reviews.models import Review
 
 
@@ -44,5 +45,8 @@ class ReviewAdmin(admin.ModelAdmin):
 
         for title in Title.objects.filter(pk__in=title_ids):
             update_title_rating(title)
+
+        # Инвалидируем кэш: batch update не шлёт сигналов
+        invalidate_for_model("reviews.review")
 
         return updated

@@ -1,7 +1,7 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static i18n %}
 
-{% block page_title %}MovieHub — каталог фильмов и сериалов{% endblock %}
+{% block page_title %}{% trans "MovieHub — каталог фильмов и сериалов" %}{% endblock %}
 
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'css/home.css' %}">
@@ -9,70 +9,84 @@
 {% endblock %}
 
 {% block hero %}
-    {% if featured %}
-        <section class="showcase">
-            {% if featured.backdrop %}
-                <img class="showcase__backdrop" src="{{ featured.backdrop.url }}" alt="" aria-hidden="true" loading="eager">
-            {% endif %}
-            <div class="showcase__scrim" aria-hidden="true"></div>
-
-            {# Video trailer autoplay #}
-            {% if featured.trailer_file %}
-                <video class="showcase__trailer" src="{{ featured.trailer_file.url }}" muted loop playsinline data-hero-video aria-hidden="true"></video>
-            {% endif %}
-
-            <div class="container showcase__inner">
-                {% if featured.logo %}
-                    <h1 class="showcase__logo-title">
-                        <img class="showcase__logo" src="{{ featured.logo.url }}" alt="{{ featured.name }}">
-                    </h1>
-                {% else %}
-                    <p class="showcase__label">Свежее в каталоге</p>
-                    <h1 class="showcase__name">{{ featured.name }}</h1>
-                {% endif %}
-
-                <div class="showcase__meta">
-                    {% if featured.rating_average %}
-                        <span class="score">
-                            <span class="score__value">{{ featured.rating_average }}</span>
-                            <span class="score__max">/10</span>
-                        </span>
+    {% if hero_titles %}
+        <section class="showcase" data-hero-rotation>
+            {% for hero in hero_titles %}
+                <div class="showcase__slide {% if forloop.first %}showcase__slide--active{% endif %}" data-hero-slide>
+                    {% if hero.backdrop %}
+                        <img class="showcase__backdrop" src="{{ hero.backdrop.url }}" alt="" aria-hidden="true" loading="{% if forloop.first %}eager{% else %}lazy{% endif %}">
                     {% endif %}
-                    <span>{{ featured.get_type_display }}</span>
-                    <span class="showcase__dot" aria-hidden="true">·</span>
-                    <span>{{ featured.release_year }}</span>
-                    {% for genre in featured.genres.all|slice:":3" %}
-                        <span class="showcase__dot" aria-hidden="true">·</span>
-                        <span>{{ genre.name }}</span>
+                    <div class="showcase__scrim" aria-hidden="true"></div>
+
+                    {% if hero.trailer_file %}
+                        <video class="showcase__trailer" src="{{ hero.trailer_file.url }}" muted loop playsinline data-hero-video aria-hidden="true"></video>
+                    {% endif %}
+
+                    <div class="container showcase__inner">
+                        {% if hero.logo %}
+                            <h1 class="showcase__logo-title">
+                                <img class="showcase__logo" src="{{ hero.logo.url }}" alt="{{ hero.name }}">
+                            </h1>
+                        {% else %}
+                            <p class="showcase__label">{% trans "Свежее в каталоге" %}</p>
+                            <h1 class="showcase__name">{{ hero.name }}</h1>
+                        {% endif %}
+
+                        <div class="showcase__meta">
+                            {% if hero.rating_average %}
+                                <span class="score">
+                                    <span class="score__value">{{ hero.rating_average }}</span>
+                                    <span class="score__max">/10</span>
+                                </span>
+                            {% endif %}
+                            <span>{{ hero.get_type_display }}</span>
+                            <span class="showcase__dot" aria-hidden="true">·</span>
+                            <span>{{ hero.release_year }}</span>
+                            {% for genre in hero.genres.all|slice:":3" %}
+                                <span class="showcase__dot" aria-hidden="true">·</span>
+                                <span>{{ genre.name }}</span>
+                            {% endfor %}
+                            {% if hero.age_rating %}
+                                <span class="film-hero__age">{{ hero.age_rating }}</span>
+                            {% endif %}
+                        </div>
+
+                        {% if hero.description %}
+                            <p class="showcase__description">{{ hero.description|truncatewords:40 }}</p>
+                        {% endif %}
+
+                        <div class="showcase__actions">
+                            <a class="button button--primary" href="{{ hero.get_absolute_url }}">
+                                <span aria-hidden="true">▶</span>
+                                {% trans "Подробнее" %}
+                            </a>
+                            {% if hero.trailer_source %}
+                                <a class="button button--ghost" href="{{ hero.get_absolute_url }}#trailer">
+                                    <span aria-hidden="true">▶</span>
+                                    {% trans "Трейлер" %}
+                                </a>
+                            {% endif %}
+                            <a class="button button--ghost" href="{% url 'catalog:title_list' %}">{% trans "Весь каталог" %}</a>
+                        </div>
+                    </div>
+
+                    {% if hero.rating_average %}
+                        <div class="showcase__badge" aria-hidden="true">
+                            <span class="showcase__badge-value">{{ hero.rating_average }}</span>
+                            <span class="showcase__badge-label">{% trans "Рейтинг" %}</span>
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+
+            {% if hero_titles|length > 1 %}
+                <div class="showcase__dots" aria-label="{% trans 'Навигация по баннерам' %}">
+                    {% for hero in hero_titles %}
+                        <button class="showcase__dot-btn {% if forloop.first %}showcase__dot-btn--active{% endif %}"
+                                type="button"
+                                data-hero-dot
+                                aria-label="{% blocktranslate with name=hero.name %}Показать: {{ name }}{% endblocktranslate %}"></button>
                     {% endfor %}
-                    {% if featured.age_rating %}
-                        <span class="film-hero__age">{{ featured.age_rating }}</span>
-                    {% endif %}
-                </div>
-
-                {% if featured.description %}
-                    <p class="showcase__description">{{ featured.description|truncatewords:40 }}</p>
-                {% endif %}
-
-                <div class="showcase__actions">
-                    <a class="button button--primary" href="{{ featured.get_absolute_url }}">
-                        <span aria-hidden="true">▶</span>
-                        Подробнее
-                    </a>
-                    {% if featured.trailer_source %}
-                        <a class="button button--ghost" href="{{ featured.get_absolute_url }}#trailer">
-                            <span aria-hidden="true">▶</span>
-                            Трейлер
-                        </a>
-                    {% endif %}
-                    <a class="button button--ghost" href="{% url 'catalog:title_list' %}">Весь каталог</a>
-                </div>
-            </div>
-
-            {% if featured.rating_average %}
-                <div class="showcase__badge" aria-hidden="true">
-                    <span class="showcase__badge-value">{{ featured.rating_average }}</span>
-                    <span class="showcase__badge-label">Рейтинг</span>
                 </div>
             {% endif %}
         </section>
@@ -83,10 +97,10 @@
     {% if continue_watching %}
         <section class="section reveal">
             <div class="section__header">
-                <h2 class="section__title">Продолжить просмотр</h2>
+                <h2 class="section__title">{% trans "Продолжить просмотр" %}</h2>
             </div>
             <div class="carousel">
-                <button class="carousel__btn carousel__btn--prev" type="button" aria-label="Назад">‹</button>
+                <button class="carousel__btn carousel__btn--prev" type="button" aria-label="{% trans 'Назад' %}">‹</button>
                 <div class="carousel__track continue-grid">
                     {% for progress in continue_watching %}
                         {% with asset=progress.video_asset %}
@@ -108,7 +122,7 @@
                                     <span class="continue-card__body">
                                         <strong>{{ asset.title_object.name }}</strong>
                                         {% if asset.episode %}
-                                            <small>{{ asset.episode.season.display_name }} · Серия {{ asset.episode.number }}</small>
+                                            <small>{{ asset.episode.season.display_name }} · {% trans "Серия" %} {{ asset.episode.number }}</small>
                                         {% endif %}
                                     </span>
                                     <span class="continue-card__progress">
@@ -119,7 +133,7 @@
                         {% endwith %}
                     {% endfor %}
                 </div>
-                <button class="carousel__btn carousel__btn--next" type="button" aria-label="Вперёд">›</button>
+                <button class="carousel__btn carousel__btn--next" type="button" aria-label="{% trans 'Вперёд' %}">›</button>
             </div>
         </section>
     {% endif %}
@@ -127,8 +141,8 @@
     {% if collections %}
         <section class="section reveal">
             <div class="section__header">
-                <h2 class="section__title">Подборки</h2>
-                <a class="section__link" href="{% url 'catalog:collection_list' %}">Все →</a>
+                <h2 class="section__title">{% trans "Подборки" %}</h2>
+                <a class="section__link" href="{% url 'catalog:collection_list' %}">{% trans "Все" %} →</a>
             </div>
             <div class="collection-grid">
                 {% for collection in collections %}
@@ -138,23 +152,23 @@
         </section>
     {% endif %}
 
-    {% include "includes/title_section.html" with section_title="Новинки" section_titles=new_titles section_url=new_url %}
+    {% include "includes/title_section.html" with section_title=_("Новинки") section_titles=new_titles section_url=new_url %}
 
     {% if user.is_authenticated and recommendations %}
-        {% include "includes/title_section.html" with section_title="Вам может понравиться" section_titles=recommendations section_url=None %}
+        {% include "includes/title_section.html" with section_title=_("Вам может понравиться") section_titles=recommendations section_url=None %}
     {% endif %}
 
-    {% include "includes/title_section.html" with section_title="Высокий рейтинг" section_titles=top_rated section_url=top_rated_url %}
+    {% include "includes/title_section.html" with section_title=_("Высокий рейтинг") section_titles=top_rated section_url=top_rated_url %}
 
-    {% include "includes/title_section.html" with section_title="Фильмы" section_titles=movies section_url=movies_url %}
+    {% include "includes/title_section.html" with section_title=_("Фильмы") section_titles=movies section_url=movies_url %}
 
-    {% include "includes/title_section.html" with section_title="Сериалы" section_titles=series section_url=series_url %}
+    {% include "includes/title_section.html" with section_title=_("Сериалы") section_titles=series section_url=series_url %}
 
     {% if genres %}
         <section class="section reveal">
             <div class="section__header">
-                <h2 class="section__title">Жанры</h2>
-                <a class="section__link" href="{% url 'catalog:genre_list' %}">Все →</a>
+                <h2 class="section__title">{% trans "Жанры" %}</h2>
+                <a class="section__link" href="{% url 'catalog:genre_list' %}">{% trans "Все" %} →</a>
             </div>
             <div class="badge-list">
                 {% for genre in genres %}

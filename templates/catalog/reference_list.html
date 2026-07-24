@@ -1,15 +1,7 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static i18n %}
 
-{% comment %}
-Общий шаблон для страниц «Жанры» и «Страны».
-
-Обе страницы устроены одинаково — сетка карточек со счётчиком,
-поэтому шаблон один. Различаются только заголовком и адресом ссылки,
-которые приходят из вьюхи.
-{% endcomment %}
-
-{% block page_title %}{{ page_heading }} — MovieHub{% endblock %}
+{% block page_title %}{% blocktranslate with heading=page_heading %}{{ heading }} — MovieHub{% endblocktranslate %}{% endblock %}
 
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'css/catalog.css' %}">
@@ -18,7 +10,7 @@
 {% block content %}
     <div class="page-header">
         <h1 class="page-title">{{ page_heading }}</h1>
-        <p class="page-subtitle">Всего: {{ references|length }}</p>
+        <p class="page-subtitle">{% blocktranslate with count=references|length %}Всего: {{ count }}{% endblocktranslate %}</p>
     </div>
 
     <div class="reference-grid">
@@ -28,7 +20,7 @@
                 <span class="reference-card__count">{{ reference.titles_count }}</span>
             </a>
         {% empty %}
-            <p class="empty-state">Пока пусто.</p>
+            <p class="empty-state">{% trans "Пока пусто." %}</p>
         {% endfor %}
     </div>
 {% endblock %}

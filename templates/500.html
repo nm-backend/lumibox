@@ -1,18 +1,18 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static i18n %}
 
-{% block page_title %}Ошибка сервера (500) — MovieHub{% endblock %}
+{% block page_title %}{% trans "Ошибка сервера (500) — MovieHub" %}{% endblock %}
 
 {% block content %}
     <div class="empty-state" style="padding: var(--space-8) 0;">
         <p style="font-size: 5rem; font-weight: 800; color: var(--color-accent); line-height: 1; margin-bottom: var(--space-2);">500</p>
-        <p class="empty-state__title">Что-то пошло не так</p>
+        <p class="empty-state__title">{% trans "Что-то пошло не так" %}</p>
         <p style="max-width: 40ch; margin: 0 auto; color: var(--color-text-muted);">
-            Мы уже знаем об этой ошибке и работаем над её исправлением. Попробуйте обновить страницу позже.
+            {% trans "Мы уже знаем об этой ошибке и работаем над её исправлением. Попробуйте обновить страницу позже." %}
         </p>
         <p class="empty-state__action" style="display: flex; flex-wrap: wrap; gap: var(--space-3); justify-content: center;">
-            <a class="button button--primary" href="{% url 'catalog:home' %}">На главную</a>
-            <a class="button button--ghost" href="{% url 'catalog:title_list' %}">Весь каталог</a>
+            <a class="button button--primary" href="{% url 'catalog:home' %}">{% trans "На главную" %}</a>
+            <a class="button button--ghost" href="{% url 'catalog:title_list' %}">{% trans "Весь каталог" %}</a>
         </p>
     </div>
 {% endblock %}

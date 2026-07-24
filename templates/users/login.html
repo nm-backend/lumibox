@@ -1,7 +1,7 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static i18n %}
 
-{% block page_title %}Вход — MovieHub{% endblock %}
+{% block page_title %}{% trans "Вход — MovieHub" %}{% endblock %}
 
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'css/forms.css' %}">
@@ -9,24 +9,24 @@
 
 {% block content %}
     <div class="auth-card">
-        <h1 class="auth-card__title">Вход</h1>
-        <p class="auth-card__subtitle">Рады снова вас видеть.</p>
+        <h1 class="auth-card__title">{% trans "Вход" %}</h1>
+        <p class="auth-card__subtitle">{% trans "Рады снова вас видеть." %}</p>
+
+        {% url 'users:register' as register_url %}
 
         <form method="post" novalidate>
             {% csrf_token %}
             {% include "includes/form_fields.html" %}
 
-            {% comment %}
-            Возвращаем туда, откуда пришли. Django сам проверяет,
-            что адрес ведёт на наш сайт — чужой ссылкой не подменить.
-            {% endcomment %}
             {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
 
-            <button class="button button--primary auth-card__submit" type="submit">Войти</button>
+            <button class="button button--primary auth-card__submit" type="submit">{% trans "Войти" %}</button>
         </form>
 
         <p class="auth-card__footer">
-            Нет аккаунта? <a href="{% url 'users:register' %}">Зарегистрируйтесь</a>
+            {% blocktranslate trimmed %}
+                Нет аккаунта? <a href="{{ register_url }}">Зарегистрируйтесь</a>
+            {% endblocktranslate %}
         </p>
     </div>
 {% endblock %}

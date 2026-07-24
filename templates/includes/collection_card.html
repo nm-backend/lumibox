@@ -1,6 +1,6 @@
+{% load i18n %}
 {% comment %}
 Карточка подборки. Ждёт переменную collection.
-Используется на странице подборок и на главной.
 {% endcomment %}
 
 <a class="collection-card" href="{{ collection.get_absolute_url }}">
@@ -16,7 +16,7 @@
     <span class="collection-card__body">
         <span class="collection-card__name">{{ collection.name }}</span>
         {% if collection.titles_count %}
-            <span class="collection-card__count">{{ collection.titles_count }} в подборке</span>
+            <span class="collection-card__count">{% blocktranslate count count=collection.titles_count trimmed %}{{ count }} в подборке{% plural %}{{ count }} в подборке{% endblocktranslate %}</span>
         {% endif %}
     </span>
 </a>

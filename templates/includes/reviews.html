@@ -1,24 +1,19 @@
-{% comment %}
-Отзывы на странице фильма.
-
-Ждёт title, reviews, review_form, user_review.
-Обычные формы с CSRF — JavaScript здесь ничего не улучшил бы.
-{% endcomment %}
+{% load i18n %}
 
 <section class="section" id="reviews">
-    <h2 class="section__title">Отзывы {% if title.rating_count %}<span class="section__count">{{ title.rating_count }}</span>{% endif %}</h2>
+    <h2 class="section__title">{% trans "Отзывы" %} {% if title.rating_count %}<span class="section__count">{{ title.rating_count }}</span>{% endif %}</h2>
 
     {% if user.is_authenticated %}
         <form class="review-form" method="post" action="{% url 'reviews:save' title.slug %}" novalidate>
             {% csrf_token %}
             <p class="review-form__title">
-                {% if user_review %}Изменить свой отзыв{% else %}Оставить отзыв{% endif %}
+                {% if user_review %}{% trans "Изменить свой отзыв" %}{% else %}{% trans "Оставить отзыв" %}{% endif %}
             </p>
             {% include "includes/form_fields.html" with form=review_form %}
 
             <div class="review-form__actions">
                 <button class="button button--primary" type="submit">
-                    {% if user_review %}Сохранить{% else %}Отправить{% endif %}
+                    {% if user_review %}{% trans "Сохранить" %}{% else %}{% trans "Отправить" %}{% endif %}
                 </button>
             </div>
         </form>
@@ -26,13 +21,18 @@
         {% if user_review %}
             <form method="post" action="{% url 'reviews:delete' user_review.pk %}" class="review-form__delete">
                 {% csrf_token %}
-                <button class="button button--ghost" type="submit">Удалить мой отзыв</button>
+                <button class="button button--ghost" type="submit">{% trans "Удалить мой отзыв" %}</button>
             </form>
         {% endif %}
     {% else %}
+        {% url 'users:login' as login_url %}
+        {% with next_path=request.path %}
         <p class="review-login">
-            <a href="{% url 'users:login' %}?next={{ request.path }}">Войдите</a>, чтобы оставить отзыв.
+            {% blocktranslate trimmed %}
+                <a href="{{ login_url }}?next={{ next_path }}">Войдите</a>, чтобы оставить отзыв.
+            {% endblocktranslate %}
         </p>
+        {% endwith %}
     {% endif %}
 
     {% if reviews %}
@@ -61,6 +61,6 @@
             {% endfor %}
         </ul>
     {% else %}
-        <p class="review-empty">Отзывов пока нет. Будьте первым.</p>
+        <p class="review-empty">{% trans "Отзывов пока нет. Будьте первым." %}</p>
     {% endif %}
 </section>

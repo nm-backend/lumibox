@@ -9,7 +9,6 @@
 }
 
 html {
-    /* Плавная прокрутка к якорям — но не для тех, кому анимация мешает */
     scroll-behavior: smooth;
 }
 
@@ -17,7 +16,6 @@ html {
     html {
         scroll-behavior: auto;
     }
-
     *,
     *::before,
     *::after {
@@ -30,13 +28,13 @@ body {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
-
     background-color: var(--color-bg);
     color: var(--color-text);
     font-family: var(--font-base);
     font-size: var(--text-md);
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 img {
@@ -67,27 +65,37 @@ select {
     color: inherit;
 }
 
-button {
+/*
+  Курсор-указатель на всём кликабельном.
+  Без этого интерфейс ощущается «застывшим» — пользователь не знает,
+  можно ли нажать. Это одна из самых частых жалоб в UX-аудитах.
+*/
+button,
+label,
+select,
+summary,
+a[href] {
     cursor: pointer;
+}
+
+button {
     background: none;
     border: none;
 }
 
-h1,
-h2,
-h3 {
-    line-height: 1.25;
-    font-weight: 600;
-}
+/*
+  Все кликабельные элементы должны иметь минимальный размер 44×44px
+  для комфортного тач-взаимодействия. Там, где это невозможно,
+  используйте padding или дополнительный псевдоэлемент.
+*/
 
-/* Видимая рамка фокуса: без неё сайтом нельзя пользоваться с клавиатуры. */
 :focus-visible {
     outline: 2px solid var(--color-accent);
     outline-offset: 2px;
     border-radius: var(--radius-sm);
+    transition: outline-offset var(--transition-fast);
 }
 
-/* Текст только для скринридеров: виден программам, не виден глазу. */
 .visually-hidden {
     position: absolute;
     width: 1px;
@@ -95,4 +103,47 @@ h3 {
     overflow: hidden;
     clip-path: inset(50%);
     white-space: nowrap;
+}
+
+/* ---------- Cinema projector glow (signature) ---------- */
+
+.cinema-glow {
+    position: fixed;
+    bottom: -40%;
+    right: -20%;
+    width: 80vmax;
+    height: 80vmax;
+    pointer-events: none;
+    z-index: -1;
+    background: radial-gradient(
+        ellipse at 50% 100%,
+        var(--color-accent-glow) 0%,
+        transparent 60%
+    );
+    opacity: 0.6;
+    animation: glowPulse 6s ease-in-out infinite alternate;
+}
+
+@keyframes glowPulse {
+    0% { opacity: 0.35; transform: scale(0.95); }
+    100% { opacity: 0.7; transform: scale(1.05); }
+}
+
+/* ---------- Blur-up image loading (progressive enhancement) ---------- */
+
+@keyframes blurUp {
+    0% {
+        filter: blur(20px);
+        transform: scale(1.05);
+        opacity: 0.6;
+    }
+    100% {
+        filter: blur(0);
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+img[data-loaded] {
+    animation: blurUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) both;
 }

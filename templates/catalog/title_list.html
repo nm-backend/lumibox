@@ -1,13 +1,20 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static i18n %}
 
-{% block page_title %}{{ page_heading }} — MovieHub{% endblock %}
+{% block page_title %}{% blocktranslate with heading=page_heading %}{{ heading }} — MovieHub{% endblocktranslate %}{% endblock %}
 
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'css/catalog.css' %}">
 {% endblock %}
 
 {% block content %}
+    {# Breadcrumbs #}
+    <nav class="breadcrumbs" aria-label="{% trans 'Вы здесь' %}">
+        <a href="{% url 'catalog:home' %}">{% trans "Главная" %}</a>
+        <span class="breadcrumbs__sep" aria-hidden="true">›</span>
+        <span aria-current="page">{{ page_heading }}</span>
+    </nav>
+
     <div class="page-header">
         {% if page_subtitle %}
             <p class="page-subtitle">{{ page_subtitle }}</p>
@@ -16,26 +23,33 @@
     </div>
 
     <div class="catalog">
+        {# Quick filter genre chips #}
+        {% if genres %}
+            <nav class="genre-chips" aria-label="{% trans 'Быстрая фильтрация по жанрам' %}">
+                <a class="genre-chip {% if not request.GET.genres__slug %}genre-chip--active{% endif %}" href="{% url 'catalog:title_list' %}">{% trans "Все" %}</a>
+                {% for genre in genres %}
+                    <a class="genre-chip {% if request.GET.genres__slug == genre.slug %}genre-chip--active{% endif %}"
+                       href="{% url 'catalog:title_list' %}?genres__slug={{ genre.slug }}">{{ genre.name }}</a>
+                {% endfor %}
+            </nav>
+        {% endif %}
+
         {% include "includes/catalog_filters.html" %}
 
         <div>
             <div class="catalog__toolbar">
                 <p class="catalog__count">
                     {% if request.GET.q %}
-                        По запросу «{{ request.GET.q }}» найдено: {{ paginator.count }}
+                        {% blocktranslate with q=request.GET.q count=paginator.count %}По запросу «{{ q }}» найдено: {{ count }}{% endblocktranslate %}
                     {% else %}
-                        Всего: {{ paginator.count }}
+                        {% blocktranslate with count=paginator.count %}Всего: {{ count }}{% endblocktranslate %}
                     {% endif %}
                 </p>
 
-                {% comment %}
-                Чипсы применённых фильтров: показывают, что включено,
-                и снимают фильтр одним кликом. Ссылку посчитала вьюха.
-                {% endcomment %}
                 {% for filter in active_filters %}
                     <span class="chip">
                         {{ filter.label }}
-                        <a class="chip__remove" href="{{ filter.remove_url }}" aria-label="Убрать фильтр «{{ filter.label }}»">×</a>
+                        <a class="chip__remove" href="{{ filter.remove_url }}" aria-label="{% blocktranslate with label=filter.label %}Убрать фильтр «{{ label }}»{% endblocktranslate %}">×</a>
                     </span>
                 {% endfor %}
             </div>
@@ -50,10 +64,10 @@
                 {% include "includes/pagination.html" %}
             {% else %}
                 <div class="empty-state">
-                    <p class="empty-state__title">Ничего не найдено</p>
-                    <p>Попробуйте изменить условия — или посмотрите весь каталог.</p>
+                    <p class="empty-state__title">{% trans "Ничего не найдено" %}</p>
+                    <p>{% trans "Попробуйте изменить условия — или посмотрите весь каталог." %}</p>
                     <p class="empty-state__action">
-                        <a class="button button--ghost" href="{% url 'catalog:title_list' %}">Открыть весь каталог</a>
+                        <a class="button button--ghost" href="{% url 'catalog:title_list' %}">{% trans "Открыть весь каталог" %}</a>
                     </p>
                 </div>
             {% endif %}

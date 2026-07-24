@@ -1,23 +1,23 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static i18n %}
 
-{% block page_title %}Страница не найдена (404) — MovieHub{% endblock %}
+{% block page_title %}{% trans "Страница не найдена (404) — MovieHub" %}{% endblock %}
 
 {% block content %}
     <div class="empty-state" style="padding: var(--space-8) 0;">
         <p style="font-size: 5rem; font-weight: 800; color: var(--color-accent); line-height: 1; margin-bottom: var(--space-2);">404</p>
-        <p class="empty-state__title">Страница не найдена</p>
+        <p class="empty-state__title">{% trans "Страница не найдена" %}</p>
         <p style="max-width: 40ch; margin: 0 auto; color: var(--color-text-muted);">
-            Возможно, фильм удалили из каталога или вы перешли по неверной ссылке.
+            {% trans "Возможно, фильм удалили из каталога или вы перешли по неверной ссылке." %}
         </p>
         <p class="empty-state__action" style="display: flex; flex-wrap: wrap; gap: var(--space-3); justify-content: center;">
-            <a class="button button--primary" href="{% url 'catalog:home' %}">На главную</a>
-            <a class="button button--ghost" href="{% url 'catalog:title_list' %}">Весь каталог</a>
+            <a class="button button--primary" href="{% url 'catalog:home' %}">{% trans "На главную" %}</a>
+            <a class="button button--ghost" href="{% url 'catalog:title_list' %}">{% trans "Весь каталог" %}</a>
         </p>
         <div style="margin-top: var(--space-6); max-width: 400px; margin-left: auto; margin-right: auto;">
             <form class="search" action="{% url 'catalog:title_list' %}" method="get" role="search">
-                <label class="visually-hidden" for="search-404">Поиск по каталогу</label>
-                <input class="search__input" id="search-404" type="search" name="q" placeholder="Поиск по названию..." autocomplete="off">
+                <label class="visually-hidden" for="search-404">{% trans "Поиск по каталогу" %}</label>
+                <input class="search__input" id="search-404" type="search" name="q" placeholder="{% trans 'Поиск по названию...' %}" autocomplete="off">
                 <button class="search__submit" type="submit">🔍</button>
             </form>
         </div>

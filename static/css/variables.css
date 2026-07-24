@@ -1,50 +1,67 @@
 /*
   Дизайн-токены MovieHub.
 
-  Все цвета, отступы и размеры описаны здесь один раз.
-  Остальные файлы стилей ссылаются на переменные и не содержат
-  собственных значений цвета — поменять тему можно в одном месте.
+  Кинотеатр — это тёмный зал, свет проектора, мерцание экрана.
+  Отсюда палитра: глубокий чёрный, тёплый янтарь проекторного луча,
+  серебристый отблеск киноплёнки.
+
+  Шрифты: Bebas Neue для заголовков (афиша), Inter для текста (программа).
 */
 
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&display=swap');
+
 :root {
-    /* Фон: от самого тёмного к более светлым слоям */
-    --color-bg: #0b0d12;
-    --color-surface: #151922;
-    --color-surface-hover: #1e2430;
-    --color-border: #262d3b;
+    /* --- Цвета --- */
 
-    /* Текст */
-    --color-text: #eef1f7;
-    --color-text-muted: #939cb0;
-    --color-text-dim: #646c7e;
+    /* Фон: кинозал — абсолютный чёрный с микро-оттенком синего */
+    --color-bg: #07080d;
+    --color-surface: #12151e;
+    --color-surface-hover: #1a1f2b;
+    --color-border: #222838;
 
-    /* Акцент — тёплый янтарный: отсылка к свету кинопроектора */
-    --color-accent: #ffc043;
-    --color-accent-hover: #ffd070;
-    --color-accent-dim: rgba(255, 192, 67, 0.12);
-    --color-on-accent: #1a1204;
+    /* Текст: серебро киноплёнки */
+    --color-text: #e8ecf4;
+    --color-text-muted: #8891a8;
+    --color-text-dim: #5c6478;
 
-    /* Success / error */
+    /* Акцент — свет кинопроектора: тёплый янтарь */
+    --color-accent: #ffb830;
+    --color-accent-hover: #ffc95e;
+    --color-accent-dim: rgba(255, 184, 48, 0.10);
+    --color-accent-glow: rgba(255, 184, 48, 0.08);
+    --color-on-accent: #150f02;
+
+    /* Акцент действия — «play red»: кнопка воспроизведения, CTA */
+    --color-play: #e11d48;
+    --color-play-hover: #f01f4f;
+    --color-play-dim: rgba(225, 29, 72, 0.12);
+    --color-play-glow: rgba(225, 29, 72, 0.25);
+    --color-on-play: #ffffff;
+
+    /* Отражения */
     --color-success: #4ade80;
-    --color-error: #ff7a6b;
-    --color-info: #60a5fa;
+    --color-error: #ff6b5a;
+    --color-info: #5b9cf5;
 
-    /* Glass */
-    --glass-bg: rgba(21, 25, 34, 0.72);
-    --glass-border: rgba(38, 45, 59, 0.48);
-    --glass-blur: 16px;
+    /* Glass — чуть теплее, чем фон */
+    --glass-bg: rgba(18, 21, 30, 0.78);
+    --glass-border: rgba(34, 40, 56, 0.5);
+    --glass-blur: 18px;
 
-    /* Типографика */
-    --font-base: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    /* --- Типографика --- */
+    --font-display: "Bebas Neue", "Impact", sans-serif;
+    --font-base: "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    --font-mono: "JetBrains Mono", "Cascadia Code", monospace;
 
     --text-xs: 0.75rem;
     --text-sm: 0.875rem;
     --text-md: 1rem;
     --text-lg: 1.25rem;
     --text-xl: 1.75rem;
-    --text-2xl: 2.25rem;
+    --text-2xl: 2.5rem;
+    --text-3xl: 3.5rem;
 
-    /* Отступы. Шаг в 4px — сетка, на которой держится вся вёрстка */
+    /* --- Отступы (4px шаг) --- */
     --space-1: 0.25rem;
     --space-2: 0.5rem;
     --space-3: 0.75rem;
@@ -52,47 +69,96 @@
     --space-5: 1.5rem;
     --space-6: 2rem;
     --space-8: 3rem;
+    --space-10: 4rem;
 
+    /* --- Скругления --- */
     --radius-sm: 6px;
     --radius-md: 10px;
     --radius-lg: 16px;
     --radius-full: 999px;
 
-    /* Тени слоями: близкая задаёт контур, дальняя — глубину. */
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
-    --shadow-md: 0 2px 4px rgba(0, 0, 0, 0.3), 0 8px 16px rgba(0, 0, 0, 0.25);
-    --shadow-card: 0 4px 8px rgba(0, 0, 0, 0.35), 0 16px 32px rgba(0, 0, 0, 0.3);
-    --shadow-accent: 0 8px 24px rgba(255, 192, 67, 0.18);
-    --shadow-glass: 0 8px 32px rgba(0, 0, 0, 0.4);
+    /* --- Тени: кинозал бросает глубокие тени --- */
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4);
+    --shadow-md: 0 3px 8px rgba(0, 0, 0, 0.4), 0 8px 20px rgba(0, 0, 0, 0.3);
+    --shadow-card: 0 4px 12px rgba(0, 0, 0, 0.5), 0 16px 40px rgba(0, 0, 0, 0.35);
+    --shadow-accent: 0 8px 28px rgba(255, 184, 48, 0.15);
+    --shadow-glass: 0 8px 32px rgba(0, 0, 0, 0.55);
+    --shadow-play: 0 4px 20px rgba(225, 29, 72, 0.35);
 
-    /* Разные длительности намеренно */
-    --transition-fast: 120ms cubic-bezier(0.4, 0, 0.2, 1);
-    --transition: 200ms cubic-bezier(0.4, 0, 0.2, 1);
-    --transition-slow: 320ms cubic-bezier(0.4, 0, 0.2, 1);
+    /* --- Анимации --- */
+    /*
+      Длительности подогнаны под рекомендации UI/UX Pro Max:
+      — hover 150–200ms (быстрое ощущение отклика)
+      — переходы 200–300ms (стандарт)
+      — выход быстрее входа (exit-faster-than-enter)
+    */
+    --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-slow: 400ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-spring: 400ms cubic-bezier(0.34, 1.56, 0.64, 1);
+    --transition-exit: 200ms cubic-bezier(0.4, 0, 1, 1);
 
+    /* --- Макет --- */
     --container-width: 1280px;
     --header-height: 68px;
+    --touch-target: 44px;  /* Минимальный размер тач-цели по рекомендациям UX */
 
-    /* Skeleton */
+    /* --- Скелетон --- */
     --skeleton-base: var(--color-surface);
     --skeleton-shine: var(--color-surface-hover);
 }
 
+/* ---------- Светлая тема: кинозал днём ---------- */
+
 [data-theme="light"] {
-    --color-bg: #f5f6fa;
+    --color-bg: #f2f4f8;
     --color-surface: #ffffff;
-    --color-surface-hover: #eef0f5;
-    --color-border: #dde1ea;
-    --color-text: #14161c;
-    --color-text-muted: #5a6377;
-    --color-text-dim: #8a93a8;
-    --color-accent: #e69500;
-    --color-accent-hover: #cc8600;
-    --color-accent-dim: rgba(230, 149, 0, 0.1);
+    --color-surface-hover: #e8ebf2;
+    --color-border: #d4d9e3;
+    --color-text: #12141c;
+    --color-text-muted: #5a6278;
+    --color-text-dim: #8a93aa;
+    --color-accent: #d49001;
+    --color-accent-hover: #b87a00;
+    --color-accent-dim: rgba(212, 144, 1, 0.08);
     --color-on-accent: #ffffff;
-    --glass-bg: rgba(255, 255, 255, 0.78);
-    --glass-border: rgba(221, 225, 234, 0.6);
+    --color-play: #c51a44;
+    --color-play-hover: #d91f4d;
+    --color-play-dim: rgba(197, 26, 68, 0.10);
+    --color-play-glow: rgba(197, 26, 68, 0.20);
+    --color-on-play: #ffffff;
+    --glass-bg: rgba(255, 255, 255, 0.82);
+    --glass-border: rgba(212, 217, 227, 0.6);
     --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.06);
-    --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.06), 0 4px 16px rgba(0, 0, 0, 0.04);
-    --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.06), 0 8px 24px rgba(0, 0, 0, 0.04);
+    --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.06), 0 4px 18px rgba(0, 0, 0, 0.04);
+    --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.06), 0 8px 28px rgba(0, 0, 0, 0.04);
+    --shadow-accent: 0 8px 24px rgba(212, 144, 1, 0.12);
+    --shadow-play: 0 4px 16px rgba(197, 26, 68, 0.30);
+}
+
+/* ---------- Typography base layer ---------- */
+
+/* Display typography: Bebas Neue for large headings (cinema poster feel) */
+h1, h2, h3.section__title, .showcase__name, .film-hero__name {
+    font-family: var(--font-display);
+    font-weight: 400;
+    letter-spacing: 0.02em;
+    line-height: 1.1;
+    text-transform: uppercase;
+    text-wrap: balance;
+}
+
+h1 { font-size: var(--text-3xl); }
+h2 { font-size: var(--text-2xl); }
+
+/* Card and meta titles use body font for readability at small sizes */
+h3:not(.section__title) {
+    font-family: var(--font-base);
+    font-weight: 600;
+    text-transform: none;
+    letter-spacing: normal;
+}
+
+body {
+    font-family: var(--font-base);
 }

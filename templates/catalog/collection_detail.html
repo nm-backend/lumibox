@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static i18n %}
 
 {% block page_title %}{{ collection.get_meta_title }} — MovieHub{% endblock %}
 {% block page_description %}{{ collection.get_meta_description }}{% endblock %}
@@ -15,12 +15,12 @@
         {% endif %}
 
         <div class="collection-hero__body">
-            <p class="hero__label">Подборка</p>
+            <p class="hero__label">{% trans "Подборка" %}</p>
             <h1 class="page-title">{{ collection.name }}</h1>
             {% if collection.description %}
                 <p class="collection-hero__description">{{ collection.description }}</p>
             {% endif %}
-            <p class="page-subtitle">Записей: {{ paginator.count }}</p>
+            <p class="page-subtitle">{% blocktranslate with count=paginator.count %}Записей: {{ count }}{% endblocktranslate %}</p>
         </div>
     </div>
 
@@ -34,7 +34,7 @@
         {% include "includes/pagination.html" %}
     {% else %}
         <div class="empty-state">
-            <p class="empty-state__title">Подборка пока пуста</p>
+            <p class="empty-state__title">{% trans "Подборка пока пуста" %}</p>
         </div>
     {% endif %}
 {% endblock %}

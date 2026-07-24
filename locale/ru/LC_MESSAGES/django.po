@@ -6,637 +6,642 @@ msgstr ""
 "POT-Creation-Date: 2026-07-24 12:00+0000\n"
 "PO-Revision-Date: 2026-07-24 12:00+0000\n"
 "Last-Translator: MovieHub Team\n"
-"Language-Team: MovieHub en\n"
-"Language: en\n"
+"Language-Team: MovieHub ru\n"
+"Language: ru\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 msgid "MovieHub — каталог фильмов и сериалов"
-msgstr "MovieHub — Movies & Series"
+msgstr "MovieHub — каталог фильмов и сериалов"
 
 msgid "Каталог фильмов и сериалов: поиск, фильтры, подборки."
-msgstr "Movies and series catalog: search, filters, collections."
+msgstr "Каталог фильмов и сериалов: поиск, фильтры, подборки."
 
 msgid "Основная навигация"
-msgstr "Main navigation"
+msgstr "Основная навигация"
 
 msgid "Всё"
-msgstr "All"
+msgstr "Всё"
 
 msgid "Фильмы"
-msgstr "Movies"
+msgstr "Фильмы"
 
 msgid "Сериалы"
-msgstr "Series"
+msgstr "Сериалы"
 
 msgid "Жанры"
-msgstr "Genres"
+msgstr "Жанры"
 
 msgid "Подборки"
-msgstr "Collections"
+msgstr "Подборки"
 
 msgid "Поиск по каталогу"
-msgstr "Search catalog"
+msgstr "Поиск по каталогу"
 
 msgid "Поиск..."
-msgstr "Search..."
+msgstr "Поиск..."
 
 msgid "Найти"
-msgstr "Search"
+msgstr "Найти"
 
 msgid "Меню"
-msgstr "Menu"
+msgstr "Меню"
 
 msgid "Меню пользователя"
-msgstr "User menu"
+msgstr "Меню пользователя"
 
 msgid "Профиль"
-msgstr "Profile"
+msgstr "Профиль"
 
 msgid "Избранное"
-msgstr "Favorites"
+msgstr "Избранное"
 
 msgid "История"
-msgstr "History"
+msgstr "История"
 
 msgid "Выйти"
-msgstr "Log out"
+msgstr "Выйти"
 
 msgid "Войти"
-msgstr "Log in"
+msgstr "Войти"
 
 msgid "Мобильная навигация"
-msgstr "Mobile navigation"
+msgstr "Мобильная навигация"
 
 msgid "Главная"
-msgstr "Home"
+msgstr "Главная"
 
 msgid "Весь каталог"
-msgstr "All titles"
+msgstr "Весь каталог"
 
 msgid "Высокий рейтинг"
-msgstr "Top rated"
+msgstr "Высокий рейтинг"
 
 msgid "Новинки"
-msgstr "New releases"
+msgstr "Новинки"
 
 msgid "Просмотр изображения"
-msgstr "View image"
+msgstr "Просмотр изображения"
 
 msgid "Закрыть"
-msgstr "Close"
+msgstr "Закрыть"
 
 msgid "Быстрая навигация"
-msgstr "Quick navigation"
+msgstr "Быстрая навигация"
 
 msgid "Каталог"
-msgstr "Catalog"
+msgstr "Каталог"
 
 msgid "Реклама"
-msgstr "Ad"
+msgstr "Реклама"
 
 msgid "Рекламный баннер"
-msgstr "Ad banner"
+msgstr "Рекламный баннер"
 
 msgid "Фильтры"
-msgstr "Filters"
+msgstr "Фильтры"
 
 msgid "Показать"
-msgstr "Show"
+msgstr "Показать"
 
 msgid "Сбросить"
-msgstr "Reset"
+msgstr "Сбросить"
 
 msgid "%(count)s в подборке"
-msgstr[0] "%(count)s in collection"
-msgstr[1] "%(count)s in collection"
+msgstr[0] "%(count)s в подборке"
+msgstr[1] "%(count)s в подборке"
 
 msgid "Продолжить просмотр"
-msgstr "Continue watching"
+msgstr "Продолжить просмотр"
 
 msgid "серия"
-msgstr "episode"
+msgstr "серия"
 
 msgid "Осталось %(sec)s сек."
-msgstr "%(sec)s sec. left"
+msgstr "Осталось %(sec)s сек."
 
 msgid "Следующая серия через"
-msgstr "Next episode in"
+msgstr "Следующая серия через"
 
 msgid ""
 "Каталог фильмов и сериалов с поиском, фильтрами, подборками и личной "
 "библиотекой. Учебный проект с открытым кодом, собранный на Django и "
 "PostgreSQL."
 msgstr ""
-"Movies and series catalog with search, filters, collections and personal "
-"library. An open-source educational project built with Django and "
+"Каталог фильмов и сериалов с поиском, фильтрами, подборками и личной "
+"библиотекой. Учебный проект с открытым кодом, собранный на Django и "
 "PostgreSQL."
 
 msgid "Разделы каталога"
-msgstr "Catalog sections"
+msgstr "Разделы каталога"
 
 msgid "Все фильмы и сериалы"
-msgstr "All movies and series"
+msgstr "Все фильмы и сериалы"
 
 msgid "Разделы"
-msgstr "Sections"
+msgstr "Разделы"
 
 msgid "Страны"
-msgstr "Countries"
+msgstr "Страны"
 
 msgid "Навигация по справочникам"
-msgstr "Reference navigation"
+msgstr "Навигация по справочникам"
 
 msgid "Для разработчиков"
-msgstr "For developers"
+msgstr "Для разработчиков"
 
 msgid "Разработчикам"
-msgstr "Developers"
+msgstr "Разработчикам"
 
 msgid "Схема OpenAPI"
-msgstr "OpenAPI schema"
+msgstr "Схема OpenAPI"
 
 msgid "Панель управления"
-msgstr "Admin panel"
+msgstr "Панель управления"
 
 msgid "Создатель проекта"
-msgstr "Project author"
+msgstr "Создатель проекта"
 
 msgid "Автор и ведущий разработчик"
-msgstr "Author and lead developer"
+msgstr "Автор и ведущий разработчик"
 
 msgid "GitHub проекта"
-msgstr "Project GitHub"
+msgstr "GitHub проекта"
 
 msgid "GitHub автора"
-msgstr "Author GitHub"
+msgstr "GitHub автора"
 
 msgid "Написать"
-msgstr "Write"
+msgstr "Написать"
 
 msgid "© %(current_year)s MovieHub. Собственный дизайн и код."
-msgstr "© %(current_year)s MovieHub. Custom design and code."
+msgstr "© %(current_year)s MovieHub. Собственный дизайн и код."
 
 msgid ""
 "Данные о фильмах — общедоступные факты. Оформление создано для этого "
 "проекта."
-msgstr "Movie data is public facts. Design created for this project."
+msgstr ""
+"Данные о фильмах — общедоступные факты. Оформление создано для этого "
+"проекта."
 
 msgid "Навигация по страницам"
-msgstr "Page navigation"
+msgstr "Навигация по страницам"
 
 msgid "Назад"
-msgstr "Previous"
+msgstr "Назад"
 
 msgid "Вперёд"
-msgstr "Next"
+msgstr "Вперёд"
 
 msgid "Отзывы"
-msgstr "Reviews"
+msgstr "Отзывы"
 
 msgid "Изменить свой отзыв"
-msgstr "Edit your review"
+msgstr "Изменить свой отзыв"
 
 msgid "Оставить отзыв"
-msgstr "Leave a review"
+msgstr "Оставить отзыв"
 
 msgid "Сохранить"
-msgstr "Save"
+msgstr "Сохранить"
 
 msgid "Отправить"
-msgstr "Submit"
+msgstr "Отправить"
 
 msgid "Удалить мой отзыв"
-msgstr "Delete my review"
+msgstr "Удалить мой отзыв"
 
 msgid ""
 "<a href=\"%(login_url)s?next=%(next_path)s\">Войдите</a>, чтобы оставить "
 "отзыв."
 msgstr ""
-"<a href=\"%(login_url)s?next=%(next_path)s\">Log in</a> to leave a review."
+"<a href=\"%(login_url)s?next=%(next_path)s\">Войдите</a>, чтобы оставить "
+"отзыв."
 
 msgid "Отзывов пока нет. Будьте первым."
-msgstr "No reviews yet. Be the first."
+msgstr "Отзывов пока нет. Будьте первым."
 
 msgid "Постер: %(name)s"
-msgstr "Poster: %(name)s"
+msgstr "Постер: %(name)s"
 
 msgid "Подробнее"
-msgstr "Details"
+msgstr "Подробнее"
 
 msgid "%(name)s, %(year)s"
 msgstr "%(name)s, %(year)s"
 
 msgid "Свежее в каталоге"
-msgstr "Fresh in catalog"
+msgstr "Свежее в каталоге"
 
 msgid "Рейтинг"
-msgstr "Rating"
+msgstr "Рейтинг"
 
 msgid "Навигация по баннерам"
-msgstr "Banner navigation"
+msgstr "Навигация по баннерам"
 
 msgid "Показать: %(name)s"
-msgstr "Show: %(name)s"
+msgstr "Показать: %(name)s"
 
 msgid "Вам может понравиться"
-msgstr "You may like"
+msgstr "Вам может понравиться"
 
 msgid "%(name)s (%(year)s) — MovieHub"
 msgstr "%(name)s (%(year)s) — MovieHub"
 
 msgid "Средняя оценка зрителей"
-msgstr "Average viewer rating"
+msgstr "Средняя оценка зрителей"
 
 msgid "%(min)s мин"
-msgstr "%(min)s min"
+msgstr "%(min)s мин"
 
 msgid "%(count)s оценок"
-msgstr[0] "%(count)s ratings"
-msgstr[1] "%(count)s ratings"
+msgstr[0] "%(count)s оценок"
+msgstr[1] "%(count)s оценок"
 
 msgid "Смотреть"
-msgstr "Watch"
+msgstr "Смотреть"
 
 msgid "Трейлер"
-msgstr "Trailer"
+msgstr "Трейлер"
 
 msgid "В избранном"
-msgstr "In favorites"
+msgstr "В избранном"
 
 msgid "В избранное"
-msgstr "Add to favorites"
+msgstr "В избранное"
 
 msgid "Вы здесь"
-msgstr "You are here"
+msgstr "Вы здесь"
 
 msgid "О проекте"
-msgstr "About"
+msgstr "О проекте"
 
 msgid "Сезоны"
-msgstr "Seasons"
+msgstr "Сезоны"
 
 msgid "Создатели"
-msgstr "Crew"
+msgstr "Создатели"
 
 msgid "Галерея"
-msgstr "Gallery"
+msgstr "Галерея"
 
 msgid "Похожее"
-msgstr "Similar"
+msgstr "Похожее"
 
 msgid "Дата выхода"
-msgstr "Release date"
+msgstr "Дата выхода"
 
 msgid "Год"
-msgstr "Year"
+msgstr "Год"
 
 msgid "Длительность"
-msgstr "Duration"
+msgstr "Длительность"
 
 msgid "Студии"
-msgstr "Studios"
+msgstr "Студии"
 
 msgid "Оценка зрителей"
-msgstr "Viewer rating"
+msgstr "Оценка зрителей"
 
 msgid "%(avg)s / 10 (%(count)s)"
 msgstr[0] "%(avg)s / 10 (%(count)s)"
 msgstr[1] "%(avg)s / 10 (%(count)s)"
 
 msgid "%(sec)s мин"
-msgstr "%(sec)s min"
+msgstr "%(sec)s мин"
 
 msgid "Галерея кадров"
-msgstr "Frame gallery"
+msgstr "Галерея кадров"
 
 msgid "Ваш браузер не умеет проигрывать видео."
-msgstr "Your browser cannot play video."
+msgstr "Ваш браузер не умеет проигрывать видео."
 
 msgid "Скачать файл"
-msgstr "Download file"
+msgstr "Скачать файл"
 
 msgid "Трейлер: %(name)s"
-msgstr "Trailer: %(name)s"
+msgstr "Трейлер: %(name)s"
 
 msgid "Трейлер размещён на стороннем сервисе."
-msgstr "Trailer is hosted on an external service."
+msgstr "Трейлер размещён на стороннем сервисе."
 
 msgid "Открыть трейлер"
-msgstr "Open trailer"
+msgstr "Открыть трейлер"
 
 msgid "%(heading)s — MovieHub"
 msgstr "%(heading)s — MovieHub"
 
 msgid "Быстрая фильтрация по жанрам"
-msgstr "Quick filter by genre"
+msgstr "Быстрая фильтрация по жанрам"
 
 msgid "По запросу «%(q)s» найдено: %(count)s"
-msgstr[0] "Results for \"%(q)s\": %(count)s"
-msgstr[1] "Results for \"%(q)s\": %(count)s"
+msgstr[0] "По запросу «%(q)s» найдено: %(count)s"
+msgstr[1] "По запросу «%(q)s» найдено: %(count)s"
 
 msgid "Всего: %(count)s"
-msgstr[0] "Total: %(count)s"
-msgstr[1] "Total: %(count)s"
+msgstr[0] "Всего: %(count)s"
+msgstr[1] "Всего: %(count)s"
 
 msgid "Убрать фильтр «%(label)s»"
-msgstr "Remove filter \"%(label)s\""
+msgstr "Убрать фильтр «%(label)s»"
 
 msgid "Ничего не найдено"
-msgstr "Nothing found"
+msgstr "Ничего не найдено"
 
 msgid "Попробуйте изменить условия — или посмотрите весь каталог."
-msgstr "Try changing your filters — or browse the full catalog."
+msgstr "Попробуйте изменить условия — или посмотрите весь каталог."
 
 msgid "Открыть весь каталог"
-msgstr "Browse full catalog"
+msgstr "Открыть весь каталог"
 
 msgid "Подборка"
-msgstr "Collection"
+msgstr "Подборка"
 
 msgid "Записей: %(count)s"
-msgstr[0] "Items: %(count)s"
-msgstr[1] "Items: %(count)s"
+msgstr[0] "Записей: %(count)s"
+msgstr[1] "Записей: %(count)s"
 
 msgid "Подборка пока пуста"
-msgstr "This collection is empty"
+msgstr "Подборка пока пуста"
 
 msgid "Подборки — MovieHub"
-msgstr "Collections — MovieHub"
+msgstr "Подборки — MovieHub"
 
 msgid "Тематические подборки фильмов и сериалов."
-msgstr "Thematic collections of movies and series."
+msgstr "Тематические подборки фильмов и сериалов."
 
 msgid "Подборок пока нет"
-msgstr "No collections yet"
+msgstr "Подборок пока нет"
 
 msgid "Загляните позже — они появятся."
-msgstr "Check back later — they will appear."
+msgstr "Загляните позже — они появятся."
 
 msgid "Открыть каталог"
-msgstr "Browse catalog"
+msgstr "Открыть каталог"
 
 msgid "%(name)s — фильмография — MovieHub"
-msgstr "%(name)s — filmography — MovieHub"
+msgstr "%(name)s — фильмография — MovieHub"
 
 msgid "%(name)s: фильмография, роли, биография на MovieHub."
-msgstr "%(name)s: filmography, roles, biography on MovieHub."
+msgstr "%(name)s: фильмография, роли, биография на MovieHub."
 
 msgid "Фото: %(name)s"
-msgstr "Photo: %(name)s"
+msgstr "Фото: %(name)s"
 
 msgid "%(count)s проектов"
-msgstr[0] "%(count)s projects"
-msgstr[1] "%(count)s projects"
+msgstr[0] "%(count)s проектов"
+msgstr[1] "%(count)s проектов"
 
 msgid "%(count)s наград"
-msgstr[0] "%(count)s awards"
-msgstr[1] "%(count)s awards"
+msgstr[0] "%(count)s наград"
+msgstr[1] "%(count)s наград"
 
 msgid "Награды и номинации"
-msgstr "Awards and nominations"
+msgstr "Награды и номинации"
 
 msgid "Фильмография"
-msgstr "Filmography"
+msgstr "Фильмография"
 
 msgid "Пока нет опубликованных проектов"
-msgstr "No published projects yet"
+msgstr "Пока нет опубликованных проектов"
 
 msgid "Когда %(name)s появится в фильмах каталога, они отобразятся здесь."
-msgstr "When %(name)s appears in catalog films, they will show here."
+msgstr "Когда %(name)s появится в фильмах каталога, они отобразятся здесь."
 
 msgid "Пока нет персон."
-msgstr "No people yet."
+msgstr "Пока нет персон."
 
 msgid "%(count)s произведений"
-msgstr[0] "%(count)s works"
-msgstr[1] "%(count)s works"
+msgstr[0] "%(count)s произведений"
+msgstr[1] "%(count)s произведений"
 
 msgid "Пока пусто."
-msgstr "Empty."
+msgstr "Пока пусто."
 
 msgid "Официальный сайт"
-msgstr "Official website"
+msgstr "Официальный сайт"
 
 msgid "Произведений: %(count)s"
-msgstr[0] "Works: %(count)s"
-msgstr[1] "Works: %(count)s"
+msgstr[0] "Произведений: %(count)s"
+msgstr[1] "Произведений: %(count)s"
 
 msgid "Пока нет опубликованных произведений."
-msgstr "No published works yet."
+msgstr "Пока нет опубликованных произведений."
 
 msgid "Избранное — MovieHub"
-msgstr "Favorites — MovieHub"
+msgstr "Избранное — MovieHub"
 
 msgid "Здесь пока пусто"
-msgstr "Nothing here yet"
+msgstr "Здесь пока пусто"
 
 msgid "Нажмите «В избранное» на странице фильма — и он появится тут."
-msgstr "Click \"Add to favorites\" on a movie page and it will appear here."
+msgstr "Нажмите «В избранное» на странице фильма — и он появится тут."
 
 msgid "История просмотров — MovieHub"
-msgstr "Watch history — MovieHub"
+msgstr "История просмотров — MovieHub"
 
 msgid "История просмотров"
-msgstr "Watch history"
+msgstr "История просмотров"
 
 msgid "Очистить историю"
-msgstr "Clear history"
+msgstr "Очистить историю"
 
 msgid "История пуста"
-msgstr "History is empty"
+msgstr "История пуста"
 
 msgid "Здесь появятся фильмы и сериалы, страницы которых вы открывали."
-msgstr "Movies and series you've visited will appear here."
+msgstr "Здесь появятся фильмы и сериалы, страницы которых вы открывали."
 
 msgid "Вход — MovieHub"
-msgstr "Log in — MovieHub"
+msgstr "Вход — MovieHub"
 
 msgid "Вход"
-msgstr "Log in"
+msgstr "Вход"
 
 msgid "Рады снова вас видеть."
-msgstr "Glad to see you again."
+msgstr "Рады снова вас видеть."
 
 msgid "Нет аккаунта? <a href=\"%(register_url)s\">Зарегистрируйтесь</a>"
-msgstr "No account? <a href=\"%(register_url)s\">Sign up</a>"
+msgstr "Нет аккаунта? <a href=\"%(register_url)s\">Зарегистрируйтесь</a>"
 
 msgid "Регистрация — MovieHub"
-msgstr "Sign up — MovieHub"
+msgstr "Регистрация — MovieHub"
 
 msgid "Регистрация"
-msgstr "Sign up"
+msgstr "Регистрация"
 
 msgid "Избранное, история просмотров и отзывы."
-msgstr "Favorites, watch history and reviews."
+msgstr "Избранное, история просмотров и отзывы."
 
 msgid "Создать аккаунт"
-msgstr "Create account"
+msgstr "Создать аккаунт"
 
 msgid "Уже есть аккаунт? <a href=\"%(login_url)s\">Войдите</a>"
-msgstr "Already have an account? <a href=\"%(login_url)s\">Log in</a>"
+msgstr "Уже есть аккаунт? <a href=\"%(login_url)s\">Войдите</a>"
 
 msgid "Профиль — %(name)s — MovieHub"
-msgstr "Profile — %(name)s — MovieHub"
+msgstr "Профиль — %(name)s — MovieHub"
 
 msgid "Аватар: %(name)s"
-msgstr "Avatar: %(name)s"
+msgstr "Аватар: %(name)s"
 
 msgid "На сайте с %(date)s"
-msgstr "Member since %(date)s"
+msgstr "На сайте с %(date)s"
 
 msgid "В истории"
-msgstr "In history"
+msgstr "В истории"
 
 msgid "Отзывов"
-msgstr "Reviews"
+msgstr "Отзывов"
 
 msgid "Недавнее"
-msgstr "Recent"
+msgstr "Недавнее"
 
 msgid "Недавняя активность"
-msgstr "Recent activity"
+msgstr "Недавняя активность"
 
 msgid "Здесь пока ничего нет"
-msgstr "Nothing here yet"
+msgstr "Здесь пока ничего нет"
 
 msgid "Добавляйте фильмы и сериалы в избранное, чтобы они появились здесь."
-msgstr "Add movies and series to favorites and they will appear here."
+msgstr "Добавляйте фильмы и сериалы в избранное, чтобы они появились здесь."
 
 msgid "Нет добавленных фильмов."
-msgstr "No favorites yet."
+msgstr "Нет добавленных фильмов."
 
 msgid "Редактировать профиль"
-msgstr "Edit profile"
+msgstr "Редактировать профиль"
 
 msgid "Все"
-msgstr "All"
+msgstr "Все"
 
 msgid "Всего %(count)s в истории"
-msgstr[0] "Total %(count)s in history"
-msgstr[1] "Total %(count)s in history"
+msgstr[0] "Всего %(count)s в истории"
+msgstr[1] "Всего %(count)s в истории"
 
 msgid "История просмотров пуста."
-msgstr "Watch history is empty."
+msgstr "История просмотров пуста."
 
 msgid "Смотреть %(name)s — MovieHub"
-msgstr "Watch %(name)s — MovieHub"
+msgstr "Смотреть %(name)s — MovieHub"
 
 msgid "Просмотр %(name)s на MovieHub."
-msgstr "Watching %(name)s on MovieHub."
+msgstr "Просмотр %(name)s на MovieHub."
 
 msgid "%(season)s, серия %(number)s"
-msgstr "%(season)s, episode %(number)s"
+msgstr "%(season)s, серия %(number)s"
 
 msgid "Плеер: %(name)s, %(episode_name)s"
-msgstr "Player: %(name)s, %(episode_name)s"
+msgstr "Плеер: %(name)s, %(episode_name)s"
 
 msgid "Воспроизвести"
-msgstr "Play"
+msgstr "Воспроизвести"
 
 msgid "Пропустить рекап"
-msgstr "Skip recap"
+msgstr "Пропустить рекап"
 
 msgid "Пропустить заставку"
-msgstr "Skip intro"
+msgstr "Пропустить заставку"
 
 msgid "сек."
-msgstr "sec."
+msgstr "сек."
 
 msgid "Отмена"
-msgstr "Cancel"
+msgstr "Отмена"
 
 msgid "Горячие клавиши"
-msgstr "Keyboard shortcuts"
+msgstr "Горячие клавиши"
 
 msgid "Воспроизвести / Пауза"
-msgstr "Play / Pause"
+msgstr "Воспроизвести / Пауза"
 
 msgid "Назад / Вперёд 10 сек"
-msgstr "Back / Forward 10 sec"
+msgstr "Назад / Вперёд 10 сек"
 
 msgid "Громкость + / −"
-msgstr "Volume + / −"
+msgstr "Громкость + / −"
 
 msgid "Полный экран"
-msgstr "Full screen"
+msgstr "Полный экран"
 
 msgid "Картинка в картинке"
-msgstr "Picture in picture"
+msgstr "Картинка в картинке"
 
 msgid "Выключить звук"
-msgstr "Mute"
+msgstr "Выключить звук"
 
 msgid "Скриншот кадра"
-msgstr "Take screenshot"
+msgstr "Скриншот кадра"
 
 msgid "Это окно"
-msgstr "This window"
+msgstr "Это окно"
 
 msgid "Позиция воспроизведения"
-msgstr "Playback position"
+msgstr "Позиция воспроизведения"
 
 msgid "Назад на 10 секунд"
-msgstr "Back 10 seconds"
+msgstr "Назад на 10 секунд"
 
 msgid "Вперёд на 10 секунд"
-msgstr "Forward 10 seconds"
+msgstr "Вперёд на 10 секунд"
 
 msgid "Громкость"
-msgstr "Volume"
+msgstr "Громкость"
 
 msgid "Скриншот"
-msgstr "Screenshot"
+msgstr "Скриншот"
 
 msgid "Скорость воспроизведения"
-msgstr "Playback speed"
+msgstr "Скорость воспроизведения"
 
 msgid "Качество"
-msgstr "Quality"
+msgstr "Качество"
 
 msgid "Субтитры"
-msgstr "Subtitles"
+msgstr "Субтитры"
 
 msgid "Субтитры: выкл."
-msgstr "Subtitles: off"
+msgstr "Субтитры: выкл."
 
 msgid "Подготовка плеера…"
-msgstr "Preparing player…"
+msgstr "Подготовка плеера…"
 
 msgid "Скачать"
-msgstr "Download"
+msgstr "Скачать"
 
 msgid "О фильме"
-msgstr "About"
+msgstr "О фильме"
 
 msgid "Пробел — пауза, ←/→ — 10 секунд, F — полный экран, ? — все клавиши"
-msgstr "Space — pause, ←/→ — 10 sec, F — fullscreen, ? — all keys"
+msgstr "Пробел — пауза, ←/→ — 10 секунд, F — полный экран, ? — все клавиши"
 
 msgid "Страница не найдена (404) — MovieHub"
-msgstr "Page not found (404) — MovieHub"
+msgstr "Страница не найдена (404) — MovieHub"
 
 msgid "Страница не найдена"
-msgstr "Page not found"
+msgstr "Страница не найдена"
 
 msgid "Возможно, фильм удалили из каталога или вы перешли по неверной ссылке."
-msgstr "The movie may have been removed or you followed a broken link."
+msgstr ""
+"Возможно, фильм удалили из каталога или вы перешли по неверной ссылке."
 
 msgid "На главную"
-msgstr "Home"
+msgstr "На главную"
 
 msgid "Поиск по названию..."
-msgstr "Search by title..."
+msgstr "Поиск по названию..."
 
 msgid "Ошибка сервера (500) — MovieHub"
-msgstr "Server error (500) — MovieHub"
+msgstr "Ошибка сервера (500) — MovieHub"
 
 msgid "Что-то пошло не так"
-msgstr "Something went wrong"
+msgstr "Что-то пошло не так"
 
 msgid ""
 "Мы уже знаем об этой ошибке и работаем над её исправлением. Попробуйте "
 "обновить страницу позже."
 msgstr ""
-"We are aware of this error and are working on a fix. Please try again later."
+"Мы уже знаем об этой ошибке и работаем над её исправлением. Попробуйте "
+"обновить страницу позже."

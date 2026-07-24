@@ -48,24 +48,35 @@ def update_title_rating(title):
     )
 
 
+DEFAULT_HOME_CACHE_TTL = 60 * 5  # 5 minutes
+SIMILAR_CACHE_KEY = "catalog:similar:{title_id}:v1"
+RECOMMENDATIONS_CACHE_KEY = "catalog:recommendations:{user_id}:v1"
+COLLECTIONS_CACHE_KEY = "catalog:featured_collections:v1"
+
+
 def get_similar_titles(title, limit=6):
     """
     Похожие записи по числу совпавших жанров.
 
-    Если редактор задал похожие вручную — берём его выбор: человек знает
-    о связях, которых в жанрах не видно (продолжение, тот же режиссёр).
-    Если не задал, работает эвристика: сортируем по количеству общих
-    жанров, при равенстве — по свежести.
+    Результат кэшируется на 30 минут: содержимое каталога
+    меняется редко, а страница фильма — вторая по посещаемости.
     """
+    key = SIMILAR_CACHE_KEY.format(title_id=title.pk)
+    cached = cache.get(key)
+    if cached is not None:
+        return cached
+
     manual = title.related_titles.published().with_related()[:limit]
     if manual:
+        manual = list(manual)
+        cache.set(key, manual, 60 * 30)
         return manual
 
     genre_ids = list(title.genres.values_list("id", flat=True))
     if not genre_ids:
         return Title.objects.none()
 
-    return (
+    results = list(
         Title.objects.published()
         .with_related()
         .filter(genres__in=genre_ids)
@@ -73,32 +84,38 @@ def get_similar_titles(title, limit=6):
         .annotate(shared_genres=Count("genres", filter=Q(genres__in=genre_ids)))
         .order_by("-shared_genres", "-release_year")[:limit]
     )
+    cache.set(key, results, 60 * 30)
+    return results
 
 
 def get_recommendations(user, limit=12):
     """
     Персональные рекомендации по избранному пользователя.
 
-    Берём жанры того, что человек добавил в избранное, и предлагаем
-    записи с теми же жанрами, исключая уже виденное и добавленное.
-    Гостю и новичку без избранного показываем просто популярное —
-    пустой блок рекомендаций выглядел бы сломанным.
+    Кэшируются на 5 минут: избранное пользователя меняется нечасто.
     """
     popular = Title.objects.published().with_related().order_by("-published_at")
 
     if not user.is_authenticated:
-        return popular[:limit]
+        return list(popular[:limit])
+
+    key = RECOMMENDATIONS_CACHE_KEY.format(user_id=user.pk)
+    cached = cache.get(key)
+    if cached is not None:
+        return cached
 
     favorite_genre_ids = list(
         Title.objects.filter(favorite__user=user).values_list("genres__id", flat=True).distinct()
     )
     if not favorite_genre_ids:
-        return popular[:limit]
+        results = list(popular[:limit])
+        cache.set(key, results, 60 * 5)
+        return results
 
     seen_ids = list(Title.objects.filter(watchhistory__user=user).values_list("id", flat=True))
     favorite_ids = list(Title.objects.filter(favorite__user=user).values_list("id", flat=True))
 
-    return (
+    results = list(
         Title.objects.published()
         .with_related()
         .filter(genres__in=favorite_genre_ids)
@@ -106,6 +123,8 @@ def get_recommendations(user, limit=12):
         .annotate(matched_genres=Count("genres", filter=Q(genres__in=favorite_genre_ids)))
         .order_by("-matched_genres", "-published_at")[:limit]
     )
+    cache.set(key, results, 60 * 5)
+    return results
 
 
 def get_crew_by_role(title):
@@ -133,16 +152,19 @@ def get_crew_by_role(title):
 
 
 def get_featured_collections(limit=4):
-    """Подборки для главной страницы."""
-    # order_by после annotate — не дублирование Meta.ordering: GROUP BY
-    # сбрасывает сортировку модели, и срез [:limit] отдавал бы четыре
-    # случайные подборки вместо тех, что редактор поставил первыми.
-    return (
+    """Подборки для главной страницы. Кэшируются на 10 минут."""
+    cached = cache.get(COLLECTIONS_CACHE_KEY)
+    if cached is not None:
+        return cached[:limit] if len(cached) > limit else cached
+
+    results = list(
         Collection.objects.featured()
         .annotate(titles_count=Count("titles", filter=Q(titles__status=Title.Status.PUBLISHED)))
         .filter(titles_count__gt=0)
-        .order_by("order", "-created_at")[:limit]
+        .order_by("order", "-created_at")
     )
+    cache.set(COLLECTIONS_CACHE_KEY, results, 60 * 10)
+    return results[:limit]
 
 
 def get_home_sections():
@@ -166,6 +188,11 @@ def get_home_sections():
         # list() обязателен: QuerySet ленивый, в кэш попал бы не результат,
         # а объект запроса, и каждый читатель кэша ходил бы в базу заново.
         "featured": published.exclude(description="").order_by("-published_at").first(),
+        # Герои для авто-ротации: топ-6 по рейтингу с описанием
+        "hero_titles": list(
+            published.exclude(description="")
+            .order_by("-rating_average")[:6]
+        ),
         "new_titles": list(published.order_by("-published_at")[:12]),
         "movies": list(published.movies()[:6]),
         "series": list(published.series()[:6]),
@@ -193,7 +220,11 @@ def clear_home_cache():
     # forms, и на уровне модуля это замкнулось бы в круг.
     from apps.catalog.forms import YEAR_CHOICES_CACHE_KEY
 
-    cache.delete_many([HOME_CACHE_KEY, YEAR_CHOICES_CACHE_KEY])
+    cache.delete_many([
+        HOME_CACHE_KEY,
+        YEAR_CHOICES_CACHE_KEY,
+        COLLECTIONS_CACHE_KEY,
+    ])
 
 
 def clear_reference_cache():

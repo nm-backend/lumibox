@@ -1,7 +1,7 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static i18n %}
 
-{% block page_title %}Профиль — {{ user.display_name }} — MovieHub{% endblock %}
+{% block page_title %}{% blocktranslate with name=user.display_name %}Профиль — {{ name }} — MovieHub{% endblocktranslate %}{% endblock %}
 
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'css/profile.css' %}">
@@ -15,7 +15,7 @@
                 <div class="profile-card__avatar">
                     <span class="avatar avatar--large">
                         {% if user.avatar %}
-                            <img class="avatar__image" src="{{ user.avatar.url }}" alt="Аватар: {{ user.display_name }}">
+                            <img class="avatar__image" src="{{ user.avatar.url }}" alt="{% blocktranslate with name=user.display_name %}Аватар: {{ name }}{% endblocktranslate %}">
                         {% else %}
                             <span aria-hidden="true">{{ user.initial }}</span>
                         {% endif %}
@@ -26,21 +26,21 @@
                     <p class="profile-card__bio">{{ user.bio }}</p>
                 {% endif %}
                 <p class="profile-card__email">{{ user.email }}</p>
-                <p class="profile-card__joined">На сайте с {{ user.date_joined|date:"F Y" }}</p>
+                <p class="profile-card__joined">{% blocktranslate with date=user.date_joined|date:"F Y" %}На сайте с {{ date }}{% endblocktranslate %}</p>
             </div>
 
             <div class="profile-stats glass">
                 <div class="profile-stat">
                     <span class="profile-stat__value">{{ favorites_count }}</span>
-                    <span class="profile-stat__label">В избранном</span>
+                    <span class="profile-stat__label">{% trans "В избранном" %}</span>
                 </div>
                 <div class="profile-stat">
                     <span class="profile-stat__value">{{ history_count }}</span>
-                    <span class="profile-stat__label">В истории</span>
+                    <span class="profile-stat__label">{% trans "В истории" %}</span>
                 </div>
                 <div class="profile-stat">
                     <span class="profile-stat__value">{{ reviews_count }}</span>
-                    <span class="profile-stat__label">Отзывов</span>
+                    <span class="profile-stat__label">{% trans "Отзывов" %}</span>
                 </div>
             </div>
         </aside>
@@ -48,32 +48,32 @@
         {# Main content #}
         <div class="profile-main">
             <div class="tabs" data-tabs>
-                <button class="tab tab--active" data-tab="recent" type="button">Недавнее</button>
-                <button class="tab" data-tab="favorites" type="button">Избранное</button>
-                <button class="tab" data-tab="history" type="button">История</button>
-                <button class="tab" data-tab="settings" type="button">Настройки</button>
+                <button class="tab tab--active" data-tab="recent" type="button">{% trans "Недавнее" %}</button>
+                <button class="tab" data-tab="favorites" type="button">{% trans "Избранное" %}</button>
+                <button class="tab" data-tab="history" type="button">{% trans "История" %}</button>
+                <button class="tab" data-tab="settings" type="button">{% trans "Настройки" %}</button>
             </div>
 
             {# Tab: Recent Activity #}
             <div class="tab-content tab-content--active" data-tab-content="recent">
                 <section class="section">
-                    <h2 class="section__title">Недавняя активность</h2>
+                    <h2 class="section__title">{% trans "Недавняя активность" %}</h2>
                     {% if recent_favorites %}
                         <div class="carousel">
-                            <button class="carousel__btn carousel__btn--prev" type="button" aria-label="Назад">‹</button>
+                            <button class="carousel__btn carousel__btn--prev" type="button" aria-label="{% trans 'Назад' %}">‹</button>
                             <div class="carousel__track">
                                 {% for favorite in recent_favorites %}
                                     {% include "includes/title_card.html" with title=favorite.title %}
                                 {% endfor %}
                             </div>
-                            <button class="carousel__btn carousel__btn--next" type="button" aria-label="Вперёд">›</button>
+                            <button class="carousel__btn carousel__btn--next" type="button" aria-label="{% trans 'Вперёд' %}">›</button>
                         </div>
                     {% else %}
                         <div class="empty-state">
-                            <p class="empty-state__title">Здесь пока ничего нет</p>
-                            <p>Добавляйте фильмы и сериалы в избранное, чтобы они появились здесь.</p>
+                            <p class="empty-state__title">{% trans "Здесь пока ничего нет" %}</p>
+                            <p>{% trans "Добавляйте фильмы и сериалы в избранное, чтобы они появились здесь." %}</p>
                             <p class="empty-state__action">
-                                <a class="button button--primary" href="{% url 'catalog:title_list' %}">Открыть каталог</a>
+                                <a class="button button--primary" href="{% url 'catalog:title_list' %}">{% trans "Открыть каталог" %}</a>
                             </p>
                         </div>
                     {% endif %}
@@ -84,9 +84,9 @@
             <div class="tab-content" data-tab-content="favorites">
                 <section class="section">
                     <div class="section__header">
-                        <h2 class="section__title">Избранное</h2>
+                        <h2 class="section__title">{% trans "Избранное" %}</h2>
                         {% if favorites_count %}
-                            <a class="section__link" href="{% url 'library:favorites' %}">Все →</a>
+                            <a class="section__link" href="{% url 'library:favorites' %}">{% trans "Все" %} →</a>
                         {% endif %}
                     </div>
                     {% if recent_favorites %}
@@ -96,7 +96,7 @@
                             {% endfor %}
                         </div>
                     {% else %}
-                        <p class="review-empty">Нет добавленных фильмов.</p>
+                        <p class="review-empty">{% trans "Нет добавленных фильмов." %}</p>
                     {% endif %}
                 </section>
             </div>
@@ -105,15 +105,15 @@
             <div class="tab-content" data-tab-content="history">
                 <section class="section">
                     <div class="section__header">
-                        <h2 class="section__title">История просмотров</h2>
+                        <h2 class="section__title">{% trans "История просмотров" %}</h2>
                         {% if history_count %}
-                            <a class="section__link" href="{% url 'library:history' %}">Все →</a>
+                            <a class="section__link" href="{% url 'library:history' %}">{% trans "Все" %} →</a>
                         {% endif %}
                     </div>
                     {% if history_count %}
-                        <p class="review-empty">Всего {{ history_count }} в истории</p>
+                        <p class="review-empty">{% blocktranslate with count=history_count %}Всего {{ count }} в истории{% endblocktranslate %}</p>
                     {% else %}
-                        <p class="review-empty">История просмотров пуста.</p>
+                        <p class="review-empty">{% trans "История просмотров пуста." %}</p>
                     {% endif %}
                 </section>
             </div>
@@ -121,11 +121,11 @@
             {# Tab: Settings #}
             <div class="tab-content" data-tab-content="settings">
                 <section class="section">
-                    <h2 class="section__title">Редактировать профиль</h2>
+                    <h2 class="section__title">{% trans "Редактировать профиль" %}</h2>
                     <form class="profile-form" method="post" enctype="multipart/form-data">
                         {% csrf_token %}
                         {% include "includes/form_fields.html" with form=form %}
-                        <button class="button button--primary" type="submit">Сохранить</button>
+                        <button class="button button--primary" type="submit">{% trans "Сохранить" %}</button>
                     </form>
                 </section>
             </div>

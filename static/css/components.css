@@ -211,15 +211,17 @@
     align-items: center;
     gap: var(--space-3);
     padding: var(--space-2) var(--space-3);
+    min-height: var(--touch-target);
     border-radius: var(--radius-sm);
     color: var(--color-text);
-    transition: background var(--transition-fast);
+    transition: background var(--transition-fast), transform var(--transition-fast);
     text-decoration: none;
 }
 
 .search__suggestion:hover {
     background: var(--color-surface-hover);
     color: var(--color-text);
+    transform: translateX(4px);
 }
 
 .search__suggestion-poster {
@@ -532,14 +534,25 @@
     background-color: var(--color-surface);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
-    transition: border-color var(--transition), transform var(--transition),
+    transition: border-color var(--transition), transform var(--transition-spring),
                 box-shadow var(--transition);
 }
 
 .card:hover .card__poster {
     border-color: var(--color-accent);
-    transform: translateY(-6px);
+    transform: translateY(-6px) scale(1.01);
     box-shadow: var(--shadow-card);
+}
+
+/*
+  Пружинная анимация при выведении: карточка возвращается с лёгким
+  перелётом, как настоящий физический объект.
+*/
+@media (prefers-reduced-motion: no-preference) {
+    .card__poster {
+        transition-duration: 0.35s, 0.5s, 0.35s;
+        transition-timing-function: var(--transition), var(--transition-spring), var(--transition);
+    }
 }
 
 .card__image {
@@ -598,6 +611,29 @@
 }
 
 /*
+  Subtle border glow on card hover — the poster border gets a warm
+  amber halo that mimics cinema light spilling from the screen.
+*/
+.card__poster::after {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    border-radius: var(--radius-md);
+    border: 2px solid transparent;
+    background: linear-gradient(135deg, var(--color-accent-dim), transparent 60%) border-box;
+    -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0;
+    transition: opacity var(--transition);
+    pointer-events: none;
+}
+
+.card:hover .card__poster::after {
+    opacity: 1;
+}
+
+/*
   :has(), а не соседний селектор: ссылка лежит после постера, и «~» до
   оверлея внутри постера не дотягивается. Оверлей показываем и при фокусе
   с клавиатуры — иначе тот, кто ходит по сайту табом, не видит подсказку,
@@ -648,8 +684,8 @@
     left: var(--space-2);
 
     padding: 2px var(--space-2);
-    background-color: rgba(11, 13, 18, 0.8);
-    backdrop-filter: blur(4px);
+    background-color: rgba(11, 13, 18, 0.85);
+    backdrop-filter: blur(6px);
     border-radius: var(--radius-sm);
 
     color: var(--color-accent);
@@ -657,6 +693,12 @@
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.04em;
+    /* Badge slides in from left on hover */
+    transition: transform var(--transition-fast);
+}
+
+.card:hover .card__badge {
+    transform: translateX(4px);
 }
 
 .card__age {
@@ -665,7 +707,8 @@
     right: var(--space-2);
 
     padding: 2px var(--space-2);
-    background-color: rgba(11, 13, 18, 0.8);
+    background-color: rgba(11, 13, 18, 0.85);
+    backdrop-filter: blur(6px);
     border-radius: var(--radius-sm);
 
     color: var(--color-text-muted);
@@ -810,6 +853,36 @@
 .button--primary:active {
     transform: translateY(1px);
     box-shadow: var(--shadow-sm);
+}
+
+/* Play button — красный акцент для воспроизведения */
+.button--play {
+    background-color: var(--color-play);
+    color: var(--color-on-play);
+    box-shadow: 0 2px 12px rgba(225, 29, 72, 0.3);
+}
+
+.button--play:hover {
+    background-color: var(--color-play-hover);
+    color: var(--color-on-play);
+    transform: translateY(-1px) scale(1.02);
+    box-shadow: var(--shadow-play);
+}
+
+.button--play:active {
+    transform: translateY(1px) scale(0.98);
+}
+
+/* Ghost button with play accent */
+.button--ghost-play {
+    border: 1.5px solid var(--color-play);
+    color: var(--color-play);
+}
+
+.button--ghost-play:hover {
+    background-color: var(--color-play-dim);
+    color: var(--color-play-hover);
+    border-color: var(--color-play-hover);
 }
 
 .button--ghost {
@@ -1133,6 +1206,213 @@
     border: 1px solid var(--color-border);
     border-radius: var(--radius-sm);
     font-size: var(--text-xs);
+}
+
+/* ---------- Toast-уведомления ---------- */
+
+.toast-container {
+    position: fixed;
+    top: calc(var(--header-height) + var(--space-4));
+    right: var(--space-4);
+    z-index: 200;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    pointer-events: none;
+}
+
+@keyframes toastIn {
+    from {
+        opacity: 0;
+        transform: translateX(100%) scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+    }
+}
+
+@keyframes toastOut {
+    from {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(100%) scale(0.9);
+    }
+}
+
+.toast {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    min-width: 280px;
+    max-width: 420px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-glass);
+    color: var(--color-text);
+    font-size: var(--text-sm);
+    pointer-events: auto;
+    animation: toastIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+.toast--success {
+    border-color: var(--color-success);
+}
+
+.toast--error {
+    border-color: var(--color-error);
+}
+
+.toast--info {
+    border-color: var(--color-info);
+}
+
+.toast__icon {
+    font-size: var(--text-lg);
+    flex-shrink: 0;
+}
+
+.toast__message {
+    flex: 1;
+}
+
+.toast__close {
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    display: grid;
+    place-items: center;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--color-text-dim);
+    font-size: var(--text-xs);
+    cursor: pointer;
+    transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.toast__close:hover {
+    background: var(--color-surface-hover);
+    color: var(--color-text);
+}
+
+/* ---------- Scroll to top ---------- */
+
+.scroll-top {
+    position: fixed;
+    bottom: calc(80px + env(safe-area-inset-bottom));
+    right: var(--space-5);
+    z-index: 45;
+    width: 44px;
+    height: 44px;
+    display: grid;
+    place-items: center;
+    border: 1px solid var(--color-border);
+    border-radius: 50%;
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    box-shadow: var(--shadow-glass);
+    color: var(--color-text-muted);
+    font-size: var(--text-lg);
+    cursor: pointer;
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity var(--transition), transform var(--transition), color var(--transition-fast);
+    pointer-events: none;
+}
+
+.scroll-top--visible {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+.scroll-top:hover {
+    color: var(--color-accent);
+}
+
+@media (max-width: 720px) {
+    .scroll-top {
+        bottom: calc(76px + env(safe-area-inset-bottom));
+        right: var(--space-4);
+        width: 40px;
+        height: 40px;
+    }
+}
+
+/* ---------- Хлебные крошки ---------- */
+
+.breadcrumbs {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+    margin-bottom: var(--space-4);
+    font-size: var(--text-xs);
+    color: var(--color-text-dim);
+}
+
+.breadcrumbs a {
+    color: var(--color-text-muted);
+    text-decoration: none;
+    transition: color var(--transition-fast);
+}
+
+.breadcrumbs a:hover {
+    color: var(--color-accent);
+}
+
+.breadcrumbs__sep {
+    color: var(--color-text-dim);
+    font-size: 0.6rem;
+}
+
+/* ---------- Жанровые чипсы (быстрая навигация) ---------- */
+
+.genre-chips {
+    display: flex;
+    gap: var(--space-2);
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    padding: var(--space-2) 0;
+    margin-bottom: var(--space-5);
+}
+
+.genre-chips::-webkit-scrollbar {
+    display: none;
+}
+
+.genre-chip {
+    flex: 0 0 auto;
+    padding: var(--space-2) var(--space-4);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-full);
+    color: var(--color-text-muted);
+    font-size: var(--text-xs);
+    font-weight: 500;
+    white-space: nowrap;
+    text-decoration: none;
+    transition: border-color var(--transition-fast), color var(--transition-fast), background var(--transition-fast);
+}
+
+.genre-chip:hover {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+    background: var(--color-accent-dim);
+}
+
+.genre-chip--active {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+    background: var(--color-accent-dim);
 }
 
 /* ---------- Чипсы ---------- */

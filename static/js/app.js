@@ -26,7 +26,6 @@
     /* -----------------------------------------------
        2. Search autocomplete
     ----------------------------------------------- */
-    const searchForm = document.querySelector('[data-search-form]');
     const searchInput = document.querySelector('[data-search-input]');
     const dropdown = document.querySelector('[data-search-dropdown]');
     let searchTimer = null;
@@ -117,7 +116,6 @@
             });
         }
 
-        // Show/hide buttons based on scroll position
         const updateButtons = () => {
             if (prevBtn) prevBtn.style.display = track.scrollLeft <= 0 ? 'none' : '';
             if (nextBtn) {
@@ -141,7 +139,6 @@
             hamburger.setAttribute('aria-expanded', isOpen);
         });
 
-        // Close on link click
         mobileNav.querySelectorAll('a').forEach(function (link) {
             link.addEventListener('click', function () {
                 mobileNav.classList.remove('mobile-nav--open');
@@ -234,10 +231,131 @@
     }
 
     /* -----------------------------------------------
-       9. Keyboard shortcuts (global)
+       9. Hero auto-rotation
+    ----------------------------------------------- */
+    const heroRotation = document.querySelector('[data-hero-rotation]');
+    if (heroRotation) {
+        const slides = heroRotation.querySelectorAll('[data-hero-slide]');
+        const dots = heroRotation.querySelectorAll('[data-hero-dot]');
+        let current = 0;
+        let interval = null;
+
+        const showSlide = (index) => {
+            slides.forEach((s, i) => {
+                s.classList.toggle('showcase__slide--active', i === index);
+            });
+            dots.forEach((d, i) => {
+                d.classList.toggle('showcase__dot-btn--active', i === index);
+            });
+            current = index;
+        };
+
+        const startRotation = () => {
+            if (slides.length <= 1) return;
+            stopRotation();
+            interval = setInterval(() => {
+                showSlide((current + 1) % slides.length);
+            }, 7000);
+        };
+
+        const stopRotation = () => {
+            if (interval) {
+                clearInterval(interval);
+                interval = null;
+            }
+        };
+
+        // Dot click handlers
+        dots.forEach((dot, i) => {
+            dot.addEventListener('click', () => {
+                showSlide(i);
+                startRotation(); // reset timer
+            });
+        });
+
+        // Pause on hover
+        heroRotation.addEventListener('mouseenter', stopRotation);
+        heroRotation.addEventListener('mouseleave', startRotation);
+
+        startRotation();
+    }
+
+    /* -----------------------------------------------
+       10. Toast notifications
+    ----------------------------------------------- */
+    const toastContainer = document.querySelector('[data-toast-container]');
+    if (!toastContainer) {
+        const container = document.createElement('div');
+        container.className = 'toast-container';
+        container.setAttribute('data-toast-container', '');
+        document.body.appendChild(container);
+    }
+
+    window.showToast = function (message, type = 'info', duration = 4000) {
+        const container = document.querySelector('[data-toast-container]');
+        if (!container) return;
+
+        const icons = {
+            success: '✅',
+            error: '❌',
+            info: 'ℹ️',
+        };
+
+        const toast = document.createElement('div');
+        toast.className = `toast toast--${type}`;
+        toast.innerHTML = `
+            <span class="toast__icon">${icons[type] || 'ℹ️'}</span>
+            <span class="toast__message">${message}</span>
+            <button class="toast__close" type="button" aria-label="Закрыть">✕</button>
+        `;
+
+        toast.querySelector('.toast__close').addEventListener('click', () => {
+            toast.style.animation = 'toastOut 0.25s ease both';
+            setTimeout(() => toast.remove(), 300);
+        });
+
+        container.appendChild(toast);
+
+        if (duration > 0) {
+            setTimeout(() => {
+                if (toast.isConnected) {
+                    toast.style.animation = 'toastOut 0.25s ease both';
+                    setTimeout(() => toast.remove(), 300);
+                }
+            }, duration);
+        }
+    };
+
+    /* -----------------------------------------------
+       11. Scroll-to-top button
+    ----------------------------------------------- */
+    const scrollBtn = document.querySelector('[data-scroll-top]');
+    if (!scrollBtn) {
+        const btn = document.createElement('button');
+        btn.className = 'scroll-top';
+        btn.setAttribute('data-scroll-top', '');
+        btn.setAttribute('aria-label', 'Наверх');
+        btn.textContent = '↑';
+        document.body.appendChild(btn);
+
+        let scrollVisible = false;
+        window.addEventListener('scroll', () => {
+            const shouldShow = window.scrollY > 400;
+            if (shouldShow !== scrollVisible) {
+                btn.classList.toggle('scroll-top--visible', shouldShow);
+                scrollVisible = shouldShow;
+            }
+        }, { passive: true });
+
+        btn.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    }
+
+    /* -----------------------------------------------
+       12. Keyboard shortcuts (global)
     ----------------------------------------------- */
     document.addEventListener('keydown', function (e) {
-        // Don't hijack inputs
         if (e.target.matches('input, select, textarea, [contenteditable]')) return;
         // / to focus search
         if (e.key === '/' && !e.ctrlKey && !e.metaKey) {

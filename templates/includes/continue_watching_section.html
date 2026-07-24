@@ -1,7 +1,8 @@
+{% load i18n %}
 <section class="section">
     <div class="section__header">
-        <h2 class="section__title">Продолжить просмотр</h2>
-        <a class="section__link" href="{% url 'library:history' %}">История →</a>
+        <h2 class="section__title">{% trans "Продолжить просмотр" %}</h2>
+        <a class="section__link" href="{% url 'library:history' %}">{% trans "История" %} →</a>
     </div>
     <div class="continue-grid">
         {% for progress in continue_watching %}
@@ -24,7 +25,7 @@
                         <span class="continue-card__progress"><span style="width: {{ progress.percentage }}%"></span></span>
                         <span class="continue-card__body">
                             <strong>{{ watch_title.name }}</strong>
-                            <small>{% if episode %}{{ episode.season.display_name }}, серия {{ episode.number }}{% else %}Осталось {{ progress.duration_seconds|add:"-1"|floatformat:0 }} сек.{% endif %}</small>
+                            <small>{% if episode %}{{ episode.season.display_name }}, {% trans "серия" %} {{ episode.number }}{% else %}{% blocktranslate with sec=progress.duration_seconds|add:"-1"|floatformat:0 %}Осталось {{ sec }} сек.{% endblocktranslate %}{% endif %}</small>
                         </span>
                     </a>
                 </article>

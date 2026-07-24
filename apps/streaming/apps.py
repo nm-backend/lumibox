@@ -5,3 +5,6 @@ class StreamingConfig(AppConfig):
     default_auto_field = "django.db.models.BigAutoField"
     name = "apps.streaming"
     verbose_name = "Видеоплатформа"
+
+    def ready(self):
+        from apps.streaming import signals  # noqa: F401

@@ -1,7 +1,7 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static i18n %}
 
-{% block page_title %}Регистрация — MovieHub{% endblock %}
+{% block page_title %}{% trans "Регистрация — MovieHub" %}{% endblock %}
 
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'css/forms.css' %}">
@@ -9,17 +9,21 @@
 
 {% block content %}
     <div class="auth-card">
-        <h1 class="auth-card__title">Регистрация</h1>
-        <p class="auth-card__subtitle">Избранное, история просмотров и отзывы.</p>
+        <h1 class="auth-card__title">{% trans "Регистрация" %}</h1>
+        <p class="auth-card__subtitle">{% trans "Избранное, история просмотров и отзывы." %}</p>
+
+        {% url 'users:login' as login_url %}
 
         <form method="post" novalidate>
             {% csrf_token %}
             {% include "includes/form_fields.html" %}
-            <button class="button button--primary auth-card__submit" type="submit">Создать аккаунт</button>
+            <button class="button button--primary auth-card__submit" type="submit">{% trans "Создать аккаунт" %}</button>
         </form>
 
         <p class="auth-card__footer">
-            Уже есть аккаунт? <a href="{% url 'users:login' %}">Войдите</a>
+            {% blocktranslate trimmed %}
+                Уже есть аккаунт? <a href="{{ login_url }}">Войдите</a>
+            {% endblocktranslate %}
         </p>
     </div>
 {% endblock %}

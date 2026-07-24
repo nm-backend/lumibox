@@ -1,11 +1,48 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static i18n %}
 
-{% block page_title %}{{ title.get_meta_title }} ({{ title.release_year }}) — MovieHub{% endblock %}
+{% block page_title %}{% blocktranslate with name=title.name year=title.release_year %}{{ name }} ({{ year }}) — MovieHub{% endblocktranslate %}{% endblock %}
 {% block page_description %}{{ title.get_meta_description }}{% endblock %}
 
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'css/title-detail.css' %}">
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const ratingContainer = document.querySelector('[data-star-rating]');
+    if (!ratingContainer) return;
+
+    const inputs = ratingContainer.querySelectorAll('.star-rating__input');
+    const stars = ratingContainer.querySelectorAll('.star-rating__star');
+
+    inputs.forEach(input => {
+        input.addEventListener('change', function () {});
+    });
+
+    stars.forEach(star => {
+        star.addEventListener('mouseenter', function () {
+            const value = this.dataset.value;
+            stars.forEach(s => {
+                s.style.color = parseInt(s.dataset.value) <= parseInt(value)
+                    ? 'var(--color-accent)'
+                    : 'var(--color-border)';
+            });
+        });
+
+        star.addEventListener('mouseleave', function () {
+            const checked = ratingContainer.querySelector('.star-rating__input:checked');
+            const val = checked ? parseInt(checked.value) : 0;
+            stars.forEach(s => {
+                s.style.color = parseInt(s.dataset.value) <= val
+                    ? 'var(--color-accent)'
+                    : 'var(--color-border)';
+            });
+        });
+    });
+});
+</script>
 {% endblock %}
 
 {% block hero %}
@@ -22,7 +59,7 @@
     <div class="container film-hero__inner">
         <div class="film-hero__poster">
             {% if title.poster %}
-                <img class="film-hero__poster-image" src="{{ title.poster.url }}" alt="Постер: {{ title.name }}">
+                <img class="film-hero__poster-image" src="{{ title.poster.url }}" alt="{% blocktranslate with name=title.name %}Постер: {{ name }}{% endblocktranslate %}">
             {% else %}
                 <span class="card__placeholder" aria-hidden="true">{{ title.name|first }}</span>
             {% endif %}
@@ -47,7 +84,7 @@
 
             <div class="film-hero__meta">
                 {% if title.rating_average %}
-                    <span class="score" title="Средняя оценка зрителей">
+                    <span class="score" title="{% trans 'Средняя оценка зрителей' %}">
                         <span class="score__value">{{ title.rating_average }}</span>
                         <span class="score__max">/10</span>
                     </span>
@@ -60,7 +97,7 @@
 
                 {% if title.duration_minutes %}
                     <span class="film-hero__dot" aria-hidden="true">·</span>
-                    <span>{{ title.duration_minutes }} мин</span>
+                    <span>{% blocktranslate with min=title.duration_minutes %}{{ min }} мин{% endblocktranslate %}</span>
                 {% endif %}
 
                 {% if title.age_rating %}
@@ -69,7 +106,7 @@
 
                 {% if title.rating_count %}
                     <span class="film-hero__dot" aria-hidden="true">·</span>
-                    <span>{{ title.rating_count }} оценок</span>
+                    <span>{% blocktranslate with count=title.rating_count %}{{ count }} оценок{% endblocktranslate %}</span>
                 {% endif %}
             </div>
 
@@ -89,13 +126,13 @@
                 {% if watch_url %}
                     <a class="button button--primary button--large" href="{{ watch_url }}">
                         <span aria-hidden="true">▶</span>
-                        Смотреть
+                        {% trans "Смотреть" %}
                     </a>
                 {% endif %}
                 {% if title.trailer_source %}
                     <a class="button {% if watch_url %}button--ghost{% else %}button--primary{% endif %}" href="#trailer">
                         <span aria-hidden="true">▶</span>
-                        Трейлер
+                        {% trans "Трейлер" %}
                     </a>
                 {% endif %}
 
@@ -104,17 +141,16 @@
                         {% csrf_token %}
                         <input type="hidden" name="next" value="{{ request.path }}">
                         <button class="button button--ghost {% if is_favorite %}button--active{% endif %}" type="submit" data-favorite-button>
-                            {% if is_favorite %}❤️ В избранном{% else %}🤍 В избранное{% endif %}
+                            {% if is_favorite %}❤️ {% trans "В избранном" %}{% else %}🤍 {% trans "В избранное" %}{% endif %}
                         </button>
                     </form>
                 {% else %}
                     <a class="button button--ghost" href="{% url 'users:login' %}?next={{ request.path }}">
-                        🤍 В избранное
+                        🤍 {% trans "В избранное" %}
                     </a>
                 {% endif %}
             </div>
 
-            {# Дополнительные характеристики #}
             <div class="film-hero__specs">
                 {% if title.countries.all %}
                     <span class="film-hero__spec">
@@ -139,21 +175,32 @@
 {% endblock %}
 
 {% block content %}
+    {# Breadcrumbs #}
+    <nav class="breadcrumbs" aria-label="{% trans 'Вы здесь' %}">
+        <a href="{% url 'catalog:home' %}">{% trans "Главная" %}</a>
+        <span class="breadcrumbs__sep" aria-hidden="true">›</span>
+        <a href="{% url 'catalog:title_list' %}?type={% if title.is_series %}series{% else %}movie{% endif %}">
+            {% if title.is_series %}{% trans "Сериалы" %}{% else %}{% trans "Фильмы" %}{% endif %}
+        </a>
+        <span class="breadcrumbs__sep" aria-hidden="true">›</span>
+        <span aria-current="page">{{ title.name }}</span>
+    </nav>
+
     {# Tabs #}
     <div class="tabs" data-tabs>
-        <button class="tab tab--active" data-tab="about" type="button">О проекте</button>
+        <button class="tab tab--active" data-tab="about" type="button">{% trans "О проекте" %}</button>
         {% if title.seasons.exists %}
-            <button class="tab" data-tab="seasons" type="button">Сезоны</button>
+            <button class="tab" data-tab="seasons" type="button">{% trans "Сезоны" %}</button>
         {% endif %}
         {% if crew_by_role %}
-            <button class="tab" data-tab="crew" type="button">Создатели</button>
+            <button class="tab" data-tab="crew" type="button">{% trans "Создатели" %}</button>
         {% endif %}
         {% if title.frames.all %}
-            <button class="tab" data-tab="gallery" type="button">Галерея</button>
+            <button class="tab" data-tab="gallery" type="button">{% trans "Галерея" %}</button>
         {% endif %}
-        <button class="tab" data-tab="reviews" type="button">Отзывы</button>
+        <button class="tab" data-tab="reviews" type="button">{% trans "Отзывы" %}</button>
         {% if similar_titles %}
-            <button class="tab" data-tab="similar" type="button">Похожее</button>
+            <button class="tab" data-tab="similar" type="button">{% trans "Похожее" %}</button>
         {% endif %}
     </div>
 
@@ -161,21 +208,21 @@
     <div class="tab-content tab-content--active" data-tab-content="about">
         {% if title.trailer_source %}
             <section class="section" id="trailer">
-                <h2 class="section__title">Трейлер</h2>
+                <h2 class="section__title">{% trans "Трейлер" %}</h2>
                 {% if title.trailer_source == "file" %}
                     <div class="player">
                         <video class="player__frame" controls preload="metadata"
                                {% if title.backdrop %}poster="{{ title.backdrop.url }}"{% endif %}>
                             <source src="{{ title.trailer_file.url }}">
-                            Ваш браузер не умеет проигрывать видео.
-                            <a href="{{ title.trailer_file.url }}">Скачать файл</a>.
+                            {% trans "Ваш браузер не умеет проигрывать видео." %}
+                            <a href="{{ title.trailer_file.url }}">{% trans "Скачать файл" %}</a>.
                         </video>
                     </div>
                 {% elif title.trailer_embed_url %}
                     <div class="player">
                         <iframe class="player__frame"
                                 src="{{ title.trailer_embed_url }}"
-                                title="Трейлер: {{ title.name }}"
+                                title="{% blocktranslate with name=title.name %}Трейлер: {{ name }}{% endblocktranslate %}"
                                 loading="lazy"
                                 referrerpolicy="strict-origin-when-cross-origin"
                                 allow="accelerometer; clipboard-write; encrypted-media; picture-in-picture"
@@ -183,27 +230,27 @@
                     </div>
                 {% else %}
                     <p class="player-fallback">
-                        Трейлер размещён на стороннем сервисе.
+                        {% trans "Трейлер размещён на стороннем сервисе." %}
                         <a class="button button--ghost" href="{{ title.trailer_url }}"
-                           target="_blank" rel="noopener noreferrer">Открыть трейлер</a>
+                           target="_blank" rel="noopener noreferrer">{% trans "Открыть трейлер" %}</a>
                     </p>
                 {% endif %}
             </section>
         {% endif %}
 
         <section class="section">
-            <h2 class="section__title">О проекте</h2>
+            <h2 class="section__title">{% trans "О проекте" %}</h2>
             <dl class="spec-list">
-                <dt class="spec-list__label">{% if title.release_date %}Дата выхода{% else %}Год{% endif %}</dt>
+                <dt class="spec-list__label">{% if title.release_date %}{% trans "Дата выхода" %}{% else %}{% trans "Год" %}{% endif %}</dt>
                 <dd class="spec-list__value">
                     {% if title.release_date %}{{ title.release_date|date:"j E Y" }}{% else %}{{ title.release_year }}{% endif %}
                 </dd>
                 {% if title.duration_minutes %}
-                    <dt class="spec-list__label">{% if title.is_series %}Серия{% else %}Длительность{% endif %}</dt>
-                    <dd class="spec-list__value">{{ title.duration_minutes }} мин</dd>
+                    <dt class="spec-list__label">{% if title.is_series %}{% trans "Серия" %}{% else %}{% trans "Длительность" %}{% endif %}</dt>
+                    <dd class="spec-list__value">{% blocktranslate with min=title.duration_minutes %}{{ min }} мин{% endblocktranslate %}</dd>
                 {% endif %}
                 {% if title.countries.all %}
-                    <dt class="spec-list__label">Страны</dt>
+                    <dt class="spec-list__label">{% trans "Страны" %}</dt>
                     <dd class="spec-list__value">
                         <div class="badge-list">
                             {% for country in title.countries.all %}
@@ -213,7 +260,7 @@
                     </dd>
                 {% endif %}
                 {% if title.studios.all %}
-                    <dt class="spec-list__label">Студии</dt>
+                    <dt class="spec-list__label">{% trans "Студии" %}</dt>
                     <dd class="spec-list__value">
                         <div class="badge-list">
                             {% for studio in title.studios.all %}
@@ -223,8 +270,8 @@
                     </dd>
                 {% endif %}
                 {% if title.rating_average %}
-                    <dt class="spec-list__label">Оценка зрителей</dt>
-                    <dd class="spec-list__value">{{ title.rating_average }} / 10 ({{ title.rating_count }})</dd>
+                    <dt class="spec-list__label">{% trans "Оценка зрителей" %}</dt>
+                    <dd class="spec-list__value">{% blocktranslate with avg=title.rating_average count=title.rating_count %}{{ avg }} / 10 ({{ count }}){% endblocktranslate %}</dd>
                 {% endif %}
             </dl>
         </section>
@@ -234,7 +281,7 @@
     {% if title.seasons.exists %}
         <div class="tab-content" data-tab-content="seasons">
             <section class="section">
-                <h2 class="section__title">Сезоны</h2>
+                <h2 class="section__title">{% trans "Сезоны" %}</h2>
                 {% for season in title.seasons.all %}
                     <div class="season-group">
                         <h3 class="season__title">{{ season.display_name }}</h3>
@@ -249,7 +296,7 @@
                                         <span class="episode__body">
                                             <span class="episode__name">{{ episode.name }}</span>
                                             {% if episode.duration_seconds %}
-                                                <span class="episode__duration">{{ episode.duration_seconds|floatformat:0 }} мин</span>
+                                                <span class="episode__duration">{% blocktranslate with sec=episode.duration_seconds|floatformat:0 %}{{ sec }} мин{% endblocktranslate %}</span>
                                             {% endif %}
                                         </span>
                                         {% if episode.video_asset.status == 'ready' %}
@@ -269,7 +316,7 @@
     {% if crew_by_role %}
         <div class="tab-content" data-tab-content="crew">
             <section class="section">
-                <h2 class="section__title">Создатели</h2>
+                <h2 class="section__title">{% trans "Создатели" %}</h2>
                 {% for role_label, participations in crew_by_role %}
                     <div class="crew-group">
                         <p class="crew-group__role">{{ role_label }}</p>
@@ -302,7 +349,7 @@
     {% if title.frames.all %}
         <div class="tab-content" data-tab-content="gallery">
             <section class="section">
-                <h2 class="section__title">Галерея кадров</h2>
+                <h2 class="section__title">{% trans "Галерея кадров" %}</h2>
                 <div class="frames">
                     {% for frame in title.frames.all %}
                         <img class="frames__item"
@@ -326,13 +373,13 @@
     <div class="tab-content" data-tab-content="similar">
         <section class="section">
             <div class="carousel">
-                <button class="carousel__btn carousel__btn--prev" type="button" aria-label="Назад">‹</button>
+                <button class="carousel__btn carousel__btn--prev" type="button" aria-label="{% trans 'Назад' %}">‹</button>
                 <div class="carousel__track">
                     {% for similar in similar_titles %}
                         {% include "includes/title_card.html" with title=similar %}
                     {% endfor %}
                 </div>
-                <button class="carousel__btn carousel__btn--next" type="button" aria-label="Вперёд">›</button>
+                <button class="carousel__btn carousel__btn--next" type="button" aria-label="{% trans 'Вперёд' %}">›</button>
             </div>
         </section>
     </div>

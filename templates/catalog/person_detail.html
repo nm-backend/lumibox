@@ -1,8 +1,8 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static i18n %}
 
-{% block page_title %}{{ person.name }} — фильмография — MovieHub{% endblock %}
-{% block page_description %}{{ person.name }}: фильмография, роли, биография на MovieHub.{% endblock %}
+{% block page_title %}{% blocktranslate with name=person.name %}{{ name }} — фильмография — MovieHub{% endblocktranslate %}{% endblock %}
+{% block page_description %}{% blocktranslate with name=person.name %}{{ name }}: фильмография, роли, биография на MovieHub.{% endblocktranslate %}{% endblock %}
 
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'css/title-detail.css' %}">
@@ -13,7 +13,7 @@
     <div class="profile-header">
         <div class="avatar avatar--large">
             {% if person.photo %}
-                <img class="avatar__image" src="{{ person.photo.url }}" alt="Фото: {{ person.name }}">
+                <img class="avatar__image" src="{{ person.photo.url }}" alt="{% blocktranslate with name=person.name %}Фото: {{ name }}{% endblocktranslate %}">
             {% else %}
                 <span aria-hidden="true">{{ person.initial }}</span>
             {% endif %}
@@ -31,15 +31,15 @@
                 <p class="profile-header__bio">{{ person.biography }}</p>
             {% endif %}
             <p class="profile-header__bio" style="margin-top: var(--space-2);">
-                <span class="chip chip--muted">{{ participations|length }} проектов</span>
-                {% if awards %}<span class="chip chip--muted">{{ awards|length }} наград</span>{% endif %}
+                {% blocktranslate with count=participations|length %}<span class="chip chip--muted">{{ count }} проектов</span>{% endblocktranslate %}
+                {% if awards %}<span class="chip chip--muted">{% blocktranslate with count=awards|length %}{{ count }} наград{% endblocktranslate %}</span>{% endif %}
             </p>
         </div>
     </div>
 
     {% if awards %}
         <section class="section">
-            <h2 class="section__title">Награды и номинации</h2>
+            <h2 class="section__title">{% trans "Награды и номинации" %}</h2>
             <div class="award-list">
                 {% for award_entry in awards %}
                     <div class="award-item">
@@ -62,7 +62,7 @@
     {% endif %}
 
     <section class="section">
-        <h2 class="section__title">Фильмография</h2>
+        <h2 class="section__title">{% trans "Фильмография" %}</h2>
 
         {% if participations %}
             {% regroup participations by get_role_display as role_groups %}
@@ -85,8 +85,8 @@
             {% endfor %}
         {% else %}
             <div class="empty-state">
-                <p class="empty-state__title">Пока нет опубликованных проектов</p>
-                <p>Когда {{ person.name }} появится в фильмах каталога, они отобразятся здесь.</p>
+                <p class="empty-state__title">{% trans "Пока нет опубликованных проектов" %}</p>
+                <p>{% blocktranslate with name=person.name %}Когда {{ name }} появится в фильмах каталога, они отобразятся здесь.{% endblocktranslate %}</p>
             </div>
         {% endif %}
     </section>
