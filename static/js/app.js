@@ -231,23 +231,55 @@
     }
 
     /* -----------------------------------------------
-       9. Hero auto-rotation
+       9. Hero auto-rotation with smooth crossfade
     ----------------------------------------------- */
     const heroRotation = document.querySelector('[data-hero-rotation]');
     if (heroRotation) {
         const slides = heroRotation.querySelectorAll('[data-hero-slide]');
+        const videos = heroRotation.querySelectorAll('[data-hero-video]');
         const dots = heroRotation.querySelectorAll('[data-hero-dot]');
         let current = 0;
         let interval = null;
 
+        const playVideo = (index) => {
+            const video = videos[index];
+            if (video) {
+                video.currentTime = 0;
+                video.play().catch(() => {});
+            }
+        };
+
+        const pauseAllVideos = (exceptIndex) => {
+            videos.forEach((v, i) => {
+                if (i !== exceptIndex) {
+                    v.pause();
+                }
+            });
+        };
+
         const showSlide = (index) => {
             slides.forEach((s, i) => {
-                s.classList.toggle('showcase__slide--active', i === index);
+                if (i === index) {
+                    s.classList.remove('showcase__slide--prev');
+                    s.classList.add('showcase__slide--active');
+                    s.classList.add('showcase__slide--animating');
+                } else if (i === current) {
+                    s.classList.remove('showcase__slide--active');
+                    s.classList.add('showcase__slide--prev');
+                    // Remove animation class after transition
+                    setTimeout(() => s.classList.remove('showcase__slide--animating'), 800);
+                } else {
+                    s.classList.remove('showcase__slide--active', 'showcase__slide--prev', 'showcase__slide--animating');
+                }
             });
             dots.forEach((d, i) => {
                 d.classList.toggle('showcase__dot-btn--active', i === index);
             });
             current = index;
+
+            // Autoplay trailer for active slide
+            playVideo(current);
+            pauseAllVideos(current);
         };
 
         const startRotation = () => {
@@ -255,7 +287,7 @@
             stopRotation();
             interval = setInterval(() => {
                 showSlide((current + 1) % slides.length);
-            }, 7000);
+            }, 9000);
         };
 
         const stopRotation = () => {
@@ -264,6 +296,9 @@
                 interval = null;
             }
         };
+
+        // Autoplay first video
+        playVideo(0);
 
         // Dot click handlers
         dots.forEach((dot, i) => {
@@ -327,7 +362,33 @@
     };
 
     /* -----------------------------------------------
-       11. Scroll-to-top button
+       11. Scroll progress indicator
+    ----------------------------------------------- */
+    const createScrollProgress = () => {
+        const container = document.createElement('div');
+        container.className = 'scroll-progress';
+        container.innerHTML = '<div class="scroll-progress__bar" data-scroll-bar></div>';
+        document.body.prepend(container);
+        const bar = container.querySelector('[data-scroll-bar]');
+
+        let ticking = false;
+        window.addEventListener('scroll', () => {
+            if (!ticking) {
+                window.requestAnimationFrame(() => {
+                    const scrollTop = window.scrollY;
+                    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+                    const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+                    bar.style.width = progress + '%';
+                    ticking = false;
+                });
+                ticking = true;
+            }
+        }, { passive: true });
+    };
+    createScrollProgress();
+
+    /* -----------------------------------------------
+       12. Scroll-to-top button
     ----------------------------------------------- */
     const scrollBtn = document.querySelector('[data-scroll-top]');
     if (!scrollBtn) {
@@ -353,7 +414,48 @@
     }
 
     /* -----------------------------------------------
-       12. Keyboard shortcuts (global)
+       13. Touch swipe for carousels
+    ----------------------------------------------- */
+    document.querySelectorAll('.carousel__track').forEach(function (track) {
+        let startX = 0;
+        let startScrollLeft = 0;
+        let isSwiping = false;
+
+        track.addEventListener('touchstart', function (e) {
+            startX = e.touches[0].pageX;
+            startScrollLeft = this.scrollLeft;
+            isSwiping = true;
+        }, { passive: true });
+
+        track.addEventListener('touchmove', function (e) {
+            if (!isSwiping) return;
+            const deltaX = startX - e.touches[0].pageX;
+            this.scrollLeft = startScrollLeft + deltaX;
+        }, { passive: true });
+
+        track.addEventListener('touchend', function () {
+            isSwiping = false;
+        }, { passive: true });
+    });
+
+    /* -----------------------------------------------
+       14. Page entrance animation on load
+    ----------------------------------------------- */
+    document.querySelector('.site-main').classList.add('page-enter');
+
+    /* -----------------------------------------------
+       15. Button ripple effect
+    ----------------------------------------------- */
+    document.querySelectorAll('.button').forEach(function (btn) {
+        btn.addEventListener('pointerdown', function (e) {
+            const rect = this.getBoundingClientRect();
+            this.style.setProperty('--ripple-x', ((e.clientX - rect.left) / rect.width * 100) + '%');
+            this.style.setProperty('--ripple-y', ((e.clientY - rect.top) / rect.height * 100) + '%');
+        });
+    });
+
+    /* -----------------------------------------------
+       16. Keyboard shortcuts (global)
     ----------------------------------------------- */
     document.addEventListener('keydown', function (e) {
         if (e.target.matches('input, select, textarea, [contenteditable]')) return;

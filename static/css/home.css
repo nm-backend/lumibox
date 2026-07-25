@@ -5,22 +5,25 @@
 /* ---------- Hero auto-rotation ---------- */
 
 .showcase__slide {
-    display: none;
-    position: relative;
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 0;
 }
 
 .showcase__slide--active {
-    display: block;
-    animation: heroFadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) both;
+    position: relative;
+    opacity: 1;
+    z-index: 1;
 }
 
-@keyframes heroFadeIn {
-    from {
-        opacity: 0;
-    }
-    to {
-        opacity: 1;
-    }
+.showcase__slide--prev {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    z-index: 0;
+    transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .showcase__dots {
@@ -60,6 +63,9 @@
     }
     .showcase__slide--active {
         animation: none;
+    }
+    .showcase__slide {
+        transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1);
     }
 }
 
@@ -119,6 +125,11 @@
 
 .showcase:hover .showcase__backdrop {
     transform: scale(1.03);
+}
+
+.showcase__slide--animating .showcase__backdrop {
+    transform: scale(1.08);
+    transition: transform 4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Trailer video in hero */
@@ -219,7 +230,19 @@
     backdrop-filter: blur(var(--glass-blur));
     border: 1px solid var(--glass-border);
     border-radius: var(--radius-md);
-    animation: fadeUp 0.8s 0.3s cubic-bezier(0.4, 0, 0.2, 1) both;
+    animation: heroBadgeIn 0.8s 0.3s cubic-bezier(0.4, 0, 0.2, 1) both;
+    z-index: 2;
+}
+
+@keyframes heroBadgeIn {
+    from {
+        opacity: 0;
+        transform: translateY(16px) scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
 }
 
 .showcase__badge-value {
@@ -390,18 +413,16 @@
 
     .showcase__name {
         max-width: none;
-    }        .showcase__actions .button {
-            flex: 1;
-            min-height: var(--touch-target);
-        }
+    }
 
-        .showcase__badge {
-            display: none;
-        }
+    .showcase__actions .button {
+        flex: 1;
+        min-height: var(--touch-target);
+    }
 
-        .showcase__scrim {
-            background: linear-gradient(180deg, rgba(11, 13, 18, 0.5) 0%, var(--color-bg) 100%);
-        }
+    .showcase__badge {
+        display: none;
+    }
 
     .continue-card {
         min-width: 180px;

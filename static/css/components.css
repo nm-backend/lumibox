@@ -413,12 +413,20 @@
     color: var(--color-text-dim);
     font-size: 0.6rem;
     font-weight: 600;
-    transition: color var(--transition-fast);
+    transition: color var(--transition-fast), transform var(--transition-fast);
     text-decoration: none;
+    padding: var(--space-2) var(--space-3);
+    min-height: var(--touch-target);
+    min-width: var(--touch-target);
 }
 
 .bottom-nav__link:hover {
     color: var(--color-accent);
+    transform: translateY(-2px);
+}
+
+.bottom-nav__link:active {
+    transform: translateY(0);
 }
 
 .bottom-nav__icon {
@@ -434,7 +442,7 @@
         display: flex;
     }
     body {
-        padding-bottom: 68px;
+        padding-bottom: 72px;
     }
 }
 
@@ -485,7 +493,6 @@
 /* ---------- Mobile drawer nav ---------- */
 
 .mobile-nav {
-    display: none;
     position: fixed;
     top: var(--header-height);
     left: 0;
@@ -496,11 +503,18 @@
     gap: var(--space-1);
     padding: var(--space-4);
     background: var(--color-bg);
+    backdrop-filter: blur(12px);
     overflow-y: auto;
+    opacity: 0;
+    transform: translateY(-8px);
+    pointer-events: none;
+    transition: opacity var(--transition), transform var(--transition);
 }
 
 .mobile-nav--open {
-    display: flex;
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
 }
 
 .mobile-nav__link {
@@ -510,11 +524,13 @@
     color: var(--color-text);
     font-size: var(--text-lg);
     font-weight: 500;
-    transition: background var(--transition-fast);
+    transition: background var(--transition-fast), color var(--transition-fast), transform var(--transition-fast);
 }
 
 .mobile-nav__link:hover {
     background: var(--color-surface-hover);
+    color: var(--color-accent);
+    transform: translateX(4px);
 }
 
 /* ---------- Карточка фильма ---------- */
@@ -776,7 +792,6 @@
     display: flex;
     align-items: center;
     gap: var(--space-2);
-
     padding: 0 var(--space-3);
     background-color: var(--color-surface);
     border: 1px solid var(--color-border);
@@ -794,6 +809,7 @@
     padding: var(--space-2) 0;
     background: none;
     border: none;
+    color: var(--color-text);
 }
 
 .search__input::placeholder {
@@ -1076,8 +1092,25 @@
   components.css грузится из base.html на каждой странице.
 */
 
+/* Subtle section divider with cinema beam effect */
 .section {
     margin-bottom: var(--space-8);
+    position: relative;
+}
+
+.section::after {
+    content: "";
+    position: absolute;
+    bottom: calc(-1 * var(--space-8) / 2);
+    left: 10%;
+    right: 10%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--color-border), transparent);
+    pointer-events: none;
+}
+
+.section:last-of-type::after {
+    display: none;
 }
 
 .section__header {
@@ -1086,6 +1119,7 @@
     justify-content: space-between;
     gap: var(--space-4);
     margin-bottom: var(--space-4);
+    position: relative;
 }
 
 .section__title {
@@ -1094,7 +1128,18 @@
     letter-spacing: -0.01em;
 }
 
-/* Внутри шапки отступ задаёт сама шапка — иначе он удвоится. */
+/* Animated underline accent for section titles */
+.section__header .section__title::after {
+    content: "";
+    display: block;
+    width: 40px;
+    height: 3px;
+    margin-top: var(--space-2);
+    background: linear-gradient(90deg, var(--color-accent), transparent);
+    border-radius: 2px;
+}
+
+/* Inside header the underline isn't needed (title inline with link) */
 .section__header .section__title {
     margin-bottom: 0;
 }
@@ -1104,10 +1149,12 @@
     font-size: var(--text-sm);
     font-weight: 500;
     white-space: nowrap;
+    transition: color var(--transition-fast), transform var(--transition-fast);
 }
 
 .section__link:hover {
     color: var(--color-accent);
+    transform: translateX(2px);
 }
 
 /* ---------- Отзывы ---------- */
@@ -1473,4 +1520,110 @@
 .icon--sm {
     width: 13px;
     height: 13px;
+}
+
+/* ---------- Scroll progress indicator ---------- */
+
+.scroll-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    z-index: 100;
+    pointer-events: none;
+    background: transparent;
+}
+
+.scroll-progress__bar {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--color-accent), var(--color-play));
+    border-radius: 0 2px 2px 0;
+    transition: width 50ms linear;
+    box-shadow: 0 0 8px var(--color-accent-glow);
+}
+
+/* ---------- Page transition overlay ---------- */
+
+@keyframes pageFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.page-enter {
+    animation: pageFadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+/* ---------- Empty state enhancements ---------- */
+
+.empty-state {
+    padding: var(--space-8) var(--space-4);
+    text-align: center;
+    color: var(--color-text-muted);
+    animation: fadeUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+.empty-state__icon {
+    font-size: 3rem;
+    margin-bottom: var(--space-4);
+    opacity: 0.4;
+}
+
+/* ---------- Loading skeleton for sections ---------- */
+
+@keyframes sectionPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+}
+
+.section--loading {
+    animation: sectionPulse 1.5s ease-in-out infinite;
+    pointer-events: none;
+}
+
+.section--loading .carousel__track > * {
+    opacity: 0;
+}
+
+.section--loading .carousel__track {
+    min-height: 280px;
+    position: relative;
+}
+
+.section--loading .carousel__track::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, var(--skeleton-base) 25%, var(--skeleton-shine) 50%, var(--skeleton-base) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s ease-in-out infinite;
+    border-radius: var(--radius-md);
+}
+
+/* ---------- Button ripple effect ---------- */
+
+.button {
+    position: relative;
+    overflow: hidden;
+}
+
+.button::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at var(--ripple-x, 50%) var(--ripple-y, 50%), rgba(255, 255, 255, 0.15) 0%, transparent 60%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.button:active::after {
+    opacity: 1;
 }
