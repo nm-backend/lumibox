@@ -26,7 +26,7 @@ class RegisterView(CreateView):
 
     def form_valid(self, form):
         response = super().form_valid(form)
-        login(self.request, self.object)
+        login(self.request, self.object, backend="django.contrib.auth.backends.ModelBackend")
         messages.success(self.request, f"Добро пожаловать, {self.object.display_name}!")
         return response
 
