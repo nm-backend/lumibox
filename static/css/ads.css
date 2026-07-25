@@ -23,18 +23,16 @@
     .ad-rail {
         display: block;
         position: fixed;
-        top: 50%;
-        right: var(--space-4);
-        transform: translateY(-50%);
+        top: calc(var(--header-height) + var(--space-10));
+        right: max(var(--space-4), calc((100vw - var(--container-width) - 200px) / 2));
         z-index: 5;
     }
 
     .ad-rail--left {
         display: block;
         position: fixed;
-        top: 50%;
-        left: var(--space-4);
-        transform: translateY(-50%);
+        top: calc(var(--header-height) + var(--space-10));
+        left: max(var(--space-4), calc((100vw - var(--container-width) - 200px) / 2));
         z-index: 5;
     }
 
