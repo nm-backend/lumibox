@@ -16,40 +16,42 @@ def custom_500(request):
 
 
 def health_check(request):
-    """
-    Проба живости для балансировщика и мониторинга хостинга.
+    """Проба живости для балансировщика и мониторинга."""
+    import time
+    start = time.monotonic()
 
-    Платформа опрашивает этот адрес и перезапускает контейнер, если он
-    молчит. Проверка дешёвая, но честная: простое «200 OK» скрыло бы
-    отказавшую базу. Пингуем базу и кэш по отдельности, чтобы в ответе
-    было видно, что именно упало.
-
-    Статус ответа определяет ТОЛЬКО база: без неё сайт не работает, и
-    перезапуск может помочь переподключиться. Кэш сообщаем отдельно, но
-    из-за него в 503 не уходим — иначе внешний сбой Redis гонял бы
-    контейнер по кругу перезапусков, ничего не исправляя.
-    """
     database = "ok"
+    db_latency_ms = 0
     try:
         with connection.cursor() as cursor:
+            db_start = time.monotonic()
             cursor.execute("SELECT 1")
+            db_latency_ms = round((time.monotonic() - db_start) * 1000)
     except Exception:
         database = "fail"
 
     cache_state = "ok"
+    cache_latency_ms = 0
     try:
+        cache_start = time.monotonic()
         cache.set("healthz", "1", 5)
         if cache.get("healthz") != "1":
             cache_state = "fail"
+        cache_latency_ms = round((time.monotonic() - cache_start) * 1000)
     except Exception:
         cache_state = "fail"
 
     db_ok = database == "ok"
+    total_ms = round((time.monotonic() - start) * 1000)
+
     return JsonResponse(
         {
             "status": "ok" if db_ok and cache_state == "ok" else "degraded",
             "database": database,
+            "database_latency_ms": db_latency_ms,
             "cache": cache_state,
+            "cache_latency_ms": cache_latency_ms,
+            "total_latency_ms": total_ms,
         },
         status=200 if db_ok else 503,
     )
