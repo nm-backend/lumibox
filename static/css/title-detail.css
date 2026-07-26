@@ -39,9 +39,7 @@
 .film-hero__scrim {
     position: absolute;
     inset: 0;
-    background:
-        linear-gradient(180deg, rgba(11, 13, 18, 0.55) 0%, var(--color-bg) 100%),
-        linear-gradient(90deg, rgba(11, 13, 18, 0.9) 0%, rgba(11, 13, 18, 0.25) 70%);
+    background: var(--scrim-hero);
 }
 
 .film-hero__inner {

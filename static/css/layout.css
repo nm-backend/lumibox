@@ -7,6 +7,29 @@
     padding: 0 var(--space-4);
 }
 
+/* ---------- Skip-link (accessibility) ---------- */
+
+.skip-link {
+    position: absolute;
+    top: -100%;
+    left: 0;
+    z-index: 100;
+    padding: var(--space-3) var(--space-5);
+    background: var(--color-accent);
+    color: var(--color-on-accent);
+    font-weight: 600;
+    font-size: var(--text-sm);
+    text-decoration: none;
+    white-space: nowrap;
+    transition: top var(--transition-fast);
+}
+
+.skip-link:focus {
+    top: 0;
+    outline: 2px solid var(--color-on-accent);
+    outline-offset: 2px;
+}
+
 /* ---------- Шапка ---------- */
 
 .site-header {
@@ -14,7 +37,7 @@
     top: 0;
     z-index: 10;
 
-    background-color: rgba(11, 13, 18, 0.85);
+    background-color: var(--header-bg);
     backdrop-filter: blur(12px);
     border-bottom: 1px solid var(--color-border);
 }

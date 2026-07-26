@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://moviehub.onrender.com/sitemap.xml

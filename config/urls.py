@@ -12,12 +12,17 @@ from django.urls import include, path, re_path
 from django.views.generic import TemplateView
 
 from apps.catalog.sitemaps import sitemaps
-from apps.core.views import health_check, serve_public_media
+from apps.core.views import cache_version, health_check, serve_public_media, sse_events
 
 urlpatterns = [
     # Проба живости для хостинга и мониторинга. Первой в списке и без
     # завершающего редиректа: платформа должна получать ответ мгновенно.
     path("healthz/", health_check, name="health"),
+
+    # Версия кэша для фронтенд-pooling'а (лёгкий эндпоинт, один cache.get)
+    path("api/v1/cache-version/", cache_version, name="cache-version"),
+    # Server-Sent Events для live-обновлений (Redis Pub/Sub)
+    path("api/v1/events/", sse_events, name="sse-events"),
 
     path("admin/", admin.site.urls),
 

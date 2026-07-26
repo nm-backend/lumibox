@@ -22,11 +22,48 @@ from apps.catalog.services import clear_home_cache, clear_reference_cache
 logger = logging.getLogger(__name__)
 
 # ─── Ключи кэша ─────────────────────────────────────────────────────
+
+# Глобальный счётчик версий кэша. Инкрементируется при каждой инвалидации.
+# Фронтенд опрашивает его раз в 60с: если значение изменилось — пора
+# обновить страницу, чтобы пользователь увидел новый контент.
+# Хранится в Redis (или LocMem) и живёт вечно, пока не изменят вручную.
+CACHE_VERSION_KEY = "cache:global_version:v1"
+
 SIMILAR_CACHE_PREFIX = "catalog:similar:"
 RECOMMENDATIONS_CACHE_PREFIX = "catalog:recommendations:"
 YEAR_CHOICES_CACHE_KEY = "catalog:year_choices:v1"
 
 # ─── Действия инвалидации ───────────────────────────────────────────
+
+
+def _bump_cache_version():
+    """Инкрементирует глобальный счётчик версий кэша.
+
+    В Redis — атомарный incr(). В LocMemCache (incr() не поддерживается) —
+    читаем-инкрементируем-пишем. Оба варианта работают без глобального
+    состояния модуля.
+    """
+    try:
+        cache.incr(CACHE_VERSION_KEY)
+        return
+    except (ValueError, NotImplementedError):
+        pass
+
+    # LocMemCache: incr не работает — делаем read+incr+set
+    try:
+        v = cache.get(CACHE_VERSION_KEY, 0)
+        cache.set(CACHE_VERSION_KEY, v + 1)
+    except Exception:
+        pass
+
+
+def get_cache_version():
+    """Возвращает текущую версию кэша для фронтенд-pooling'а."""
+    try:
+        version = cache.get(CACHE_VERSION_KEY, 0)
+    except Exception:
+        version = 0
+    return version
 
 
 def _clear_home_and_collections():
@@ -130,6 +167,7 @@ def invalidate_for_model(model_label: str) -> None:
         except Exception:
             logger.exception("Cache invalidation failed for %s", model_label)
 
+    _bump_cache_version()
     _publish_invalidation(model_label)
 
 

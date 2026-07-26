@@ -36,6 +36,7 @@
     --color-play-hover: #f01f4f;
     --color-play-dim: rgba(225, 29, 72, 0.12);
     --color-play-glow: rgba(225, 29, 72, 0.25);
+    --color-play-ambient: rgba(225, 29, 72, 0.03);
     --color-on-play: #ffffff;
 
     /* Отражения */
@@ -108,32 +109,69 @@
     --skeleton-shine: var(--color-surface-hover);
 }
 
-/* ---------- Светлая тема: кинозал днём ---------- */
+/* ---------- Светлая тема: кинозал днём ----------
+
+  Принципы:
+  — тёплая, «кинотеатральная» палитра, но светлая — будто дневной сеанс;
+  — мягкий контраст без грязных теней;
+  — стекло с реальной глубиной (белый + полупрозрачная тень);
+  — акцент читается на белом, но не кричит.
+*/
 
 [data-theme="light"] {
     --color-bg: #f2f4f8;
     --color-surface: #ffffff;
-    --color-surface-hover: #e8ebf2;
-    --color-border: #d4d9e3;
-    --color-text: #12141c;
-    --color-text-muted: #5a6278;
-    --color-text-dim: #8a93aa;
-    --color-accent: #d49001;
-    --color-accent-hover: #b87a00;
-    --color-accent-dim: rgba(212, 144, 1, 0.08);
+    --color-surface-hover: #edf0f5;
+    --color-border: #dce0e8;
+
+    --color-text: #14161c;
+    --color-text-muted: #5c6478;
+    --color-text-dim: #9098aa;
+
+    --color-accent: #cc8800;
+    --color-accent-hover: #b37700;
+    --color-accent-dim: rgba(204, 136, 0, 0.10);
+    --color-accent-glow: rgba(204, 136, 0, 0.06);
     --color-on-accent: #ffffff;
+
     --color-play: #c51a44;
     --color-play-hover: #d91f4d;
-    --color-play-dim: rgba(197, 26, 68, 0.10);
-    --color-play-glow: rgba(197, 26, 68, 0.20);
+    --color-play-dim: rgba(197, 26, 68, 0.08);
+    --color-play-glow: rgba(197, 26, 68, 0.18);
+    --color-play-ambient: rgba(197, 26, 68, 0.03);
     --color-on-play: #ffffff;
-    --glass-bg: rgba(255, 255, 255, 0.82);
-    --glass-border: rgba(212, 217, 227, 0.6);
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.06);
-    --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.06), 0 4px 18px rgba(0, 0, 0, 0.04);
-    --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.06), 0 8px 28px rgba(0, 0, 0, 0.04);
-    --shadow-accent: 0 8px 24px rgba(212, 144, 1, 0.12);
-    --shadow-play: 0 4px 16px rgba(197, 26, 68, 0.30);
+
+    --color-success: #22c55e;
+    --color-error: #e53e3e;
+    --color-info: #3b82f6;
+
+    --glass-bg: rgba(255, 255, 255, 0.75);
+    --glass-border: rgba(220, 224, 232, 0.7);
+
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.10);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.10), 0 6px 20px rgba(0, 0, 0, 0.06);
+    --shadow-card: 0 4px 16px rgba(0, 0, 0, 0.12), 0 8px 32px rgba(0, 0, 0, 0.08);
+    --shadow-accent: 0 8px 24px rgba(204, 136, 0, 0.15);
+    --shadow-glass: 0 8px 32px rgba(0, 0, 0, 0.10);
+    --shadow-play: 0 4px 16px rgba(197, 26, 68, 0.25);
+
+    /* Hero scrim — тёплый градиент (не чёрный) для светлой темы */
+    --hero-scrim-start: rgba(242, 244, 248, 0.15);
+    --hero-scrim-end: var(--color-bg);
+    --hero-scrim-side: rgba(242, 244, 248, 0.85);
+
+    /* Оверлеи — для светлой темы используем полупрозрачный
+       тёплый серый вместо чёрного, чтобы не было «чёрных засветов» */
+    --overlay-dark: rgba(44, 46, 54, 0.82);
+    --overlay-mid: rgba(44, 46, 54, 0.45);
+    --overlay-light: rgba(44, 46, 54, 0.18);
+    --overlay-glass: rgba(44, 46, 54, 0.10);
+
+    --scrim-bottom: linear-gradient(180deg, transparent 45%, rgba(44, 46, 54, 0.85) 100%);
+    --scrim-hero: linear-gradient(180deg, rgba(242, 244, 248, 0.55) 0%, var(--color-bg) 100%),
+                  linear-gradient(90deg, rgba(242, 244, 248, 0.9) 0%, rgba(242, 244, 248, 0.25) 70%);
+
+    --header-bg: rgba(255, 255, 255, 0.88);
 }
 
 /* ---------- Typography base layer ---------- */

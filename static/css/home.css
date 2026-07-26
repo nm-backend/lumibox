@@ -91,7 +91,7 @@
     right: -10%;
     width: 60%;
     height: 80%;
-    background: radial-gradient(ellipse at 50% 100%, rgba(255, 184, 48, 0.04) 0%, transparent 70%);
+    background: radial-gradient(ellipse at 50% 100%, var(--color-accent-glow) 0%, transparent 70%);
     pointer-events: none;
     z-index: 0;
 }
@@ -107,7 +107,7 @@
     left: -10%;
     width: 50%;
     height: 60%;
-    background: radial-gradient(ellipse at 30% 50%, rgba(225, 29, 72, 0.03) 0%, transparent 60%);
+    background: radial-gradient(ellipse at 30% 50%, var(--color-play-ambient) 0%, transparent 60%);
     pointer-events: none;
     z-index: 0;
 }
@@ -146,8 +146,8 @@
     position: absolute;
     inset: 0;
     background:
-        linear-gradient(180deg, rgba(11, 13, 18, 0.45) 0%, var(--color-bg) 100%),
-        linear-gradient(90deg, rgba(11, 13, 18, 0.92) 0%, rgba(11, 13, 18, 0.2) 65%);
+        linear-gradient(180deg, var(--hero-scrim-start, rgba(7, 8, 13, 0.45)) 0%, var(--color-bg) 100%),
+        linear-gradient(90deg, var(--hero-scrim-side, rgba(7, 8, 13, 0.92)) 0%, transparent 65%);
 }
 
 .showcase__inner {
@@ -342,7 +342,7 @@
 .continue-card__shade {
     position: absolute;
     inset: 0;
-    background: linear-gradient(0deg, rgba(4, 6, 12, .9), transparent 70%);
+    background: linear-gradient(0deg, var(--overlay-dark) 0%, transparent 70%);
 }
 
 .continue-card__play {
@@ -408,7 +408,7 @@
     }
 
     .showcase__scrim {
-        background: linear-gradient(180deg, rgba(11, 13, 18, 0.5) 0%, var(--color-bg) 100%);
+        background: linear-gradient(180deg, var(--hero-scrim-start, rgba(7, 8, 13, 0.5)) 0%, var(--color-bg) 100%);
     }
 
     .showcase__name {

@@ -203,7 +203,10 @@
     ----------------------------------------------- */
     document.querySelectorAll('[data-tabs]').forEach(function (container) {
         const tabs = container.querySelectorAll('[data-tab]');
-        const contents = container.querySelectorAll('[data-tab-content]');
+        // Content divs are siblings of [data-tabs], not children,
+        // so we search from the parent scope.
+        const contentRoot = container.parentElement || document;
+        const contents = contentRoot.querySelectorAll('[data-tab-content]');
 
         tabs.forEach(function (tab) {
             tab.addEventListener('click', function () {
@@ -211,7 +214,7 @@
                 tabs.forEach(t => t.classList.remove('tab--active'));
                 contents.forEach(c => c.classList.remove('tab-content--active'));
                 this.classList.add('tab--active');
-                const content = container.querySelector(`[data-tab-content="${target}"]`);
+                const content = contentRoot.querySelector(`[data-tab-content="${target}"]`);
                 if (content) content.classList.add('tab-content--active');
             });
         });
@@ -455,7 +458,172 @@
     });
 
     /* -----------------------------------------------
-       16. Keyboard shortcuts (global)
+       16. Cookie consent banner
+    ----------------------------------------------- */
+    const cookieConsent = document.querySelector('[data-cookie-consent]');
+    const cookieAccept = document.querySelector('[data-cookie-accept]');
+
+    if (cookieConsent && cookieAccept) {
+        // Баннер скрыт по умолчанию (cookie-consent--hidden уже в HTML).
+        // Показываем только если согласия ещё нет.
+        try {
+            if (localStorage.getItem('moviehub-cookie-consent') !== 'accepted') {
+                cookieConsent.classList.remove('cookie-consent--hidden');
+            }
+        } catch {
+            // localStorage недоступен (private browsing) — показываем баннер
+            cookieConsent.classList.remove('cookie-consent--hidden');
+        }
+
+        cookieAccept.addEventListener('click', function () {
+            try {
+                localStorage.setItem('moviehub-cookie-consent', 'accepted');
+            } catch {}
+            cookieConsent.classList.add('cookie-consent--hidden');
+        });
+    }
+
+    /* -----------------------------------------------
+       17. Live update: polling cache version + SSE
+    ----------------------------------------------- */
+    /*
+      Стратегия:
+      1. Пытаемся подключиться к SSE (работает через Redis Pub/Sub,
+         или keepalive-pings если Redis недоступен).
+      2. Если SSE не работает — переходим на polling раз в 60 секунд.
+      3. При изменении версии кэша: показываем уведомление
+         «Новый контент» с кнопкой «Обновить».
+      4. Через 30 секунд авто-обновление (если пользователь не кликнул).
+    */
+
+    let currentCacheVersion = 0;
+    let updateTimer = null;
+    let refreshBanner = null;
+
+    // Создаём баннер для уведомления о новом контенте
+    function createRefreshBanner() {
+        if (refreshBanner) return refreshBanner;
+        refreshBanner = document.createElement('div');
+        refreshBanner.className = 'refresh-banner refresh-banner--hidden';
+        refreshBanner.setAttribute('role', 'status');
+        refreshBanner.setAttribute('aria-live', 'polite');
+        refreshBanner.innerHTML = `
+            <span class="refresh-banner__icon">🆕</span>
+            <span class="refresh-banner__text">${window.MOVIEHUB_I18N?.newContent || 'Появился новый контент'}</span>
+            <button class="refresh-banner__btn" type="button">${window.MOVIEHUB_I18N?.refresh || 'Обновить'}</button>
+            <button class="refresh-banner__close" type="button" aria-label="${window.MOVIEHUB_I18N?.dismiss || 'Закрыть'}">✕</button>
+        `;
+        refreshBanner.querySelector('.refresh-banner__btn').addEventListener('click', function () {
+            window.location.reload();
+        });
+        refreshBanner.querySelector('.refresh-banner__close').addEventListener('click', function () {
+            hideRefreshBanner();
+        });
+        document.body.appendChild(refreshBanner);
+        return refreshBanner;
+    }
+
+    function showRefreshBanner() {
+        const banner = createRefreshBanner();
+        banner.classList.remove('refresh-banner--hidden');
+
+        // Авто-обновление через 30 секунд
+        clearTimeout(updateTimer);
+        updateTimer = setTimeout(function () {
+            window.location.reload();
+        }, 30000);
+    }
+
+    function hideRefreshBanner() {
+        if (refreshBanner) {
+            refreshBanner.classList.add('refresh-banner--hidden');
+        }
+        clearTimeout(updateTimer);
+    }
+
+    function onCacheVersionChanged(newVersion) {
+        if (currentCacheVersion === 0) {
+            currentCacheVersion = newVersion;
+            return;
+        }
+        if (newVersion !== currentCacheVersion) {
+            currentCacheVersion = newVersion;
+            showRefreshBanner();
+        }
+    }
+
+    // Пробуем SSE
+    function trySSE() {
+        try {
+            const evtSource = new EventSource('/api/v1/events/');
+
+            evtSource.addEventListener('connected', function () {
+                // SSE работает — polling не нужен
+            });
+
+            evtSource.addEventListener('update', function (e) {
+                try {
+                    const data = JSON.parse(e.data);
+                    if (data && data.v !== undefined) {
+                        onCacheVersionChanged(data.v);
+                    }
+                } catch {}
+            });
+
+            evtSource.addEventListener('invalidate', function () {
+                // Можно выполнить целевое обновление секций в будущем
+            });
+
+            evtSource.onerror = function () {
+                evtSource.close();
+                // SSE отвалился — переходим на polling
+                startPolling();
+            };
+
+            // Если через 3 секунды не пришло connected — SSE не работает,
+            // переключаемся на polling. Короткий таймаут: не хотим
+            // блокировать Gunicorn-воркер дольше необходимого.
+            setTimeout(function () {
+                if (evtSource.readyState !== EventSource.OPEN) {
+                    evtSource.close();
+                    startPolling();
+                }
+            }, 3000);
+        } catch {
+            startPolling();
+        }
+    }
+
+    // Fallback polling раз в 60 секунд
+    let pollTimer = null;
+
+    function startPolling() {
+        // Уже запущен?
+        if (pollTimer) return;
+
+        function poll() {
+            fetch('/api/v1/cache-version/')
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    if (data && data.v !== undefined) {
+                        onCacheVersionChanged(data.v);
+                    }
+                })
+                .catch(function () { /* тихо */ })
+                .then(function () {
+                    pollTimer = setTimeout(poll, 60000);
+                });
+        }
+
+        // Первый опрос через 5 секунд (даём странице загрузиться)
+        pollTimer = setTimeout(poll, 5000);
+    }
+
+    // Стартуем: пробуем SSE, если не вышло — polling
+    trySSE();
+
+    /* -----------------------------------------------
+       18. Keyboard shortcuts (global)
     ----------------------------------------------- */
     document.addEventListener('keydown', function (e) {
         if (e.target.matches('input, select, textarea, [contenteditable]')) return;

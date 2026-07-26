@@ -12,6 +12,7 @@ html {
     scroll-behavior: smooth;
 }
 
+
 @media (prefers-reduced-motion: reduce) {
     html {
         scroll-behavior: auto;
@@ -35,6 +36,10 @@ body {
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    /* Smooth theme transition — всё, что меняется при переключении темы,
+       анимируется. Без этого переключение темы выглядит рывком. */
+    transition: background-color var(--transition-slow),
+                color var(--transition-slow);
 }
 
 img {
@@ -147,3 +152,30 @@ button {
 img[data-loaded] {
     animation: blurUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) both;
 }
+
+/* ---------- Custom scrollbar (WebKit/Chrome) ---------- */
+
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--scrollbar-track, transparent);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--scrollbar-thumb, var(--color-border));
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--color-text-dim);
+}
+
+/* Thin scrollbar for Firefox */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: var(--scrollbar-thumb, var(--color-border)) var(--scrollbar-track, transparent);
+}
+

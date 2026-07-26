@@ -345,6 +345,18 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # Логирование — раздел 7 ТЗ.
 # Пишем в консоль: контейнер и systemd сами собирают stdout, и складывать
 # логи в файл внутри контейнера значит однажды их потерять.
+# ─── Python 3.14 (compatibility patches) ──────────────────────────────
+# Python 3.14 removed __dict__ from super() objects. Django 5.1.x
+# and django-axes rely on it.  Apply runtime patches early so every
+# subsequent import sees the fixed code.
+try:
+    from apps.core.py314_compat import apply_py314_patches
+
+    apply_py314_patches()
+except ImportError:
+    pass  # Not a critical failure; patches are only needed on Python 3.14+
+
+
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,

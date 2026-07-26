@@ -1,18 +1,6 @@
 User-agent: *
-
-# Личные страницы и служебные адреса роботу индексировать незачем.
-Disallow: /admin/
-Disallow: /profile/
-Disallow: /favorites/
-Disallow: /history/
-Disallow: /login/
-Disallow: /register/
-Disallow: /logout/
-
-# Страницы с фильтрами — это тот же каталог в разных сочетаниях.
-# Без запрета робот обойдёт тысячи почти одинаковых адресов.
-Disallow: /catalog/?
-
 Allow: /
 
-Sitemap: {{ request.scheme }}://{{ request.get_host }}/sitemap.xml
+# Замените URL ниже на адрес вашего сайта после деплоя.
+# Например: Sitemap: https://moviehub-web.onrender.com/sitemap.xml
+Sitemap: https://YOUR-DOMAIN.com/sitemap.xml

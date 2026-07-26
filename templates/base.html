@@ -8,15 +8,38 @@
     <title>{% block page_title %}{% trans "MovieHub — каталог фильмов и сериалов" %}{% endblock %}</title>
     <meta name="description" content="{% block page_description %}{% trans "Каталог фильмов и сериалов: поиск, фильтры, подборки." %}{% endblock %}">
 
+    {% block social_meta %}
+    <meta property="og:title" content="{% block og_title %}{% trans "MovieHub — каталог фильмов и сериалов" %}{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}{% trans "Каталог фильмов и сериалов с поиском, фильтрами и подборками." %}{% endblock %}">
+    <meta property="og:type" content="{% block og_type %}website{% endblock %}">
+    <meta property="og:url" content="{{ request.build_absolute_uri }}">
+    {% block og_image_tag %}
+    <meta property="og:image" content="{% block og_image %}{% static 'apple-touch-icon.png' %}{% endblock %}">
+    {% endblock %}
+    <meta property="og:site_name" content="MovieHub">
+    <meta property="og:locale" content="{{ LANGUAGE_CODE }}">
+    <meta name="twitter:card" content="{% block twitter_card %}summary{% endblock %}">
+    <meta name="twitter:title" content="{% block twitter_title %}{% trans "MovieHub — каталог фильмов и сериалов" %}{% endblock %}">
+    <meta name="twitter:description" content="{% block twitter_description %}{% trans "Каталог фильмов и сериалов с поиском, фильтрами и подборками." %}{% endblock %}">
+    {% block twitter_image_tag %}
+    <meta name="twitter:image" content="{% block twitter_image %}{% static 'apple-touch-icon.png' %}{% endblock %}">
+    {% endblock %}
+    {% endblock social_meta %}
+
+    <link rel="canonical" href="{{ request.build_absolute_uri }}">
+    <link rel="icon" type="image/svg+xml" href="{% static 'favicon.svg' %}">
+    <link rel="apple-touch-icon" href="{% static 'apple-touch-icon.png' %}">
     <link rel="stylesheet" href="{% static 'css/variables.css' %}">
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
     <link rel="stylesheet" href="{% static 'css/layout.css' %}">
     <link rel="stylesheet" href="{% static 'css/components.css' %}">
     <link rel="stylesheet" href="{% static 'css/footer.css' %}">
     <link rel="stylesheet" href="{% static 'css/ads.css' %}">
+    {% block json_ld %}{% endblock %}
     {% block extra_css %}{% endblock %}
 </head>
 <body>
+    <a class="skip-link" href="#main-content">{% trans "Перейти к содержимому" %}</a>
     <div class="cinema-glow" aria-hidden="true"></div>
     <header class="site-header">
         <div class="container site-header__inner">
@@ -113,7 +136,7 @@
         {% endif %}
     </nav>
 
-    <main class="site-main{% if messages %} site-main--with-messages{% endif %}">
+    <main id="main-content" class="site-main{% if messages %} site-main--with-messages{% endif %}">
         {% if messages %}
             <div class="container">
                 <ul class="messages">
@@ -130,6 +153,16 @@
             {% block content %}{% endblock %}
         </div>
     </main>
+
+    {# Cookie consent banner — скрыт по умолчанию, пока JS не проверит localStorage #}
+    <div class="cookie-consent cookie-consent--hidden" data-cookie-consent role="dialog" aria-label="Cookie consent">
+        <p class="cookie-consent__text">
+            {% trans "Мы используем cookie для авторизации и сохранения настроек." %}
+        </p>
+        <button class="cookie-consent__btn" type="button" data-cookie-accept>
+            {% trans "Принять" %}
+        </button>
+    </div>
 
     {# Toast notifications #}
     <div class="toast-container" data-toast-container></div>
@@ -171,6 +204,15 @@
 
     {% include "includes/ad_rail.html" %}
     {% include "includes/footer.html" %}
+
+    {# i18n-строки для JS: передаём переводы в глобальную переменную #}
+    <script>
+    window.MOVIEHUB_I18N = {
+        newContent: '{% trans "Появился новый контент"|escapejs %}',
+        refresh: '{% trans "Обновить"|escapejs %}',
+        dismiss: '{% trans "Закрыть"|escapejs %}'
+    };
+    </script>
 
     <script src="{% static 'js/favorite.js' %}" defer></script>
     <script src="{% static 'js/app.js' %}" defer></script>

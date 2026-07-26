@@ -3,9 +3,40 @@
 
 {% block page_title %}{% blocktranslate with name=title.name year=title.release_year %}{{ name }} ({{ year }}) — MovieHub{% endblocktranslate %}{% endblock %}
 {% block page_description %}{{ title.get_meta_description }}{% endblock %}
+{% block og_type %}movie{% endblock %}
+{% block og_title %}{{ title.name }} ({{ title.release_year }}) — MovieHub{% endblock %}
+{% block og_description %}{{ title.get_meta_description }}{% endblock %}
+{% block og_image %}{% if title.poster %}{{ request.scheme }}://{{ request.get_host }}{{ title.poster.url }}{% else %}{% static 'apple-touch-icon.png' %}{% endif %}{% endblock %}
+{% block twitter_card %}summary_large_image{% endblock %}
+{% block twitter_title %}{{ title.name }} ({{ title.release_year }}) — MovieHub{% endblock %}
+{% block twitter_description %}{{ title.get_meta_description }}{% endblock %}
+{% block twitter_image %}{% if title.poster %}{{ request.scheme }}://{{ request.get_host }}{{ title.poster.url }}{% else %}{% static 'apple-touch-icon.png' %}{% endif %}{% endblock %}
 
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'css/title-detail.css' %}">
+{% endblock %}
+
+{% block json_ld %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "{% if title.is_series %}TVSeries{% else %}Movie{% endif %}",
+  "name": "{{ title.name|safe }}",
+  "description": "{{ title.get_meta_description|safe }}",
+  "datePublished": "{{ title.release_year }}",
+  {% if title.duration_minutes %}"duration": "PT{{ title.duration_minutes }}M",{% endif %}
+  {% if title.rating_average %}
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": {{ title.rating_average|stringformat:".1f" }},
+    "bestRating": 10,
+    "ratingCount": {{ title.rating_count }}
+  },
+  {% endif %}
+  {% if title.poster %}"image": "{{ request.scheme }}://{{ request.get_host }}{{ title.poster.url }}",{% endif %}
+  "url": "{{ request.build_absolute_uri }}"
+}
+</script>
 {% endblock %}
 
 {% block extra_js %}

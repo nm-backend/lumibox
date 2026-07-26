@@ -1,7 +1,15 @@
+import logging
+import time
+
+from django.conf import settings
 from django.core.cache import cache
 from django.db import connection
-from django.http import Http404, JsonResponse
+from django.http import Http404, JsonResponse, StreamingHttpResponse
 from django.views.static import serve
+
+from apps.core.cache import get_cache_version
+
+logger = logging.getLogger(__name__)
 
 
 def health_check(request):
@@ -50,6 +58,115 @@ def serve_public_media(request, path, document_root=None):
     if normalized_path.startswith("private_media/"):
         raise Http404("Файл доступен только через защищённый маршрут.")
     return serve(request, path, document_root=document_root)
+
+
+def cache_version(request):
+    """
+    Лёгкий эндпоинт для фронтенд-pooling'а.
+
+    Возвращает текущую версию кэша. Клиент опрашивает раз в 60 секунд:
+    если значение изменилось — пора обновить страницу.
+    Один запрос = один cache.get(). Никакой нагрузки на базу.
+    """
+    response = JsonResponse({"v": get_cache_version()})
+    response["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    return response
+
+
+def sse_events(request):
+    """
+    Server-Sent Events: стримит события инвалидации кэша в реальном времени.
+
+    Использует Redis Pub/Sub для кросс-процессной коммуникации.
+    Если Redis недоступен — переходит в режим keepalive-пинга
+    (клиент сам переключится на polling).
+
+    ВАЖНО: SSE в WSGI (Gunicorn) блокирует воркер на всё время соединения.
+    Для продакшена с сотнями одновременных пользователей используйте
+    этот эндпоинт через ASGI-сервер (Daphne/Uvicorn) или полагайтесь
+    на polling через /api/v1/cache-version/.
+    """
+    last_version = get_cache_version()
+
+    def event_stream():
+        nonlocal last_version
+
+        redis_pubsub = None
+        redis_client = None
+
+        # Пытаемся подключиться к Redis Pub/Sub
+        if settings.REDIS_URL:
+            try:
+                from redis import Redis
+
+                redis_client = Redis.from_url(settings.REDIS_URL, socket_connect_timeout=2, socket_timeout=2)
+                redis_pubsub = redis_client.pubsub()
+                redis_pubsub.subscribe("moviehub:cache:invalidate")
+                logger.info("SSE: подключились к Redis Pub/Sub")
+            except Exception as exc:
+                logger.warning("SSE: Redis недоступен (%s), переходим в режим polling", exc)
+                redis_pubsub = None
+
+        yield "retry: 15000\n"  # переподключение через 15 секунд
+        yield "event: connected\ndata: {}\n\n"
+
+        last_keepalive = time.monotonic()
+
+        try:
+            while True:
+                # Если есть Redis — слушаем Pub/Sub
+                if redis_pubsub is not None:
+                    try:
+                        message = redis_pubsub.get_message(timeout=5.0)
+                        if message and message["type"] == "message":
+                            new_version = get_cache_version()
+                            if new_version != last_version:
+                                last_version = new_version
+                                yield f"event: invalidate\ndata: {message['data'].decode()}\n\n"
+                                yield f'event: update\ndata: {{"v": {new_version}}}\n\n'
+                    except Exception:
+                        # Redis отвалился — переключаемся на polling
+                        redis_pubsub = None
+                        continue
+
+                # Если Redis нет — polling с keepalive
+                now = time.monotonic()
+                if now - last_keepalive >= 15.0:
+                    new_version = get_cache_version()
+                    if new_version != last_version:
+                        last_version = new_version
+                        yield f'event: update\ndata: {{"v": {new_version}}}\n\n'
+                    yield ': keepalive\n\n'
+                    last_keepalive = now
+                else:
+                    time.sleep(2.0)
+
+        except GeneratorExit:
+            pass
+        finally:
+            if redis_pubsub:
+                try:
+                    redis_pubsub.unsubscribe()
+                    redis_pubsub.close()
+                except Exception:
+                    pass
+            if redis_client:
+                try:
+                    redis_client.close()
+                except Exception:
+                    pass
+
+    response = StreamingHttpResponse(
+        event_stream(),
+        content_type="text/event-stream",
+    )
+    response["Cache-Control"] = "no-cache, no-store"
+    response["X-Accel-Buffering"] = "no"
+    response["Connection"] = "keep-alive"
+    # Отключаем сжатие: GZipMiddleware буферизирует стрим,
+    # что убивает SSE (клиент не получает данные, пока стрим не закончится).
+    response["Content-Encoding"] = "identity"
+    return response
 
 
 class ElidedPaginationMixin:

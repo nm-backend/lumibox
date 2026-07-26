@@ -10,6 +10,12 @@
     gap: var(--space-5) var(--space-4);
 }
 
+/* Карточки в сетке наследуют появление от проекта.fadeIn
+   через родительский .reveal (scroll-reveal в app.js).
+   Анимации на самих карточках не нужны — они конфликтуют
+   с системой раскрытия при скролле. */
+
+
 /* ---------- Карусель (горизонтальный скролл) ---------- */
 
 .carousel {
@@ -91,11 +97,28 @@
     100% { background-position: 200% 0; }
 }
 
+/* Skeleton with subtle pulse overlay — feels like a living placeholder,
+   not just a static gray block. The shimmer moves across, and the pulse
+   adds a breathing effect on top. */
 .skeleton {
+    position: relative;
     background: linear-gradient(90deg, var(--skeleton-base) 25%, var(--skeleton-shine) 50%, var(--skeleton-base) 75%);
     background-size: 200% 100%;
     animation: shimmer 1.5s ease-in-out infinite;
     border-radius: var(--radius-md);
+    overflow: hidden;
+}
+
+/* Subtle breathing overlay on skeleton — adds depth
+   without overwhelming the placeholder. Uses accent-glow
+   so it works on both themes. */
+.skeleton::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, transparent 40%, var(--color-accent-glow) 50%, transparent 60%);
+    animation: shimmer 2s ease-in-out infinite;
+    background-size: 200% 100%;
 }
 
 .skeleton--poster {
@@ -550,6 +573,7 @@
     background-color: var(--color-surface);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
     transition: border-color var(--transition), transform var(--transition-spring),
                 box-shadow var(--transition);
 }
@@ -621,7 +645,7 @@
     justify-content: center;
     padding: var(--space-4);
 
-    background: linear-gradient(180deg, transparent 45%, rgba(11, 13, 18, 0.92) 100%);
+    background: var(--scrim-bottom);
     opacity: 0;
     transition: opacity var(--transition);
 }
@@ -700,7 +724,7 @@
     left: var(--space-2);
 
     padding: 2px var(--space-2);
-    background-color: rgba(11, 13, 18, 0.85);
+    background-color: var(--overlay-dark);
     backdrop-filter: blur(6px);
     border-radius: var(--radius-sm);
 
@@ -723,7 +747,7 @@
     right: var(--space-2);
 
     padding: 2px var(--space-2);
-    background-color: rgba(11, 13, 18, 0.85);
+    background-color: var(--overlay-dark);
     backdrop-filter: blur(6px);
     border-radius: var(--radius-sm);
 
@@ -1076,7 +1100,7 @@
     left: var(--space-2);
 
     padding: 2px var(--space-2);
-    background-color: rgba(11, 13, 18, 0.85);
+    background-color: var(--overlay-dark);
     border-radius: var(--radius-sm);
     color: var(--color-accent);
     font-size: var(--text-xs);
@@ -1520,6 +1544,176 @@
 .icon--sm {
     width: 13px;
     height: 13px;
+}
+
+/* ---------- Cookie Consent Banner ---------- */
+
+@keyframes cookieSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(24px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.cookie-consent {
+    position: fixed;
+    bottom: var(--space-4);
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 90;
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    padding: var(--space-4) var(--space-5);
+    max-width: min(600px, calc(100vw - var(--space-8)));
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+    animation: cookieSlideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.cookie-consent--hidden {
+    display: none;
+}
+
+.cookie-consent__text {
+    flex: 1;
+    font-size: var(--text-sm);
+    color: var(--color-text-muted);
+    line-height: 1.5;
+}
+
+.cookie-consent__text a {
+    color: var(--color-accent);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.cookie-consent__btn {
+    flex-shrink: 0;
+    padding: var(--space-2) var(--space-4);
+    background: var(--color-accent);
+    color: var(--color-on-accent);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    border: none;
+    border-radius: var(--radius-full);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background var(--transition-fast), transform var(--transition-fast);
+}
+
+.cookie-consent__btn:hover {
+    background: var(--color-accent-hover);
+    transform: translateY(-1px);
+}
+
+.cookie-consent__btn:active {
+    transform: translateY(0);
+}
+
+@media (max-width: 720px) {
+    .cookie-consent {
+        bottom: calc(76px + env(safe-area-inset-bottom));
+    }
+}
+
+@media (max-width: 480px) {
+    .cookie-consent {
+        flex-direction: column;
+        text-align: center;
+    }
+}
+
+/* ---------- Refresh banner (new content available) ---------- */
+
+.refresh-banner {
+    position: fixed;
+    top: calc(var(--header-height) + var(--space-3));
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 90;
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--color-accent);
+    border-radius: var(--radius-full);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    animation: refreshSlideDown 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    font-size: var(--text-sm);
+}
+
+.refresh-banner--hidden {
+    display: none;
+}
+
+@keyframes refreshSlideDown {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-20px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0) scale(1);
+    }
+}
+
+.refresh-banner__icon {
+    flex-shrink: 0;
+    font-size: 1.1rem;
+}
+
+.refresh-banner__text {
+    color: var(--color-text);
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.refresh-banner__btn {
+    flex-shrink: 0;
+    padding: var(--space-1) var(--space-3);
+    background: var(--color-accent);
+    color: var(--color-on-accent);
+    font-size: var(--text-xs);
+    font-weight: 700;
+    border: none;
+    border-radius: var(--radius-full);
+    cursor: pointer;
+    transition: background var(--transition-fast), transform var(--transition-fast);
+}
+
+.refresh-banner__btn:hover {
+    background: var(--color-accent-hover);
+    transform: scale(1.05);
+}
+
+.refresh-banner__close {
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    display: grid;
+    place-items: center;
+    border: none;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--color-text-dim);
+    font-size: var(--text-xs);
+    cursor: pointer;
+    transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.refresh-banner__close:hover {
+    background: var(--color-surface-hover);
+    color: var(--color-text);
 }
 
 /* ---------- Scroll progress indicator ---------- */

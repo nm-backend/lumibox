@@ -22,7 +22,7 @@ class ContentSecurityPolicyMiddleware:
 
     CSP_TEMPLATE = (
         "default-src 'self'; "
-        "script-src 'self' 'unsafe-inline' 'unsafe-eval'; "
+        "script-src 'self' 'unsafe-inline'; "
         "style-src 'self' 'unsafe-inline'; "
         "img-src 'self' data: https:; "
         "font-src 'self' data:; "
@@ -39,5 +39,9 @@ class ContentSecurityPolicyMiddleware:
 
     def __call__(self, request):
         response = self.get_response(request)
+        # Пропускаем SSE-эндпоинт: CSP-заголовок на streaming-ответе
+        # вызывает 500 в некоторых WSGI-серверах.
+        if response.get("Content-Type", "").startswith("text/event-stream"):
+            return response
         response["Content-Security-Policy"] = self.CSP_TEMPLATE
         return response
