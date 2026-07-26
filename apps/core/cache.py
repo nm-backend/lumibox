@@ -54,22 +54,26 @@ def _clear_reference_caches():
 
 def _clear_similar_cache():
     """Сбрасывает все кэши похожих фильмов (catalog:similar:*)."""
-    if not settings.REDIS_URL:
-        return
-    try:
-        cache.delete_pattern(f"{SIMILAR_CACHE_PREFIX}*")
-    except AttributeError:
-        pass  # LocMemCache не имеет delete_pattern
+    if settings.REDIS_URL:
+        try:
+            cache.delete_pattern(f"{SIMILAR_CACHE_PREFIX}*")
+            return
+        except AttributeError:
+            pass
+    # LocMemCache: delete_pattern не работает — чистим всё.
+    cache.clear()
 
 
 def _clear_recommendations_cache():
     """Сбрасывает все персональные рекомендации."""
-    if not settings.REDIS_URL:
-        return
-    try:
-        cache.delete_pattern(f"{RECOMMENDATIONS_CACHE_PREFIX}*")
-    except AttributeError:
-        pass
+    if settings.REDIS_URL:
+        try:
+            cache.delete_pattern(f"{RECOMMENDATIONS_CACHE_PREFIX}*")
+            return
+        except AttributeError:
+            pass
+    # LocMemCache: delete_pattern не работает — чистим всё.
+    cache.clear()
 
 
 def _clear_industry_cache():

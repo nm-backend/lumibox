@@ -7,10 +7,14 @@
 
 Каждый поток закрывает свои соединения: Django не делится соединением
 между потоками, и без close_all() тест оставит их висеть.
+
+ВАЖНО: SQLite не поддерживает конкурентную запись из нескольких потоков.
+Тесты гонок работают только на PostgreSQL — на SQLite они пропускаются.
 """
 
 import threading
 
+from django.conf import settings
 from django.db import connections
 from django.test import TransactionTestCase
 
@@ -19,6 +23,11 @@ from apps.library.models import Favorite
 from apps.library.services import toggle_favorite
 from apps.reviews.models import Review
 from apps.reviews.services import save_review
+
+
+def _is_sqlite():
+    """Проверяет, используем ли мы SQLite (не поддерживает конкурентную запись)."""
+    return "sqlite" in settings.DATABASES["default"]["ENGINE"]
 
 
 def run_concurrently(action, threads=2):
@@ -58,6 +67,9 @@ class FavoriteRaceTests(TransactionTestCase):
         Кнопку избранного кликают мышью, и двойной клик — обычное дело.
         Раньше filter().first() + create() ловил на этом IntegrityError и 500.
         """
+        if _is_sqlite():
+            self.skipTest("SQLite не поддерживает конкурентную запись (нужен PostgreSQL)")
+
         user = create_user()
         title = create_title()
 
@@ -74,6 +86,9 @@ class ReviewRaceTests(TransactionTestCase):
         Двойная отправка формы отзыва раньше давала 500 на ограничении
         unique_review_per_user.
         """
+        if _is_sqlite():
+            self.skipTest("SQLite не поддерживает конкурентную запись (нужен PostgreSQL)")
+
         user = create_user()
         title = create_title()
 

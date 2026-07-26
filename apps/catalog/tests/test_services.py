@@ -88,6 +88,11 @@ class RatingTests(TestCase):
 
 
 class SimilarTitlesTests(TestCase):
+    def setUp(self):
+        cache.clear()
+
+    def tearDown(self):
+        cache.clear()
     def test_more_shared_genres_ranks_higher(self):
         drama = create_genre()
         thriller = create_genre()
@@ -146,6 +151,11 @@ class SimilarTitlesTests(TestCase):
 
 
 class RecommendationTests(TestCase):
+    def setUp(self):
+        cache.clear()
+
+    def tearDown(self):
+        cache.clear()
     def test_based_on_favorite_genres(self):
         user = create_user()
         liked_genre = create_genre()
