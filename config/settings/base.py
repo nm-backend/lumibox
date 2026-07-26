@@ -123,6 +123,11 @@ DATABASES = {
     "default": env.db("DATABASE_URL"),
 }
 
+# Connection pooling: reuse connections for 5 minutes.
+# Production overrides to 10 minutes.
+DATABASES["default"]["CONN_MAX_AGE"] = 300
+DATABASES["default"]["CONN_HEALTH_CHECKS"] = True
+
 
 # Кэш. Если REDIS_URL не задан, работаем на памяти процесса:
 # проект должен подниматься на машине без Redis, просто без общего кэша
