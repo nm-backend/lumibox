@@ -27,6 +27,10 @@ class User(AbstractUser):
     )
     bio = models.TextField("О себе", max_length=500, blank=True)
 
+    # Push-подписка для Web Push уведомлений.
+    # Хранится как JSON строка с endpoint, keys (p256dh, auth).
+    push_subscription = models.TextField("Push-подписка", blank=True, default="")
+
     # Входим по почте, а не по имени пользователя.
     USERNAME_FIELD = "email"
 

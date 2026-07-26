@@ -17,6 +17,7 @@ from django.urls import include, path, re_path
 
 from apps.catalog.sitemaps import sitemaps
 from apps.core.admin_dashboard import admin_dashboard, admin_dashboard_api
+from apps.core.metrics import metrics_view
 from apps.core.views import health_check, robots_txt, serve_public_media
 
 # Error handlers
@@ -26,6 +27,7 @@ handler500 = "apps.core.views.custom_500"
 # Маршруты без языкового префикса: API, админка, health check, статика.
 urlpatterns = [
     path("healthz/", health_check, name="health"),
+    path("metrics/", metrics_view, name="prometheus-metrics"),
     path("admin/dashboard/", admin_dashboard, name="admin_dashboard"),
     path("admin/dashboard/api/", admin_dashboard_api, name="admin_dashboard_api"),
     path("admin/", admin.site.urls),

@@ -339,6 +339,16 @@ SENTRY_DSN = env("SENTRY_DSN", default="")
 # Без переменных окружения — скрипты не загружаются.
 GOOGLE_ANALYTICS_ID = env("GOOGLE_ANALYTICS_ID", default="")
 YANDEX_METRIKA_ID = env("YANDEX_METRIKA_ID", default="")
+
+# TMDB API: импорт реальных данных о фильмах.
+# Ключ берётся бесплатно: https://www.themoviedb.org/settings/api
+TMDB_API_KEY = env("TMDB_API_KEY", default="")
+
+# VAPID ключи для Push-уведомлений (Web Push API).
+# Сгенерировать: python -c "from py_vapid import Vapid; Vapid().generate_keys()"
+VAPID_PUBLIC_KEY = env("VAPID_PUBLIC_KEY", default="")
+VAPID_PRIVATE_KEY = env("VAPID_PRIVATE_KEY", default="")
+VAPID_CLAIMS_EMAIL = env("VAPID_CLAIMS_EMAIL", default="mailto:admin@moviehub.local")
 if SENTRY_DSN:
     import sentry_sdk
     from sentry_sdk.integrations.django import DjangoIntegration

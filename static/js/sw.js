@@ -119,3 +119,46 @@ self.addEventListener("fetch", (event) => {
         return;
     }
 });
+
+/* ---- Push уведомления ---- */
+self.addEventListener("push", (event) => {
+    let data = { title: "MovieHub", body: "Новое обновление!" };
+    try {
+        data = event.data.json();
+    } catch {
+        data.body = event.data ? event.data.text() : data.body;
+    }
+
+    event.waitUntil(
+        self.registration.showNotification(data.title, {
+            body: data.body,
+            icon: "/static/img/icon-192.png",
+            badge: "/static/img/favicon-32.png",
+            data: data,
+            tag: data.tag || "moviehub-notification",
+            renotify: true,
+            vibrate: [200, 100, 200],
+            actions: data.url
+                ? [{ action: "open", title: "Открыть" }]
+                : [],
+        })
+    );
+});
+
+self.addEventListener("notificationclick", (event) => {
+    event.notification.close();
+
+    const url = event.notification.data?.url || "/";
+    event.waitUntil(
+        clients.matchAll({ type: "window", includeUncontrolled: true }).then((windowClients) => {
+            // Если уже открыто окно — фокусируемся
+            for (const client of windowClients) {
+                if (client.url.includes(self.location.origin) && "focus" in client) {
+                    return client.focus();
+                }
+            }
+            // Иначе открываем новое
+            return clients.openWindow(url);
+        })
+    );
+});
