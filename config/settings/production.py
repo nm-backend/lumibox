@@ -75,3 +75,8 @@ X_FRAME_OPTIONS = "DENY"
 # Увеличивает производительность при большом количестве запросов.
 DATABASES["default"]["CONN_MAX_AGE"] = 600  # 10 минут
 DATABASES["default"]["CONN_HEALTH_CHECKS"] = True
+
+# Дополнительные security headers.
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_CROSS_ORIGIN_OPENER_POLICY = "same-origin"
+SESSION_COOKIE_SECURE = True
