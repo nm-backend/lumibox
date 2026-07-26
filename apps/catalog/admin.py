@@ -16,7 +16,7 @@ from apps.catalog.models import (
     Title,
     TitleAward,
 )
-from apps.catalog.services import clear_home_cache
+from apps.core.cache import invalidate_for_model
 
 
 class ReferenceAdmin(admin.ModelAdmin):
@@ -335,14 +335,14 @@ class TitleAdmin(admin.ModelAdmin):
         updated = queryset.update(status=Title.Status.PUBLISHED)
 
         # По той же причине не срабатывает и сигнал сброса кэша главной.
-        clear_home_cache()
+        invalidate_for_model("catalog.title")
         self.message_user(request, f"Опубликовано записей: {updated}")
 
     @admin.action(description="Снять с публикации")
     def unpublish(self, request, queryset):
         # published_at не трогаем: это дата первой публикации, она остаётся фактом.
         updated = queryset.update(status=Title.Status.DRAFT)
-        clear_home_cache()
+        invalidate_for_model("catalog.title")
         self.message_user(request, f"Снято с публикации: {updated}")
 
 
