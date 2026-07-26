@@ -7,7 +7,7 @@
 
     /* Подвал чуть темнее страницы, а не светлее: так он читается как
        основание, а не как ещё один блок контента. */
-    background: linear-gradient(180deg, var(--color-surface), var(--color-bg));
+    background: linear-gradient(180deg, var(--color-surface-hover), var(--color-bg));
 }
 
 .footer-grid {
