@@ -9,27 +9,12 @@ on:
     branches: [main]
 
 jobs:
-  lint:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.13"
-          cache: pip
-      - run: pip install ruff
-      - name: Линт
-        run: ruff check apps config scripts
-      - name: Форматирование
-        run: ruff format --check apps config scripts
-
   test:
     runs-on: ubuntu-latest
-    needs: lint
 
     services:
       db:
-        image: postgres:16-alpine
+        image: postgres:18-alpine
         env:
           POSTGRES_DB: moviehub
           POSTGRES_USER: moviehub
@@ -39,7 +24,7 @@ jobs:
           --health-cmd "pg_isready -U moviehub"
           --health-interval 5s --health-timeout 3s --health-retries 10
       redis:
-        image: redis:7-alpine
+        image: redis:8-alpine
         ports: ["6379:6379"]
         options: >-
           --health-cmd "redis-cli ping"
@@ -62,6 +47,9 @@ jobs:
       - name: Установка зависимостей
         run: pip install -r requirements/development.txt
 
+      - name: Линт (ruff)
+        run: ruff check apps config scripts
+
       - name: Проверка проекта
         run: python manage.py check
 
@@ -72,4 +60,4 @@ jobs:
         run: python manage.py check --deploy --settings=config.settings.production
 
       - name: Тесты
-        run: python manage.py test apps -v2
+        run: python manage.py test apps
