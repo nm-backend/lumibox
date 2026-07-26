@@ -66,3 +66,51 @@ class ImageValidatorTests(TestCase):
             title.full_clean(exclude=["slug"])
 
         title.poster.delete(save=False)
+
+
+class RobotsTxtTests(TestCase):
+    """Проверяем, что robots.txt отдаётся корректно."""
+
+    def test_robots_txt_returns_200(self):
+        response = self.client.get("/robots.txt")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response["Content-Type"], "text/plain")
+
+    def test_robots_txt_contains_sitemap(self):
+        response = self.client.get("/robots.txt")
+        content = response.content.decode()
+        self.assertIn("Sitemap:", content)
+        self.assertIn("/sitemap.xml", content)
+
+    def test_robots_txt_disallows_admin(self):
+        response = self.client.get("/robots.txt")
+        content = response.content.decode()
+        self.assertIn("Disallow: /admin/", content)
+
+
+class AnalyticsContextProcessorTests(TestCase):
+    """Проверяем, что аналитические ID передаются в шаблоны."""
+
+    def test_analytics_ids_in_context(self):
+        from django.test import RequestFactory
+
+        from apps.core.context_processors import analytics_ids
+
+        factory = RequestFactory()
+        request = factory.get("/")
+        result = analytics_ids(request)
+        self.assertIn("GOOGLE_ANALYTICS_ID", result)
+        self.assertIn("YANDEX_METRIKA_ID", result)
+
+
+class HealthCheckTests(TestCase):
+    """Проверяем healthz endpoint."""
+
+    def test_health_check_returns_json(self):
+        response = self.client.get("/healthz/")
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertIn("status", data)
+        self.assertIn("database", data)
+        self.assertIn("cache", data)
+

@@ -1,8 +1,19 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static i18n %}
 
 {% block page_title %}{{ entity.get_meta_title }} — MovieHub{% endblock %}
 {% block page_description %}{{ entity.get_meta_description }}{% endblock %}
+
+{% block breadcrumbs %}
+<div class="container">
+    <nav class="breadcrumbs" aria-label="{% trans 'Навигация' %}">
+        <ol class="breadcrumbs__list">
+            <li class="breadcrumbs__item"><a class="breadcrumbs__link" href="{% url 'catalog:home' %}">{% trans "Главная" %}</a></li>
+            <li class="breadcrumbs__item"><span class="breadcrumbs__current">{{ entity.name }}</span></li>
+        </ol>
+    </nav>
+</div>
+{% endblock %}
 
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'css/collections.css' %}">
@@ -17,8 +28,8 @@
             <p class="hero__label">{{ entity_label }}</p>
             <h1 class="page-title">{{ entity.name }}</h1>
             {% if entity.description %}<p class="collection-hero__description">{{ entity.description }}</p>{% endif %}
-            {% if entity.website %}<a class="section__link" href="{{ entity.website }}" rel="noopener noreferrer" target="_blank">Официальный сайт ↗</a>{% endif %}
-            <p class="page-subtitle">Произведений: {{ paginator.count }}</p>
+            {% if entity.website %}<a class="section__link" href="{{ entity.website }}" rel="noopener noreferrer" target="_blank">{% trans "Официальный сайт" %} ↗</a>{% endif %}
+            <p class="page-subtitle">{% blocktrans with count=paginator.count %}Произведений: {{ count }}{% endblocktrans %}</p>
         </div>
     </section>
 
@@ -28,6 +39,6 @@
         </div>
         {% include "includes/pagination.html" %}
     {% else %}
-        <div class="empty-state"><p class="empty-state__title">Пока нет опубликованных произведений.</p></div>
+        <div class="empty-state"><p class="empty-state__title">{% trans "Пока нет опубликованных произведений." %}</p></div>
     {% endif %}
 {% endblock %}

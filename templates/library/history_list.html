@@ -3,6 +3,17 @@
 
 {% block page_title %}{% trans "История просмотров" %} — MovieHub{% endblock %}
 
+{% block breadcrumbs %}
+<div class="container">
+    <nav class="breadcrumbs" aria-label="{% trans 'Навигация' %}">
+        <ol class="breadcrumbs__list">
+            <li class="breadcrumbs__item"><a class="breadcrumbs__link" href="{% url 'catalog:home' %}">{% trans "Главная" %}</a></li>
+            <li class="breadcrumbs__item"><span class="breadcrumbs__current">{% trans "История" %}</span></li>
+        </ol>
+    </nav>
+</div>
+{% endblock %}
+
 {% block content %}
     <div class="page-header page-header--with-action">
         <div>

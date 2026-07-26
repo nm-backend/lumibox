@@ -212,3 +212,93 @@ class CollectionViewTests(TestCase):
         collection = create_collection(is_published=False)
         response = self.client.get(collection.get_absolute_url())
         self.assertEqual(response.status_code, 404)
+
+
+class BreadcrumbTests(TestCase):
+    """Проверяем наличие хлебных крошек на ключевых страницах."""
+
+    def test_home_has_no_breadcrumbs(self):
+        """На главной хлебные крошки не нужны."""
+        create_title()
+        response = self.client.get(reverse("catalog:home"))
+        self.assertNotContains(response, "breadcrumbs")
+
+    def test_catalog_has_breadcrumbs(self):
+        create_title()
+        response = self.client.get(reverse("catalog:title_list"))
+        self.assertContains(response, "breadcrumbs")
+        self.assertContains(response, "Главная")
+
+    def test_title_detail_has_breadcrumbs(self):
+        title = create_title()
+        response = self.client.get(title.get_absolute_url())
+        self.assertContains(response, "breadcrumbs")
+        self.assertContains(response, "Каталог")
+
+    def test_collection_detail_has_breadcrumbs(self):
+        collection = create_collection(titles=[create_title()])
+        response = self.client.get(collection.get_absolute_url())
+        self.assertContains(response, "breadcrumbs")
+        self.assertContains(response, "Подборки")
+
+
+class RandomTitleTests(TestCase):
+    def test_random_redirects_to_title(self):
+        title = create_title()
+        response = self.client.get(reverse("catalog:random_title"))
+        self.assertEqual(response.status_code, 302)
+        self.assertIn(title.slug, response.url)
+
+    def test_random_without_titles_redirects_to_catalog(self):
+        response = self.client.get(reverse("catalog:random_title"))
+        self.assertEqual(response.status_code, 302)
+        self.assertIn("/catalog/", response.url)
+
+
+class OpenGraphTests(TestCase):
+    """Проверяем наличие OpenGraph метатегов."""
+
+    def test_home_has_og_tags(self):
+        create_title()
+        response = self.client.get(reverse("catalog:home"))
+        self.assertContains(response, 'property="og:type"')
+        self.assertContains(response, 'property="og:title"')
+
+    def test_title_detail_has_og_tags(self):
+        from apps.core.test_factories import make_poster
+
+        title = create_title()
+        title.poster = make_poster()
+        title.save()
+        response = self.client.get(title.get_absolute_url())
+        self.assertContains(response, 'property="og:type"')
+        self.assertContains(response, 'property="og:title"')
+        self.assertContains(response, 'property="og:image"')
+
+
+class SitemapTests(TestCase):
+    def test_sitemap_returns_xml(self):
+        create_title()
+        response = self.client.get("/sitemap.xml")
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "<?xml")
+
+
+class AccessibilityTests(TestCase):
+    """Проверяем элементы доступности."""
+
+    def test_skip_link_present(self):
+        create_title()
+        response = self.client.get(reverse("catalog:home"))
+        self.assertContains(response, "skip-link")
+        self.assertContains(response, "main-content")
+
+    def test_mobile_nav_present(self):
+        create_title()
+        response = self.client.get(reverse("catalog:home"))
+        self.assertContains(response, "mobile-nav")
+
+    def test_back_to_top_present(self):
+        create_title()
+        response = self.client.get(reverse("catalog:home"))
+        self.assertContains(response, "back-to-top")

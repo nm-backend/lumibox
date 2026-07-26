@@ -9,12 +9,23 @@
 для проекта такого размера этого достаточно, а читать проще.
 """
 
+import io
+
 from django.contrib.auth import get_user_model
+from django.core.files.uploadedfile import SimpleUploadedFile
+from PIL import Image
 
 from apps.catalog.models import Collection, CollectionItem, Country, Genre, Participation, Person, Title
 from apps.reviews.models import Review
 
 User = get_user_model()
+
+
+def make_poster(width=200, height=300, name="poster.png"):
+    """Создаёт тестовое изображение-постер."""
+    buffer = io.BytesIO()
+    Image.new("RGB", (width, height), "red").save(buffer, "PNG")
+    return SimpleUploadedFile(name, buffer.getvalue(), content_type="image/png")
 
 # Счётчик для уникальных значений. Простая замена sequence из factory_boy:
 # без него второй вызов create_genre() упёрся бы в unique на slug.

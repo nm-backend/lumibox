@@ -12,6 +12,27 @@
     <link rel="stylesheet" href="{% static 'css/title-detail.css' %}">
 {% endblock %}
 
+{% block breadcrumbs %}
+<div class="container">
+    <nav class="breadcrumbs" aria-label="{% trans 'Навигация' %}">
+        <ol class="breadcrumbs__list" itemscope itemtype="https://schema.org/BreadcrumbList">
+            <li class="breadcrumbs__item" itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+                <a class="breadcrumbs__link" href="{% url 'catalog:home' %}" itemprop="item"><span itemprop="name">{% trans "Главная" %}</span></a>
+                <meta itemprop="position" content="1">
+            </li>
+            <li class="breadcrumbs__item" itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+                <a class="breadcrumbs__link" href="{% url 'catalog:title_list' %}" itemprop="item"><span itemprop="name">{% trans "Каталог" %}</span></a>
+                <meta itemprop="position" content="2">
+            </li>
+            <li class="breadcrumbs__item" itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+                <span class="breadcrumbs__current" itemprop="name">{{ title.name }}</span>
+                <meta itemprop="position" content="3">
+            </li>
+        </ol>
+    </nav>
+</div>
+{% endblock %}
+
 {% block extra_js %}
     {% include "includes/jsonld_title.html" %}
 {% endblock %}
@@ -19,7 +40,7 @@
 {% block hero %}
 <section class="film-hero">
     {% if title.backdrop %}
-        <img class="film-hero__backdrop" src="{{ title.backdrop.url }}" alt="" aria-hidden="true">
+        <img class="film-hero__backdrop" src="{{ title.backdrop.url }}" alt="" aria-hidden="true" width="1280" height="720" decoding="async">
     {% endif %}
 
     <div class="film-hero__scrim" aria-hidden="true"></div>
@@ -27,7 +48,7 @@
     <div class="container film-hero__inner">
         <div class="film-hero__poster">
             {% if title.poster %}
-                <img class="film-hero__poster-image" src="{{ title.poster.url }}" alt="{% blocktrans with name=title.name %}Постер: {{ name }}{% endblocktrans %}">
+                <img class="film-hero__poster-image" src="{{ title.poster.url }}" alt="{% blocktrans with name=title.name %}Постер: {{ name }}{% endblocktrans %}" width="300" height="450" decoding="async">
             {% else %}
                 <span class="card__placeholder" aria-hidden="true">{{ title.name|first }}</span>
             {% endif %}

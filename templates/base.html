@@ -5,9 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#ffc043">
     <link rel="manifest" href="{% static 'manifest.json' %}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'img/favicon-32.png' %}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{% static 'img/favicon-16.png' %}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{% static 'img/apple-touch-icon.png' %}">
 
     <title>{% block page_title %}{% trans "MovieHub — каталог фильмов и сериалов" %}{% endblock %}</title>
     <meta name="description" content="{% block page_description %}{% trans 'Каталог фильмов и сериалов: поиск, фильтры, подборки.' %}{% endblock %}">
+
+    {# Canonical URL — говорит поисковикам «это основной адрес страницы» #}
+    {% block canonical %}<link rel="canonical" href="{{ request.build_absolute_uri }}">{% endblock %}
+
+    {# Hreflang — указывает поисковикам разные языковые версии #}
+    {% get_current_language as CURRENT_LANG_CODE %}
+    {% get_available_languages as ALL_LANGUAGES %}
+    {% for lang_code, lang_name in ALL_LANGUAGES %}
+        {% language lang_code %}<link rel="alternate" hreflang="{{ lang_code }}" href="{{ request.build_absolute_uri }}">{% endlanguage %}
+    {% endfor %}
+
+    {# Preconnect — ускоряет загрузку внешних ресурсов #}
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 
     <link rel="stylesheet" href="{% static 'css/variables.css' %}">
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
@@ -19,8 +35,12 @@
     {% block extra_head %}{% endblock %}
     {# Тема применяется ДО отрисовки body, чтобы не было вспышки светлой/тёмной #}
     <script src="{% static 'js/theme-toggle.js' %}"></script>
+    {% include "includes/analytics.html" %}
 </head>
 <body>
+    {# Skip-to-content — доступность для скринридеров и клавиатуры #}
+    <a class="skip-link" href="#main-content">{% trans "Перейти к содержимому" %}</a>
+
     <header class="site-header">
         <div class="container site-header__inner">
             <a class="logo" href="{% url 'catalog:home' %}">
@@ -60,6 +80,7 @@
                    href="{% url 'catalog:genre_list' %}">{% trans "Жанры" %}</a>
                 <a class="site-nav__link {% if request.resolver_match.url_name == 'country_list' %}site-nav__link--active{% endif %}"
                    href="{% url 'catalog:country_list' %}">{% trans "Страны" %}</a>
+                <a class="site-nav__link" href="{% url 'catalog:random_title' %}">🎲</a>
             </nav>
 
             <form class="search site-header__search" action="{% url 'catalog:title_list' %}" method="get" role="search">
@@ -131,7 +152,7 @@
         </div>
     </header>
 
-    <main class="site-main{% if messages %} site-main--with-messages{% endif %}">
+    <main class="site-main{% if messages %} site-main--with-messages{% endif %}" id="main-content">
         {% if messages %}
             <div class="container">
                 <ul class="messages">
@@ -141,6 +162,9 @@
                 </ul>
             </div>
         {% endif %}
+
+        {# Breadcrumbs — SEO и навигация #}
+        {% block breadcrumbs %}{% endblock %}
 
         {% block hero %}{% endblock %}
 
@@ -152,6 +176,38 @@
     {% include "includes/ad_rail.html" %}
     {% include "includes/footer.html" %}
 
+    {# Мобильная нижняя навигация (Netflix-style) #}
+    <nav class="mobile-nav" aria-label="{% trans 'Быстрая навигация' %}">
+        <a class="mobile-nav__item {% if request.resolver_match.url_name == 'home' %}mobile-nav__item--active{% endif %}" href="{% url 'catalog:home' %}">
+            <svg class="mobile-nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            <span>{% trans "Главная" %}</span>
+        </a>
+        <a class="mobile-nav__item {% if request.resolver_match.url_name == 'title_list' %}mobile-nav__item--active{% endif %}" href="{% url 'catalog:title_list' %}">
+            <svg class="mobile-nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="2" y1="7" x2="7" y2="7"/><line x1="2" y1="17" x2="7" y2="17"/><line x1="17" y1="17" x2="22" y2="17"/><line x1="17" y1="7" x2="22" y2="7"/></svg>
+            <span>{% trans "Каталог" %}</span>
+        </a>
+        <a class="mobile-nav__item" href="{% url 'catalog:genre_list' %}">
+            <svg class="mobile-nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <span>{% trans "Жанры" %}</span>
+        </a>
+        {% if user.is_authenticated %}
+            <a class="mobile-nav__item" href="{% url 'library:favorites' %}">
+                <svg class="mobile-nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+                <span>{% trans "Избранное" %}</span>
+            </a>
+        {% else %}
+            <a class="mobile-nav__item" href="{% url 'users:login' %}">
+                <svg class="mobile-nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                <span>{% trans "Войти" %}</span>
+            </a>
+        {% endif %}
+    </nav>
+
+    {# Кнопка «Наверх» #}
+    <button class="back-to-top" data-back-to-top type="button" aria-label="{% trans 'Наверх' %}">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg>
+    </button>
+
     <script src="{% static 'js/favorite.js' %}" defer></script>
     <script src="{% static 'js/scroll-reveal.js' %}" defer></script>
     <script src="{% static 'js/search-enhanced.js' %}" defer></script>
@@ -160,9 +216,29 @@
         <script src="{% static 'js/notifications.js' %}" defer></script>
     {% endif %}
     <script>
+        // Service Worker
         if ("serviceWorker" in navigator) {
             navigator.serviceWorker.register("{% static 'js/sw.js' %}").catch(() => {});
         }
+
+        // Back to top button
+        (function() {
+            const btn = document.querySelector("[data-back-to-top]");
+            if (!btn) return;
+            let ticking = false;
+            window.addEventListener("scroll", function() {
+                if (!ticking) {
+                    window.requestAnimationFrame(function() {
+                        btn.classList.toggle("back-to-top--visible", window.scrollY > 600);
+                        ticking = false;
+                    });
+                    ticking = true;
+                }
+            }, { passive: true });
+            btn.addEventListener("click", function() {
+                window.scrollTo({ top: 0, behavior: "smooth" });
+            });
+        })();
     </script>
     {% block extra_js %}{% endblock %}
 </body>

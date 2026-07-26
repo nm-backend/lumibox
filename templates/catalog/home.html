@@ -3,6 +3,33 @@
 
 {% block page_title %}{% trans "MovieHub — каталог фильмов и сериалов" %}{% endblock %}
 
+{% block extra_head %}
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="{% trans 'MovieHub — каталог фильмов и сериалов' %}">
+    <meta property="og:description" content="{% trans 'Каталог фильмов и сериалов: поиск, фильтры, подборки.' %}">
+    <meta property="og:url" content="{{ request.build_absolute_uri }}">
+    <meta property="og:site_name" content="MovieHub">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{% trans 'MovieHub — каталог фильмов и сериалов' %}">
+    <meta name="twitter:description" content="{% trans 'Каталог фильмов и сериалов: поиск, фильтры, подборки.' %}">
+
+    {# Structured Data: Organization + WebSite with SearchAction #}
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "MovieHub",
+        "url": "{{ request.scheme }}://{{ request.get_host }}",
+        "description": "{% trans 'Каталог фильмов и сериалов: поиск, фильтры, подборки.' %}",
+        "potentialAction": {
+            "@type": "SearchAction",
+            "target": "{{ request.scheme }}://{{ request.get_host }}/catalog/?q={search_term_string}",
+            "query-input": "required name=search_term_string"
+        }
+    }
+    </script>
+{% endblock %}
+
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'css/home.css' %}">
     <link rel="stylesheet" href="{% static 'css/collections.css' %}">
@@ -12,7 +39,7 @@
     {% if featured %}
         <section class="showcase">
             {% if featured.backdrop %}
-                <img class="showcase__backdrop" src="{{ featured.backdrop.url }}" alt="" aria-hidden="true">
+                <img class="showcase__backdrop" src="{{ featured.backdrop.url }}" alt="" aria-hidden="true" width="1280" height="720" decoding="async">
             {% endif %}
             <div class="showcase__scrim" aria-hidden="true"></div>
 

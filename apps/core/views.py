@@ -1,8 +1,33 @@
 from django.core.cache import cache
 from django.db import connection
-from django.http import Http404, JsonResponse
+from django.http import Http404, HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.views.static import serve
+
+
+def robots_txt(request):
+    """Отдаёт robots.txt с актуальным доменом для Sitemap."""
+    domain = request.build_absolute_uri("/").rstrip("/")
+    content = f"""User-agent: *
+
+# Личные страницы и служебные адреса роботу индексировать незачем.
+Disallow: /admin/
+Disallow: /profile/
+Disallow: /favorites/
+Disallow: /history/
+Disallow: /login/
+Disallow: /register/
+Disallow: /logout/
+
+# Страницы с фильтрами — это тот же каталог в разных сочетаниях.
+# Без запрета робот обойдёт тысячи почти одинаковых адресов.
+Disallow: /catalog/?
+
+Allow: /
+
+Sitemap: {domain}/sitemap.xml
+"""
+    return HttpResponse(content, content_type="text/plain")
 
 
 def custom_404(request, exception):

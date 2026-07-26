@@ -8,9 +8,17 @@
         <p style="font-size: clamp(4rem, 10vw, 8rem); font-weight: 900; line-height: 1; margin-bottom: var(--space-4); background: var(--color-premium-gold); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">404</p>
         <p class="empty-state__title" style="font-size: var(--text-xl);">{% trans "Страница не найдена" %}</p>
         <p style="max-width: 40ch; margin: 0 auto; line-height: 1.6;">{% trans "Возможно, запись удалили или ссылка набрана с ошибкой." %}</p>
-        <p class="empty-state__action" style="display: flex; gap: var(--space-3); justify-content: center; flex-wrap: wrap;">
+
+        <form class="search" action="{% url 'catalog:title_list' %}" method="get" role="search" style="max-width: 400px; margin: var(--space-5) auto 0;">
+            <label class="visually-hidden" for="search-404">{% trans "Поиск по каталогу" %}</label>
+            <input class="search__input" id="search-404" type="search" name="q" placeholder="{% trans 'Найти фильм или сериал...' %}" autocomplete="off">
+            <button class="search__submit" type="submit">{% trans "Найти" %}</button>
+        </form>
+
+        <p class="empty-state__action" style="display: flex; gap: var(--space-3); justify-content: center; flex-wrap: wrap; margin-top: var(--space-5);">
             <a class="button button--primary" href="{% url 'catalog:home' %}">{% trans "На главную" %}</a>
             <a class="button button--ghost" href="{% url 'catalog:title_list' %}">{% trans "Открыть каталог" %}</a>
+            <a class="button button--ghost" href="{% url 'catalog:random_title' %}">{% trans "Случайный фильм" %}</a>
         </p>
     </div>
 {% endblock %}

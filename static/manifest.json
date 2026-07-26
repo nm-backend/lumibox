@@ -1,21 +1,48 @@
 {
-    "name": "MovieHub",
+    "name": "MovieHub — Каталог фильмов и сериалов",
     "short_name": "MovieHub",
-    "description": "Каталог фильмов и сериалов",
+    "description": "Каталог фильмов и сериалов с поиском, фильтрами, подборками и личной библиотекой.",
     "start_url": "/",
+    "scope": "/",
     "display": "standalone",
+    "orientation": "any",
     "background_color": "#0b0d12",
     "theme_color": "#ffc043",
+    "categories": ["entertainment", "movies"],
+    "lang": "ru",
+    "dir": "ltr",
     "icons": [
         {
             "src": "/static/img/icon-192.png",
             "sizes": "192x192",
-            "type": "image/png"
+            "type": "image/png",
+            "purpose": "any maskable"
         },
         {
             "src": "/static/img/icon-512.png",
             "sizes": "512x512",
-            "type": "image/png"
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ],
+    "shortcuts": [
+        {
+            "name": "Каталог",
+            "short_name": "Каталог",
+            "url": "/catalog/",
+            "description": "Все фильмы и сериалы"
+        },
+        {
+            "name": "Фильмы",
+            "short_name": "Фильмы",
+            "url": "/catalog/?type=movie",
+            "description": "Только фильмы"
+        },
+        {
+            "name": "Сериалы",
+            "short_name": "Сериалы",
+            "url": "/catalog/?type=series",
+            "description": "Только сериалы"
         }
     ]
 }

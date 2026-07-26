@@ -4,6 +4,18 @@
 {% block page_title %}{{ person.name }} — MovieHub{% endblock %}
 {% block page_description %}{% blocktrans with name=person.name %}{{ name }}: фильмография, роли, биография.{% endblocktrans %}{% endblock %}
 
+{% block breadcrumbs %}
+<div class="container">
+    <nav class="breadcrumbs" aria-label="{% trans 'Навигация' %}">
+        <ol class="breadcrumbs__list">
+            <li class="breadcrumbs__item"><a class="breadcrumbs__link" href="{% url 'catalog:home' %}">{% trans "Главная" %}</a></li>
+            <li class="breadcrumbs__item"><a class="breadcrumbs__link" href="{% url 'catalog:actor_list' %}">{% trans "Актёры" %}</a></li>
+            <li class="breadcrumbs__item"><span class="breadcrumbs__current">{{ person.name }}</span></li>
+        </ol>
+    </nav>
+</div>
+{% endblock %}
+
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'css/title-detail.css' %}">
     <link rel="stylesheet" href="{% static 'css/profile.css' %}">

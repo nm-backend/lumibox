@@ -4,6 +4,27 @@
 {% block page_title %}{{ collection.get_meta_title }} — MovieHub{% endblock %}
 {% block page_description %}{{ collection.get_meta_description }}{% endblock %}
 
+{% block extra_head %}
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="{{ collection.get_meta_title }}">
+    <meta property="og:description" content="{{ collection.get_meta_description }}">
+    <meta property="og:url" content="{{ request.build_absolute_uri }}">
+    <meta property="og:site_name" content="MovieHub">
+    {% if collection.cover %}<meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{{ collection.cover.url }}">{% endif %}
+{% endblock %}
+
+{% block breadcrumbs %}
+<div class="container">
+    <nav class="breadcrumbs" aria-label="{% trans 'Навигация' %}">
+        <ol class="breadcrumbs__list">
+            <li class="breadcrumbs__item"><a class="breadcrumbs__link" href="{% url 'catalog:home' %}">{% trans "Главная" %}</a></li>
+            <li class="breadcrumbs__item"><a class="breadcrumbs__link" href="{% url 'catalog:collection_list' %}">{% trans "Подборки" %}</a></li>
+            <li class="breadcrumbs__item"><span class="breadcrumbs__current">{{ collection.name }}</span></li>
+        </ol>
+    </nav>
+</div>
+{% endblock %}
+
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'css/collections.css' %}">
 {% endblock %}

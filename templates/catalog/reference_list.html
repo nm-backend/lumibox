@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static i18n %}
 
 {% comment %}
 Общий шаблон для страниц «Жанры» и «Страны».
@@ -11,6 +11,17 @@
 
 {% block page_title %}{{ page_heading }} — MovieHub{% endblock %}
 
+{% block breadcrumbs %}
+<div class="container">
+    <nav class="breadcrumbs" aria-label="{% trans 'Навигация' %}">
+        <ol class="breadcrumbs__list">
+            <li class="breadcrumbs__item"><a class="breadcrumbs__link" href="{% url 'catalog:home' %}">{% trans "Главная" %}</a></li>
+            <li class="breadcrumbs__item"><span class="breadcrumbs__current">{{ page_heading }}</span></li>
+        </ol>
+    </nav>
+</div>
+{% endblock %}
+
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'css/catalog.css' %}">
 {% endblock %}
@@ -18,7 +29,7 @@
 {% block content %}
     <div class="page-header">
         <h1 class="page-title">{{ page_heading }}</h1>
-        <p class="page-subtitle">Всего: {{ references|length }}</p>
+        <p class="page-subtitle">{% blocktrans with count=references|length %}Всего: {{ count }}{% endblocktrans %}</p>
     </div>
 
     <div class="reference-grid">
@@ -28,7 +39,7 @@
                 <span class="reference-card__count">{{ reference.titles_count }}</span>
             </a>
         {% empty %}
-            <p class="empty-state">Пока пусто.</p>
+            <p class="empty-state">{% trans "Пока пусто." %}</p>
         {% endfor %}
     </div>
 {% endblock %}

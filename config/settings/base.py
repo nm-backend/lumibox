@@ -108,6 +108,7 @@ TEMPLATES = [
                 "django.template.context_processors.i18n",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "apps.core.context_processors.analytics_ids",
             ],
         },
     },
@@ -333,6 +334,11 @@ LOCALE_PATHS = [BASE_DIR / "locale"]
 # Sentry: трекинг ошибок в продакшене.
 # Без переменной окружения SENTRY_DSN Sentry не активируется.
 SENTRY_DSN = env("SENTRY_DSN", default="")
+
+# Аналитика: Google Analytics и Яндекс.Метрика.
+# Без переменных окружения — скрипты не загружаются.
+GOOGLE_ANALYTICS_ID = env("GOOGLE_ANALYTICS_ID", default="")
+YANDEX_METRIKA_ID = env("YANDEX_METRIKA_ID", default="")
 if SENTRY_DSN:
     import sentry_sdk
     from sentry_sdk.integrations.django import DjangoIntegration
@@ -369,11 +375,29 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 CONTENT_SECURITY_POLICY = {
     "DIRECTIVES": {
         "default-src": ("'self'",),
-        "script-src": ("'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net"),
+        "script-src": (
+            "'self'",
+            "'unsafe-inline'",
+            "https://cdn.jsdelivr.net",
+            "https://www.googletagmanager.com",
+            "https://www.google-analytics.com",
+            "https://mc.yandex.ru",
+        ),
         "style-src": ("'self'", "'unsafe-inline'"),
-        "img-src": ("'self'", "data:", "https:"),
+        "img-src": (
+            "'self'",
+            "data:",
+            "https:",
+            "https://mc.yandex.ru",
+        ),
         "font-src": ("'self'",),
-        "connect-src": ("'self'",),
+        "connect-src": (
+            "'self'",
+            "https://www.google-analytics.com",
+            "https://analytics.google.com",
+            "https://mc.yandex.ru",
+            "wss:",
+        ),
         "frame-src": (
             "'self'",
             "https://www.youtube.com",

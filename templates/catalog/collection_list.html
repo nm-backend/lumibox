@@ -4,6 +4,17 @@
 {% block page_title %}{% trans "Подборки" %} — MovieHub{% endblock %}
 {% block page_description %}{% trans "Тематические подборки фильмов и сериалов." %}{% endblock %}
 
+{% block breadcrumbs %}
+<div class="container">
+    <nav class="breadcrumbs" aria-label="{% trans 'Навигация' %}">
+        <ol class="breadcrumbs__list">
+            <li class="breadcrumbs__item"><a class="breadcrumbs__link" href="{% url 'catalog:home' %}">{% trans "Главная" %}</a></li>
+            <li class="breadcrumbs__item"><span class="breadcrumbs__current">{% trans "Подборки" %}</span></li>
+        </ol>
+    </nav>
+</div>
+{% endblock %}
+
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'css/collections.css' %}">
 {% endblock %}
