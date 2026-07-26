@@ -1,35 +1,33 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static i18n %}
 
 {% block page_title %}{{ title.get_meta_title }} ({{ title.release_year }}) — MovieHub{% endblock %}
 {% block page_description %}{{ title.get_meta_description }}{% endblock %}
+
+{% block extra_head %}
+    {% include "includes/opengraph.html" %}
+{% endblock %}
 
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'css/title-detail.css' %}">
 {% endblock %}
 
-{% comment %}
-Шапка вынесена в блок hero: она полноширинная и живёт вне .container.
-Фон — необязательный: если редактор его не загрузил, остаётся чистый
-градиент, и страница не выглядит сломанной.
-{% endcomment %}
+{% block extra_js %}
+    {% include "includes/jsonld_title.html" %}
+{% endblock %}
+
 {% block hero %}
 <section class="film-hero">
     {% if title.backdrop %}
-        {% comment %}
-        alt пустой и aria-hidden: это декорация, содержания в ней нет,
-        а скринридеру незачем читать «фон фильма такого-то».
-        {% endcomment %}
         <img class="film-hero__backdrop" src="{{ title.backdrop.url }}" alt="" aria-hidden="true">
     {% endif %}
 
-    {# Затемнение поверх фона: без него светлый кадр съедает белый текст. #}
     <div class="film-hero__scrim" aria-hidden="true"></div>
 
     <div class="container film-hero__inner">
         <div class="film-hero__poster">
             {% if title.poster %}
-                <img class="film-hero__poster-image" src="{{ title.poster.url }}" alt="Постер: {{ title.name }}">
+                <img class="film-hero__poster-image" src="{{ title.poster.url }}" alt="{% blocktrans with name=title.name %}Постер: {{ name }}{% endblocktrans %}">
             {% else %}
                 <span class="card__placeholder" aria-hidden="true">{{ title.name|first }}</span>
             {% endif %}
@@ -37,10 +35,6 @@
 
         <div class="film-hero__body">
             {% if title.logo %}
-                {% comment %}
-                Логотип заменяет текстовый заголовок, но h1 остаётся
-                в разметке для поисковика и скринридера.
-                {% endcomment %}
                 <h1 class="film-hero__name film-hero__name--logo">
                     <img class="film-hero__logo" src="{{ title.logo.url }}" alt="{{ title.name }}">
                 </h1>
@@ -58,7 +52,7 @@
 
             <div class="film-hero__meta">
                 {% if title.rating_average %}
-                    <span class="score" title="Средняя оценка зрителей">
+                    <span class="score" title="{% trans 'Средняя оценка зрителей' %}">
                         <span class="score__value">{{ title.rating_average }}</span>
                         <span class="score__max">/10</span>
                     </span>
@@ -71,7 +65,7 @@
 
                 {% if title.duration_minutes %}
                     <span class="film-hero__dot" aria-hidden="true">·</span>
-                    <span>{{ title.duration_minutes }} мин</span>
+                    <span>{% blocktrans with minutes=title.duration_minutes %}{{ minutes }} мин{% endblocktrans %}</span>
                 {% endif %}
 
                 {% if title.age_rating %}
@@ -95,26 +89,17 @@
                 {% if watch_url %}
                     <a class="button button--primary" href="{{ watch_url }}">
                         <span class="button__icon" aria-hidden="true">▶</span>
-                        Смотреть
+                        {% trans "Смотреть" %}
                     </a>
                 {% endif %}
                 {% if title.trailer_source %}
-                    {% comment %}
-                    Якорь, а не модалка: плеер ниже на странице.
-                    Модальное окно потребовало бы JS ради того же результата.
-                    {% endcomment %}
                     <a class="button {% if watch_url %}button--ghost{% else %}button--primary{% endif %}" href="#trailer">
                         <span class="button__icon" aria-hidden="true">▶</span>
-                        Смотреть трейлер
+                        {% trans "Смотреть трейлер" %}
                     </a>
                 {% endif %}
 
                 {% if user.is_authenticated %}
-                    {% comment %}
-                    POST, а не ссылка: GET не должен менять данные.
-                    data-favorite-form подхватит скрипт и уберёт перезагрузку,
-                    но без JavaScript форма всё равно работает.
-                    {% endcomment %}
                     <form method="post"
                           action="{% url 'library:toggle_favorite' title.slug %}"
                           data-favorite-form>
@@ -122,12 +107,12 @@
                         <input type="hidden" name="next" value="{{ request.path }}">
                         <button class="button button--ghost {% if is_favorite %}button--active{% endif %}"
                                 type="submit" data-favorite-button>
-                            {% if is_favorite %}В избранном{% else %}В избранное{% endif %}
+                            {% if is_favorite %}{% trans "В избранном" %}{% else %}{% trans "В избранное" %}{% endif %}
                         </button>
                     </form>
                 {% else %}
                     <a class="button button--ghost" href="{% url 'users:login' %}?next={{ request.path }}">
-                        В избранное
+                        {% trans "В избранное" %}
                     </a>
                 {% endif %}
             </div>
@@ -139,28 +124,23 @@
 {% block content %}
     {% if title.trailer_source %}
         <section class="section" id="trailer">
-            <h2 class="section__title">Трейлер</h2>
+            <h2 class="section__title">{% trans "Трейлер" %}</h2>
 
             {% if title.trailer_source == "file" %}
-                {# Своё видео: отдаём тегом video, без внешних зависимостей. #}
                 <div class="player">
                     <video class="player__frame" controls preload="metadata"
                            {% if title.backdrop %}poster="{{ title.backdrop.url }}"{% endif %}>
                         <source src="{{ title.trailer_file.url }}">
-                        Ваш браузер не умеет проигрывать видео.
-                        <a href="{{ title.trailer_file.url }}">Скачать файл</a>.
+                        {% trans "Ваш браузер не умеет проигрывать видео." %}
+                        <a href="{{ title.trailer_file.url }}">{% trans "Скачать файл" %}</a>.
                     </video>
                 </div>
 
             {% elif title.trailer_embed_url %}
-                {% comment %}
-                Встраиваем только проверенные хосты — список в apps/catalog/embeds.py.
-                Ссылку вводит редактор, и пускать во фрейм что попало нельзя.
-                {% endcomment %}
                 <div class="player">
                     <iframe class="player__frame"
                             src="{{ title.trailer_embed_url }}"
-                            title="Трейлер: {{ title.name }}"
+                            title="{% blocktrans with name=title.name %}Трейлер: {{ name }}{% endblocktrans %}"
                             loading="lazy"
                             referrerpolicy="strict-origin-when-cross-origin"
                             allow="accelerometer; clipboard-write; encrypted-media; picture-in-picture"
@@ -168,15 +148,10 @@
                 </div>
 
             {% else %}
-                {% comment %}
-                Хост незнакомый — встраивать не будем, но и ссылку не теряем.
-                rel="noopener" обязателен: без него открытая вкладка получает
-                доступ к нашей странице через window.opener.
-                {% endcomment %}
                 <p class="player-fallback">
-                    Трейлер размещён на стороннем сервисе.
+                    {% trans "Трейлер размещён на стороннем сервисе." %}
                     <a class="button button--ghost" href="{{ title.trailer_url }}"
-                       target="_blank" rel="noopener noreferrer">Открыть трейлер</a>
+                       target="_blank" rel="noopener noreferrer">{% trans "Открыть трейлер" %}</a>
                 </p>
             {% endif %}
         </section>
@@ -184,13 +159,9 @@
 
     {% if title.frames.all %}
         <section class="section">
-            <h2 class="section__title">Кадры</h2>
+            <h2 class="section__title">{% trans "Кадры" %}</h2>
             <div class="frames">
                 {% for frame in title.frames.all %}
-                    {% comment %}
-                    Подпись служит alt-текстом: без неё незрячий услышит
-                    только «изображение». Если её нет — подставляем название.
-                    {% endcomment %}
                     <img class="frames__item"
                          src="{{ frame.image.url }}"
                          alt="{{ frame.caption|default:title.name }}"
@@ -201,20 +172,20 @@
     {% endif %}
 
     <section class="section">
-        <h2 class="section__title">О проекте</h2>
+        <h2 class="section__title">{% trans "О проекте" %}</h2>
         <dl class="spec-list">
-            <dt class="spec-list__label">{% if title.release_date %}Дата выхода{% else %}Год{% endif %}</dt>
+            <dt class="spec-list__label">{% if title.release_date %}{% trans "Дата выхода" %}{% else %}{% trans "Год" %}{% endif %}</dt>
             <dd class="spec-list__value">
                 {% if title.release_date %}{{ title.release_date|date:"j E Y" }}{% else %}{{ title.release_year }}{% endif %}
             </dd>
 
             {% if title.duration_minutes %}
-                <dt class="spec-list__label">{% if title.is_series %}Серия{% else %}Длительность{% endif %}</dt>
-                <dd class="spec-list__value">{{ title.duration_minutes }} мин</dd>
+                <dt class="spec-list__label">{% if title.is_series %}{% trans "Серия" %}{% else %}{% trans "Длительность" %}{% endif %}</dt>
+                <dd class="spec-list__value">{% blocktrans with minutes=title.duration_minutes %}{{ minutes }} мин{% endblocktrans %}</dd>
             {% endif %}
 
             {% if title.countries.all %}
-                <dt class="spec-list__label">Страны</dt>
+                <dt class="spec-list__label">{% trans "Страны" %}</dt>
                 <dd class="spec-list__value">
                     <div class="badge-list">
                         {% for country in title.countries.all %}
@@ -225,15 +196,20 @@
             {% endif %}
 
             {% if title.rating_average %}
-                <dt class="spec-list__label">Оценка зрителей</dt>
+                <dt class="spec-list__label">{% trans "Оценка зрителей" %}</dt>
                 <dd class="spec-list__value">{{ title.rating_average }} / 10 ({{ title.rating_count }})</dd>
+            {% endif %}
+
+            {% if title.view_count %}
+                <dt class="spec-list__label">{% trans "Просмотров" %}</dt>
+                <dd class="spec-list__value">{{ title.view_count }}</dd>
             {% endif %}
         </dl>
     </section>
 
     {% if crew_by_role %}
         <section class="section">
-            <h2 class="section__title">Над проектом работали</h2>
+            <h2 class="section__title">{% trans "Над проектом работали" %}</h2>
 
             {% for role_label, participations in crew_by_role %}
                 <div class="crew-group">
@@ -262,16 +238,50 @@
         </section>
     {% endif %}
 
+    {% if seasons %}
+        <section class="section" id="seasons">
+            <h2 class="section__title">{% trans "Сезоны" %}</h2>
+
+            <details class="season-accordion" open>
+                {% for season in seasons %}
+                    <details class="season-accordion__item" {% if forloop.first %}open{% endif %}>
+                        <summary class="season-accordion__trigger">
+                            <span class="season-accordion__name">{{ season.display_name }}</span>
+                            {% if season.release_year %}
+                                <span class="season-accordion__year">{{ season.release_year }}</span>
+                            {% endif %}
+                            <span class="season-accordion__count">{{ season.episodes.count }} {% trans "серий" %}</span>
+                        </summary>
+
+                        <div class="season-accordion__body">
+                            {% for episode in season.episodes.all %}
+                                <a class="episode-row" href="{% url 'streaming:watch_episode' title.slug season.number episode.number %}">
+                                    <span class="episode-row__number">{{ episode.number }}</span>
+                                    <span class="episode-row__info">
+                                        <span class="episode-row__name">{{ episode.name }}</span>
+                                        {% if episode.description %}
+                                            <span class="episode-row__desc">{{ episode.description|truncatechars:100 }}</span>
+                                        {% endif %}
+                                    </span>
+                                    {% if episode.duration_seconds %}
+                                        <span class="episode-row__duration">{{ episode.duration_seconds|floatformat:0 }} {% trans "мин" %}</span>
+                                    {% endif %}
+                                    <span class="episode-row__play" aria-hidden="true">▶</span>
+                                </a>
+                            {% endfor %}
+                        </div>
+                    </details>
+                {% endfor %}
+            </details>
+        </section>
+    {% endif %}
+
     {% include "includes/reviews.html" %}
 
     {% if similar_titles %}
         <section class="section">
-            <h2 class="section__title">Похожее</h2>
+            <h2 class="section__title">{% trans "Похожее" %}</h2>
             <div class="title-grid">
-                {% comment %}
-                Переменная цикла названа иначе, чтобы не затирать title
-                самой страницы, и передана в карточку явно через with.
-                {% endcomment %}
                 {% for similar in similar_titles %}
                     {% include "includes/title_card.html" with title=similar %}
                 {% endfor %}

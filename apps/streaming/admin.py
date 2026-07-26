@@ -48,7 +48,15 @@ class VideoAssetAdmin(admin.ModelAdmin):
     inlines = [SubtitleTrackInline]
     fieldsets = [
         ("Контент", {"fields": ["title", "episode"]}),
-        ("Доставка", {"fields": ["provider", "stream_type", "asset_key", "media_file", "duration_seconds", "available_qualities"]}),
+        (
+            "Доставка",
+            {
+                "fields": [
+                    "provider", "stream_type", "asset_key",
+                    "media_file", "duration_seconds", "available_qualities",
+                ]
+            },
+        ),
         ("Лицензия и доступ", {"fields": ["status", "access_level", "license_ends_at"]}),
         ("Офлайн", {"fields": ["allow_download", "download_name"]}),
         ("Служебное", {"fields": ["id", "created_at", "updated_at"]}),
@@ -78,4 +86,6 @@ class WatchProgressAdmin(admin.ModelAdmin):
     readonly_fields = ["created_at", "updated_at", "last_watched_at"]
 
     def get_queryset(self, request):
-        return super().get_queryset(request).select_related("user", "video_asset__title", "video_asset__episode__season__title")
+        return super().get_queryset(request).select_related(
+            "user", "video_asset__title", "video_asset__episode__season__title"
+        )

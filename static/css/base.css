@@ -8,6 +8,99 @@
     padding: 0;
 }
 
+/* Scroll reveal animation */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(24px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+/* Skeleton loading effect */
+.skeleton {
+    background: linear-gradient(
+        90deg,
+        var(--color-surface) 25%,
+        var(--color-surface-hover) 37%,
+        var(--color-surface) 63%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.4s ease infinite;
+    border-radius: var(--radius-sm);
+}
+
+/* Blur loading для изображений */
+.card__image {
+    transition: filter 0.4s ease, opacity 0.4s ease;
+}
+
+.card__image[loading="lazy"] {
+    filter: blur(0);
+    opacity: 1;
+}
+
+/* Плавное появление изображений */
+img[loading="lazy"] {
+    opacity: 0;
+    animation: imageLoad 0.4s ease forwards;
+}
+
+@keyframes imageLoad {
+    from {
+        opacity: 0;
+        filter: blur(4px);
+    }
+    to {
+        opacity: 1;
+        filter: blur(0);
+    }
+}
+
+/* Premium loading spinner */
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.spinner {
+    width: 24px;
+    height: 24px;
+    border: 2px solid var(--color-border);
+    border-top-color: var(--color-accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+.spinner--large {
+    width: 40px;
+    height: 40px;
+    border-width: 3px;
+}
+
+/* Pulse animation for badges */
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+.pulse {
+    animation: pulse 2s ease-in-out infinite;
+}
+
 html {
     /* Плавная прокрутка к якорям — но не для тех, кому анимация мешает */
     scroll-behavior: smooth;
@@ -22,6 +115,7 @@ html {
     *::before,
     *::after {
         animation-duration: 0.01ms !important;
+        animation-delay: 0s !important;
         transition-duration: 0.01ms !important;
     }
 }
@@ -95,4 +189,29 @@ h3 {
     overflow: hidden;
     clip-path: inset(50%);
     white-space: nowrap;
+}
+
+/* Красивый скроллбар */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--color-bg);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--color-border);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--color-text-dim);
+}
+
+/* Firefox scrollbar */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-border) var(--color-bg);
 }

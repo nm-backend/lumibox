@@ -11,12 +11,10 @@ from django.core.exceptions import PermissionDenied
 from django.db import transaction
 from django.db.models import Q
 from django.urls import reverse
-from django.utils import timezone
 
 from apps.catalog.models import Title
 from apps.library.services import remember_view
 from apps.streaming.models import Episode, PlaybackPreference, SubtitleTrack, VideoAsset, WatchProgress
-
 
 MINIMUM_RESUME_SECONDS = 30
 

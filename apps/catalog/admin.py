@@ -4,6 +4,7 @@ from django.utils import timezone
 from django.utils.html import format_html
 
 from apps.catalog.models import (
+    Award,
     Collection,
     CollectionItem,
     Country,
@@ -11,7 +12,6 @@ from apps.catalog.models import (
     Genre,
     Participation,
     Person,
-    Award,
     Studio,
     Title,
     TitleAward,
@@ -160,7 +160,7 @@ class TitleAdmin(admin.ModelAdmin):
     # в обычном multi-select нерабочий.
     autocomplete_fields = ["related_titles"]
 
-    list_display = ["poster_thumb", "name", "type", "release_year", "status", "rating_display"]
+    list_display = ["poster_thumb", "name", "type", "release_year", "status", "rating_display", "views_display"]
     list_display_links = ["poster_thumb", "name"]
     list_filter = ["status", "type", "genres", "countries", "release_year"]
     search_fields = ["name", "original_name"]
@@ -306,6 +306,10 @@ class TitleAdmin(admin.ModelAdmin):
             'background: #14161c; border-radius: 6px;">',
             title.logo.url,
         )
+
+    @admin.display(description="Просмотры", ordering="view_count")
+    def views_display(self, title):
+        return title.view_count
 
     @admin.display(description="Рейтинг (считается из отзывов)")
     def rating_display(self, title):

@@ -1,0 +1,31 @@
+{% comment %}
+  JSON-LD structured data для страницы фильма/сериала.
+  Помогает Google, Яндекс и другим поисковикам понять контент страницы.
+  Schema.org тип: Movie или TVSeries.
+{% endcomment %}
+{% load i18n %}
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "{% if title.is_series %}TVSeries{% else %}Movie{% endif %}",
+    "name": "{{ title.name }}",
+    {% if title.original_name %}"alternateName": "{{ title.original_name }}",{% endif %}
+    "description": "{{ title.get_meta_description|escapejs }}",
+    "datePublished": "{{ title.release_year }}",
+    {% if title.release_date %}"dateCreated": "{{ title.release_date|date:'Y-m-d' }}",{% endif %}
+    {% if title.duration_minutes %}"duration": "PT{{ title.duration_minutes }}M",{% endif %}
+    {% if title.poster %}"image": "{{ request.scheme }}://{{ request.get_host }}{{ title.poster.url }}",{% endif %}
+    {% if title.rating_average %}"aggregateRating": {"@type": "AggregateRating", "ratingValue": "{{ title.rating_average }}", "bestRating": "10", "ratingCount": "{{ title.rating_count }}"}{% endif %}
+    {% for genre in title.genres.all %}
+    {% if forloop.first %},"genre": [{% endif %}"{{ genre.name }}"{% if not forloop.last %}, {% endif %}{% if forloop.last %}]{% endif %}{% endfor %}
+    {% if crew_by_role %}
+    ,"actor": [
+    {% for role_label, participations in crew_by_role %}
+        {% for p in participations %}
+        {"@type": "Person", "name": "{{ p.person.name }}"{% if p.character %}, "characterName": "{{ p.character }}"{% endif %}}{% if not forloop.parentloop.last or not forloop.last %},{% endif %}
+        {% endfor %}
+    {% endfor %}
+    ]
+    {% endif %}
+}
+</script>

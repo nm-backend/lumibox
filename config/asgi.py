@@ -1,15 +1,24 @@
 """
-ASGI-точка входа. Понадобится, если проект будет обслуживать
-асинхронные запросы или веб-сокеты.
+ASGI-точка входа с поддержкой WebSocket через Django Channels.
 
 Документация: https://docs.djangoproject.com/en/5.2/howto/deployment/asgi/
 """
 
 import os
 
+from channels.auth import AuthMiddlewareStack
+from channels.routing import ProtocolTypeRouter, URLRouter
 from django.core.asgi import get_asgi_application
 
-# Причина такого умолчания — та же, что и в wsgi.py: безопасность важнее удобства.
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.production")
 
-application = get_asgi_application()
+django_asgi_app = get_asgi_application()
+
+from config.routing import websocket_urlpatterns  # noqa: E402
+
+application = ProtocolTypeRouter({
+    "http": django_asgi_app,
+    "websocket": AuthMiddlewareStack(
+        URLRouter(websocket_urlpatterns)
+    ),
+})

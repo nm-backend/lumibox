@@ -1,13 +1,16 @@
 {% extends "base.html" %}
+{% load i18n %}
 
-{% block page_title %}Страница не найдена — MovieHub{% endblock %}
+{% block page_title %}{% trans "Страница не найдена" %} — MovieHub{% endblock %}
 
 {% block content %}
-    <div class="empty-state">
-        <p class="empty-state__title">Страница не найдена</p>
-        <p>Возможно, запись удалили или ссылка набрана с ошибкой.</p>
-        <p class="empty-state__action">
-            <a class="button button--primary" href="{% url 'catalog:title_list' %}">Открыть каталог</a>
+    <div class="empty-state" style="padding: var(--space-8) 0;">
+        <p style="font-size: clamp(4rem, 10vw, 8rem); font-weight: 900; line-height: 1; margin-bottom: var(--space-4); background: var(--color-premium-gold); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">404</p>
+        <p class="empty-state__title" style="font-size: var(--text-xl);">{% trans "Страница не найдена" %}</p>
+        <p style="max-width: 40ch; margin: 0 auto; line-height: 1.6;">{% trans "Возможно, запись удалили или ссылка набрана с ошибкой." %}</p>
+        <p class="empty-state__action" style="display: flex; gap: var(--space-3); justify-content: center; flex-wrap: wrap;">
+            <a class="button button--primary" href="{% url 'catalog:home' %}">{% trans "На главную" %}</a>
+            <a class="button button--ghost" href="{% url 'catalog:title_list' %}">{% trans "Открыть каталог" %}</a>
         </p>
     </div>
 {% endblock %}

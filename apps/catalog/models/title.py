@@ -204,6 +204,15 @@ class Title(SeoModel, TimeStampedModel):
         editable=False,
     )
 
+    # Счётчик просмотров: обновляется при каждом открытии страницы фильма.
+    # Не точный (update через F() атомарен, но не вызывает сигналы),
+    # зато не создаёт N+1 и не тормозит каталог.
+    view_count = models.PositiveIntegerField(
+        "Просмотров",
+        default=0,
+        editable=False,
+    )
+
     objects = TitleQuerySet.as_manager()
 
     class Meta:
@@ -216,6 +225,12 @@ class Title(SeoModel, TimeStampedModel):
             models.Index(fields=["status", "type"], name="title_status_type_idx"),
             # Фильтр и сортировка по годам.
             models.Index(fields=["-release_year"], name="title_year_idx"),
+            # Сортировка по популярности.
+            models.Index(fields=["-view_count"], name="title_view_count_idx"),
+            # Сортировка по рейтингу.
+            models.Index(fields=["-rating_average"], name="title_rating_idx"),
+            # Публикация для главной (свежие опубликованные).
+            models.Index(fields=["status", "-published_at"], name="title_published_idx"),
         ]
 
     def __str__(self):

@@ -1,8 +1,9 @@
 from random import randrange
 
-from django.db.models import Count, Q
+from django.db.models import Count, F, Q
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
+from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView, ListView, TemplateView
 
 from apps.catalog.forms import CatalogFilterForm
@@ -52,6 +53,7 @@ class HomeView(TemplateView):
         context["top_rated_url"] = f"{catalog_url}?sort=-rating_average"
         context["movies_url"] = f"{catalog_url}?type={Title.Type.MOVIE}"
         context["series_url"] = f"{catalog_url}?type={Title.Type.SERIES}"
+        context["trending_url"] = f"{catalog_url}?sort=-view_count"
 
         # Гостю блок рекомендаций не показываем, поэтому и не считаем:
         # лишний запрос на каждой загрузке главной ни к чему.
@@ -82,7 +84,7 @@ class TitleListView(ElidedPaginationMixin, ListView):
     context_object_name = "titles"
     paginate_by = 24
 
-    page_heading = "Каталог"
+    page_heading = _("Каталог")
     page_subtitle = ""
 
     def get_filter_form(self):
@@ -134,7 +136,7 @@ class TitleListView(ElidedPaginationMixin, ListView):
 class GenreTitleListView(TitleListView):
     """Каталог, суженный до одного жанра: /genres/drama/"""
 
-    page_subtitle = "Жанр"
+    page_subtitle = _("Жанр")
 
     def get_base_queryset(self):
         genre = get_object_or_404(Genre, slug=self.kwargs["slug"])
@@ -145,7 +147,7 @@ class GenreTitleListView(TitleListView):
 class CountryTitleListView(TitleListView):
     """Каталог, суженный до одной страны: /countries/yaponiya/"""
 
-    page_subtitle = "Страна"
+    page_subtitle = _("Страна")
 
     def get_base_queryset(self):
         country = get_object_or_404(Country, slug=self.kwargs["slug"])
@@ -188,13 +190,13 @@ class ReferenceListView(ListView):
 
 class GenreListView(ReferenceListView):
     model = Genre
-    page_heading = "Жанры"
+    page_heading = _("Жанры")
     detail_url_name = "catalog:genre_titles"
 
 
 class CountryListView(ReferenceListView):
     model = Country
-    page_heading = "Страны"
+    page_heading = _("Страны")
     detail_url_name = "catalog:country_titles"
 
 
@@ -214,6 +216,9 @@ class TitleDetailView(DetailView):
         response = super().get(request, *args, **kwargs)
         # Запоминаем просмотр после успешной отрисовки страницы.
         remember_view(request.user, self.object)
+        # Атомарный инкремент счётчика просмотров.
+        # F() не вызывает сигналы и не обновляет updated_at.
+        Title.objects.filter(pk=self.object.pk).update(view_count=F("view_count") + 1)
         return response
 
     def get_context_data(self, **kwargs):
@@ -227,6 +232,18 @@ class TitleDetailView(DetailView):
         context["user_review"] = user_review
         context["is_favorite"] = self.is_favorite()
         context["watch_url"] = get_watch_url(self.object)
+
+        # Сезоны и серии для сериалов
+        if self.object.is_series:
+            context["seasons"] = (
+                self.object.seasons
+                .filter(is_published=True)
+                .prefetch_related(
+                    "episodes",
+                )
+                .order_by("number")
+            )
+
         return context
 
     def get_user_review(self):
@@ -276,7 +293,7 @@ class PersonDirectoryView(ListView):
     template_name = "catalog/person_list.html"
     context_object_name = "persons"
     role = Participation.Role.ACTOR
-    page_heading = "Актёры"
+    page_heading = _("Актёры")
 
     def get_queryset(self):
         published_role = Q(
@@ -297,12 +314,12 @@ class PersonDirectoryView(ListView):
 
 class ActorListView(PersonDirectoryView):
     role = Participation.Role.ACTOR
-    page_heading = "Актёры"
+    page_heading = _("Актёры")
 
 
 class DirectorListView(PersonDirectoryView):
     role = Participation.Role.DIRECTOR
-    page_heading = "Режиссёры"
+    page_heading = _("Режиссёры")
 
 
 class StudioListView(ListView):
@@ -335,7 +352,7 @@ class StudioDetailView(ElidedPaginationMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["entity"] = self.studio
-        context["entity_label"] = "Студия"
+        context["entity_label"] = _("Студия")
         return context
 
 
@@ -381,7 +398,7 @@ class AwardDetailView(ElidedPaginationMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["entity"] = self.award
-        context["entity_label"] = "Премия"
+        context["entity_label"] = _("Премия")
         return context
 
 

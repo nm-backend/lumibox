@@ -5,6 +5,7 @@
     align-items: center;
     gap: var(--space-5);
     margin-bottom: var(--space-6);
+    animation: fadeInUp 0.4s ease both;
 }
 
 .profile-header__bio {
@@ -32,19 +33,64 @@
     background-color: var(--color-surface);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
-    transition: border-color var(--transition);
+    transition: border-color var(--transition), transform var(--transition),
+                box-shadow var(--transition);
+    will-change: transform;
+    position: relative;
+    overflow: hidden;
 }
 
-/* Подсвечиваем только те счётчики, которые ведут на страницу */
+/* Subtle gradient accent on stat cards */
+.stat::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--color-premium-gold);
+    opacity: 0;
+    transition: opacity var(--transition);
+}
+
 a.stat:hover {
     border-color: var(--color-accent);
     color: var(--color-text);
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+}
+
+a.stat:hover::after {
+    opacity: 1;
+}
+
+/* Light theme: stat cards with shadow */
+[data-theme="light"] .stat {
+    box-shadow: var(--shadow-sm);
+}
+
+[data-theme="light"] a.stat:hover {
+    box-shadow: var(--shadow-card);
 }
 
 .stat__value {
     font-size: var(--text-xl);
-    font-weight: 700;
+    font-weight: 800;
     line-height: 1;
+}
+
+/* Dark theme: gold gradient text */
+[data-theme="dark"] .stat__value,
+:not([data-theme="light"]) .stat__value {
+    background: var(--color-premium-gold);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Light theme: solid accent color */
+[data-theme="light"] .stat__value {
+    color: var(--color-accent);
 }
 
 .stat__label {
@@ -64,10 +110,49 @@ a.stat:hover {
     justify-content: space-between;
 }
 
+/* ---------- Адаптивность ---------- */
+
 @media (max-width: 600px) {
     .profile-header {
         flex-direction: column;
         align-items: flex-start;
         gap: var(--space-4);
+    }
+
+    .avatar--large {
+        width: 64px;
+        height: 64px;
+        font-size: var(--text-lg);
+    }
+
+    .stat-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .stat {
+        padding: var(--space-3);
+    }
+
+    .stat__value {
+        font-size: var(--text-lg);
+    }
+
+    .stat__label {
+        font-size: 0.65rem;
+    }
+}
+
+@media (max-width: 390px) {
+    .stat-grid {
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: var(--space-2);
+    }
+
+    .stat {
+        padding: var(--space-2);
+    }
+
+    .stat__value {
+        font-size: var(--text-md);
     }
 }

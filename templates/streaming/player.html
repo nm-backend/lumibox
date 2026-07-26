@@ -1,8 +1,8 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static i18n %}
 
-{% block page_title %}Смотреть {{ title.name }} — MovieHub{% endblock %}
-{% block page_description %}Просмотр {{ title.name }} на MovieHub.{% endblock %}
+{% block page_title %}{% blocktrans with name=title.name %}Смотреть {{ name }}{% endblocktrans %} — MovieHub{% endblock %}
+{% block page_description %}{% blocktrans with name=title.name %}Просмотр {{ name }} на MovieHub.{% endblocktrans %}{% endblock %}
 
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'css/player.css' %}">
@@ -10,11 +10,11 @@
 
 {% block content %}
     <section class="watch-page">
-        <nav class="watch-page__breadcrumb" aria-label="Навигация">
+        <nav class="watch-page__breadcrumb" aria-label="{% trans 'Навигация' %}">
             <a href="{{ title.get_absolute_url }}">{{ title.name }}</a>
             {% if episode %}
                 <span aria-hidden="true">/</span>
-                <span>{{ episode.season.display_name }}, серия {{ episode.number }}</span>
+                <span>{{ episode.season.display_name }}, {% blocktrans with num=episode.number %}серия {{ num }}{% endblocktrans %}</span>
             {% endif %}
         </nav>
 
@@ -25,66 +25,66 @@
                        preload="metadata"
                        playsinline
                        {% if title.backdrop %}poster="{{ title.backdrop.url }}"{% endif %}
-                       aria-label="Плеер: {{ title.name }}{% if episode %}, {{ episode.name }}{% endif %}"></video>
+                       aria-label="{% blocktrans with name=title.name %}Плеер: {{ name }}{% endblocktrans %}"></video>
 
                 <div class="stream-player__scrim" data-player-scrim></div>
-                <button class="stream-player__big-play" type="button" data-player-toggle aria-label="Воспроизвести">
+                <button class="stream-player__big-play" type="button" data-player-toggle aria-label="{% trans 'Воспроизвести' %}">
                     <span aria-hidden="true">▶</span>
                 </button>
 
                 <div class="stream-player__skip-actions" aria-live="polite">
-                    <button class="stream-player__skip-button" type="button" data-player-skip="recap" hidden>Пропустить рекап</button>
-                    <button class="stream-player__skip-button" type="button" data-player-skip="intro" hidden>Пропустить заставку</button>
+                    <button class="stream-player__skip-button" type="button" data-player-skip="recap" hidden>{% trans "Пропустить рекап" %}</button>
+                    <button class="stream-player__skip-button" type="button" data-player-skip="intro" hidden>{% trans "Пропустить заставку" %}</button>
                 </div>
 
                 <aside class="stream-player__next" data-player-next hidden aria-live="polite">
-                    <p class="stream-player__next-kicker">Следующая серия через <span data-player-countdown>15</span> сек.</p>
+                    <p class="stream-player__next-kicker">{% trans "Следующая серия через" %} <span data-player-countdown>15</span> {% trans "сек." %}</p>
                     <strong data-player-next-title></strong>
                     <div class="stream-player__next-actions">
-                        <a class="button button--primary" data-player-next-link href="#">Смотреть</a>
-                        <button class="button button--ghost" data-player-cancel-next type="button">Отмена</button>
+                        <a class="button button--primary" data-player-next-link href="#">{% trans "Смотреть" %}</a>
+                        <button class="button button--ghost" data-player-cancel-next type="button">{% trans "Отмена" %}</button>
                     </div>
                 </aside>
 
                 <div class="stream-player__controls" data-player-controls>
                     <div class="stream-player__timeline">
-                        <input class="stream-player__range" data-player-progress type="range" min="0" max="100" value="0" step="0.1" aria-label="Позиция воспроизведения">
+                        <input class="stream-player__range" data-player-progress type="range" min="0" max="100" value="0" step="0.1" aria-label="{% trans 'Позиция воспроизведения' %}">
                         <div class="stream-player__buffer" data-player-buffer aria-hidden="true"></div>
                     </div>
                     <div class="stream-player__toolbar">
-                        <button class="stream-player__control" type="button" data-player-toggle aria-label="Воспроизвести">▶</button>
-                        <button class="stream-player__control" type="button" data-player-seek="-10" aria-label="Назад на 10 секунд">↶ 10</button>
-                        <button class="stream-player__control" type="button" data-player-seek="10" aria-label="Вперёд на 10 секунд">10 ↷</button>
+                        <button class="stream-player__control" type="button" data-player-toggle aria-label="{% trans 'Воспроизвести' %}">▶</button>
+                        <button class="stream-player__control" type="button" data-player-seek="-10" aria-label="{% trans 'Назад на 10 секунд' %}">↶ 10</button>
+                        <button class="stream-player__control" type="button" data-player-seek="10" aria-label="{% trans 'Вперёд на 10 секунд' %}">10 ↷</button>
                         <time class="stream-player__time" data-player-time>0:00 / 0:00</time>
                         <div class="stream-player__toolbar-spacer"></div>
-                        <label class="visually-hidden" for="player-speed">Скорость воспроизведения</label>
-                        <select class="stream-player__select" id="player-speed" data-player-speed aria-label="Скорость воспроизведения">
+                        <label class="visually-hidden" for="player-speed">{% trans "Скорость воспроизведения" %}</label>
+                        <select class="stream-player__select" id="player-speed" data-player-speed aria-label="{% trans 'Скорость воспроизведения' %}">
                             <option value="0.5">0.5×</option><option value="0.75">0.75×</option><option value="1" selected>1×</option><option value="1.25">1.25×</option><option value="1.5">1.5×</option><option value="2">2×</option>
                         </select>
-                        <label class="visually-hidden" for="player-quality">Качество</label>
-                        <select class="stream-player__select" id="player-quality" data-player-quality aria-label="Качество"></select>
-                        <label class="visually-hidden" for="player-subtitles">Субтитры</label>
-                        <select class="stream-player__select" id="player-subtitles" data-player-subtitles aria-label="Субтитры"><option value="off">Субтитры: выкл.</option></select>
-                        <button class="stream-player__control" type="button" data-player-pip aria-label="Картинка в картинке">▣</button>
-                        <button class="stream-player__control" type="button" data-player-fullscreen aria-label="Полный экран">⛶</button>
+                        <label class="visually-hidden" for="player-quality">{% trans "Качество" %}</label>
+                        <select class="stream-player__select" id="player-quality" data-player-quality aria-label="{% trans 'Качество' %}"></select>
+                        <label class="visually-hidden" for="player-subtitles">{% trans "Субтитры" %}</label>
+                        <select class="stream-player__select" id="player-subtitles" data-player-subtitles aria-label="{% trans 'Субтитры' %}"><option value="off">{% trans "Субтитры: выкл." %}</option></select>
+                        <button class="stream-player__control" type="button" data-player-pip aria-label="{% trans 'Картинка в картинке' %}">▣</button>
+                        <button class="stream-player__control" type="button" data-player-fullscreen aria-label="{% trans 'Полный экран' %}">⛶</button>
                     </div>
                 </div>
-                <p class="stream-player__status" data-player-status aria-live="polite">Подготовка плеера…</p>
+                <p class="stream-player__status" data-player-status aria-live="polite">{% trans "Подготовка плеера…" %}</p>
             </div>
         </div>
 
         <div class="watch-page__details">
             <div>
-                <p class="watch-page__eyebrow">{% if episode %}{{ episode.season.display_name }} · серия {{ episode.number }}{% else %}Фильм{% endif %}</p>
+                <p class="watch-page__eyebrow">{% if episode %}{{ episode.season.display_name }} · {% blocktrans with num=episode.number %}серия {{ num }}{% endblocktrans %}{% else %}{% trans "Фильм" %}{% endif %}</p>
                 <h1>{% if episode %}{{ episode.name }}{% else %}{{ title.name }}{% endif %}</h1>
                 {% if episode.description %}<p>{{ episode.description }}</p>{% elif title.short_description %}<p>{{ title.short_description }}</p>{% endif %}
             </div>
             <div class="watch-page__actions">
-                {% if player_config.downloadUrl %}<a class="button button--ghost" href="{{ player_config.downloadUrl }}">Скачать</a>{% endif %}
-                <a class="button button--ghost" href="{{ title.get_absolute_url }}">О фильме</a>
+                {% if player_config.downloadUrl %}<a class="button button--ghost" href="{{ player_config.downloadUrl }}">{% trans "Скачать" %}</a>{% endif %}
+                <a class="button button--ghost" href="{{ title.get_absolute_url }}">{% trans "О фильме" %}</a>
             </div>
         </div>
-        <p class="watch-page__hint">Пробел — пауза, ←/→ — 10 секунд, M — звук, F — полный экран, P — PiP.</p>
+        <p class="watch-page__hint">{% trans "Пробел — пауза, ←/→ — 10 секунд, M — звук, F — полный экран, P — PiP." %}</p>
     </section>
     {{ player_config|json_script:"stream-player-config" }}
 {% endblock %}

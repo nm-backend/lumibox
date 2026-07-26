@@ -1,7 +1,7 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static i18n %}
 
-{% block page_title %}Профиль — MovieHub{% endblock %}
+{% block page_title %}{% trans "Профиль" %} — MovieHub{% endblock %}
 
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'css/forms.css' %}">
@@ -12,7 +12,7 @@
     <div class="profile-header">
         <div class="avatar avatar--large">
             {% if user.avatar %}
-                <img class="avatar__image" src="{{ user.avatar.url }}" alt="Аватар">
+                <img class="avatar__image" src="{{ user.avatar.url }}" alt="{% trans 'Аватар' %}">
             {% else %}
                 <span aria-hidden="true">{{ user.initial }}</span>
             {% endif %}
@@ -28,23 +28,23 @@
     <div class="stat-grid">
         <a class="stat" href="{% url 'library:favorites' %}">
             <span class="stat__value">{{ favorites_count }}</span>
-            <span class="stat__label">В избранном</span>
+            <span class="stat__label">{% trans "В избранном" %}</span>
         </a>
         <a class="stat" href="{% url 'library:history' %}">
             <span class="stat__value">{{ history_count }}</span>
-            <span class="stat__label">Просмотрено</span>
+            <span class="stat__label">{% trans "Просмотрено" %}</span>
         </a>
         <span class="stat">
             <span class="stat__value">{{ reviews_count }}</span>
-            <span class="stat__label">Отзывов</span>
+            <span class="stat__label">{% trans "Отзывов" %}</span>
         </span>
     </div>
 
     {% if recent_favorites %}
         <section class="section">
             <div class="section__header">
-                <h2 class="section__title">Избранное</h2>
-                <a class="section__link" href="{% url 'library:favorites' %}">Все →</a>
+                <h2 class="section__title">{% trans "Избранное" %}</h2>
+                <a class="section__link" href="{% url 'library:favorites' %}">{% trans "Все" %} →</a>
             </div>
             <div class="title-grid">
                 {% for favorite in recent_favorites %}
@@ -55,12 +55,38 @@
     {% endif %}
 
     <section class="section">
-        <h2 class="section__title">Настройки профиля</h2>
+        <h2 class="section__title">{% trans "Настройки профиля" %}</h2>
 
         <form class="profile-form" method="post" enctype="multipart/form-data" novalidate>
             {% csrf_token %}
             {% include "includes/form_fields.html" %}
-            <button class="button button--primary" type="submit">Сохранить</button>
+            <button class="button button--primary" type="submit">{% trans "Сохранить" %}</button>
+        </form>
+    </section>
+
+    <section class="section">
+        <h2 class="section__title">{% trans "Смена пароля" %}</h2>
+
+        <form class="profile-form" method="post" novalidate>
+            {% csrf_token %}
+            <input type="hidden" name="change_password" value="1">
+
+            <div class="form__field">
+                <label class="form__label" for="id_old_password">{% trans "Текущий пароль" %}</label>
+                <input type="password" name="old_password" id="id_old_password" required autocomplete="current-password">
+            </div>
+
+            <div class="form__field">
+                <label class="form__label" for="id_new_password1">{% trans "Новый пароль" %}</label>
+                <input type="password" name="new_password1" id="id_new_password1" required autocomplete="new-password">
+            </div>
+
+            <div class="form__field">
+                <label class="form__label" for="id_new_password2">{% trans "Подтвердите новый пароль" %}</label>
+                <input type="password" name="new_password2" id="id_new_password2" required autocomplete="new-password">
+            </div>
+
+            <button class="button button--primary" type="submit">{% trans "Изменить пароль" %}</button>
         </form>
     </section>
 {% endblock %}

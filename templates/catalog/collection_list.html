@@ -1,8 +1,8 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static i18n %}
 
-{% block page_title %}Подборки — MovieHub{% endblock %}
-{% block page_description %}Тематические подборки фильмов и сериалов.{% endblock %}
+{% block page_title %}{% trans "Подборки" %} — MovieHub{% endblock %}
+{% block page_description %}{% trans "Тематические подборки фильмов и сериалов." %}{% endblock %}
 
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'css/collections.css' %}">
@@ -10,8 +10,8 @@
 
 {% block content %}
     <div class="page-header">
-        <h1 class="page-title">Подборки</h1>
-        <p class="page-subtitle">Всего: {{ paginator.count }}</p>
+        <h1 class="page-title">{% trans "Подборки" %}</h1>
+        <p class="page-subtitle">{% blocktrans with count=paginator.count %}Всего: {{ count }}{% endblocktrans %}</p>
     </div>
 
     {% if collections %}
@@ -24,10 +24,10 @@
         {% include "includes/pagination.html" %}
     {% else %}
         <div class="empty-state">
-            <p class="empty-state__title">Подборок пока нет</p>
-            <p>Загляните позже — они появятся.</p>
+            <p class="empty-state__title">{% trans "Подборок пока нет" %}</p>
+            <p>{% trans "Загляните позже — они появятся." %}</p>
             <p class="empty-state__action">
-                <a class="button button--primary" href="{% url 'catalog:title_list' %}">Открыть каталог</a>
+                <a class="button button--primary" href="{% url 'catalog:title_list' %}">{% trans "Открыть каталог" %}</a>
             </p>
         </div>
     {% endif %}

@@ -24,12 +24,12 @@
     width: 100%;
     padding: var(--space-3);
 
-    background-color: var(--color-bg);
+    background-color: var(--color-surface);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-sm);
     color: var(--color-text);
     font-size: var(--text-sm);
-    transition: border-color var(--transition);
+    transition: border-color var(--transition), box-shadow var(--transition);
 }
 
 .form__field textarea {
@@ -42,6 +42,14 @@
 .form__field textarea:focus {
     outline: none;
     border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px var(--color-accent-dim);
+}
+
+/* Light theme: form fields with subtle shadow on focus */
+[data-theme="light"] .form__field input:focus,
+[data-theme="light"] .form__field select:focus,
+[data-theme="light"] .form__field textarea:focus {
+    box-shadow: 0 0 0 3px var(--color-accent-dim), var(--shadow-sm);
 }
 
 .form__field input[type="file"] {
@@ -57,17 +65,20 @@
 
 .form__error {
     margin-top: var(--space-2);
-    color: #ff7a6b;
+    color: var(--color-error);
     font-size: var(--text-xs);
+    animation: fadeInUp 0.2s ease both;
 }
 
 .form__errors {
     margin-bottom: var(--space-4);
     padding: var(--space-3);
-    background-color: rgba(255, 122, 107, 0.1);
+    background-color: var(--color-error-bg);
+    border: 1px solid var(--color-error-border);
     border-radius: var(--radius-sm);
-    color: #ff7a6b;
+    color: var(--color-error);
     font-size: var(--text-sm);
+    animation: fadeInUp 0.3s ease both;
 }
 
 /* ---------- Карточка входа и регистрации ---------- */
@@ -77,13 +88,35 @@
     margin: var(--space-6) auto;
     padding: var(--space-6);
 
-    background-color: var(--color-surface);
+    background-color: var(--overlay-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+    animation: fadeInUp 0.4s ease both;
 }
 
 .auth-card__title {
     font-size: var(--text-xl);
+    background: var(--color-premium-gold);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Light theme: auth card needs solid background */
+[data-theme="light"] .auth-card {
+    background-color: var(--color-surface);
+    box-shadow: var(--shadow-card);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+}
+
+[data-theme="light"] .auth-card__title {
+    color: var(--color-accent);
+    background: none;
+    -webkit-text-fill-color: var(--color-accent);
 }
 
 .auth-card__subtitle {
@@ -128,12 +161,18 @@
     border-left: 3px solid var(--color-accent);
     background-color: var(--color-surface);
     font-size: var(--text-sm);
+    animation: fadeInUp 0.3s ease both;
 }
 
 .message--success {
-    border-left-color: #4ade80;
+    border-left-color: var(--color-success);
 }
 
 .message--error {
-    border-left-color: #ff7a6b;
+    border-left-color: var(--color-error);
+}
+
+/* Light theme: messages with subtle shadow */
+[data-theme="light"] .message {
+    box-shadow: var(--shadow-sm);
 }

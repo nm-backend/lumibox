@@ -2,6 +2,7 @@ from django import forms
 from django.conf import settings
 from django.core.cache import cache
 from django.db.models import F, Q
+from django.utils.translation import gettext_lazy as _
 
 from apps.catalog.models import Country, Genre, Title
 
@@ -32,7 +33,7 @@ def get_year_choices():
         .distinct()
         .order_by("-release_year")
     )
-    choices = [("", "Любой год")] + [(str(year), str(year)) for year in years]
+    choices = [("", _("Любой год"))] + [(str(year), str(year)) for year in years]
 
     cache.set(YEAR_CHOICES_CACHE_KEY, choices, settings.CACHE_TTL_HOME)
     return choices
@@ -49,48 +50,44 @@ class CatalogFilterForm(forms.Form):
 
     # Ключ — значение для order_by, значение — подпись для человека.
     SORT_OPTIONS = {
-        "-release_year": "Сначала новые",
-        "release_year": "Сначала старые",
-        "name": "По алфавиту",
-        "-published_at": "Недавно добавленные",
-        # Сортировка по готовому полю — без JOIN и GROUP BY.
-        # F-выражение ниже уводит неоценённые записи в конец списка.
-        "-rating_average": "По рейтингу",
+        "-release_year": _("Сначала новые"),
+        "release_year": _("Сначала старые"),
+        "name": _("По алфавиту"),
+        "-published_at": _("Недавно добавленные"),
+        "-rating_average": _("По рейтингу"),
     }
 
     q = forms.CharField(
-        label="Поиск",
+        label=_("Поиск"),
         required=False,
-        widget=forms.TextInput(attrs={"placeholder": "Название"}),
+        widget=forms.TextInput(attrs={"placeholder": _("Название")}),
     )
     type = forms.ChoiceField(
-        label="Тип",
+        label=_("Тип"),
         required=False,
-        choices=[("", "Всё")] + Title.Type.choices,
+        choices=[("", _("Всё"))] + Title.Type.choices,
     )
     genre = forms.ModelChoiceField(
-        label="Жанр",
+        label=_("Жанр"),
         required=False,
         queryset=Genre.objects.all(),
-        # Ищем жанр по slug, а не по id: адрес /catalog/?genre=drama
-        # читается человеком и не ломается при переносе базы.
         to_field_name="slug",
-        empty_label="Все жанры",
+        empty_label=_("Все жанры"),
     )
     country = forms.ModelChoiceField(
-        label="Страна",
+        label=_("Страна"),
         required=False,
         queryset=Country.objects.all(),
         to_field_name="slug",
-        empty_label="Все страны",
+        empty_label=_("Все страны"),
     )
     year = forms.ChoiceField(
-        label="Год",
+        label=_("Год"),
         required=False,
         choices=get_year_choices,
     )
     sort = forms.ChoiceField(
-        label="Сортировка",
+        label=_("Сортировка"),
         required=False,
         choices=list(SORT_OPTIONS.items()),
     )

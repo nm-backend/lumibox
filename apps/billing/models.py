@@ -10,7 +10,6 @@ from django.utils import timezone
 
 from apps.core.models import TimeStampedModel
 
-
 PROMO_CODE_VALIDATOR = RegexValidator(
     regex=r"^[A-Z0-9][A-Z0-9_-]{2,31}$",
     message="Промокод состоит из 3–32 прописных латинских букв, цифр, дефисов или подчёркиваний.",
@@ -209,7 +208,9 @@ class Payment(TimeStampedModel):
         REFUNDED = "refunded", "Возвращён"
 
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="payments")
-    subscription = models.ForeignKey(Subscription, on_delete=models.PROTECT, null=True, blank=True, related_name="payments")
+    subscription = models.ForeignKey(
+        Subscription, on_delete=models.PROTECT, null=True, blank=True, related_name="payments"
+    )
     offer = models.ForeignKey(ContentOffer, on_delete=models.PROTECT, null=True, blank=True, related_name="payments")
     provider = models.CharField("Провайдер", max_length=20, choices=Provider.choices)
     provider_payment_id = models.CharField("Идентификатор платежа", max_length=255, unique=True)
@@ -254,7 +255,9 @@ class ReferralProfile(TimeStampedModel):
 
 class Referral(TimeStampedModel):
     referrer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="referrals_made")
-    referred_user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="referral_received")
+    referred_user = models.OneToOneField(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="referral_received"
+    )
     reward_granted_at = models.DateTimeField("Награда выдана", null=True, blank=True)
 
     class Meta:

@@ -2,6 +2,18 @@
 
 /* ---------- Сетка карточек ---------- */
 
+/* Scroll reveal: карточки появляются с задержкой */
+.title-grid > .card {
+    animation: fadeInUp 0.4s ease both;
+}
+
+.title-grid > .card:nth-child(1) { animation-delay: 0.02s; }
+.title-grid > .card:nth-child(2) { animation-delay: 0.06s; }
+.title-grid > .card:nth-child(3) { animation-delay: 0.10s; }
+.title-grid > .card:nth-child(4) { animation-delay: 0.14s; }
+.title-grid > .card:nth-child(5) { animation-delay: 0.18s; }
+.title-grid > .card:nth-child(6) { animation-delay: 0.22s; }
+
 .title-grid {
     display: grid;
     /* auto-fill сам подбирает число колонок под ширину экрана:
@@ -27,14 +39,25 @@
     background-color: var(--color-surface);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
-    transition: border-color var(--transition), transform var(--transition),
+    transition: border-color var(--transition), transform var(--transition-slow),
                 box-shadow var(--transition);
+    will-change: transform;
 }
 
 .card:hover .card__poster {
     border-color: var(--color-accent);
-    transform: translateY(-6px);
-    box-shadow: var(--shadow-card);
+    transform: translateY(-6px) scale(1.02);
+    box-shadow: var(--shadow-card), 0 0 30px rgba(255, 192, 67, 0.08);
+    z-index: 10;
+}
+
+/* Light theme: cards get visible shadow, hover lift */
+[data-theme="light"] .card__poster {
+    box-shadow: var(--shadow-sm);
+}
+
+[data-theme="light"] .card:hover .card__poster {
+    box-shadow: var(--shadow-card), 0 8px 24px rgba(0, 0, 0, 0.08);
 }
 
 .card__image {
@@ -142,16 +165,33 @@
     top: var(--space-2);
     left: var(--space-2);
 
-    padding: 2px var(--space-2);
-    background-color: rgba(11, 13, 18, 0.8);
-    backdrop-filter: blur(4px);
+    padding: 3px var(--space-2);
+    background-color: rgba(11, 13, 18, 0.85);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     border-radius: var(--radius-sm);
 
     color: var(--color-accent);
     font-size: var(--text-xs);
-    font-weight: 600;
+    font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.06em;
+}
+
+/* Premium badge variants */
+.card__badge--new {
+    color: var(--color-premium-new);
+    background-color: rgba(74, 222, 128, 0.15);
+}
+
+.card__badge--top {
+    color: var(--color-premium-top);
+    background-color: rgba(255, 107, 107, 0.15);
+}
+
+.card__badge--exclusive {
+    color: var(--color-premium-exclusive);
+    background-color: rgba(167, 139, 250, 0.15);
 }
 
 .card__age {
@@ -186,6 +226,7 @@
 
 .card:hover .card__name {
     color: var(--color-accent);
+    text-shadow: 0 0 20px rgba(255, 192, 67, 0.15);
 }
 
 .card__meta {
@@ -206,11 +247,20 @@
     color: var(--color-text-muted);
     font-size: var(--text-xs);
     font-weight: 500;
+    transition: border-color var(--transition-fast), color var(--transition-fast),
+                transform var(--transition-fast), background-color var(--transition-fast);
 }
 
 .badge:hover {
     border-color: var(--color-accent);
     color: var(--color-accent);
+    background-color: var(--color-accent-dim);
+    transform: translateY(-1px);
+}
+
+/* Light theme: badges get subtle shadow on hover */
+[data-theme="light"] .badge:hover {
+    box-shadow: var(--shadow-sm);
 }
 
 /* .badge--accent удалён вместе со старым баннером главной: тип записи
@@ -238,6 +288,8 @@
 
 .search:focus-within {
     border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px var(--color-accent-dim);
+    background-color: var(--overlay-bg-strong);
 }
 
 .search__input {
@@ -250,6 +302,11 @@
 
 .search__input::placeholder {
     color: var(--color-text-dim);
+    transition: color var(--transition);
+}
+
+.search__input:focus::placeholder {
+    color: var(--color-text-muted);
 }
 
 .search__input:focus {
@@ -263,6 +320,70 @@
 
 .search__submit:hover {
     color: var(--color-accent);
+}
+
+/* Light theme: search with subtle shadow */
+[data-theme="light"] .search {
+    box-shadow: var(--shadow-sm);
+}
+
+[data-theme="light"] .search:focus-within {
+    box-shadow: var(--shadow-md);
+    background-color: var(--color-surface);
+}
+
+/* ---------- Search Dropdown ---------- */
+
+.search {
+    position: relative;
+}
+
+.search-dropdown {
+    position: absolute;
+    top: calc(100% + var(--space-1));
+    left: 0;
+    right: 0;
+    z-index: 25;
+    min-width: 200px;
+    padding: var(--space-1);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-card);
+}
+
+[data-theme="light"] .search-dropdown {
+    box-shadow: var(--shadow-card);
+}
+
+.search-dropdown__item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    width: 100%;
+    padding: var(--space-2) var(--space-3);
+    border: none;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
+    text-align: left;
+    cursor: pointer;
+    transition: background var(--transition-fast), color var(--transition-fast);
+    text-decoration: none;
+}
+
+.search-dropdown__item:hover {
+    background: var(--color-surface-hover);
+    color: var(--color-text);
+}
+
+.search-dropdown__link {
+    color: var(--color-text-muted);
+}
+
+.search-dropdown__link:hover {
+    color: var(--color-text);
 }
 
 /* ---------- Кнопки ---------- */
@@ -293,13 +414,45 @@
     background-color: var(--color-accent);
     color: var(--color-on-accent);
     box-shadow: var(--shadow-sm);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Glass shimmer effect on primary buttons */
+.button--primary::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        105deg,
+        transparent 40%,
+        rgba(255, 255, 255, 0.15) 45%,
+        rgba(255, 255, 255, 0.25) 50%,
+        rgba(255, 255, 255, 0.15) 55%,
+        transparent 60%
+    );
+    transform: translateX(-100%);
+    transition: transform 0.5s ease;
 }
 
 .button--primary:hover {
     background-color: var(--color-accent-hover);
     color: var(--color-on-accent);
-    transform: translateY(-1px);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-accent), 0 0 30px rgba(255, 192, 67, 0.15);
+}
+
+/* Light theme: buttons get softer shadows */
+[data-theme="light"] .button--primary:hover {
     box-shadow: var(--shadow-accent);
+}
+
+[data-theme="light"] .button--ghost:hover {
+    box-shadow: var(--shadow-sm);
+}
+
+.button--primary:hover::before {
+    transform: translateX(100%);
 }
 
 .button--primary:active {
@@ -326,6 +479,7 @@
     align-items: center;
     gap: var(--space-2);
     margin-top: var(--space-8);
+    flex-wrap: wrap;
 }
 
 .pagination__link {
@@ -342,13 +496,14 @@
     font-size: var(--text-sm);
     font-weight: 500;
     transition: border-color var(--transition-fast), color var(--transition-fast),
-                background-color var(--transition-fast);
+                background-color var(--transition-fast), transform var(--transition-fast);
 }
 
 .pagination__link:hover {
     background-color: var(--color-surface-hover);
     border-color: var(--color-accent);
     color: var(--color-accent);
+    transform: translateY(-1px);
 }
 
 .pagination__link--current {
@@ -357,6 +512,16 @@
     color: var(--color-on-accent);
     font-weight: 700;
     box-shadow: var(--shadow-accent);
+    transform: scale(1.05);
+}
+
+/* Light theme: pagination with subtle shadow */
+[data-theme="light"] .pagination__link {
+    box-shadow: var(--shadow-sm);
+}
+
+[data-theme="light"] .pagination__link:hover {
+    box-shadow: var(--shadow-md);
 }
 
 .pagination__link--current:hover {
@@ -373,6 +538,7 @@
     padding: var(--space-8) var(--space-4);
     text-align: center;
     color: var(--color-text-muted);
+    animation: fadeIn 0.4s ease both;
 }
 
 .empty-state__title {
@@ -437,10 +603,13 @@
     min-width: 190px;
     padding: var(--space-2);
 
-    background-color: var(--color-surface);
+    background-color: var(--overlay-bg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-card);
+    animation: fadeInUp 0.2s ease both;
 }
 
 .user-menu__name {
@@ -471,6 +640,14 @@
     color: var(--color-text-dim);
 }
 
+/* Light theme: user menu with solid background and shadow */
+[data-theme="light"] .user-menu__dropdown {
+    background-color: var(--color-surface);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    box-shadow: var(--shadow-card);
+}
+
 /* ---------- Рейтинг ---------- */
 
 /* Блок .rating* удалён: его заменил .score в title-detail.css —
@@ -481,12 +658,24 @@
     bottom: var(--space-2);
     left: var(--space-2);
 
-    padding: 2px var(--space-2);
-    background-color: rgba(11, 13, 18, 0.85);
+    padding: 3px var(--space-2) 3px 6px;
+    background-color: rgba(11, 13, 18, 0.88);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     border-radius: var(--radius-sm);
     color: var(--color-accent);
     font-size: var(--text-xs);
     font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+}
+
+/* Звёздочка перед рейтингом */
+.card__rating::before {
+    content: "★";
+    font-size: 0.6rem;
+    opacity: 0.8;
 }
 
 /* ---------- Секция ---------- */
@@ -514,6 +703,30 @@
     margin-bottom: var(--space-4);
     font-size: var(--text-xl);
     letter-spacing: -0.01em;
+    position: relative;
+    display: inline-block;
+}
+
+/* Акцентная линия под заголовком секции */
+.section__title::after {
+    content: "";
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 40px;
+    height: 3px;
+    background: var(--color-premium-gold);
+    border-radius: 2px;
+    transition: width var(--transition);
+}
+
+.section:hover .section__title::after {
+    width: 60px;
+}
+
+/* Light theme: section divider subtler */
+[data-theme="light"] .section__title::after {
+    opacity: 0.7;
 }
 
 /* Внутри шапки отступ задаёт сама шапка — иначе он удвоится. */
@@ -548,6 +761,10 @@
     background-color: var(--color-surface);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
+}
+
+[data-theme="light"] .review-form {
+    box-shadow: var(--shadow-sm);
 }
 
 .review-form__title {
@@ -663,6 +880,105 @@
     opacity: 1;
 }
 
+/* Light theme: chips with subtle border */
+[data-theme="light"] .chip {
+    border: 1px solid var(--color-border);
+}
+
+/* ---------- Toast уведомления ---------- */
+
+.toast {
+    position: fixed;
+    top: calc(var(--header-height) + var(--space-4));
+    right: var(--space-4);
+    z-index: 1000;
+    max-width: 380px;
+    padding: var(--space-3) var(--space-4);
+    background: var(--overlay-bg-strong);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-card);
+    opacity: 0;
+    transform: translateX(100%);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+}
+
+.toast--visible {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.toast__content {
+    flex: 1;
+    min-width: 0;
+}
+
+.toast__title {
+    display: block;
+    font-size: var(--text-sm);
+    font-weight: 600;
+    margin-bottom: 2px;
+}
+
+.toast__message {
+    font-size: var(--text-xs);
+    color: var(--color-text-muted);
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.toast__action {
+    flex-shrink: 0;
+    padding: var(--space-1) var(--space-3);
+    background: var(--color-accent-dim);
+    border-radius: var(--radius-full);
+    color: var(--color-accent);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.toast__action:hover {
+    background: var(--color-accent);
+    color: var(--color-on-accent);
+}
+
+.toast__refresh {
+    background: var(--color-accent);
+    color: var(--color-on-accent);
+    border: none;
+    cursor: pointer;
+    font-weight: 700;
+}
+
+.toast__refresh:hover {
+    background: var(--color-accent-hover);
+}
+
+[data-theme="light"] .toast {
+    background: var(--color-surface);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border: 1px solid var(--color-border);
+    box-shadow: var(--shadow-card);
+}
+
+@media (max-width: 480px) {
+    .toast {
+        right: var(--space-2);
+        left: var(--space-2);
+        max-width: none;
+    }
+}
+
 /* ---------- Иконки ---------- */
 
 /*
@@ -679,4 +995,66 @@
 .icon--sm {
     width: 13px;
     height: 13px;
+}
+
+/* ---------- Адаптивность карточек ---------- */
+
+@media (max-width: 390px) {
+    .title-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--space-3);
+    }
+
+    .card__name {
+        font-size: var(--text-xs);
+    }
+
+    .card__meta {
+        font-size: 0.65rem;
+    }
+
+    .badge {
+        font-size: 0.65rem;
+        padding: 2px var(--space-2);
+    }
+}
+
+@media (min-width: 391px) and (max-width: 560px) {
+    .title-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (min-width: 561px) and (max-width: 768px) {
+    .title-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+/* Horizontal scroll for mobile sections (Netflix-style) */
+@media (max-width: 560px) {
+    .title-grid--scroll {
+        display: flex;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+        gap: var(--space-3);
+        padding-bottom: var(--space-2);
+        scrollbar-width: none;
+    }
+
+    .title-grid--scroll::-webkit-scrollbar {
+        display: none;
+    }
+
+    .title-grid--scroll > .card {
+        flex: 0 0 140px;
+        scroll-snap-align: start;
+    }
+}
+
+@media (min-width: 2560px) {
+    .title-grid {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    }
 }

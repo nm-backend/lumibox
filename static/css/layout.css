@@ -14,16 +14,42 @@
     top: 0;
     z-index: 10;
 
-    background-color: rgba(11, 13, 18, 0.85);
+    background-color: var(--header-bg);
     backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     border-bottom: 1px solid var(--color-border);
+}
+
+/* Gradient line below header */
+.site-header::after {
+    content: "";
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        var(--color-accent-dim) 30%,
+        var(--color-accent) 50%,
+        var(--color-accent-dim) 70%,
+        transparent 100%
+    );
+    opacity: 0.4;
+    pointer-events: none;
+}
+
+/* Light theme: header gradient line subtler */
+[data-theme="light"] .site-header::after {
+    opacity: 0.25;
 }
 
 .site-header__inner {
     min-height: var(--header-height);
     display: flex;
     align-items: center;
-    gap: var(--space-5);
+    gap: var(--space-4);
 }
 
 .logo {
@@ -41,16 +67,20 @@
     color: var(--color-text);
 }
 
-/* Значок логотипа — треугольник «play», нарисованный рамками.
-   Своя графика, без картинок и внешних иконочных шрифтов. */
 .logo__mark {
     width: 28px;
     height: 28px;
     display: grid;
     place-items: center;
 
-    background-color: var(--color-accent);
+    background: var(--color-premium-gold);
     border-radius: var(--radius-sm);
+    transition: transform var(--transition), box-shadow var(--transition);
+}
+
+.logo:hover .logo__mark {
+    transform: scale(1.05);
+    box-shadow: var(--shadow-accent);
 }
 
 .logo__mark::before {
@@ -78,6 +108,7 @@
     font-size: var(--text-sm);
     font-weight: 500;
     border-bottom: 2px solid transparent;
+    transition: color var(--transition-fast), border-color var(--transition-fast);
 }
 
 .site-nav__link:hover {
@@ -89,10 +120,235 @@
     border-bottom-color: var(--color-accent);
 }
 
-/* Поиск занимает всё свободное место между навигацией и краем */
 .site-header__search {
     margin-left: auto;
     flex: 0 1 320px;
+    transition: flex var(--transition);
+}
+
+.site-header__search:focus-within {
+    flex: 0 1 400px;
+}
+
+/* ---------- Переключатель темы ---------- */
+
+.theme-toggle {
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    display: grid;
+    place-items: center;
+    border: 1px solid var(--color-border);
+    border-radius: 50%;
+    background: var(--color-surface);
+    font-size: 1rem;
+    cursor: pointer;
+    transition: border-color var(--transition-fast), background-color var(--transition-fast),
+                transform var(--transition-fast);
+    line-height: 1;
+}
+
+.theme-toggle:hover {
+    border-color: var(--color-accent);
+    background-color: var(--color-surface-hover);
+    transform: scale(1.08);
+}
+
+.theme-toggle:active {
+    transform: scale(0.95);
+}
+
+/* ---------- Переключатель языка ---------- */
+
+.lang-switcher {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.lang-switcher__dropdown {
+    position: relative;
+}
+
+.lang-switcher__trigger {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    padding: var(--space-1) var(--space-2);
+    cursor: pointer;
+    list-style: none;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    color: var(--color-text-muted);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    transition: border-color var(--transition-fast), color var(--transition-fast);
+}
+
+.lang-switcher__trigger::-webkit-details-marker {
+    display: none;
+}
+
+.lang-switcher__trigger::marker {
+    content: "";
+}
+
+.lang-switcher__trigger:hover {
+    border-color: var(--color-accent);
+    color: var(--color-text);
+}
+
+.lang-switcher__current {
+    letter-spacing: 0.04em;
+}
+
+.lang-switcher__dropdown[open] .lang-switcher__trigger {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+}
+
+.lang-switcher__menu {
+    position: absolute;
+    top: calc(100% + var(--space-1));
+    right: 0;
+    z-index: 25;
+    min-width: 120px;
+    padding: var(--space-1);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-card);
+}
+
+.lang-switcher__option {
+    display: block;
+    width: 100%;
+    padding: var(--space-2) var(--space-3);
+    border: none;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    text-align: left;
+    cursor: pointer;
+    transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.lang-switcher__option:hover {
+    background: var(--color-surface-hover);
+    color: var(--color-text);
+}
+
+.lang-switcher__option--active {
+    color: var(--color-accent);
+    font-weight: 700;
+}
+
+/* Light theme: lang switcher with solid background */
+[data-theme="light"] .lang-switcher__menu {
+    background: var(--color-surface);
+    box-shadow: var(--shadow-card);
+}
+
+[data-theme="light"] .theme-toggle {
+    box-shadow: var(--shadow-sm);
+    background: var(--color-surface);
+}
+
+/* ---------- Мобильное меню ---------- */
+
+.mobile-menu {
+    display: none;
+}
+
+.mobile-menu__toggle {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: var(--space-2);
+    cursor: pointer;
+    list-style: none;
+}
+
+.mobile-menu__toggle::-webkit-details-marker {
+    display: none;
+}
+
+.mobile-menu__toggle::marker {
+    content: "";
+}
+
+.mobile-menu__bar {
+    display: block;
+    width: 22px;
+    height: 2px;
+    background: var(--color-text);
+    border-radius: 2px;
+    transition: transform var(--transition), opacity var(--transition-fast);
+}
+
+/* Анимация «крестик» при открытии */
+.mobile-menu[open] .mobile-menu__bar:nth-child(1) {
+    transform: translateY(6px) rotate(45deg);
+}
+
+.mobile-menu[open] .mobile-menu__bar:nth-child(2) {
+    opacity: 0;
+}
+
+.mobile-menu[open] .mobile-menu__bar:nth-child(3) {
+    transform: translateY(-6px) rotate(-45deg);
+}
+
+.mobile-menu__panel {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 20;
+    padding: var(--space-4);
+    background: var(--overlay-bg-strong);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--color-border);
+    box-shadow: var(--shadow-premium);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    animation: fadeInUp 0.25s ease both;
+}
+
+.mobile-menu__link {
+    display: block;
+    padding: var(--space-3) var(--space-4);
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+    border-radius: var(--radius-sm);
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.mobile-menu__link:hover {
+    background: var(--color-surface-hover);
+    color: var(--color-text);
+}
+
+.mobile-menu__link--active {
+    color: var(--color-accent);
+    font-weight: 700;
+}
+
+/* Light theme: mobile menu with solid background */
+[data-theme="light"] .mobile-menu__panel {
+    background: var(--color-surface);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border: 1px solid var(--color-border);
+    box-shadow: var(--shadow-premium);
 }
 
 /* ---------- Основная область ---------- */
@@ -102,12 +358,6 @@
     padding: var(--space-6) 0 var(--space-8);
 }
 
-/*
-  Когда сверху показано сообщение, баннеры не должны втягивать себя вверх
-  отрицательным отступом — иначе шапка страницы наедет на текст сообщения.
-  Классы перечислены явно: селектор по всем потомкам задел бы и вложенные
-  секции, которые к баннерам отношения не имеют.
-*/
 .site-main--with-messages .showcase,
 .site-main--with-messages .film-hero {
     margin-top: 0;
@@ -128,10 +378,27 @@
     font-size: var(--text-sm);
 }
 
-/* Подвал целиком живёт в footer.css — там же, где его разметка.
-   Держать .site-footer в двух файлах значит однажды поправить не тот. */
+/* ---------- Адаптивность ---------- */
 
-/* ---------- Телефоны ---------- */
+/* Планшеты и меньше — показываем мобильное меню, скрываем desktop-навигацию */
+@media (max-width: 860px) {
+    .site-nav {
+        display: none;
+    }
+
+    .mobile-menu {
+        display: block;
+        position: relative;
+    }
+
+    .site-header__inner {
+        gap: var(--space-3);
+    }
+
+    .site-header__search {
+        flex: 0 1 200px;
+    }
+}
 
 @media (max-width: 720px) {
     .site-header__inner {
@@ -141,14 +408,100 @@
         gap: var(--space-3);
     }
 
-    /* На узком экране поиск переносится на свою строку во всю ширину */
     .site-header__search {
-        order: 3;
+        order: 4;
         flex-basis: 100%;
         margin-left: 0;
     }
 
+    .lang-switcher {
+        order: 2;
+    }
+
+    .theme-toggle {
+        order: 2;
+    }
+
+    .user-menu,
+    .site-header__login {
+        order: 3;
+    }
+
+    .mobile-menu {
+        order: 1;
+    }
+
+    .logo {
+        order: 0;
+    }
+}
+
+/* Очень маленькие экраны */
+@media (max-width: 390px) {
+    .logo {
+        font-size: var(--text-md);
+    }
+
+    .logo__mark {
+        width: 24px;
+        height: 24px;
+    }
+
+    .logo__mark::before {
+        border-width: 5px 0 5px 7px;
+    }
+
+    .site-header__inner {
+        gap: var(--space-2);
+    }
+}
+
+/* 320px — минимальная ширина поддержки */
+@media (max-width: 320px) {
+    .container {
+        padding: 0 var(--space-2);
+    }
+
+    .site-header__inner {
+        min-height: 56px;
+        gap: var(--space-1);
+    }
+
+    .search__input {
+        font-size: var(--text-xs);
+    }
+
+    .search__submit {
+        font-size: var(--text-xs);
+    }
+
+    .lang-switcher__trigger {
+        padding: 2px var(--space-1);
+        font-size: 0.65rem;
+    }
+
+    .mobile-menu__toggle {
+        padding: var(--space-1);
+    }
+
+    .mobile-menu__bar {
+        width: 18px;
+        height: 2px;
+    }
+}
+
+/* Огромные экраны: центрируем и не даём строкам разъехаться */
+@media (min-width: 2560px) {
+    .container {
+        max-width: 1600px;
+    }
+
+    .site-header__inner {
+        max-width: 1600px;
+        margin: 0 auto;
+    }
+
     .site-nav {
-        margin-left: auto;
+        gap: var(--space-6);
     }
 }

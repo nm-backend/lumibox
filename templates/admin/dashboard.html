@@ -1,0 +1,128 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Дашборд" %} | {{ site_title|default:"MovieHub" }}{% endblock %}
+
+{% block content %}
+<h1>{% trans "Дашборд" %}</h1>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin: 1.5rem 0;">
+    <div class="module" style="padding: 1rem;">
+        <h3>{% trans "Контент" %}</h3>
+        <p>{% trans "Фильмов:" %} <strong>{{ total_movies }}</strong></p>
+        <p>{% trans "Сериалов:" %} <strong>{{ total_series }}</strong></p>
+        <p>{% trans "Всего:" %} <strong>{{ total_titles }}</strong></p>
+    </div>
+
+    <div class="module" style="padding: 1rem;">
+        <h3>{% trans "Пользователи" %}</h3>
+        <p>{% trans "Всего:" %} <strong>{{ total_users }}</strong></p>
+        <p>{% trans "Активных:" %} <strong>{{ active_users }}</strong></p>
+        <p>{% trans "Админов:" %} <strong>{{ staff_users }}</strong></p>
+    </div>
+
+    <div class="module" style="padding: 1rem;">
+        <h3>{% trans "Просмотры" %}</h3>
+        <p>{% trans "Всего просмотров:" %} <strong>{{ total_views }}</strong></p>
+        <p>{% trans "Среднее на фильм:" %} <strong>{{ avg_views_per_title }}</strong></p>
+        <p>{% trans "Активных зрителей (30д):" %} <strong>{{ active_watchers }}</strong></p>
+        <p>{% trans "Недосмотренных:" %} <strong>{{ in_progress }}</strong></p>
+    </div>
+
+    <div class="module" style="padding: 1rem;">
+        <h3>{% trans "Отзывы" %}</h3>
+        <p>{% trans "Всего отзывов:" %} <strong>{{ total_reviews }}</strong></p>
+        <p>{% trans "Опубликованных:" %} <strong>{{ published_reviews }}</strong></p>
+        <p>{% trans "Скрытых:" %} <strong>{{ hidden_reviews }}</strong></p>
+        <p>{% trans "Конверсия в отзывы:" %} <strong>{{ review_conversion }}%</strong></p>
+        {% if avg_rating %}<p>{% trans "Средний рейтинг:" %} <strong>{{ avg_rating|floatformat:1 }}</strong></p>{% endif %}
+    </div>
+</div>
+
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+    <div class="module">
+        <h2>{% trans "Топ-10 по просмотрам" %}</h2>
+        <table>
+            <thead><tr><th>#</th><th>{% trans "Название" %}</th><th>{% trans "Просмотры" %}</th></tr></thead>
+            <tbody>
+                {% for title in top_viewed %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td><a href="{% url 'admin:catalog_title_change' title.pk %}">{{ title.name }}</a></td>
+                    <td>{{ title.view_count }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="module">
+        <h2>{% trans "Топ-10 по рейтингу" %}</h2>
+        <table>
+            <thead><tr><th>#</th><th>{% trans "Название" %}</th><th>{% trans "Рейтинг" %}</th></tr></thead>
+            <tbody>
+                {% for title in top_rated %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td><a href="{% url 'admin:catalog_title_change' title.pk %}">{{ title.name }}</a></td>
+                    <td>{{ title.rating_average }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1.5rem;">
+    <div class="module">
+        <h2>{% trans "Последние отзывы" %}</h2>
+        <table>
+            <thead><tr><th>{% trans "Автор" %}</th><th>{% trans "Фильм" %}</th><th>{% trans "Оценка" %}</th><th>{% trans "Дата" %}</th></tr></thead>
+            <tbody>
+                {% for review in recent_reviews %}
+                <tr>
+                    <td>{{ review.user.display_name }}</td>
+                    <td>{{ review.title.name }}</td>
+                    <td>{{ review.rating }}/10</td>
+                    <td>{{ review.created_at|date:"d.m.Y H:i" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="module">
+        <h2>{% trans "Новые пользователи" %}</h2>
+        <table>
+            <thead><tr><th>{% trans "Имя" %}</th><th>{% trans "Email" %}</th><th>{% trans "Дата регистрации" %}</th></tr></thead>
+            <tbody>
+                {% for user in recent_users %}
+                <tr>
+                    <td>{{ user.display_name }}</td>
+                    <td>{{ user.email }}</td>
+                    <td>{{ user.date_joined|date:"d.m.Y H:i" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div style="margin-top: 1.5rem;">
+    <div class="module">
+        <h2>{% trans "Самые активные зрители (30 дней)" %}</h2>
+        <table>
+            <thead><tr><th>#</th><th>{% trans "Пользователь" %}</th><th>{% trans "Просмотров" %}</th></tr></thead>
+            <tbody>
+                {% for viewer in top_viewers %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ viewer.user__username|default:viewer.user__email }}</td>
+                    <td>{{ viewer.watch_count }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

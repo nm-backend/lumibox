@@ -2,6 +2,7 @@ from rest_framework import serializers
 
 from apps.catalog.models import Collection, Country, Genre, Participation, Person, Title
 from apps.reviews.models import Review
+from apps.streaming.models import Episode, Season
 
 
 class ReferenceSerializer(serializers.ModelSerializer):
@@ -81,7 +82,32 @@ class TitleDetailSerializer(TitleListSerializer):
             "countries",
             "participations",
             "published_at",
+            "view_count",
         ]
+
+
+class EpisodeSerializer(serializers.ModelSerializer):
+    """Эпизод сериала."""
+
+    watch_url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Episode
+        fields = ["id", "number", "name", "description", "duration_seconds", "release_date", "watch_url"]
+
+    def get_watch_url(self, obj):
+        return obj.get_absolute_url()
+
+
+class SeasonSerializer(serializers.ModelSerializer):
+    """Сезон сериала с эпизодами."""
+
+    episodes = EpisodeSerializer(many=True, read_only=True)
+    display_name = serializers.CharField(read_only=True)
+
+    class Meta:
+        model = Season
+        fields = ["id", "number", "name", "display_name", "release_year", "episodes"]
 
 
 class CollectionSerializer(serializers.ModelSerializer):

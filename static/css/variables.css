@@ -4,6 +4,11 @@
   Все цвета, отступы и размеры описаны здесь один раз.
   Остальные файлы стилей ссылаются на переменные и не содержат
   собственных значений цвета — поменять тему можно в одном месте.
+
+  Dark theme — default (:root).
+  Light theme — [data-theme="light"].
+  Токены, общие для обеих тем (размеры, отступы, типографика),
+  живут в :root. Цвета переопределяются в [data-theme="light"].
 */
 
 :root {
@@ -24,6 +29,13 @@
     --color-accent-dim: rgba(255, 192, 67, 0.12);
     --color-on-accent: #1a1204;
 
+    /* Премиум-цвета для бейджей и градиентов */
+    --color-premium-gold: linear-gradient(135deg, #ffc043 0%, #ff8a3d 100%);
+    --color-premium-silver: linear-gradient(135deg, #c0c0c0 0%, #8a8a8a 100%);
+    --color-premium-new: #4ade80;
+    --color-premium-top: #ff6b6b;
+    --color-premium-exclusive: #a78bfa;
+
     /* Типографика */
     --font-base: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
 
@@ -33,6 +45,7 @@
     --text-lg: 1.25rem;
     --text-xl: 1.75rem;
     --text-2xl: 2.25rem;
+    --text-3xl: 3rem;
 
     /* Отступы. Шаг в 4px — сетка, на которой держится вся вёрстка */
     --space-1: 0.25rem;
@@ -46,6 +59,7 @@
     --radius-sm: 6px;
     --radius-md: 10px;
     --radius-lg: 16px;
+    --radius-xl: 24px;
     --radius-full: 999px;
 
     /* Тени слоями: близкая задаёт контур, дальняя — глубину.
@@ -54,6 +68,8 @@
     --shadow-md: 0 2px 4px rgba(0, 0, 0, 0.3), 0 8px 16px rgba(0, 0, 0, 0.25);
     --shadow-card: 0 4px 8px rgba(0, 0, 0, 0.35), 0 16px 32px rgba(0, 0, 0, 0.3);
     --shadow-accent: 0 8px 24px rgba(255, 192, 67, 0.18);
+    --shadow-premium: 0 20px 60px rgba(0, 0, 0, 0.5), 0 4px 12px rgba(0, 0, 0, 0.3);
+    --shadow-glow: 0 0 40px rgba(255, 192, 67, 0.15);
 
     /* Разные длительности намеренно: цвет должен откликаться мгновенно,
        а движение — успевать читаться глазом. Одинаковая длительность
@@ -61,7 +77,79 @@
     --transition-fast: 120ms cubic-bezier(0.4, 0, 0.2, 1);
     --transition: 200ms cubic-bezier(0.4, 0, 0.2, 1);
     --transition-slow: 320ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-premium: 400ms cubic-bezier(0.16, 1, 0.3, 1);
 
     --container-width: 1280px;
     --header-height: 68px;
+
+    /* Header background — используется с alpha в layout.css */
+    --header-bg: rgba(11, 13, 18, 0.85);
+    --header-bg-solid: #0b0d12;
+    --overlay-bg: rgba(11, 13, 18, 0.92);
+    --overlay-bg-strong: rgba(11, 13, 18, 0.96);
+    --player-bg: #05070d;
+    --scrim-bg: rgba(11, 13, 18, 0.82);
+
+    /* Ошибки и успех */
+    --color-error: #ff7a6b;
+    --color-error-bg: rgba(255, 122, 107, 0.1);
+    --color-error-border: rgba(255, 122, 107, 0.2);
+    --color-success: #4ade80;
+}
+
+/*
+  Светлая тема.
+
+  Принципы:
+  — Фон НЕ чисто белый (#fff): это утомляет глаза и выглядит дёшево.
+    Вместо него мягкий тёплый белый с едва заметным серым оттенком.
+  — Карточки и поверхности — чуть светлее фона: создают глубину без теней.
+  — Тени — мягче и теплее, чем в тёмной теме.
+  — Акцент — тот же янтарный, но чуть темнее для контраста на светлом фоне.
+  — Текст — не чёрный (#000), а тёплый тёмно-серый:נוחнее для глаз.
+*/
+[data-theme="light"] {
+    /* Фоны: от основного к более светлым слоям */
+    --color-bg: #f5f5f7;
+    --color-surface: #ffffff;
+    --color-surface-hover: #f0f0f2;
+    --color-border: #e0e0e4;
+
+    /* Текст: не чёрный — тёплый тёмно-серый для мягкости */
+    --color-text: #1d1d1f;
+    --color-text-muted: #6e6e73;
+    --color-text-dim: #8e8e93;
+
+    /* Акцент: янтарный чуть темнее для контраста на светлом */
+    --color-accent: #e5a820;
+    --color-accent-hover: #d49a10;
+    --color-accent-dim: rgba(229, 168, 32, 0.1);
+    --color-on-accent: #ffffff;
+
+    /* Премиум-цвета: те же для консистентности бейджей */
+    --color-premium-new: #22c55e;
+    --color-premium-top: #ef4444;
+    --color-premium-exclusive: #8b5cf6;
+
+    /* Тени: мягче и теплее, с более выраженной глубиной */
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+    --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.06), 0 8px 24px rgba(0, 0, 0, 0.04);
+    --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.06), 0 12px 32px rgba(0, 0, 0, 0.06);
+    --shadow-accent: 0 4px 16px rgba(229, 168, 32, 0.2);
+    --shadow-premium: 0 8px 32px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
+    --shadow-glow: 0 0 32px rgba(229, 168, 32, 0.1);
+
+    /* Header и overlays */
+    --header-bg: rgba(255, 255, 255, 0.82);
+    --header-bg-solid: #ffffff;
+    --overlay-bg: rgba(255, 255, 255, 0.94);
+    --overlay-bg-strong: rgba(255, 255, 255, 0.97);
+    --player-bg: #000000;
+    --scrim-bg: rgba(0, 0, 0, 0.5);
+
+    /* Ошибки и успех */
+    --color-error: #dc2626;
+    --color-error-bg: rgba(220, 38, 38, 0.08);
+    --color-error-border: rgba(220, 38, 38, 0.15);
+    --color-success: #16a34a;
 }

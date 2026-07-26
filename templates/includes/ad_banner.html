@@ -1,0 +1,22 @@
+{% load i18n %}
+{% comment %}
+  Премиум-баннер между секциями — как на Netflix/Kinopoisk.
+
+  Ждёт: ad_title, ad_text, ad_cta_text, ad_cta_url, ad_icon (emoji).
+  Все параметры необязательны — если не переданы, используются значения по умолчанию.
+{% endcomment %}
+
+<div class="ad-banner" role="complementary" aria-label="{% trans 'Реклама' %}">
+    <div class="ad-banner__content">
+        <div class="ad-banner__icon" aria-hidden="true">{{ ad_icon|default:"🎬" }}</div>
+        <div class="ad-banner__text">
+            <p class="ad-banner__title">{{ ad_title|default:"Больше фильмов в Premium" }}</p>
+            <p class="ad-banner__subtitle">{{ ad_text|default:"Без рекламы, в высоком качестве, с ранним доступом к новинкам." }}</p>
+        </div>
+        {% if ad_cta_url %}
+            <a class="button button--primary ad-banner__cta" href="{{ ad_cta_url }}">{{ ad_cta_text|default:"Подробнее" }}</a>
+        {% else %}
+            <button class="button button--primary ad-banner__cta" type="button" disabled>{{ ad_cta_text|default:"Скоро" }}</button>
+        {% endif %}
+    </div>
+</div>

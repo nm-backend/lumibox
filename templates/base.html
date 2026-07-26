@@ -1,11 +1,13 @@
-{% load static %}<!DOCTYPE html>
-<html lang="ru">
+{% load static i18n %}<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#ffc043">
+    <link rel="manifest" href="{% static 'manifest.json' %}">
 
-    <title>{% block page_title %}MovieHub — каталог фильмов и сериалов{% endblock %}</title>
-    <meta name="description" content="{% block page_description %}Каталог фильмов и сериалов: поиск, фильтры, подборки.{% endblock %}">
+    <title>{% block page_title %}{% trans "MovieHub — каталог фильмов и сериалов" %}{% endblock %}</title>
+    <meta name="description" content="{% block page_description %}{% trans 'Каталог фильмов и сериалов: поиск, фильтры, подборки.' %}{% endblock %}">
 
     <link rel="stylesheet" href="{% static 'css/variables.css' %}">
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
@@ -14,6 +16,9 @@
     <link rel="stylesheet" href="{% static 'css/footer.css' %}">
     <link rel="stylesheet" href="{% static 'css/ads.css' %}">
     {% block extra_css %}{% endblock %}
+    {% block extra_head %}{% endblock %}
+    {# Тема применяется ДО отрисовки body, чтобы не было вспышки светлой/тёмной #}
+    <script src="{% static 'js/theme-toggle.js' %}"></script>
 </head>
 <body>
     <header class="site-header">
@@ -23,43 +28,81 @@
                 <span>Movie<span class="logo__accent">Hub</span></span>
             </a>
 
-            <nav class="site-nav" aria-label="Основная навигация">
-                {# Ссылки ведут в один и тот же каталог с разным фильтром по типу #}
+            {# Мобильная кнопка меню — details/summary без JS #}
+            <details class="mobile-menu" aria-label="{% trans 'Меню навигации' %}">
+                <summary class="mobile-menu__toggle" aria-label="{% trans 'Открыть меню' %}">
+                    <span class="mobile-menu__bar"></span>
+                    <span class="mobile-menu__bar"></span>
+                    <span class="mobile-menu__bar"></span>
+                </summary>
+                <nav class="mobile-menu__panel">
+                    <a class="mobile-menu__link {% if request.resolver_match.url_name == 'title_list' and not request.GET.type %}mobile-menu__link--active{% endif %}"
+                       href="{% url 'catalog:title_list' %}">{% trans "Всё" %}</a>
+                    <a class="mobile-menu__link {% if request.GET.type == 'movie' %}mobile-menu__link--active{% endif %}"
+                       href="{% url 'catalog:title_list' %}?type=movie">{% trans "Фильмы" %}</a>
+                    <a class="mobile-menu__link {% if request.GET.type == 'series' %}mobile-menu__link--active{% endif %}"
+                       href="{% url 'catalog:title_list' %}?type=series">{% trans "Сериалы" %}</a>
+                    <a class="mobile-menu__link {% if request.resolver_match.url_name == 'genre_list' %}mobile-menu__link--active{% endif %}"
+                       href="{% url 'catalog:genre_list' %}">{% trans "Жанры" %}</a>
+                    <a class="mobile-menu__link {% if request.resolver_match.url_name == 'country_list' %}mobile-menu__link--active{% endif %}"
+                       href="{% url 'catalog:country_list' %}">{% trans "Страны" %}</a>
+                </nav>
+            </details>
+
+            <nav class="site-nav" aria-label="{% trans 'Основная навигация' %}">
                 <a class="site-nav__link {% if request.resolver_match.url_name == 'title_list' and not request.GET.type %}site-nav__link--active{% endif %}"
-                   href="{% url 'catalog:title_list' %}">Всё</a>
+                   href="{% url 'catalog:title_list' %}">{% trans "Всё" %}</a>
                 <a class="site-nav__link {% if request.GET.type == 'movie' %}site-nav__link--active{% endif %}"
-                   href="{% url 'catalog:title_list' %}?type=movie">Фильмы</a>
+                   href="{% url 'catalog:title_list' %}?type=movie">{% trans "Фильмы" %}</a>
                 <a class="site-nav__link {% if request.GET.type == 'series' %}site-nav__link--active{% endif %}"
-                   href="{% url 'catalog:title_list' %}?type=series">Сериалы</a>
+                   href="{% url 'catalog:title_list' %}?type=series">{% trans "Сериалы" %}</a>
                 <a class="site-nav__link {% if request.resolver_match.url_name == 'genre_list' %}site-nav__link--active{% endif %}"
-                   href="{% url 'catalog:genre_list' %}">Жанры</a>
+                   href="{% url 'catalog:genre_list' %}">{% trans "Жанры" %}</a>
                 <a class="site-nav__link {% if request.resolver_match.url_name == 'country_list' %}site-nav__link--active{% endif %}"
-                   href="{% url 'catalog:country_list' %}">Страны</a>
+                   href="{% url 'catalog:country_list' %}">{% trans "Страны" %}</a>
             </nav>
 
             <form class="search site-header__search" action="{% url 'catalog:title_list' %}" method="get" role="search">
-                <label class="visually-hidden" for="search-input">Поиск по каталогу</label>
+                <label class="visually-hidden" for="search-input">{% trans "Поиск по каталогу" %}</label>
                 <input class="search__input"
                        id="search-input"
                        type="search"
                        name="q"
                        value="{{ request.GET.q|default:'' }}"
-                       placeholder="Название фильма или сериала"
+                       placeholder="{% trans 'Название фильма или сериала' %}"
                        autocomplete="off">
-                <button class="search__submit" type="submit">Найти</button>
+                <button class="search__submit" type="submit">{% trans "Найти" %}</button>
             </form>
 
+            {# Переключатель языка — без JS, через встроенный механизм Django #}
+            <form action="{% url 'set_language' %}" method="post" class="lang-switcher" aria-label="{% trans 'Язык' %}">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ request.path }}">
+                <details class="lang-switcher__dropdown">
+                    <summary class="lang-switcher__trigger" aria-label="{% trans 'Сменить язык' %}">
+                        {% get_current_language as LANGUAGE_CODE %}
+                        {% get_available_languages as LANGUAGES %}
+                        {% get_language_info for LANGUAGE_CODE as lang %}
+                        <span class="lang-switcher__current">{{ lang.code|upper }}</span>
+                    </summary>
+                    <div class="lang-switcher__menu">
+                        {% for lang_code, lang_name in LANGUAGES %}
+                            <button class="lang-switcher__option {% if lang_code == LANGUAGE_CODE %}lang-switcher__option--active{% endif %}"
+                                    type="submit"
+                                    name="language"
+                                    value="{{ lang_code }}">
+                                {{ lang_name }}
+                            </button>
+                        {% endfor %}
+                    </div>
+                </details>
+            </form>
+
+            <button class="theme-toggle" data-theme-toggle type="button" aria-label="{% trans 'Сменить тему' %}">☀️</button>
+
             {% if user.is_authenticated %}
-                {# details/summary даёт выпадающее меню без единой строки JS #}
                 <details class="user-menu">
-                    {% comment %}
-                    aria-label обязателен: внутри только аватар. Картинка идёт
-                    с пустым alt, буква-заглушка скрыта aria-hidden — то есть
-                    у кнопки не остаётся ни одного источника имени, и скринридер
-                    объявляет её безымянной. А это единственный вход в профиль,
-                    избранное, историю и выход.
-                    {% endcomment %}
-                    <summary class="user-menu__trigger" aria-label="Меню пользователя">
+                    <summary class="user-menu__trigger" aria-label="{% trans 'Меню пользователя' %}">
                         <span class="avatar">
                             {% if user.avatar %}
                                 <img class="avatar__image" src="{{ user.avatar.url }}" alt="">
@@ -71,39 +114,24 @@
 
                     <div class="user-menu__dropdown">
                         <p class="user-menu__name">{{ user.display_name }}</p>
-                        <a class="user-menu__link" href="{% url 'users:profile' %}">Профиль</a>
-                        <a class="user-menu__link" href="{% url 'library:favorites' %}">Избранное</a>
-                        <a class="user-menu__link" href="{% url 'library:history' %}">История</a>
+                        <a class="user-menu__link" href="{% url 'users:profile' %}">{% trans "Профиль" %}</a>
+                        <a class="user-menu__link" href="{% url 'users:settings' %}">{% trans "Настройки" %}</a>
+                        <a class="user-menu__link" href="{% url 'library:favorites' %}">{% trans "Избранное" %}</a>
+                        <a class="user-menu__link" href="{% url 'library:history' %}">{% trans "История" %}</a>
 
-                        {% comment %}
-                        Выход — POST: по GET-ссылке пользователя мог бы
-                        разлогинить любой чужой сайт картинкой.
-                        {% endcomment %}
                         <form method="post" action="{% url 'users:logout' %}">
                             {% csrf_token %}
-                            <button class="user-menu__link user-menu__link--button" type="submit">Выйти</button>
+                            <button class="user-menu__link user-menu__link--button" type="submit">{% trans "Выйти" %}</button>
                         </form>
                     </div>
                 </details>
             {% else %}
-                <a class="button button--primary site-header__login" href="{% url 'users:login' %}">Войти</a>
+                <a class="button button--primary site-header__login" href="{% url 'users:login' %}">{% trans "Войти" %}</a>
             {% endif %}
         </div>
     </header>
 
-    {% comment %}
-    Модификатор нужен из-за отрицательного margin-top у баннера: он съедает
-    верхний отступ .site-main, чтобы шапка начиналась сразу под навигацией.
-    Когда сверху есть сообщение, этот же отступ баннеру уже не нужен —
-    иначе он наедет на текст сообщения.
-    {% endcomment %}
     <main class="site-main{% if messages %} site-main--with-messages{% endif %}">
-        {% comment %}
-        Сообщения идут ПЕРВЫМИ, до баннера. Раньше они стояли внутри
-        .container, то есть ниже полноэкранной шапки: после «Отзыв сохранён»
-        пользователя возвращало на страницу фильма, и подтверждение
-        оказывалось за пределами экрана — человек не понимал, сработало ли.
-        {% endcomment %}
         {% if messages %}
             <div class="container">
                 <ul class="messages">
@@ -114,12 +142,6 @@
             </div>
         {% endif %}
 
-        {% comment %}
-        Блок вне .container — для полноширинных секций (шапка страницы
-        фильма с фоном). Внутри контейнера такую растянуть нельзя,
-        а ломать её отрицательными отступами — трюк, который потом
-        всплывает багами на узких экранах.
-        {% endcomment %}
         {% block hero %}{% endblock %}
 
         <div class="container">
@@ -127,19 +149,21 @@
         </div>
     </main>
 
-    {% comment %}
-    Рекламное место. Одна строка — весь блок: удалите её, и рекламы на сайте
-    не будет. Логика показа и стили — в includes/ad_rail.html и css/ads.css.
-    {% endcomment %}
     {% include "includes/ad_rail.html" %}
-
     {% include "includes/footer.html" %}
 
-    {% comment %}
-    defer: скрипт не блокирует отрисовку страницы и выполнится,
-    когда HTML уже разобран. Всё на сайте работает и без него.
-    {% endcomment %}
     <script src="{% static 'js/favorite.js' %}" defer></script>
+    <script src="{% static 'js/scroll-reveal.js' %}" defer></script>
+    <script src="{% static 'js/search-enhanced.js' %}" defer></script>
+    {% if user.is_authenticated %}
+        <span data-user-id="{{ user.pk }}" hidden></span>
+        <script src="{% static 'js/notifications.js' %}" defer></script>
+    {% endif %}
+    <script>
+        if ("serviceWorker" in navigator) {
+            navigator.serviceWorker.register("{% static 'js/sw.js' %}").catch(() => {});
+        }
+    </script>
     {% block extra_js %}{% endblock %}
 </body>
 </html>

@@ -70,3 +70,8 @@ SECURE_CONTENT_TYPE_NOSNIFF = True
 
 # Запрещаем показывать сайт внутри чужого iframe — защита от clickjacking.
 X_FRAME_OPTIONS = "DENY"
+
+# PostgreSQL connection pooling для production.
+# Увеличивает производительность при большом количестве запросов.
+DATABASES["default"]["CONN_MAX_AGE"] = 600  # 10 минут
+DATABASES["default"]["CONN_HEALTH_CHECKS"] = True

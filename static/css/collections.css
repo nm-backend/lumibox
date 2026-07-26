@@ -6,6 +6,16 @@
     gap: var(--space-4);
 }
 
+/* Staggered animation for collection cards */
+.collection-grid > .collection-card {
+    animation: fadeInUp 0.4s ease both;
+}
+
+.collection-grid > .collection-card:nth-child(1) { animation-delay: 0.02s; }
+.collection-grid > .collection-card:nth-child(2) { animation-delay: 0.08s; }
+.collection-grid > .collection-card:nth-child(3) { animation-delay: 0.14s; }
+.collection-grid > .collection-card:nth-child(4) { animation-delay: 0.20s; }
+
 .collection-card {
     display: flex;
     flex-direction: column;
@@ -14,21 +24,31 @@
     background-color: var(--color-surface);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
-    transition: border-color var(--transition), transform var(--transition);
+    transition: border-color var(--transition), transform var(--transition),
+                box-shadow var(--transition);
+    will-change: transform;
+}
+
+[data-theme="light"] .collection-card {
+    box-shadow: var(--shadow-sm);
 }
 
 .collection-card:hover {
     border-color: var(--color-accent);
-    transform: translateY(-3px);
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-card), 0 0 40px rgba(255, 192, 67, 0.06);
     color: var(--color-text);
+}
+
+/* Light theme: collection cards get more visible shadow */
+[data-theme="light"] .collection-card:hover {
+    box-shadow: var(--shadow-card);
 }
 
 .collection-card__cover {
     display: block;
     aspect-ratio: 16 / 9;
     overflow: hidden;
-
-    /* Обложки может не быть — тогда виден градиент, а не пустая дыра */
     background: linear-gradient(135deg, var(--color-surface-hover), var(--color-bg));
 }
 
@@ -36,6 +56,11 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
+    transition: transform 0.4s ease;
+}
+
+.collection-card:hover .collection-card__image {
+    transform: scale(1.05);
 }
 
 .collection-card__body {
@@ -65,6 +90,11 @@
     background: linear-gradient(135deg, var(--color-surface-hover), var(--color-surface));
     border: 1px solid var(--color-border);
     border-radius: var(--radius-lg);
+    animation: fadeInUp 0.5s ease both;
+}
+
+[data-theme="light"] .collection-hero {
+    box-shadow: var(--shadow-sm);
 }
 
 .collection-hero__image {
@@ -82,4 +112,32 @@
     margin-top: var(--space-3);
     max-width: 68ch;
     color: var(--color-text-muted);
+}
+
+/* ---------- Адаптивность ---------- */
+
+@media (max-width: 560px) {
+    .collection-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .collection-card__name {
+        font-size: var(--text-sm);
+    }
+}
+
+@media (max-width: 390px) {
+    .collection-hero__image {
+        height: 160px;
+    }
+
+    .collection-hero__body {
+        padding: var(--space-4);
+    }
+}
+
+@media (min-width: 2560px) {
+    .collection-grid {
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    }
 }

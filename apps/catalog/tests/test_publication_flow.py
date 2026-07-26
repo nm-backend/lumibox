@@ -62,12 +62,14 @@ class PublicationFlowTests(TestCase):
             "trailer_url": "https://www.youtube.com/watch?v=test",
             "genres": [self.drama.pk],
             "countries": [self.usa.pk],
+            "studios": [],
+            "related_titles": [],
             "status": Title.Status.PUBLISHED,
             "meta_title": "",
             "meta_description": "",
             "published_at": "",
             # Инлайны требуют management-форму — по одной на каждый.
-            # Без блока frames-* Django отвергнет весь POST целиком.
+            # Без блока frames-* и award_entries-* Django отвергнет весь POST целиком.
             "participations-TOTAL_FORMS": "2",
             "participations-INITIAL_FORMS": "0",
             "participations-MIN_NUM_FORMS": "0",
@@ -76,6 +78,10 @@ class PublicationFlowTests(TestCase):
             "frames-INITIAL_FORMS": "0",
             "frames-MIN_NUM_FORMS": "0",
             "frames-MAX_NUM_FORMS": "1000",
+            "award_entries-TOTAL_FORMS": "0",
+            "award_entries-INITIAL_FORMS": "0",
+            "award_entries-MIN_NUM_FORMS": "0",
+            "award_entries-MAX_NUM_FORMS": "1000",
             "participations-0-person": self.director.pk,
             "participations-0-role": Participation.Role.DIRECTOR,
             "participations-0-character": "",

@@ -77,35 +77,84 @@ def get_similar_titles(title, limit=6):
 
 def get_recommendations(user, limit=12):
     """
-    Персональные рекомендации по избранному пользователя.
+    Персональные рекомендации.
 
-    Берём жанры того, что человек добавил в избранное, и предлагаем
-    записи с теми же жанрами, исключая уже виденное и добавленное.
-    Гостю и новичку без избранного показываем просто популярное —
-    пустой блок рекомендаций выглядел бы сломанным.
+    Стратегия:
+    1. По жанрам из избранного + рейтинг (для пользователей с избранным)
+    2. Trending: популярное по просмотрам (для гостей и новичков)
+    3. Fallback: свежее (если нет данных о просмотрах)
     """
-    popular = Title.objects.published().with_related().order_by("-published_at")
-
     if not user.is_authenticated:
-        return popular[:limit]
+        return _get_trending_or_popular(limit)
 
     favorite_genre_ids = list(
         Title.objects.filter(favorite__user=user).values_list("genres__id", flat=True).distinct()
     )
     if not favorite_genre_ids:
-        return popular[:limit]
+        return _get_trending_or_popular(limit)
 
     seen_ids = list(Title.objects.filter(watchhistory__user=user).values_list("id", flat=True))
     favorite_ids = list(Title.objects.filter(favorite__user=user).values_list("id", flat=True))
+    exclude_ids = seen_ids + favorite_ids
 
-    return (
+    # Рекомендации строго по жанрам из избранного
+    genre_based = (
         Title.objects.published()
         .with_related()
         .filter(genres__in=favorite_genre_ids)
-        .exclude(pk__in=seen_ids + favorite_ids)
+        .exclude(pk__in=exclude_ids)
         .annotate(matched_genres=Count("genres", filter=Q(genres__in=favorite_genre_ids)))
-        .order_by("-matched_genres", "-published_at")[:limit]
+        .order_by("-matched_genres", "-rating_average")
     )
+
+    results = list(genre_based[:limit])
+
+    # Если жанровых результатов нет вообще — добираем trending
+    if not results:
+        return _get_trending_or_popular(limit, exclude_ids=exclude_ids)
+
+    return results
+
+
+def _get_trending_or_popular(limit, exclude_ids=None):
+    """Trending по просмотрам, fallback — популярное по дате."""
+    qs = Title.objects.published().with_related()
+    if exclude_ids:
+        qs = qs.exclude(pk__in=exclude_ids)
+
+    trending = list(qs.filter(view_count__gt=0).order_by("-view_count", "-rating_average")[:limit])
+    if trending:
+        return trending
+    return list(qs.order_by("-published_at")[:limit])
+
+
+def get_trending_weekly(limit=12):
+    """Популярное за последнюю неделю (по WatchProgress)."""
+    from datetime import timedelta
+
+    from django.utils import timezone
+
+    from apps.streaming.models import WatchProgress
+
+    week_ago = timezone.now() - timedelta(days=7)
+
+    # Получаем id самых просматриваемых titles за неделю
+    trending_ids = (
+        WatchProgress.objects.filter(last_watched_at__gte=week_ago)
+        .values("video_asset__title")
+        .annotate(watch_count=Count("id"))
+        .order_by("-watch_count")
+        .values_list("video_asset__title", flat=True)[:limit]
+    )
+
+    if not trending_ids:
+        return Title.objects.published().with_related().order_by("-published_at")[:limit]
+
+    # Сохраняем порядок из annotate
+    titles = list(Title.objects.published().with_related().filter(pk__in=trending_ids))
+    id_order = {pk: i for i, pk in enumerate(trending_ids)}
+    titles.sort(key=lambda t: id_order.get(t.pk, 999))
+    return titles
 
 
 def get_crew_by_role(title):
@@ -163,13 +212,15 @@ def get_home_sections():
     published = Title.objects.published().with_related()
 
     sections = {
-        # list() обязателен: QuerySet ленивый, в кэш попал бы не результат,
-        # а объект запроса, и каждый читатель кэша ходил бы в базу заново.
         "featured": published.exclude(description="").order_by("-published_at").first(),
         "new_titles": list(published.order_by("-published_at")[:12]),
         "movies": list(published.movies()[:6]),
         "series": list(published.series()[:6]),
         "top_rated": list(published.top_rated()[:6]),
+        "trending": list(
+            published.filter(view_count__gt=0).order_by("-view_count")[:6]
+        ),
+        "trending_weekly": list(get_trending_weekly(6)),
     }
 
     cache.set(HOME_CACHE_KEY, sections, settings.CACHE_TTL_HOME)

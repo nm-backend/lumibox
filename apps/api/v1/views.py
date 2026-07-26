@@ -1,10 +1,12 @@
 from django.db import IntegrityError
+from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import OpenApiExample, OpenApiResponse, extend_schema, extend_schema_view
 from rest_framework import filters, mixins, permissions, serializers, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from apps.api.permissions import IsAuthorOrReadOnly
 from apps.api.v1.serializers import (
@@ -12,11 +14,13 @@ from apps.api.v1.serializers import (
     CountrySerializer,
     GenreSerializer,
     ReviewSerializer,
+    SeasonSerializer,
     TitleDetailSerializer,
     TitleListSerializer,
 )
 from apps.catalog.models import Collection, Country, Genre, Title
 from apps.catalog.services import get_similar_titles
+from apps.core.search import suggest_corrections
 from apps.library.services import toggle_favorite
 from apps.reviews.models import Review
 
@@ -145,6 +149,58 @@ class TitleViewSet(viewsets.ReadOnlyModelViewSet):
         # Зовёт тот же сервис, что и вьюха сайта: логика описана один раз.
         is_favorite = toggle_favorite(request.user, self.get_object())
         return Response({"is_favorite": is_favorite})
+
+    @extend_schema(
+        summary="Сезоны и серии сериала",
+        description="Возвращает сезоны с эпизодами. Только для сериалов. Для фильмов — пустой список.",
+        responses=SeasonSerializer(many=True),
+        tags=["titles"],
+    )
+    @action(detail=True, methods=["get"])
+    def seasons(self, request, slug=None):
+        title = self.get_object()
+        seasons = title.seasons.filter(is_published=True).prefetch_related("episodes").order_by("number")
+        serializer = SeasonSerializer(seasons, many=True)
+        return Response(serializer.data)
+
+
+class SearchAutocompleteView(APIView):
+    """Автокомплит поиска: возвращает подсказки по мере ввода."""
+
+    permission_classes = [permissions.AllowAny]
+    throttle_classes = []  # Отдельный throttle для автокомплита
+
+    def get(self, request):
+        query = request.GET.get("q", "").strip()
+        if len(query) < 2:
+            return Response({"suggestions": [], "corrections": []})
+
+        titles = (
+            Title.objects.published()
+            .filter(Q(name__icontains=query) | Q(original_name__icontains=query))
+            .values("name", "slug", "release_year", "type")[:8]
+        )
+
+        suggestions = [
+            {
+                "name": t["name"],
+                "slug": t["slug"],
+                "year": t["release_year"],
+                "type": t["type"],
+                "url": f"/title/{t['slug']}/",
+            }
+            for t in titles
+        ]
+
+        # Если мало результатов — предлагаем исправления
+        corrections = []
+        if len(suggestions) < 3:
+            all_titles = list(
+                Title.objects.published().values_list("name", flat=True)[:500]
+            )
+            corrections = suggest_corrections(query, all_titles, max_suggestions=3)
+
+        return Response({"suggestions": suggestions, "corrections": corrections})
 
 
 class ReferenceViewSet(viewsets.ReadOnlyModelViewSet):

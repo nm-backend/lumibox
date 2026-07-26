@@ -32,3 +32,19 @@ celery==5.6.3
 # Без него проект работает: кэш падает на память процесса,
 # а задачи выполняются на месте.
 redis==8.0.1
+
+# Защита от брутфорса: блокировка после N неудачных попыток входа.
+django-axes==8.3.1
+
+# Платежи: Stripe SDK.
+stripe==11.5.0
+
+# CORS: разрешает запросы к API с других доменов (для SPA/мобильных).
+django-cors-headers==4.7.0
+
+# CSP: Content Security Policy headers для защиты от XSS.
+django-csp==3.8
+
+# WebSocket: real-time уведомления через Django Channels.
+channels==4.2.2
+channels-redis==4.2.1

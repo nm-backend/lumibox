@@ -15,6 +15,27 @@ from apps.catalog.models import Title
 
 
 @shared_task
+def publish_scheduled_titles():
+    """Публикует черновики с наступившей датой published_at."""
+    from django.utils import timezone
+
+    now = timezone.now()
+    scheduled = Title.objects.filter(
+        status=Title.Status.DRAFT,
+        published_at__lte=now,
+        published_at__isnull=False,
+    )
+
+    count = 0
+    for title in scheduled:
+        title.status = Title.Status.PUBLISHED
+        title.save()
+        count += 1
+
+    return f"Опубликовано запланированных: {count}"
+
+
+@shared_task
 def refresh_title_ratings():
     """
     Пересчитывает рейтинги всех записей разом.

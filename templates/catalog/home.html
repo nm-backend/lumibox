@@ -1,29 +1,23 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static i18n %}
 
-{% block page_title %}MovieHub — каталог фильмов и сериалов{% endblock %}
+{% block page_title %}{% trans "MovieHub — каталог фильмов и сериалов" %}{% endblock %}
 
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'css/home.css' %}">
     <link rel="stylesheet" href="{% static 'css/collections.css' %}">
 {% endblock %}
 
-{% comment %}
-Баннер вынесен в блок hero: он полноширинный и живёт вне .container.
-Если каталог пуст, блока просто не будет — пустой баннер выглядел бы
-сломанным сильнее, чем его отсутствие.
-{% endcomment %}
 {% block hero %}
     {% if featured %}
         <section class="showcase">
             {% if featured.backdrop %}
-                {# Декорация: содержания в фоне нет, скринридеру читать нечего. #}
                 <img class="showcase__backdrop" src="{{ featured.backdrop.url }}" alt="" aria-hidden="true">
             {% endif %}
             <div class="showcase__scrim" aria-hidden="true"></div>
 
             <div class="container showcase__inner">
-                <p class="showcase__label">Свежее в каталоге</p>
+                <p class="showcase__label">{% trans "Свежее в каталоге" %}</p>
                 <h1 class="showcase__name">{{ featured.name }}</h1>
 
                 <div class="showcase__meta">
@@ -47,8 +41,8 @@
                 {% endif %}
 
                 <div class="showcase__actions">
-                    <a class="button button--primary" href="{{ featured.get_absolute_url }}">Смотреть карточку</a>
-                    <a class="button button--ghost" href="{% url 'catalog:title_list' %}">Весь каталог</a>
+                    <a class="button button--primary" href="{{ featured.get_absolute_url }}">{% trans "Смотреть карточку" %}</a>
+                    <a class="button button--ghost" href="{% url 'catalog:title_list' %}">{% trans "Весь каталог" %}</a>
                 </div>
             </div>
         </section>
@@ -63,8 +57,8 @@
     {% if collections %}
         <section class="section">
             <div class="section__header">
-                <h2 class="section__title">Подборки</h2>
-                <a class="section__link" href="{% url 'catalog:collection_list' %}">Все →</a>
+                <h2 class="section__title">{% trans "Подборки" %}</h2>
+                <a class="section__link" href="{% url 'catalog:collection_list' %}">{% trans "Все" %} →</a>
             </div>
             <div class="collection-grid">
                 {% for collection in collections %}
@@ -74,28 +68,39 @@
         </section>
     {% endif %}
 
+    <hr class="section-divider" aria-hidden="true">
+
     {% include "includes/title_section.html" with section_title="Новинки" section_titles=new_titles section_url=new_url %}
 
-    {% comment %}
-    Для гостя и новичка здесь просто свежее — сервис подстрахован,
-    пустого блока не будет. Заголовок меняем, чтобы не обманывать:
-    «Рекомендации» без данных о вкусах звучали бы странно.
-    {% endcomment %}
+    {% include "includes/ad_banner.html" with ad_icon="⭐" ad_title="Оцените новинки первыми" ad_text="Смотрите эксклюзивные премьеры до everyone else." ad_cta_text="Скоро" %}
+
     {% if user.is_authenticated %}
         {% include "includes/title_section.html" with section_title="Вам может понравиться" section_titles=recommendations section_url=None %}
     {% endif %}
 
+    <hr class="section-divider" aria-hidden="true">
+
     {% include "includes/title_section.html" with section_title="Высокий рейтинг" section_titles=top_rated section_url=top_rated_url %}
+
+    {% if trending %}
+        {% include "includes/title_section.html" with section_title="Популярное" section_titles=trending section_url=trending_url %}
+    {% endif %}
+
+    {% include "includes/ad_banner.html" with ad_icon="🎬" ad_title="Больше фильмов в Premium" ad_text="Без рекламы, в высоком качестве, с ранним доступом к новинкам." ad_cta_text="Скоро" %}
 
     {% include "includes/title_section.html" with section_title="Фильмы" section_titles=movies section_url=movies_url %}
 
+    <hr class="section-divider" aria-hidden="true">
+
     {% include "includes/title_section.html" with section_title="Сериалы" section_titles=series section_url=series_url %}
+
+    {% include "includes/ad_banner.html" with ad_icon="📺" ad_text="Смотрите сериалы без перерывов — серии идут одна за другой." ad_cta_text="Скоро" %}
 
     {% if genres %}
         <section class="section">
             <div class="section__header">
-                <h2 class="section__title">Жанры</h2>
-                <a class="section__link" href="{% url 'catalog:genre_list' %}">Все →</a>
+                <h2 class="section__title">{% trans "Жанры" %}</h2>
+                <a class="section__link" href="{% url 'catalog:genre_list' %}">{% trans "Все" %} →</a>
             </div>
             <div class="badge-list">
                 {% for genre in genres %}

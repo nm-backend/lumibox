@@ -1,0 +1,759 @@
+# English translations for MovieHub
+msgid ""
+msgstr ""
+"Project-Id-Version: MovieHub\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-07-24 12:00+0000\n"
+"PO-Revision-Date: 2026-07-24 12:00+0000\n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+# Base template
+msgid "MovieHub — каталог фильмов и сериалов"
+msgstr "MovieHub — movies and TV series catalog"
+
+msgid "Каталог фильмов и сериалов: поиск, фильтры, подборки."
+msgstr "Movies and TV series catalog: search, filters, collections."
+
+msgid "Меню навигации"
+msgstr "Navigation menu"
+
+msgid "Открыть меню"
+msgstr "Open menu"
+
+msgid "Всё"
+msgstr "All"
+
+msgid "Фильмы"
+msgstr "Movies"
+
+msgid "Сериалы"
+msgstr "TV Series"
+
+msgid "Жанры"
+msgstr "Genres"
+
+msgid "Страны"
+msgstr "Countries"
+
+msgid "Основная навигация"
+msgstr "Main navigation"
+
+msgid "Поиск по каталогу"
+msgstr "Search catalog"
+
+msgid "Название фильма или сериала"
+msgstr "Movie or series title"
+
+msgid "Найти"
+msgstr "Search"
+
+msgid "Язык"
+msgstr "Language"
+
+msgid "Сменить язык"
+msgstr "Change language"
+
+msgid "Меню пользователя"
+msgstr "User menu"
+
+msgid "Профиль"
+msgstr "Profile"
+
+msgid "Избранное"
+msgstr "Favorites"
+
+msgid "История"
+msgstr "History"
+
+msgid "Выйти"
+msgstr "Log out"
+
+msgid "Войти"
+msgstr "Log in"
+
+# Footer
+msgid "Разделы каталога"
+msgstr "Catalog sections"
+
+msgid "Каталог"
+msgstr "Catalog"
+
+msgid "Все фильмы и сериалы"
+msgstr "All movies and series"
+
+msgid "Подборки"
+msgstr "Collections"
+
+msgid "Навигация по справочникам"
+msgstr "Reference navigation"
+
+msgid "Разделы"
+msgstr "Sections"
+
+msgid "Высокий рейтинг"
+msgstr "Top rated"
+
+msgid "Новинки"
+msgstr "New releases"
+
+msgid "Для разработчиков"
+msgstr "For developers"
+
+msgid "Разработчикам"
+msgstr "For developers"
+
+msgid "Схема OpenAPI"
+msgstr "OpenAPI Schema"
+
+msgid "Панель управления"
+msgstr "Admin panel"
+
+msgid "Создатель проекта"
+msgstr "Project creator"
+
+msgid "Автор и ведущий разработчик"
+msgstr "Author and lead developer"
+
+msgid "Написать"
+msgstr "Contact"
+
+msgid "Собственный дизайн и код."
+msgstr "Custom design and code."
+
+msgid "Данные о фильмах — общедоступные факты. Оформление создано для этого проекта."
+msgstr "Movie data are publicly available facts. Design created for this project."
+
+msgid "Каталог фильмов и сериалов с поиском, фильтрами, подборками и личной библиотекой."
+msgstr "Movie and series catalog with search, filters, collections and personal library."
+
+# Home page
+msgid "Свежее в каталоге"
+msgstr "Just added"
+
+msgid "Смотреть карточку"
+msgstr "View details"
+
+msgid "Весь каталог"
+msgstr "Full catalog"
+
+msgid "Все"
+msgstr "All"
+
+msgid "Вам может понравиться"
+msgstr "You may like"
+
+# Title section
+msgid "Все →"
+msgstr "All →"
+
+# Title card
+msgid "Подробнее"
+msgstr "Details"
+
+# Reviews
+msgid "Отзывы"
+msgstr "Reviews"
+
+msgid "Изменить свой отзыв"
+msgstr "Edit your review"
+
+msgid "Оставить отзыв"
+msgstr "Leave a review"
+
+msgid "Сохранить"
+msgstr "Save"
+
+msgid "Отправить"
+msgstr "Submit"
+
+msgid "Удалить мой отзыв"
+msgstr "Delete my review"
+
+msgid "чтобы оставить отзыв."
+msgstr "to leave a review."
+
+msgid "Отзывов пока нет. Будьте первым."
+msgstr "No reviews yet. Be the first."
+
+# Continue watching
+msgid "Продолжить просмотр"
+msgstr "Continue watching"
+
+msgid "Продолжить"
+msgstr "Continue"
+
+# Player
+msgid "Навигация"
+msgstr "Navigation"
+
+msgid "Воспроизвести"
+msgstr "Play"
+
+msgid "Пропустить рекап"
+msgstr "Skip recap"
+
+msgid "Пропустить заставку"
+msgstr "Skip intro"
+
+msgid "Следующая серия через"
+msgstr "Next episode in"
+
+msgid "сек."
+msgstr "sec."
+
+msgid "Смотреть"
+msgstr "Watch"
+
+msgid "Отмена"
+msgstr "Cancel"
+
+msgid "Позиция воспроизведения"
+msgstr "Playback position"
+
+msgid "Назад на 10 секунд"
+msgstr "Back 10 seconds"
+
+msgid "Вперёд на 10 секунд"
+msgstr "Forward 10 seconds"
+
+msgid "Скорость воспроизведения"
+msgstr "Playback speed"
+
+msgid "Качество"
+msgstr "Quality"
+
+msgid "Субтитры"
+msgstr "Subtitles"
+
+msgid "Субтитры: выкл."
+msgstr "Subtitles: off"
+
+msgid "Картинка в картинке"
+msgstr "Picture in picture"
+
+msgid "Полный экран"
+msgstr "Fullscreen"
+
+msgid "Подготовка плеера…"
+msgstr "Preparing player…"
+
+msgid "Фильм"
+msgstr "Movie"
+
+msgid "Скачать"
+msgstr "Download"
+
+msgid "О фильме"
+msgstr "About"
+
+msgid "Пробел — пауза, ←/→ — 10 секунд, M — звук, F — полный экран, P — PiP."
+msgstr "Space — pause, ←/→ — 10 seconds, M — mute, F — fullscreen, P — PiP."
+
+# Title detail page
+msgid "Средняя оценка зрителей"
+msgstr "Average audience rating"
+
+msgid "Смотреть трейлер"
+msgstr "Watch trailer"
+
+msgid "В избранном"
+msgstr "In favorites"
+
+msgid "В избранное"
+msgstr "Add to favorites"
+
+msgid "Трейлер"
+msgstr "Trailer"
+
+msgid "Ваш браузер не умеет проигрывать видео."
+msgstr "Your browser cannot play video."
+
+msgid "Скачать файл"
+msgstr "Download file"
+
+msgid "Трейлер размещён на стороннем сервисе."
+msgstr "Trailer is hosted on an external service."
+
+msgid "Открыть трейлер"
+msgstr "Open trailer"
+
+msgid "Кадры"
+msgstr "Screenshots"
+
+msgid "О проекте"
+msgstr "About"
+
+msgid "Дата выхода"
+msgstr "Release date"
+
+msgid "Год"
+msgstr "Year"
+
+msgid "Серия"
+msgstr "Episode"
+
+msgid "Длительность"
+msgstr "Duration"
+
+msgid "Страны"
+msgstr "Countries"
+
+msgid "Оценка зрителей"
+msgstr "Audience rating"
+
+msgid "Над проектом работали"
+msgstr "Cast & crew"
+
+msgid "Похожее"
+msgstr "Similar"
+
+msgid "%(minutes)s мин"
+msgstr "%(minutes)s min"
+
+# Other templates
+msgid "Все →"
+msgstr "All →"
+
+msgid "Постер: %(name)s"
+msgstr "Poster: %(name)s"
+
+msgid "Трейлер: %(name)s"
+msgstr "Trailer: %(name)s"
+
+msgid "Смотреть %(name)s"
+msgstr "Watch %(name)s"
+
+msgid "Просмотр %(name)s на MovieHub."
+msgstr "Watching %(name)s on MovieHub."
+
+msgid "Плеер: %(name)s"
+msgstr "Player: %(name)s"
+
+msgid "серия %(num)s"
+msgstr "episode %(num)s"
+
+# Login page
+msgid "Вход"
+msgstr "Login"
+
+msgid "Рады снова вас видеть."
+msgstr "Welcome back."
+
+msgid "Нет аккаунта?"
+msgstr "Don't have an account?"
+
+msgid "Зарегистрируйтесь"
+msgstr "Sign up"
+
+# Register page
+msgid "Регистрация"
+msgstr "Sign up"
+
+msgid "Избранное, история просмотров и отзывы."
+msgstr "Favorites, watch history and reviews."
+
+msgid "Создать аккаунт"
+msgstr "Create account"
+
+msgid "Уже есть аккаунт?"
+msgstr "Already have an account?"
+
+# Profile page
+msgid "Аватар"
+msgstr "Avatar"
+
+msgid "Просмотрено"
+msgstr "Watched"
+
+msgid "Отзывов"
+msgstr "Reviews"
+
+msgid "Настройки профиля"
+msgstr "Profile settings"
+
+# Favorites page
+msgid "Здесь пока пусто"
+msgstr "Nothing here yet"
+
+msgid "Нажмите «В избранное» на странице фильма — и он появится тут."
+msgstr "Click \"Add to favorites\" on a movie page — and it will appear here."
+
+msgid "Открыть каталог"
+msgstr "Open catalog"
+
+msgid "Всего: %(count)s"
+msgstr "Total: %(count)s"
+
+# History page
+msgid "История просмотров"
+msgstr "Watch history"
+
+msgid "Очистить историю"
+msgstr "Clear history"
+
+msgid "История пуста"
+msgstr "History is empty"
+
+msgid "Здесь появются фильмы и сериалы, страницы которых вы открывали."
+msgstr "Movies and series whose pages you visited will appear here."
+
+# Settings page
+msgid "Настройки"
+msgstr "Settings"
+
+msgid "Настройте плеер под себя."
+msgstr "Customize the player to your preferences."
+
+msgid "Плеер"
+msgstr "Player"
+
+msgid "Аккаунт"
+msgstr "Account"
+
+msgid "Редактировать профиль"
+msgstr "Edit profile"
+
+msgid "Настройки сохранены."
+msgstr "Settings saved."
+
+# Playback settings
+msgid "Автовоспроизведение следующей серии"
+msgstr "Autoplay next episode"
+
+msgid "Качество по умолчанию"
+msgstr "Default quality"
+
+msgid "Скорость по умолчанию"
+msgstr "Default speed"
+
+msgid "Язык субтитров по умолчанию"
+msgstr "Default subtitles language"
+
+# View count
+msgid "Просмотров"
+msgstr "Views"
+
+# Seasons
+msgid "Сезоны"
+msgstr "Seasons"
+
+msgid "серий"
+msgstr "episodes"
+
+# Trending
+msgid "Популярное"
+msgstr "Trending"
+
+# Password reset
+msgid "Сброс пароля"
+msgstr "Reset password"
+
+msgid "Введите email, и мы отправим ссылку для сброса пароля."
+msgstr "Enter your email and we'll send you a password reset link."
+
+msgid "Отправить ссылку"
+msgstr "Send link"
+
+msgid "Вернуться к входу"
+msgstr "Back to login"
+
+msgid "Письмо отправлено"
+msgstr "Email sent"
+
+msgid "Если аккаунт с таким email существует, мы отправили письмо со ссылкой для сброса пароля."
+msgstr "If an account with this email exists, we've sent a password reset link."
+
+msgid "Новый пароль"
+msgstr "New password"
+
+msgid "Введите новый пароль дважды."
+msgstr "Enter your new password twice."
+
+msgid "Сменить пароль"
+msgstr "Change password"
+
+msgid "Ссылка недействительна"
+msgstr "Invalid link"
+
+msgid "Ссылка для сброса пароля устарела или уже была использована."
+msgstr "The password reset link has expired or already been used."
+
+msgid "Запросить новую ссылку"
+msgstr "Request new link"
+
+msgid "Пароль изменён"
+msgstr "Password changed"
+
+msgid "Ваш пароль успешно изменён. Теперь вы можете войти с новым паролем."
+msgstr "Your password has been changed. You can now log in with your new password."
+
+msgid "Забыли пароль?"
+msgstr "Forgot password?"
+
+# Email verification
+msgid "Email подтверждён. Спасибо!"
+msgstr "Email confirmed. Thank you!"
+
+msgid "Ссылка недействительна или устарела."
+msgstr "The link is invalid or has expired."
+
+# Password change
+msgid "Смена пароля"
+msgstr "Change password"
+
+msgid "Текущий пароль"
+msgstr "Current password"
+
+msgid "Новый пароль"
+msgstr "New password"
+
+msgid "Подтвердите новый пароль"
+msgstr "Confirm new password"
+
+msgid "Изменить пароль"
+msgstr "Change password"
+
+msgid "Пароль успешно изменён."
+msgstr "Password changed successfully."
+
+# Catalog list
+msgid "По запросу «%(query)s» найдено: %(count)s"
+msgstr "Search \"%(query)s\" results: %(count)s"
+
+msgid "Ничего не найдено"
+msgstr "Nothing found"
+
+msgid "Попробуйте изменить условия — или посмотрите весь каталог."
+msgstr "Try changing filters — or browse the full catalog."
+
+msgid "Открыть весь каталог"
+msgstr "Open full catalog"
+
+# Person detail
+msgid "Дата рождения:"
+msgstr "Date of birth:"
+
+msgid "Фильмография"
+msgstr "Filmography"
+
+msgid "Пока нет опубликованных проектов."
+msgstr "No published projects yet."
+
+# Collection list
+msgid "Тематические подборки фильмов и сериалов."
+msgstr "Thematic collections of movies and series."
+
+msgid "Подборок пока нет"
+msgstr "No collections yet"
+
+msgid "Загляните позже — они появятся."
+msgstr "Check back later — they will appear."
+
+# Collection detail
+msgid "Подборка"
+msgstr "Collection"
+
+msgid "Записей: %(count)s"
+msgstr "Items: %(count)s"
+
+msgid "Подборка пока пуста"
+msgstr "Collection is empty"
+
+# 404 page
+msgid "Страница не найдена"
+msgstr "Page not found"
+
+msgid "Возможно, запись удалили или ссылка набрана с ошибкой."
+msgstr "The content may have been removed or the link was entered incorrectly."
+
+msgid "На главную"
+msgstr "Home"
+
+# Catalog filters
+msgid "Фильтры"
+msgstr "Filters"
+
+msgid "Показать"
+msgstr "Show"
+
+msgid "Сбросить"
+msgstr "Reset"
+
+# View headings (gettext_lazy)
+msgid "Каталог"
+msgstr "Catalog"
+
+msgid "Жанр"
+msgstr "Genre"
+
+msgid "Страна"
+msgstr "Country"
+
+msgid "Актёры"
+msgstr "Actors"
+
+msgid "Режиссёры"
+msgstr "Directors"
+
+msgid "Студии"
+msgstr "Studios"
+
+msgid "Студия"
+msgstr "Studio"
+
+msgid "Премия"
+msgstr "Award"
+
+msgid "Награды"
+msgstr "Awards"
+
+# Form labels
+msgid "Электронная почта"
+msgstr "Email"
+
+msgid "Имя пользователя"
+msgstr "Username"
+
+msgid "Это имя увидят рядом с вашими комментариями."
+msgstr "This name will be shown next to your comments."
+
+msgid "Пользователь с такой почтой уже зарегистрирован."
+msgstr "A user with this email is already registered."
+
+msgid "О себе"
+msgstr "About"
+
+msgid "Пара слов о себе"
+msgstr "A few words about yourself"
+
+msgid "Что вы думаете об этом фильме?"
+msgstr "What do you think about this movie?"
+
+msgid "Ваша оценка"
+msgstr "Your rating"
+
+msgid "Отзыв"
+msgstr "Review"
+
+# Catalog filter labels
+msgid "Любой год"
+msgstr "Any year"
+
+msgid "Сначала новые"
+msgstr "Newest first"
+
+msgid "Сначала старые"
+msgstr "Oldest first"
+
+msgid "По алфавиту"
+msgstr "Alphabetical"
+
+msgid "Недавно добавленные"
+msgstr "Recently added"
+
+msgid "По рейтингу"
+msgstr "By rating"
+
+msgid "Поиск"
+msgstr "Search"
+
+msgid "Название"
+msgstr "Title"
+
+msgid "Тип"
+msgstr "Type"
+
+msgid "Всё"
+msgstr "All"
+
+msgid "Все жанры"
+msgstr "All genres"
+
+msgid "Все страны"
+msgstr "All countries"
+
+msgid "Год"
+msgstr "Year"
+
+msgid "Сортировка"
+msgstr "Sort"
+
+# View messages
+msgid "Проверьте оценку и текст отзыва."
+msgstr "Check your rating and review text."
+
+msgid "Отзыв сохранён."
+msgstr "Review saved."
+
+msgid "Отзыв удалён."
+msgstr "Review deleted."
+
+msgid "Добро пожаловать, %(name)s!"
+msgstr "Welcome, %(name)s!"
+
+msgid "Профиль обновлён."
+msgstr "Profile updated."
+
+# Admin Dashboard
+msgid "Дашборд"
+msgstr "Dashboard"
+
+msgid "Контент"
+msgstr "Content"
+
+msgid "Пользователи"
+msgstr "Users"
+
+msgid "Просмотры"
+msgstr "Views"
+
+msgid "Отзывы"
+msgstr "Reviews"
+
+msgid "Фильмов:"
+msgstr "Movies:"
+
+msgid "Сериалов:"
+msgstr "Series:"
+
+msgid "Фильм"
+msgstr "Movie"
+
+msgid "Оценка"
+msgstr "Rating"
+
+msgid "Дата"
+msgstr "Date"
+
+msgid "Имя"
+msgstr "Name"
+
+msgid "Email"
+msgstr "Email"
+
+# Player
+msgid "Источник видео пока недоступен."
+msgstr "Video source is not available yet."
+
+msgid "Буферизация…"
+msgstr "Buffering…"
+
+msgid "Не удалось воспроизвести видео."
+msgstr "Failed to play video."
+
+# Admin Dashboard additional
+msgid "Среднее на фильм:"
+msgstr "Avg per movie:"
+
+msgid "Конверсия в отзывы:"
+msgstr "Review conversion:"
+
+# General
+msgid "Скоро"
+msgstr "Soon"
+
+msgid "Подробнее"
+msgstr "Learn more"

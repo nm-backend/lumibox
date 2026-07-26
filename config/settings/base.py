@@ -52,9 +52,13 @@ DJANGO_APPS = [
 ]
 
 THIRD_PARTY_APPS = [
+    "channels",
+    "corsheaders",
+    "csp",
     "rest_framework",
     "django_filters",
     "drf_spectacular",
+    "axes",
 ]
 
 LOCAL_APPS = [
@@ -74,11 +78,17 @@ INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    # LocaleMiddleware определяет язык из cookie, сессии или заголовка Accept-Language.
+    # Должен стоять после SessionMiddleware (чтобы читать язык из сессии)
+    # и до CommonMiddleware (чтобы редиректы учитывали язык).
+    "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "axes.middleware.AxesMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
@@ -95,6 +105,7 @@ TEMPLATES = [
         "OPTIONS": {
             "context_processors": [
                 "django.template.context_processors.request",
+                "django.template.context_processors.i18n",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
             ],
@@ -103,6 +114,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "config.wsgi.application"
+ASGI_APPLICATION = "config.asgi.application"
 
 
 # Настройки базы читаем одной строкой из DATABASE_URL.
@@ -116,6 +128,13 @@ DATABASES = {
 # проект должен подниматься на машине без Redis, просто без общего кэша
 # между процессами. Код, который зовёт cache.get/set, об этом не знает.
 REDIS_URL = env("REDIS_URL")
+
+# Django Channels: WebSocket для real-time уведомлений.
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer",
+    },
+}
 
 if REDIS_URL:
     CACHES = {
@@ -164,6 +183,10 @@ CELERY_BEAT_SCHEDULE = {
         "task": "apps.catalog.tasks.refresh_title_ratings",
         "schedule": 60 * 60,
     },
+    "publish-scheduled": {
+        "task": "apps.catalog.tasks.publish_scheduled_titles",
+        "schedule": 60 * 5,  # Каждые 5 минут
+    },
 }
 
 
@@ -176,6 +199,25 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # REST API.
 NUM_PROXIES = env("DJANGO_NUM_PROXIES")
+
+# CORS: разрешаем запросы к API с других доменов.
+# В продакшене CORS_ALLOWED_ORIGINS берётся из переменных окружения.
+CORS_URLS_REGEX = r"^/api/.*$"
+CORS_ALLOW_ALL_ORIGINS = DEBUG  # Только в dev; в проде — список доменов.
+
+AUTHENTICATION_BACKENDS = [
+    "axes.backends.AxesStandaloneBackend",
+    "django.contrib.auth.backends.ModelBackend",
+]
+
+# django-axes: блокировка после 5 неудачных попыток входа за 5 минут.
+AXES_FAILURE_LIMIT = 5
+AXES_COOLOFF_TIME = 5  # минут
+AXES_RESET_ON_SUCCESS = True
+
+# Платежи: Stripe
+STRIPE_SECRET_KEY = env("STRIPE_SECRET_KEY", default="")
+STRIPE_WEBHOOK_SECRET = env("STRIPE_WEBHOOK_SECRET", default="")
 
 REST_FRAMEWORK = {
     # По умолчанию читать может любой. Каждая вьюха, которая меняет данные,
@@ -257,7 +299,31 @@ LOGIN_REDIRECT_URL = "catalog:home"
 LOGOUT_REDIRECT_URL = "catalog:home"
 
 
-LANGUAGE_CODE = "ru-ru"
+LANGUAGE_CODE = "ru"
+
+# Поддерживаемые языки. Порядок в списке — порядок в переключателе.
+LANGUAGES = [
+    ("ru", "Русский"),
+    ("en", "English"),
+]
+
+# Пути к файлам переводов.
+LOCALE_PATHS = [BASE_DIR / "locale"]
+
+# Sentry: трекинг ошибок в продакшене.
+# Без переменной окружения SENTRY_DSN Sentry не активируется.
+SENTRY_DSN = env("SENTRY_DSN", default="")
+if SENTRY_DSN:
+    import sentry_sdk
+    from sentry_sdk.integrations.django import DjangoIntegration
+
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        integrations=[DjangoIntegration()],
+        traces_sample_rate=0.1,
+        send_default_pii=False,
+    )
+
 TIME_ZONE = "Asia/Bishkek"
 USE_I18N = True
 
@@ -277,6 +343,26 @@ MEDIA_URL = "media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# Content Security Policy: ограничивает источники контента.
+# Защита от XSS: браузер не загрузит скрипты с чужих доменов.
+CONTENT_SECURITY_POLICY = {
+    "DIRECTIVES": {
+        "default-src": ("'self'",),
+        "script-src": ("'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net"),
+        "style-src": ("'self'", "'unsafe-inline'"),
+        "img-src": ("'self'", "data:", "https:"),
+        "font-src": ("'self'",),
+        "connect-src": ("'self'",),
+        "frame-src": (
+            "'self'",
+            "https://www.youtube.com",
+            "https://player.vimeo.com",
+            "https://rutube.ru",
+        ),
+        "frame-ancestors": ("'none'",),
+    },
+}
 
 
 # Логирование — раздел 7 ТЗ.
@@ -307,7 +393,6 @@ LOGGING = {
             "level": "INFO",
             "propagate": False,
         },
-        # Ошибки запросов — то, из-за чего посетитель видит 500.
         "django.request": {
             "handlers": ["console"],
             "level": "ERROR",
@@ -316,6 +401,16 @@ LOGGING = {
         "apps": {
             "handlers": ["console"],
             "level": "INFO",
+            "propagate": False,
+        },
+        "apps.streaming": {
+            "handlers": ["console"],
+            "level": "WARNING",
+            "propagate": False,
+        },
+        "apps.billing": {
+            "handlers": ["console"],
+            "level": "WARNING",
             "propagate": False,
         },
     },

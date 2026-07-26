@@ -1,21 +1,14 @@
-{% comment %}
-Подборка на главной: заголовок, ссылка «Все» и сетка карточек.
-
-Ждёт section_title, section_titles и section_url.
-Вынесена отдельно, потому что на главной таких блоков несколько,
-а дальше они появятся в профиле и в рекомендациях.
-{% endcomment %}
-
+{% load i18n %}
 {% if section_titles %}
     <section class="section">
         <div class="section__header">
-            <h2 class="section__title">{{ section_title }}</h2>
+            <h2 class="section__title">{% trans section_title %}</h2>
             {% if section_url %}
-                <a class="section__link" href="{{ section_url }}">Все →</a>
+                <a class="section__link" href="{{ section_url }}">{% trans "Все" %} →</a>
             {% endif %}
         </div>
 
-        <div class="title-grid">
+        <div class="title-grid title-grid--scroll">
             {% for title in section_titles %}
                 {% include "includes/title_card.html" %}
             {% endfor %}

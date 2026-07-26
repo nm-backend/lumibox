@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block page_title %}{% trans "Настройки" %} — MovieHub{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/forms.css' %}">
+    <link rel="stylesheet" href="{% static 'css/profile.css' %}">
+{% endblock %}
+
+{% block content %}
+    <div class="page-header">
+        <h1 class="page-title">{% trans "Настройки" %}</h1>
+        <p class="page-subtitle">{% trans "Настройте плеер под себя." %}</p>
+    </div>
+
+    <section class="section">
+        <h2 class="section__title">{% trans "Плеер" %}</h2>
+
+        <form class="profile-form" method="post" novalidate>
+            {% csrf_token %}
+            {% include "includes/form_fields.html" %}
+            <button class="button button--primary" type="submit">{% trans "Сохранить" %}</button>
+        </form>
+    </section>
+
+    <section class="section">
+        <h2 class="section__title">{% trans "Аккаунт" %}</h2>
+        <div style="display: flex; gap: var(--space-3); flex-wrap: wrap;">
+            <a class="button button--ghost" href="{% url 'users:profile' %}">{% trans "Редактировать профиль" %}</a>
+            <a class="button button--ghost" href="{% url 'library:favorites' %}">{% trans "Избранное" %}</a>
+            <a class="button button--ghost" href="{% url 'library:history' %}">{% trans "История просмотров" %}</a>
+        </div>
+    </section>
+{% endblock %}

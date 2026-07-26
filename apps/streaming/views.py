@@ -1,7 +1,6 @@
 import mimetypes
 
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.core.exceptions import PermissionDenied
 from django.http import FileResponse, Http404, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect
 from django.views import View
@@ -25,7 +24,6 @@ from apps.streaming.services import (
     get_download_url,
     get_playback_payload,
     get_preference,
-    get_playback_source,
     require_playback_access,
 )
 
@@ -172,7 +170,11 @@ class PlaybackConfigurationApiView(APIView):
             pk=asset_id,
         )
         require_playback_access(request.user, asset)
-        return Response(PlaybackConfigurationSerializer(asset, context={"request": request, "preference": get_preference(request.user)}).data)
+        return Response(
+            PlaybackConfigurationSerializer(
+                asset, context={"request": request, "preference": get_preference(request.user)}
+            ).data
+        )
 
 
 class ContinueWatchingApiView(APIView):

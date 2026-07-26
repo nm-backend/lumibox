@@ -3,44 +3,68 @@
 
 Здесь только подключение приложений. Сами маршруты живут
 в urls.py каждого приложения — так корневой файл не разрастётся.
+
+i18n_patterns добавляет префикс языка (/ru/, /en/) к пользовательским
+страницам. API, admin, healthz и статика остаются без префикса:
+они либо не зависят от языка, либо используют свой механизм.
 """
 
 from django.conf import settings
+from django.conf.urls.i18n import i18n_patterns
 from django.contrib import admin
 from django.contrib.sitemaps.views import sitemap
 from django.urls import include, path, re_path
 from django.views.generic import TemplateView
 
 from apps.catalog.sitemaps import sitemaps
+from apps.core.admin_dashboard import admin_dashboard, admin_dashboard_api
 from apps.core.views import health_check, serve_public_media
 
+# Error handlers
+handler404 = "apps.core.views.custom_404"
+handler500 = "apps.core.views.custom_500"
+
+# Маршруты без языкового префикса: API, админка, health check, статика.
 urlpatterns = [
-    # Проба живости для хостинга и мониторинга. Первой в списке и без
-    # завершающего редиректа: платформа должна получать ответ мгновенно.
     path("healthz/", health_check, name="health"),
-
+    path("admin/dashboard/", admin_dashboard, name="admin_dashboard"),
+    path("admin/dashboard/api/", admin_dashboard_api, name="admin_dashboard_api"),
     path("admin/", admin.site.urls),
-
     path("api/", include("apps.api.urls")),
+    # set_language принимает POST с выбором языка и перенаправляет обратно.
+    path("i18n/", include("django.conf.urls.i18n")),
+    # SEO: карта сайта и robots.txt — без префикса, чтобы адрес был стабильным.
+    path(
+        "sitemap.xml",
+        sitemap,
+        {"sitemaps": sitemaps},
+        name="django.contrib.sitemaps.views.sitemap",
+    ),
+    path(
+        "robots.txt",
+        TemplateView.as_view(
+            template_name="robots.txt", content_type="text/plain"
+        ),
+    ),
+]
 
-    # SEO: карта сайта и инструкции для поисковых роботов.
-    path("sitemap.xml", sitemap, {"sitemaps": sitemaps}, name="django.contrib.sitemaps.views.sitemap"),
-    path("robots.txt", TemplateView.as_view(template_name="robots.txt", content_type="text/plain")),
+# Пользовательские страницы с языковым префиксом: /ru/catalog/, /en/title/...
+# prefix_default_language=False: русский тоже получает префикс.
+# Это делает URL-структуру консистентной и понятной поисковикам.
+urlpatterns += i18n_patterns(
     path("", include("apps.users.urls")),
     path("", include("apps.library.urls")),
     path("", include("apps.reviews.urls")),
     path("", include("apps.streaming.urls")),
-    # Каталог подключаем последним: у него маршрут "" для главной,
-    # и он не должен перехватывать адреса остальных приложений.
     path("", include("apps.catalog.urls")),
-]
+    prefix_default_language=False,
+)
 
-# Отдача загруженных файлов (постеры, кадры). Работает и при DEBUG=False:
-# на PaaS вроде Render перед Django нет Nginx, а WhiteNoise отдаёт только
-# статику, не медиа, — без этого маршрута картинки отдавали бы 404.
-# serve() из django.views.static защищён от обхода каталога. Django-раздача
-# медиа не для больших нагрузок: когда файлов станет много, их выносят
-# в объектное хранилище (S3/R2) через django-storages, и маршрут убирают.
+# Отдача загруженных файлов (постеры, кадры).
 urlpatterns += [
-    re_path(r"^media/(?P<path>.*)$", serve_public_media, {"document_root": settings.MEDIA_ROOT}),
+    re_path(
+        r"^media/(?P<path>.*)$",
+        serve_public_media,
+        {"document_root": settings.MEDIA_ROOT},
+    ),
 ]

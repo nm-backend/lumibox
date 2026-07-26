@@ -2,6 +2,7 @@ from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
 from apps.api.v1 import views
+from apps.billing.views import stripe_webhook
 
 # Версия в адресе с самого начала: когда API понадобится изменить
 # несовместимо, появится v2, а старые клиенты продолжат работать на v1.
@@ -21,4 +22,6 @@ urlpatterns = [
     path("", include(router.urls)),
     path("titles/<slug:title_slug>/reviews/", reviews, name="title-reviews"),
     path("titles/<slug:title_slug>/reviews/<int:pk>/", review_detail, name="title-review-detail"),
+    path("search/autocomplete/", views.SearchAutocompleteView.as_view(), name="search-autocomplete"),
+    path("webhooks/stripe/", stripe_webhook, name="stripe-webhook"),
 ]

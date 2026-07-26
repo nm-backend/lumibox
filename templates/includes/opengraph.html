@@ -1,0 +1,15 @@
+{% comment %}
+  OpenGraph и Twitter Card метатеги для шаринга в соцсетях.
+  Ждёт переменную title.
+{% endcomment %}
+<meta property="og:type" content="{% if title.is_series %}video.tv_show{% else %}video.movie{% endif %}">
+<meta property="og:title" content="{{ title.get_meta_title }}">
+<meta property="og:description" content="{{ title.get_meta_description }}">
+<meta property="og:url" content="{{ request.build_absolute_uri }}">
+{% if title.poster %}<meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{{ title.poster.url }}">{% endif %}
+<meta property="og:site_name" content="MovieHub">
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{ title.get_meta_title }}">
+<meta name="twitter:description" content="{{ title.get_meta_description }}">
+{% if title.poster %}<meta name="twitter:image" content="{{ request.scheme }}://{{ request.get_host }}{{ title.poster.url }}">{% endif %}

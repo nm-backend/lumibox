@@ -32,3 +32,6 @@ class Command(BaseCommand):
         # Обложки дорисовываем всегда: команда сама берёт только тех,
         # у кого постера нет. Чужие загруженные картинки не пострадают.
         call_command("generate_placeholder_art")
+
+        # Видеоресурсы: делают кнопку «Смотреть» рабочей.
+        call_command("seed_video_assets")

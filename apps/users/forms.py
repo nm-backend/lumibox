@@ -1,38 +1,33 @@
 from django import forms
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
+from django.utils.translation import gettext_lazy as _
 
 User = get_user_model()
 
 
 class RegistrationForm(UserCreationForm):
-    """
-    Регистрация нового пользователя.
-
-    Наследуемся от UserCreationForm, а не пишем с нуля: она уже умеет
-    сверять два пароля и прогонять их через валидаторы Django.
-    Нам остаётся добавить почту и подписи.
-    """
-
     email = forms.EmailField(
-        label="Электронная почта",
-        widget=forms.EmailInput(attrs={"placeholder": "you@example.com", "autocomplete": "email"}),
+        label=_("Электронная почта"),
+        widget=forms.EmailInput(
+            attrs={"placeholder": "you@example.com", "autocomplete": "email"}
+        ),
     )
 
     class Meta:
         model = User
         fields = ["email", "username"]
-        labels = {"username": "Имя пользователя"}
-        help_texts = {"username": "Это имя увидят рядом с вашими комментариями."}
+        labels = {"username": _("Имя пользователя")}
+        help_texts = {
+            "username": _("Это имя увидят рядом с вашими комментариями.")
+        }
 
     def clean_email(self):
-        # Приводим почту к нижнему регистру: иначе Ivan@mail.ru и ivan@mail.ru
-        # станут разными аккаунтами, хотя это один и тот же адрес.
         email = self.cleaned_data["email"].lower()
-
         if User.objects.filter(email=email).exists():
-            raise forms.ValidationError("Пользователь с такой почтой уже зарегистрирован.")
-
+            raise forms.ValidationError(
+                _("Пользователь с такой почтой уже зарегистрирован.")
+            )
         return email
 
     def save(self, commit=True):
@@ -44,11 +39,11 @@ class RegistrationForm(UserCreationForm):
 
 
 class LoginForm(AuthenticationForm):
-    """Вход по почте. Переопределяем только подписи и подсказки браузеру."""
-
     username = forms.EmailField(
-        label="Электронная почта",
-        widget=forms.EmailInput(attrs={"placeholder": "you@example.com", "autocomplete": "email"}),
+        label=_("Электронная почта"),
+        widget=forms.EmailInput(
+            attrs={"placeholder": "you@example.com", "autocomplete": "email"}
+        ),
     )
 
     def clean_username(self):
@@ -56,16 +51,32 @@ class LoginForm(AuthenticationForm):
 
 
 class ProfileForm(forms.ModelForm):
-    """Редактирование профиля."""
-
     class Meta:
         model = User
         fields = ["username", "bio", "avatar"]
         labels = {
-            "username": "Имя пользователя",
-            "bio": "О себе",
-            "avatar": "Аватар",
+            "username": _("Имя пользователя"),
+            "bio": _("О себе"),
+            "avatar": _("Аватар"),
         }
         widgets = {
-            "bio": forms.Textarea(attrs={"rows": 4, "placeholder": "Пара слов о себе"}),
+            "bio": forms.Textarea(
+                attrs={"rows": 4, "placeholder": _("Пара слов о себе")}
+            ),
+        }
+
+
+class PlaybackSettingsForm(forms.ModelForm):
+    """Настройки плеера пользователя."""
+
+    class Meta:
+        from apps.streaming.models import PlaybackPreference
+
+        model = PlaybackPreference
+        fields = ["autoplay_next", "default_quality", "default_speed", "subtitles_language"]
+        labels = {
+            "autoplay_next": _("Автовоспроизведение следующей серии"),
+            "default_quality": _("Качество по умолчанию"),
+            "default_speed": _("Скорость по умолчанию"),
+            "subtitles_language": _("Язык субтитров по умолчанию"),
         }
