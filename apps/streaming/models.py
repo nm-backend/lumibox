@@ -2,6 +2,7 @@ import uuid
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
+from django.core.files.storage import storages
 from django.core.validators import FileExtensionValidator, MaxValueValidator, MinValueValidator, RegexValidator
 from django.db import models
 from django.db.models import Q
@@ -14,6 +15,23 @@ STORAGE_KEY_VALIDATOR = RegexValidator(
     regex=r"^[A-Za-z0-9][A-Za-z0-9._/-]*$",
     message="Ключ файла может содержать только латинские буквы, цифры, точки, подчёркивания, дефисы и слеши.",
 )
+
+
+def private_storage():
+    """
+    Хранилище для файлов, которые нельзя отдавать по прямой ссылке.
+
+    Настраивается псевдонимом "private" в STORAGES. Локально это тот же диск,
+    что и у остальных медиа; в продакшене на R2 — тот же бакет, но с приватным
+    ACL, поэтому объект недоступен без Django.
+
+    Функция, а не готовый объект, ради миграций: FileField запоминает саму
+    функцию и подставляет в миграцию ссылку на неё. Будь здесь объект, в
+    миграцию попали бы параметры хранилища вместе с ключами доступа.
+    Значение при этом всё равно вычисляется один раз, когда Django строит
+    класс модели, — то есть каждое окружение получает своё хранилище.
+    """
+    return storages["private"]
 
 
 class Season(TimeStampedModel):
@@ -184,6 +202,7 @@ class VideoAsset(TimeStampedModel):
     media_file = models.FileField(
         "Локальный видеофайл",
         upload_to="private_media/videos/%Y/%m",
+        storage=private_storage,
         blank=True,
         validators=[FileExtensionValidator(["mp4", "webm", "m4v", "m3u8", "mpd"])],
     )
@@ -284,6 +303,7 @@ class SubtitleTrack(TimeStampedModel):
     subtitle_file = models.FileField(
         "Локальный файл субтитров",
         upload_to="private_media/subtitles/%Y/%m",
+        storage=private_storage,
         blank=True,
         validators=[FileExtensionValidator(["vtt", "srt"])],
     )

@@ -43,42 +43,64 @@ MIDDLEWARE.insert(1, "whitenoise.middleware.WhiteNoiseMiddleware")  # noqa: F405
 # Если R2 не настроен, работаем на локальной файловой системе (эфимерной на Render).
 _USE_R2 = bool(env("AWS_STORAGE_BUCKET_NAME", default=""))
 
+# Статика по-прежнему отдаётся через whitenoise из контейнера.
+# Не кладём её в R2 — так быстрее: не нужен лишний HTTP к R2 на каждый CSS.
+_STATICFILES_STORAGE = {
+    "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+}
+
 if _USE_R2:
+    # Общие параметры подключения к бакету. Различается только ACL:
+    # постеры обязан открывать браузер, видео — только Django после проверки прав.
+    _R2_OPTIONS = {
+        "access_key": env("AWS_ACCESS_KEY_ID"),
+        "secret_key": env("AWS_SECRET_ACCESS_KEY"),
+        "bucket_name": env("AWS_STORAGE_BUCKET_NAME"),
+        "region_name": env("AWS_S3_REGION_NAME", default="auto"),
+        "endpoint_url": env("AWS_S3_ENDPOINT_URL"),
+        "signature_version": "s3v4",
+        # Не перезаписывать файлы — каждый новый файл получает уникальное имя.
+        "file_overwrite": False,
+    }
+
     STORAGES = {
         "default": {
             # Cloudflare R2 — S3-совместимое объектное хранилище.
             # Файлы не теряются при перезапуске, в отличие от локального диска.
             "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
             "OPTIONS": {
-                "access_key": env("AWS_ACCESS_KEY_ID"),
-                "secret_key": env("AWS_SECRET_ACCESS_KEY"),
-                "bucket_name": env("AWS_STORAGE_BUCKET_NAME"),
-                "region_name": env("AWS_S3_REGION_NAME", default="auto"),
-                "endpoint_url": env("AWS_S3_ENDPOINT_URL"),
+                **_R2_OPTIONS,
                 # Публичный URL (cloudfront.net, R2.dev, свой домен).
                 # Если не задан, Django строит URL из endpoint_url + bucket_name.
                 "custom_domain": env("CLOUDFLARE_R2_PUBLIC_URL", default="") or None,
-                # Загружаемые файлы доступны всем — так постеры и видео показываются
-                # в браузере без подписанных URL.
+                # Постеры, фоны, логотипы, кадры: их тянет <img> прямо из браузера,
+                # подписывать такие адреса незачем.
                 "default_acl": "public-read",
-                "signature_version": "s3v4",
-                # Не перезаписывать файлы — каждый новый файл получает уникальное имя.
-                "file_overwrite": False,
             },
         },
-        "staticfiles": {
-            # Статика по-прежнему отдаётся через whitenoise из контейнера.
-            # Не кладём её в R2 — так быстрее: не нужен лишний HTTP к R2 на каждый CSS.
-            "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        "private": {
+            "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+            "OPTIONS": {
+                **_R2_OPTIONS,
+                # Видео и субтитры. Приватный ACL — единственное, что мешает
+                # скачать фильм по прямой ссылке в обход проверки прав.
+                "default_acl": "private",
+                # Публичный домен намеренно не подставляем: адрес объекта
+                # наружу не отдаётся вовсе. Плеер получает ссылку на маршрут
+                # streaming:asset_file, а тот читает файл через это хранилище
+                # уже после require_playback_access.
+                "custom_domain": None,
+            },
         },
+        "staticfiles": _STATICFILES_STORAGE,
     }
 else:
-    # R2 не настроен — локальный диск.
+    # R2 не настроен — локальный диск. Приватные файлы лежат под
+    # media/private_media/, куда serve_public_media не пускает.
     STORAGES = {
         "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
-        "staticfiles": {
-            "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
-        },
+        "private": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+        "staticfiles": _STATICFILES_STORAGE,
     }
 
 

@@ -322,7 +322,6 @@ LOCALE_PATHS = [BASE_DIR / "locale"]
 
 TIME_ZONE = "Asia/Bishkek"
 USE_I18N = True
-USE_TZ = True
 
 # Храним время в базе в UTC, а показываем в TIME_ZONE.
 # Это избавляет от ошибок при смене часового пояса сервера.
@@ -338,6 +337,25 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 # Медиа — файлы, которые загружают пользователи и редакторы (постеры фильмов).
 MEDIA_URL = "media/"
 MEDIA_ROOT = BASE_DIR / "media"
+
+# Два хранилища вместо одного, потому что у файлов разные требования к доступу.
+#
+#   default — то, что браузер обязан показать сам: постеры, фоны, логотипы,
+#             кадры, аватары, картинки баннеров. Читать их может кто угодно.
+#   private — видеофайлы и субтитры. Их отдаёт только Django и только после
+#             проверки прав (LocalAssetFileView), поэтому прямой ссылки
+#             на них быть не должно.
+#
+# Локально оба лежат на диске в MEDIA_ROOT, и приватные пути дополнительно
+# закрыты в apps.core.views.serve_public_media. Разница появляется в продакшене
+# на объектном хранилище: там default получает публичный ACL, а private — нет
+# (см. production.py). Без такого разделения видео уезжало в бакет публичным,
+# и прямая ссылка обходила проверку доступа.
+STORAGES = {
+    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+    "private": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+    "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
+}
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
