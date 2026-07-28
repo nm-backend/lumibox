@@ -1,22 +1,29 @@
 {% load i18n static %}
-{% get_current_language as LANGUAGE_CODE %}
 
-{# Horizontal ad block — shows between content sections #}
+{% comment %}
+   Горизонтальный баннер между блоками контента.
+   promotion приходит из тега {% ad_block %} и может быть None —
+   тогда на странице не остаётся ни блока, ни пустого места.
+{% endcomment %}
+
+{% if promotion %}
 <section class="ad-block" aria-label="{% trans 'Реклама' %}">
     <div class="ad-block__inner">
         <div class="ad-block__badge">
             <span>{% trans "Реклама" %}</span>
         </div>
-        <a class="ad-block__link" href="#" target="_blank" rel="noopener noreferrer">
+        <a class="ad-block__link" href="{{ promotion.target_url }}" target="_blank" rel="noopener noreferrer sponsored">
             <img class="ad-block__banner ad-block__banner--leaderboard"
-                 src="{% static 'img/ad-leaderboard-placeholder.svg' %}"
+                 src="{% if promotion.image %}{{ promotion.image.url }}{% else %}{% static 'img/ad-leaderboard-placeholder.svg' %}{% endif %}"
                  width="728" height="90"
-                 alt="{% trans 'Рекламный баннер 728×90' %}"
+                 alt="{{ promotion.title }}"
                  loading="lazy">
         </a>
         <p class="ad-block__caption">
-            {% trans "Реклама на LumiBox — привлекайте новую аудиторию" %}
-            <a class="ad-block__cta" href="#">{% trans "Узнать" %}</a>
+            {{ promotion.title }}
+            {% if promotion.text %}<span class="ad-block__text">{{ promotion.text }}</span>{% endif %}
+            <a class="ad-block__cta" href="{{ promotion.target_url }}" target="_blank" rel="noopener noreferrer sponsored">{% trans "Перейти" %}</a>
         </p>
     </div>
 </section>
+{% endif %}

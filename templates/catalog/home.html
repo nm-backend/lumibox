@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static i18n %}
+{% load static i18n promotions %}
 
 {% block page_title %}{% trans "LumiBox — каталог фильмов и сериалов" %}{% endblock %}
 
@@ -159,7 +159,7 @@
 
     {% include "includes/title_section.html" with section_title=_("Новинки") section_titles=new_titles section_url=new_url %}
 
-    {% include "includes/ad_block.html" %}
+    {% ad_block %}
 
     {% if user.is_authenticated and recommendations %}
         {% include "includes/title_section.html" with section_title=_("Вам может понравиться") section_titles=recommendations section_url=None %}

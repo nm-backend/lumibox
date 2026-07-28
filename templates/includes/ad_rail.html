@@ -1,31 +1,39 @@
 {% load i18n static %}
-{% get_current_language as LANGUAGE_CODE %}
 
-{# Sidebar ads — only on large screens (≥1750px) #}
+{% comment %}
+   Боковые баннеры — только на широких экранах (≥1750px).
+   Данные приходят из тега {% ad_rail %}: left и right — записи Promotion
+   либо None. Активных баннеров нет — разметки не будет вовсе.
+{% endcomment %}
+
+{% if left %}
 <aside class="ad-rail ad-rail--left" role="complementary" aria-label="{% trans 'Реклама' %}">
     <div class="ad-rail__inner">
         <span class="ad-rail__label">{% trans "Реклама" %}</span>
-        <a class="ad-rail__link" href="#" target="_blank" rel="noopener noreferrer">
+        <a class="ad-rail__link" href="{{ left.target_url }}" target="_blank" rel="noopener noreferrer sponsored">
             <img class="ad-rail__banner"
-                 src="{% static 'img/ad-placeholder.svg' %}"
+                 src="{% if left.image %}{{ left.image.url }}{% else %}{% static 'img/ad-placeholder.svg' %}{% endif %}"
                  width="160" height="600"
-                 alt="{% trans 'Рекламный баннер' %}"
+                 alt="{{ left.title }}"
                  loading="lazy">
         </a>
         <span class="ad-rail__disclaimer">{% trans "Реклама · 16+" %}</span>
     </div>
 </aside>
+{% endif %}
 
+{% if right %}
 <aside class="ad-rail ad-rail--right" role="complementary" aria-label="{% trans 'Реклама' %}">
     <div class="ad-rail__inner">
         <span class="ad-rail__label">{% trans "Реклама" %}</span>
-        <a class="ad-rail__link" href="#" target="_blank" rel="noopener noreferrer">
+        <a class="ad-rail__link" href="{{ right.target_url }}" target="_blank" rel="noopener noreferrer sponsored">
             <img class="ad-rail__banner"
-                 src="{% static 'img/ad-placeholder.svg' %}"
+                 src="{% if right.image %}{{ right.image.url }}{% else %}{% static 'img/ad-placeholder.svg' %}{% endif %}"
                  width="160" height="600"
-                 alt="{% trans 'Рекламный баннер' %}"
+                 alt="{{ right.title }}"
                  loading="lazy">
         </a>
         <span class="ad-rail__disclaimer">{% trans "Реклама · 16+" %}</span>
     </div>
 </aside>
+{% endif %}
