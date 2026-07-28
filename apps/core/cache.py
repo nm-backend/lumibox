@@ -14,17 +14,17 @@ from __future__ import annotations
 
 import logging
 
-from django.conf import settings
 from django.core.cache import cache
 
-from apps.catalog.services import clear_home_cache, clear_reference_cache
+from apps.catalog.services import (
+    RECOMMENDATIONS_GENERATION_KEY,
+    SIMILAR_GENERATION_KEY,
+    bump_generation,
+    clear_home_cache,
+    clear_reference_cache,
+)
 
 logger = logging.getLogger(__name__)
-
-# ─── Ключи кэша ─────────────────────────────────────────────────────
-SIMILAR_CACHE_PREFIX = "catalog:similar:"
-RECOMMENDATIONS_CACHE_PREFIX = "catalog:recommendations:"
-YEAR_CHOICES_CACHE_KEY = "catalog:year_choices:v1"
 
 # ─── Действия инвалидации ───────────────────────────────────────────
 
@@ -53,27 +53,37 @@ def _clear_reference_caches():
 
 
 def _clear_similar_cache():
-    """Сбрасывает все кэши похожих фильмов (catalog:similar:*)."""
-    if settings.REDIS_URL:
-        try:
-            cache.delete_pattern(f"{SIMILAR_CACHE_PREFIX}*")
-            return
-        except AttributeError:
-            pass
-    # LocMemCache: delete_pattern не работает — чистим всё.
-    cache.clear()
+    """
+    Обесценивает все кэши похожих фильмов.
+
+    Увеличиваем номер поколения вместо удаления ключей: перечислить их нечем.
+    Здесь стоял cache.delete_pattern с откатом на cache.clear(), но
+    delete_pattern есть только у пакета django-redis, а проект работает на
+    штатном RedisCache Django — то есть откат срабатывал всегда, и правка
+    одного фильма выносила весь кэш вместе с очередью Celery в том же Redis.
+    """
+    bump_generation(SIMILAR_GENERATION_KEY)
 
 
 def _clear_recommendations_cache():
-    """Сбрасывает все персональные рекомендации."""
-    if settings.REDIS_URL:
-        try:
-            cache.delete_pattern(f"{RECOMMENDATIONS_CACHE_PREFIX}*")
-            return
-        except AttributeError:
-            pass
-    # LocMemCache: delete_pattern не работает — чистим всё.
-    cache.clear()
+    """Обесценивает все персональные рекомендации — тем же инкрементом."""
+    bump_generation(RECOMMENDATIONS_GENERATION_KEY)
+
+
+def _clear_promotion_cache():
+    """
+    Партнёрские баннеры — по ключу на каждое размещение.
+
+    Размещений всего три и они заданы в модели, поэтому ключи просто
+    перечисляем: заводить ради них счётчик поколений незачем.
+    """
+    from apps.billing.models import Promotion
+    from apps.billing.templatetags.promotions import PROMOTIONS_CACHE_KEY
+
+    cache.delete_many([
+        PROMOTIONS_CACHE_KEY.format(placement=placement)
+        for placement in Promotion.Placement.values
+    ])
 
 
 def _clear_industry_cache():
@@ -110,6 +120,8 @@ CACHE_INVALIDATORS: dict[str, list[callable]] = {
     "streaming.videoasset": [_clear_home_collections_similar],
     # Отзывы
     "reviews.review": [_clear_all_title_caches],
+    # Партнёрские баннеры
+    "billing.promotion": [_clear_promotion_cache],
 }
 
 
@@ -130,15 +142,13 @@ def invalidate_for_model(model_label: str) -> None:
         except Exception:
             logger.exception("Cache invalidation failed for %s", model_label)
 
-    _publish_invalidation(model_label)
-
 
 def invalidate_all() -> None:
     """
     Полный сброс всех известных кэшей.
 
-    Вместо cache.clear() (который снёс бы и чужие ключи, если Redis общий)
-    сбрасываем только ключи, которые знает этот модуль.
+    Зовётся руками из shell, когда нужно гарантированно показать всем
+    свежие данные, не трогая чужие ключи в общем Redis.
     """
     for label, actions in CACHE_INVALIDATORS.items():
         for action in actions:
@@ -146,27 +156,3 @@ def invalidate_all() -> None:
                 action()
             except Exception:
                 logger.exception("Cache invalidation failed for %s", label)
-    _publish_invalidation("*")
-
-
-# ─── Redis Pub/Sub ──────────────────────────────────────────────────
-
-
-def _publish_invalidation(model_label: str) -> None:
-    """
-    Публикует событие инвалидации в Redis для других процессов.
-
-    Без Redis — тихо проходим мимо. С Redis, но без установленного пакета
-    redis — логируем предупреждение и продолжаем.
-    """
-    if not settings.REDIS_URL:
-        return
-    try:
-        from redis import Redis
-
-        r = Redis.from_url(settings.REDIS_URL)
-        r.publish("lumibox:cache:invalidate", model_label)
-    except ImportError:
-        logger.warning("Redis package not installed — can't publish invalidation", exc_info=True)
-    except Exception:
-        logger.warning("Redis pub/sub publish failed", exc_info=True)

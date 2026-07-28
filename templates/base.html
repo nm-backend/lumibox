@@ -1,4 +1,4 @@
-{% load static i18n cache %}<!DOCTYPE html>
+{% load static i18n lumibox_urls promotions %}<!DOCTYPE html>
 {% get_current_language as LANGUAGE_CODE %}
 <html lang="{{ LANGUAGE_CODE }}" data-theme="">
 <head>
@@ -18,20 +18,29 @@
     <link rel="icon" type="image/svg+xml" href="{% static 'img/favicon.svg' %}">
     <link rel="alternate icon" href="{% static 'img/favicon.svg' %}">
 
+    {% comment %}
+       Канонический адрес — без строки запроса: /catalog/?page=2&sort=name и
+       /catalog/ это для поисковика одна и та же страница в разных сочетаниях
+       фильтров, и без canonical он делит её вес между сотнями почти
+       одинаковых адресов. Страница может переопределить блок, если у неё
+       есть свой основной адрес.
+    {% endcomment %}
+    <link rel="canonical" href="{% block canonical_url %}{% absolute_url request.path %}{% endblock %}">
+
     {# Open Graph / Social sharing #}
     <meta property="og:site_name" content="LumiBox">
     <meta property="og:type" content="website">
     <meta property="og:title" content="{% block og_title %}{% trans 'LumiBox — каталог фильмов и сериалов' %}{% endblock %}">
     <meta property="og:description" content="{% block og_description %}{% trans 'Каталог фильмов и сериалов: поиск, фильтры, подборки.' %}{% endblock %}">
     <meta property="og:url" content="{{ request.build_absolute_uri }}">
-    <meta property="og:image" content="{% block og_image %}{% static 'img/og-default.png' %}{% endblock %}">
+    <meta property="og:image" content="{% block og_image %}{% absolute_static 'img/og-default.png' %}{% endblock %}">
     <meta property="og:locale" content="{{ LANGUAGE_CODE }}">
 
     {# Twitter Card #}
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="{% block twitter_title %}{% trans 'LumiBox — каталог фильмов и сериалов' %}{% endblock %}">
     <meta name="twitter:description" content="{% block twitter_description %}{% trans 'Каталог фильмов и сериалов: поиск, фильтры, подборки.' %}{% endblock %}">
-    <meta name="twitter:image" content="{% block twitter_image %}{% static 'img/og-default.png' %}{% endblock %}">
+    <meta name="twitter:image" content="{% block twitter_image %}{% absolute_static 'img/og-default.png' %}{% endblock %}">
 
     {% block extra_meta %}{% endblock %}
     {% block extra_css %}{% endblock %}
@@ -39,7 +48,7 @@
 <body>
     <div class="cinema-glow" aria-hidden="true"></div>
 
-    {% include "includes/ad_rail.html" %}
+    {% ad_rail %}
 
     <header class="site-header">
         <div class="container site-header__inner">
@@ -48,7 +57,13 @@
                 <span>Lumi<span class="logo__accent">Box</span></span>
             </a>
 
-            {% cache 3600 site_nav request.path using="default" %}
+            {% comment %}
+               Кэшировать это меню нельзя: в нём есть переводимые подписи и
+               подсветка активного пункта по ?type. Ключ фрагмента учитывал
+               только путь, поэтому английская версия отдавалась русской, а
+               «Фильмы» и «Сериалы» подсвечивались одинаково. Запросов к базе
+               здесь нет — кэш не экономил ничего, только портил вывод.
+            {% endcomment %}
             <nav class="site-nav site-nav__desktop" aria-label="{% trans "Основная навигация" %}">
                 <a class="site-nav__link {% if request.resolver_match.url_name == 'title_list' and not request.GET.type %}site-nav__link--active{% endif %}"
                    href="{% url 'catalog:title_list' %}">{% trans "Всё" %}</a>
@@ -61,7 +76,6 @@
                 <a class="site-nav__link {% if request.resolver_match.url_name == 'collection_list' %}site-nav__link--active{% endif %}"
                    href="{% url 'catalog:collection_list' %}"{% if request.resolver_match.url_name == 'collection_list' %} aria-current="page"{% endif %}>{% trans "Подборки" %}</a>
             </nav>
-            {% endcache %}
 
             <div class="search-wrapper site-header__search">
                 <form class="search" action="{% url 'catalog:title_list' %}" method="get" role="search" data-search-form>
@@ -169,8 +183,12 @@
         <img class="lightbox__img" src="" alt="" data-lightbox-img>
     </div>
 
-    {% cache 3600 bottom_nav using="default" %}
-    {# Bottom nav for mobile #}
+    {% comment %}
+       Нижнее меню для мобильных. Без кэша сознательно: последний пункт
+       зависит от того, вошёл ли посетитель, а ключ фрагмента этого не
+       учитывал — вошедший видел «Войти» вместо «Избранного», если кэш
+       до него прогрел гость.
+    {% endcomment %}
     <nav class="bottom-nav" aria-label="{% trans 'Быстрая навигация' %}">
         <a class="bottom-nav__link" href="{% url 'catalog:home' %}">
             <span class="bottom-nav__icon">🏠</span>
@@ -196,7 +214,6 @@
             </a>
         {% endif %}
     </nav>
-    {% endcache %}
 
     {% include "includes/footer.html" %}
 

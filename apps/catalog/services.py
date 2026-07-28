@@ -48,10 +48,42 @@ def update_title_rating(title):
     )
 
 
-DEFAULT_HOME_CACHE_TTL = 60 * 5  # 5 minutes
-SIMILAR_CACHE_KEY = "catalog:similar:{title_id}:v1"
-RECOMMENDATIONS_CACHE_KEY = "catalog:recommendations:{user_id}:v1"
 COLLECTIONS_CACHE_KEY = "catalog:featured_collections:v1"
+
+# Похожие и рекомендации кэшируются по одному ключу на фильм и на человека,
+# то есть ключей столько, сколько фильмов и пользователей. Перечислить их,
+# чтобы удалить, нельзя: обычный Redis-бэкенд Django не умеет искать по маске.
+#
+# Поэтому в ключ подмешан номер поколения. Сбросить весь слой — значит увеличить
+# номер на единицу: старые ключи мгновенно перестают совпадать и тихо истекают
+# по своему TTL. Раньше на этом месте стоял cache.clear(), а он на Redis
+# выполняет FLUSHDB — вычищает всю базу целиком, вместе с очередью Celery,
+# которая живёт в том же Redis (CELERY_BROKER_URL = REDIS_URL).
+SIMILAR_GENERATION_KEY = "catalog:similar:generation"
+RECOMMENDATIONS_GENERATION_KEY = "catalog:recommendations:generation"
+
+SIMILAR_CACHE_KEY = "catalog:similar:{generation}:{title_id}:v2"
+RECOMMENDATIONS_CACHE_KEY = "catalog:recommendations:{generation}:{user_id}:v2"
+
+
+def get_generation(generation_key):
+    """Текущий номер поколения слоя кэша. Нет в кэше — начинаем с единицы."""
+    generation = cache.get(generation_key)
+    if generation is None:
+        # timeout=None — «хранить без срока»: счётчик не должен истекать,
+        # иначе номер откатится к единице и оживит старые ключи.
+        cache.set(generation_key, 1, None)
+        return 1
+    return generation
+
+
+def bump_generation(generation_key):
+    """Обесценивает весь слой кэша одним инкрементом."""
+    try:
+        cache.incr(generation_key)
+    except ValueError:
+        # Счётчика ещё нет — тогда и обесценивать нечего, просто заводим его.
+        cache.set(generation_key, 1, None)
 
 
 def get_similar_titles(title, limit=6):
@@ -61,7 +93,9 @@ def get_similar_titles(title, limit=6):
     Результат кэшируется на 30 минут: содержимое каталога
     меняется редко, а страница фильма — вторая по посещаемости.
     """
-    key = SIMILAR_CACHE_KEY.format(title_id=title.pk)
+    key = SIMILAR_CACHE_KEY.format(
+        generation=get_generation(SIMILAR_GENERATION_KEY), title_id=title.pk
+    )
     cached = cache.get(key)
     if cached is not None:
         return cached
@@ -69,7 +103,7 @@ def get_similar_titles(title, limit=6):
     manual = title.related_titles.published().with_related()[:limit]
     if manual:
         manual = list(manual)
-        cache.set(key, manual, 60 * 30)
+        cache.set(key, manual, settings.CACHE_TTL_SIMILAR)
         return manual
 
     genre_ids = list(title.genres.values_list("id", flat=True))
@@ -84,7 +118,7 @@ def get_similar_titles(title, limit=6):
         .annotate(shared_genres=Count("genres", filter=Q(genres__in=genre_ids)))
         .order_by("-shared_genres", "-release_year")[:limit]
     )
-    cache.set(key, results, 60 * 30)
+    cache.set(key, results, settings.CACHE_TTL_SIMILAR)
     return results
 
 
@@ -99,7 +133,9 @@ def get_recommendations(user, limit=12):
     if not user.is_authenticated:
         return list(popular[:limit])
 
-    key = RECOMMENDATIONS_CACHE_KEY.format(user_id=user.pk)
+    key = RECOMMENDATIONS_CACHE_KEY.format(
+        generation=get_generation(RECOMMENDATIONS_GENERATION_KEY), user_id=user.pk
+    )
     cached = cache.get(key)
     if cached is not None:
         return cached
@@ -109,7 +145,7 @@ def get_recommendations(user, limit=12):
     )
     if not favorite_genre_ids:
         results = list(popular[:limit])
-        cache.set(key, results, 60 * 5)
+        cache.set(key, results, settings.CACHE_TTL_RECOMMENDATIONS)
         return results
 
     seen_ids = list(Title.objects.filter(watchhistory__user=user).values_list("id", flat=True))
@@ -123,7 +159,7 @@ def get_recommendations(user, limit=12):
         .annotate(matched_genres=Count("genres", filter=Q(genres__in=favorite_genre_ids)))
         .order_by("-matched_genres", "-published_at")[:limit]
     )
-    cache.set(key, results, 60 * 5)
+    cache.set(key, results, settings.CACHE_TTL_RECOMMENDATIONS)
     return results
 
 
@@ -163,7 +199,7 @@ def get_featured_collections(limit=4):
         .filter(titles_count__gt=0)
         .order_by("order", "-created_at")
     )
-    cache.set(COLLECTIONS_CACHE_KEY, results, 60 * 10)
+    cache.set(COLLECTIONS_CACHE_KEY, results, settings.CACHE_TTL_HOME_LONG)
     return results[:limit]
 
 
