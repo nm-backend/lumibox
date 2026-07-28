@@ -16,12 +16,12 @@ jobs:
       db:
         image: postgres:18-alpine
         env:
-          POSTGRES_DB: moviehub
-          POSTGRES_USER: moviehub
+          POSTGRES_DB: lumibox
+          POSTGRES_USER: lumibox
           POSTGRES_PASSWORD: postgres
         ports: ["5432:5432"]
         options: >-
-          --health-cmd "pg_isready -U moviehub"
+          --health-cmd "pg_isready -U lumibox"
           --health-interval 5s --health-timeout 3s --health-retries 10
       redis:
         image: redis:8-alpine
@@ -31,7 +31,7 @@ jobs:
           --health-interval 5s --health-timeout 3s --health-retries 10
 
     env:
-      DATABASE_URL: postgres://moviehub:postgres@localhost:5432/moviehub
+      DATABASE_URL: postgres://lumibox:postgres@localhost:5432/lumibox
       REDIS_URL: redis://localhost:6379/0
       DJANGO_SECRET_KEY: ci-secret-key-not-used-in-production-0123456789
       DJANGO_ALLOWED_HOSTS: localhost,127.0.0.1

@@ -413,7 +413,7 @@
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement("a");
                 a.href = url;
-                a.download = `moviehub-${config.assetId}-${Math.floor(Date.now() / 1000)}.png`;
+                a.download = `lumibox-${config.assetId}-${Math.floor(Date.now() / 1000)}.png`;
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);

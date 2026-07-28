@@ -149,14 +149,14 @@ DJANGO_SECRET_KEY=вставьте-сюда-сгенерированный-кл�
 только внутри контейнеров:
 
 ```
-POSTGRES_PASSWORD=moviehub-local-pass
+POSTGRES_PASSWORD=lumibox-local-pass
 ```
 
 **Тот же пароль должен стоять в `DATABASE_URL`** — это два разных места
 в файле, и они обязаны совпадать:
 
 ```
-DATABASE_URL=postgres://moviehub:moviehub-local-pass@localhost:5433/moviehub
+DATABASE_URL=postgres://lumibox:lumibox-local-pass@localhost:5433/lumibox
 ```
 
 Остальные строки менять не нужно.
@@ -184,10 +184,10 @@ docker compose ps
 
 ```
 NAME                 SERVICE   STATUS
-moviehub-db-1        db        Up (healthy)
-moviehub-redis-1     redis     Up (healthy)
-moviehub-web-1       web       Up
-moviehub-worker-1    worker    Up
+lumibox-db-1        db        Up (healthy)
+lumibox-redis-1     redis     Up (healthy)
+lumibox-web-1       web       Up
+lumibox-worker-1    worker    Up
 ```
 
 Если `web` перезапускается — смотрите причину: `docker compose logs web`.
@@ -387,7 +387,7 @@ docker compose exec web sh
 docker compose exec web python manage.py shell
 
 # Консоль PostgreSQL
-docker compose exec db psql -U moviehub -d moviehub
+docker compose exec db psql -U lumibox -d lumibox
 
 # Консоль Redis
 docker compose exec redis redis-cli
@@ -556,7 +556,7 @@ ports:
   - "8002:8000"   # сайт станет доступен на localhost:8002
 ```
 
-### 4. `dependency failed to start: container moviehub-db-1 exited`
+### 4. `dependency failed to start: container lumibox-db-1 exited`
 
 **Причина.** База не поднялась. Чаще всего — остаток тома от другой версии
 PostgreSQL: образ 18 хранит данные иначе, чем предыдущие.
@@ -569,7 +569,7 @@ docker compose down -v
 docker compose up --build -d
 ```
 
-### 5. `password authentication failed for user "moviehub"`
+### 5. `password authentication failed for user "lumibox"`
 
 **Причина.** Пароль в `DATABASE_URL` не совпадает с `POSTGRES_PASSWORD`.
 Это два разных места в `.env`, и их легко рассинхронизировать.
@@ -721,7 +721,7 @@ docker compose -f docker-compose.prod.yml up --build -d
 ```
 DJANGO_SECRET_KEY=<длинный случайный ключ, НЕ тот же, что в разработке>
 POSTGRES_PASSWORD=<сильный пароль>
-DJANGO_ALLOWED_HOSTS=moviehub.example.com,www.moviehub.example.com
+DJANGO_ALLOWED_HOSTS=lumibox.example.com,www.lumibox.example.com
 ```
 
 За обратным прокси (Nginx) добавьте:
@@ -778,8 +778,8 @@ pip install -r requirements/development.txt
 **2. База данных**
 
 ```bash
-psql -U postgres -c "CREATE USER moviehub WITH PASSWORD 'ваш_пароль';"
-psql -U postgres -c "CREATE DATABASE moviehub OWNER moviehub;"
+psql -U postgres -c "CREATE USER lumibox WITH PASSWORD 'ваш_пароль';"
+psql -U postgres -c "CREATE DATABASE lumibox OWNER lumibox;"
 ```
 
 **3. Переменные окружения**
