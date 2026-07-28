@@ -39,14 +39,47 @@ SECURE_REDIRECT_EXEMPT = [r"^healthz/?$"]
 # быстрее отдаст он, и эту строку можно будет убрать.
 MIDDLEWARE.insert(1, "whitenoise.middleware.WhiteNoiseMiddleware")  # noqa: F405
 
-STORAGES = {
-    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
-    "staticfiles": {
-        # Добавляет хеш к имени файла и жмёт его. Браузер кэширует статику
-        # навсегда, а после выката получает новое имя и подхватывает свежую.
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
-    },
-}
+# Обязателен ли R2 для продакшена — проверяем по наличию бакета.
+# Если R2 не настроен, работаем на локальной файловой системе (эфимерной на Render).
+_USE_R2 = bool(env("AWS_STORAGE_BUCKET_NAME", default=""))
+
+if _USE_R2:
+    STORAGES = {
+        "default": {
+            # Cloudflare R2 — S3-совместимое объектное хранилище.
+            # Файлы не теряются при перезапуске, в отличие от локального диска.
+            "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+            "OPTIONS": {
+                "access_key": env("AWS_ACCESS_KEY_ID"),
+                "secret_key": env("AWS_SECRET_ACCESS_KEY"),
+                "bucket_name": env("AWS_STORAGE_BUCKET_NAME"),
+                "region_name": env("AWS_S3_REGION_NAME", default="auto"),
+                "endpoint_url": env("AWS_S3_ENDPOINT_URL"),
+                # Публичный URL (cloudfront.net, R2.dev, свой домен).
+                # Если не задан, Django строит URL из endpoint_url + bucket_name.
+                "custom_domain": env("CLOUDFLARE_R2_PUBLIC_URL", default="") or None,
+                # Загружаемые файлы доступны всем — так постеры и видео показываются
+                # в браузере без подписанных URL.
+                "default_acl": "public-read",
+                "signature_version": "s3v4",
+                # Не перезаписывать файлы — каждый новый файл получает уникальное имя.
+                "file_overwrite": False,
+            },
+        },
+        "staticfiles": {
+            # Статика по-прежнему отдаётся через whitenoise из контейнера.
+            # Не кладём её в R2 — так быстрее: не нужен лишний HTTP к R2 на каждый CSS.
+            "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        },
+    }
+else:
+    # R2 не настроен — локальный диск.
+    STORAGES = {
+        "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+        "staticfiles": {
+            "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        },
+    }
 
 
 # Весь трафик переводим на HTTPS.

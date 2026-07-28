@@ -119,6 +119,28 @@
     color: var(--color-accent);
 }
 
+/* Telegram-ссылка в шапке — круглая иконка рядом с переключателем темы */
+.telegram-header-link {
+    width: var(--touch-target);
+    height: var(--touch-target);
+    display: grid;
+    place-items: center;
+    border: 1px solid var(--color-border);
+    border-radius: 50%;
+    background: var(--color-surface);
+    color: #279fd9;
+    flex-shrink: 0;
+    text-decoration: none;
+    transition: border-color var(--transition-fast), color var(--transition-fast), background var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.telegram-header-link:hover {
+    border-color: #279fd9;
+    color: #279fd9;
+    background: rgba(39, 159, 217, 0.08);
+    box-shadow: 0 0 12px rgba(39, 159, 217, 0.2);
+}
+
 /* Language switcher */
 .lang-menu {
     position: relative;

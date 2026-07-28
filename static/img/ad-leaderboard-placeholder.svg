@@ -1,22 +1,9 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="728" height="90" viewBox="0 0 728 90" role="img" aria-label="Рекламное место 728 на 90">
-  <defs>
-    <linearGradient id="lb-bg" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0" stop-color="#1a1f2e"/>
-      <stop offset="1" stop-color="#0d0f16"/>
-    </linearGradient>
-    <linearGradient id="lb-border" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#ffc043" stop-opacity="0.2"/>
-      <stop offset="1" stop-color="#e11d48" stop-opacity="0.2"/>
-    </linearGradient>
-  </defs>
-
-  <rect x="1" y="1" width="726" height="88" rx="8" fill="url(#lb-bg)" stroke="url(#lb-border)" stroke-width="1"/>
-
-  <g fill="#ffc043" opacity="0.1">
-    <circle cx="100" cy="45" r="30"/>
-    <circle cx="628" cy="45" r="30"/>
-  </g>
-
-  <text x="364" y="38" text-anchor="middle" fill="#e8eaed" font-family="Arial, sans-serif" font-size="20" font-weight="700">Ваша реклама</text>
-  <text x="364" y="60" text-anchor="middle" fill="#ffc043" font-family="Arial, sans-serif" font-size="12" opacity="0.7">728 × 90 · замените этот файл</text>
+<svg xmlns="http://www.w3.org/2000/svg" width="728" height="90" viewBox="0 0 728 90">
+  <rect width="728" height="90" fill="#12151e" rx="8"/>
+  <rect x="16" y="16" width="58" height="58" rx="6" fill="rgba(255,184,48,0.06)" stroke="#222838" stroke-width="1"/>
+  <text x="45" y="53" text-anchor="middle" fill="#5c6478" font-size="20" font-family="sans-serif">📢</text>
+  <text x="90" y="40" fill="#8891a8" font-size="12" font-family="sans-serif" font-weight="600">Рекламное место</text>
+  <text x="90" y="58" fill="#5c6478" font-size="10" font-family="sans-serif">728 × 90 — Ваш бренд здесь</text>
+  <rect x="610" y="24" width="100" height="42" rx="6" fill="rgba(255,184,48,0.12)" stroke="#ffb830" stroke-width="1"/>
+  <text x="660" y="51" text-anchor="middle" fill="#ffb830" font-size="11" font-family="sans-serif" font-weight="700">Разместить</text>
 </svg>

@@ -37,7 +37,7 @@ services:
     healthCheckPath: /healthz/
     # На старте: миграции, наполнение демоданными (и отрисовка заглушек-постеров
     # в эфемерную ФС, раз постоянного диска нет), затем gunicorn на порту Render.
-    dockerCommand: sh -c "python manage.py migrate --noinput && python manage.py ensure_demo_data && gunicorn config.wsgi:application --bind 0.0.0.0:$PORT --workers 2 --timeout 60"
+    dockerCommand: sh -c "python manage.py migrate --noinput && python manage.py ensure_demo_data && python manage.py seed_videos && gunicorn config.wsgi:application --bind 0.0.0.0:$PORT --workers 2 --timeout 60"
     envVars:
       - key: DJANGO_SETTINGS_MODULE
         value: config.settings.production
@@ -62,4 +62,20 @@ services:
       - key: DJANGO_SUPERUSER_USERNAME
         sync: false
       - key: DJANGO_SUPERUSER_PASSWORD
+        sync: false
+
+      # --- Cloudflare R2 (опционально) ---
+      # Без R2 медиа-файлы хранятся локально и сбрасываются при перезапуске.
+      # Заполни эти переменные вручную в Dashboard Render после деплоя.
+      - key: AWS_ACCESS_KEY_ID
+        sync: false
+      - key: AWS_SECRET_ACCESS_KEY
+        sync: false
+      - key: AWS_STORAGE_BUCKET_NAME
+        sync: false
+      - key: AWS_S3_ENDPOINT_URL
+        sync: false
+      - key: AWS_S3_REGION_NAME
+        value: auto
+      - key: CLOUDFLARE_R2_PUBLIC_URL
         sync: false

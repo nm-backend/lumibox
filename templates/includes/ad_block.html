@@ -1,26 +1,22 @@
 {% load i18n static %}
 {% get_current_language as LANGUAGE_CODE %}
 
-{# Premium inline ad block — shows between content sections with glassmorphism #}
-<section class="ad-premium" aria-label="{% trans 'Реклама' %}">
-    <div class="ad-premium__content">
-        <p class="ad-premium__eyebrow">{% trans "Реклама" %}</p>
-        <p class="ad-premium__title">{% trans "Продвиньте свой бренд" %}</p>
-        <p class="ad-premium__description">{% trans "Тысячи любителей кино увидят вашу рекламу. Станьте партнёром LumiBox." %}</p>
-        <div class="ad-premium__cta">
-            <a class="button button--primary" href="#">{% trans "Узнать больше" %}</a>
-        </div>
-    </div>
-</section>
-
-{# Standard leaderboard ad block #}
+{# Horizontal ad block — shows between content sections #}
 <section class="ad-block" aria-label="{% trans 'Реклама' %}">
-    <div class="ad-block__item ad-block__item--leaderboard">
-        <p class="ad-block__label">{% trans "Ваша реклама" %}</p>
-        <img class="ad-block__banner ad-block__banner--leaderboard"
-             src="{% static 'img/ad-leaderboard-placeholder.svg' %}"
-             width="728" height="90"
-             alt="{% trans 'Рекламный баннер 728×90' %}"
-             loading="lazy">
+    <div class="ad-block__inner">
+        <div class="ad-block__badge">
+            <span>{% trans "Реклама" %}</span>
+        </div>
+        <a class="ad-block__link" href="#" target="_blank" rel="noopener noreferrer">
+            <img class="ad-block__banner ad-block__banner--leaderboard"
+                 src="{% static 'img/ad-leaderboard-placeholder.svg' %}"
+                 width="728" height="90"
+                 alt="{% trans 'Рекламный баннер 728×90' %}"
+                 loading="lazy">
+        </a>
+        <p class="ad-block__caption">
+            {% trans "Реклама на LumiBox — привлекайте новую аудиторию" %}
+            <a class="ad-block__cta" href="#">{% trans "Узнать" %}</a>
+        </p>
     </div>
 </section>

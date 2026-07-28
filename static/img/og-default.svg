@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <rect width="1200" height="630" fill="#0f1219"/>
+  <rect x="480" y="215" width="240" height="200" rx="20" fill="#ffb830"/>
+  <polygon points="540,265 660,315 540,365" fill="#0f1219"/>
+  <text x="600" y="480" text-anchor="middle" fill="#e8ecf4" font-size="64" font-family="Bebas Neue, Impact, sans-serif" font-weight="400" letter-spacing="2">LUMIBOX</text>
+  <text x="600" y="520" text-anchor="middle" fill="#5c6478" font-size="18" font-family="Inter, sans-serif">Каталог фильмов и сериалов</text>
+</svg>
