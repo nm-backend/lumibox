@@ -1,6 +1,6 @@
 @echo off
 rem ============================================================
-rem  MovieHub - one-command launcher for Windows
+rem  LumiBox - one-command launcher for Windows
 rem
 rem  Why this file exists: launching used to require creating .env
 rem  by hand, generating a secret key, starting containers, running
@@ -16,9 +16,8 @@ rem ============================================================
 setlocal enabledelayedexpansion
 cd /d "%~dp0"
 
-echo.
-echo   MovieHub - starting up
-echo   ======================
+echo.echo   LumiBox - starting up
+    echo   ====================
 echo.
 
 rem ---------- 1. Docker ----------
@@ -57,17 +56,17 @@ if exist ".env" (
     >> .env echo DJANGO_DEBUG=True
     >> .env echo DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1
     >> .env echo.
-    >> .env echo DATABASE_URL=postgres://moviehub:!GEN_DBPASS!@localhost:5433/moviehub
+    >> .env echo DATABASE_URL=postgres://lumibox:!GEN_DBPASS!@localhost:5433/lumibox
     >> .env echo REDIS_URL=redis://localhost:6380/0
     >> .env echo.
-    >> .env echo POSTGRES_USER=moviehub
+    >> .env echo POSTGRES_USER=lumibox
     >> .env echo POSTGRES_PASSWORD=!GEN_DBPASS!
-    >> .env echo POSTGRES_DB=moviehub
+    >> .env echo POSTGRES_DB=lumibox
     >> .env echo.
     >> .env echo # Admin account is created on first start. Change the password after login.
-    >> .env echo DJANGO_SUPERUSER_EMAIL=admin@moviehub.local
+    >> .env echo DJANGO_SUPERUSER_EMAIL=admin@lumibox.local
     >> .env echo DJANGO_SUPERUSER_USERNAME=admin
-    >> .env echo DJANGO_SUPERUSER_PASSWORD=moviehub-admin-2026
+    >> .env echo DJANGO_SUPERUSER_PASSWORD=lumibox-admin-2026
 
     echo   [OK] .env created
 )
@@ -116,7 +115,7 @@ exit /b 1
 echo   [OK] Site is responding
 echo.
 echo   ============================================
-echo     Done. MovieHub is running.
+echo     Done. LumiBox is running.
 echo   ============================================
 echo.
 echo     Site:      http://localhost:8001/
@@ -125,7 +124,7 @@ echo     Swagger:   http://localhost:8001/api/docs/
 echo     ReDoc:     http://localhost:8001/api/redoc/
 echo.
 echo     Admin login: see DJANGO_SUPERUSER_* in the .env file
-echo     (default: admin@moviehub.local)
+echo     (default: admin@lumibox.local)
 echo.
 echo     To stop the project:  stop.bat
 echo.

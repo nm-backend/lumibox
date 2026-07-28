@@ -11,12 +11,12 @@ BACKUP_DIR="${BACKUP_DIR:-./backups}"
 mkdir -p "$BACKUP_DIR"
 
 STAMP=$(date +%Y-%m-%d_%H-%M-%S)
-FILE="$BACKUP_DIR/moviehub_$STAMP.sql.gz"
+FILE="$BACKUP_DIR/lumibox_$STAMP.sql.gz"
 
 echo "Дамп базы -> $FILE"
 pg_dump "$DATABASE_URL" | gzip > "$FILE"
 
 # Держим последние 14 копий, старые удаляем — иначе диск однажды кончится.
-ls -1t "$BACKUP_DIR"/moviehub_*.sql.gz 2>/dev/null | tail -n +15 | xargs -r rm --
+ls -1t "$BACKUP_DIR"/lumibox_*.sql.gz 2>/dev/null | tail -n +15 | xargs -r rm --
 echo "Готово. Копии в $BACKUP_DIR:"
-ls -1t "$BACKUP_DIR"/moviehub_*.sql.gz | head -5
+ls -1t "$BACKUP_DIR"/lumibox_*.sql.gz | head -5

@@ -165,7 +165,7 @@ def _publish_invalidation(model_label: str) -> None:
         from redis import Redis
 
         r = Redis.from_url(settings.REDIS_URL)
-        r.publish("moviehub:cache:invalidate", model_label)
+        r.publish("lumibox:cache:invalidate", model_label)
     except ImportError:
         logger.warning("Redis package not installed — can't publish invalidation", exc_info=True)
     except Exception:

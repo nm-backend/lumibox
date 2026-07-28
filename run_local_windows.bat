@@ -1,6 +1,6 @@
 @echo off
 rem ============================================================
-rem  MovieHub - local run on Windows WITHOUT Docker.
+rem  LumiBox - local run on Windows WITHOUT Docker.
 rem  Uses SQLite (no database to install) and no Redis.
 rem  Just double-click this file. First run installs everything.
 rem  ASCII only on purpose: Cyrillic breaks cmd.exe parsing.
@@ -14,7 +14,7 @@ rem and crash with "no such table". This project uses development settings.
 set "DJANGO_SETTINGS_MODULE=config.settings.development"
 
 echo ============================================
-echo   MovieHub - local run (no Docker)
+echo   LumiBox - local run (no Docker)
 echo ============================================
 echo   Folder: %CD%
 echo ============================================
@@ -77,18 +77,16 @@ echo [4/6] Applying migrations...
 echo [5/6] Loading demo data ^(movies, cast, collections, posters^)...
 "%VPY%" manage.py ensure_demo_data
 
-rem --- 6. Admin user (only if none exists) ---
-set "DJANGO_SUPERUSER_EMAIL=admin@moviehub.local"
+rem --- 6. Admin user (only if none exists) ---set "DJANGO_SUPERUSER_EMAIL=admin@lumibox.local"
 set "DJANGO_SUPERUSER_USERNAME=admin"
 set "DJANGO_SUPERUSER_PASSWORD=admin12345"
 "%VPY%" manage.py createsuperuser --noinput >nul 2>&1
-
 echo.
 echo ============================================
 echo   Ready.
 echo   Site:  http://127.0.0.1:8000/
 echo   Admin: http://127.0.0.1:8000/admin/
-echo   Login: admin@moviehub.local  /  admin12345
+echo   Login: admin@lumibox.local  /  admin12345
 echo.
 echo   Keep this window open. Press Ctrl+C to stop.
 echo ============================================

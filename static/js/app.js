@@ -1,4 +1,4 @@
-/* Main MovieHub application JS */
+/* Main LumiBox application JS */
 
 (function () {
     'use strict';
@@ -8,7 +8,7 @@
     ----------------------------------------------- */
     const themeToggle = document.querySelector('[data-theme-toggle]');
     const html = document.documentElement;
-    const stored = localStorage.getItem('moviehub-theme');
+    const stored = localStorage.getItem('lumibox-theme');
     if (stored) html.dataset.theme = stored;
     if (themeToggle) {
         const updateIcon = () => {
@@ -18,7 +18,7 @@
         updateIcon();
         themeToggle.addEventListener('click', () => {
             html.dataset.theme = html.dataset.theme === 'light' ? '' : 'light';
-            localStorage.setItem('moviehub-theme', html.dataset.theme);
+            localStorage.setItem('lumibox-theme', html.dataset.theme);
             updateIcon();
         });
     }

@@ -1,5 +1,5 @@
 """
-Security middleware for MovieHub.
+Security middleware for LumiBox.
 
 Defense-in-depth headers that complement Django's built-in protections.
 These are not a substitute for correct CSRF, XSS, and clickjacking handling,

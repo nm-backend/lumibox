@@ -1,5 +1,5 @@
 #!/bin/sh
-# MovieHub — запуск проекта одной командой (macOS, Linux).
+# LumiBox — запуск проекта одной командой (macOS, Linux).
 # Windows-версия: start.bat
 #
 # Делает всё сам: проверяет Docker, создаёт .env со сгенерированными
@@ -10,7 +10,7 @@ set -e
 cd "$(dirname "$0")"
 
 echo ""
-echo "  MovieHub — запуск"
+echo "  LumiBox — запуск"
 echo "  ================="
 echo ""
 
@@ -37,17 +37,17 @@ DJANGO_SECRET_KEY=$SECRET
 DJANGO_DEBUG=True
 DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1
 
-DATABASE_URL=postgres://moviehub:$DBPASS@localhost:5433/moviehub
+DATABASE_URL=postgres://lumibox:$DBPASS@localhost:5433/lumibox
 REDIS_URL=redis://localhost:6380/0
 
-POSTGRES_USER=moviehub
+POSTGRES_USER=lumibox
 POSTGRES_PASSWORD=$DBPASS
-POSTGRES_DB=moviehub
+POSTGRES_DB=lumibox
 
 # Администратор создастся сам при первом запуске. Смените пароль после входа.
-DJANGO_SUPERUSER_EMAIL=admin@moviehub.local
+DJANGO_SUPERUSER_EMAIL=admin@lumibox.local
 DJANGO_SUPERUSER_USERNAME=admin
-DJANGO_SUPERUSER_PASSWORD=moviehub-admin-2026
+DJANGO_SUPERUSER_PASSWORD=lumibox-admin-2026
 EOF
     echo "  [OK] Файл .env создан"
 fi

@@ -9,8 +9,8 @@ services:
   db:
     image: postgres:18-alpine
     environment:
-      POSTGRES_DB: ${POSTGRES_DB:-moviehub}
-      POSTGRES_USER: ${POSTGRES_USER:-moviehub}
+      POSTGRES_DB: ${POSTGRES_DB:-lumibox}
+      POSTGRES_USER: ${POSTGRES_USER:-lumibox}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Задайте POSTGRES_PASSWORD в .env}
     ports:
       # 5433 снаружи, а не 5432: локальный PostgreSQL уже занял этот порт.
@@ -23,7 +23,7 @@ services:
       - postgres_data:/var/lib/postgresql
     # Пока база не готова принимать запросы, сайт стартовать не должен.
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-moviehub}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-lumibox}"]
       interval: 5s
       timeout: 3s
       retries: 10
@@ -54,7 +54,7 @@ services:
       # Внутри сети контейнеров хост базы — db, а не localhost.
       # Эти значения важнее .env: django-environ не перетирает
       # уже заданные переменные окружения.
-      DATABASE_URL: postgres://${POSTGRES_USER:-moviehub}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-moviehub}
+      DATABASE_URL: postgres://${POSTGRES_USER:-lumibox}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-lumibox}
       REDIS_URL: redis://redis:6379/0
       # Администратор создаётся автоматически, если заданы обе переменные.
       # Пусто по умолчанию — тогда шаг просто пропускается.
@@ -69,7 +69,7 @@ services:
       - venv_guard:/app/.venv
     ports:
       # 8001 снаружи, а не 8000 — по той же причине, что 5433 у базы:
-      # 8000 занимает соседний проект на этой же машине, и MovieHub
+      # 8000 занимает соседний проект на этой же машине, и LumiBox
       # молча не поднимался. Внутри контейнера порт остаётся 8000.
       - "8001:8000"
     # Три попытки, а не «всегда»: сетевую заминку они переживут, а вот
@@ -91,7 +91,7 @@ services:
     restart: on-failure:3
     environment:
       DJANGO_SETTINGS_MODULE: config.settings.development
-      DATABASE_URL: postgres://${POSTGRES_USER:-moviehub}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-moviehub}
+      DATABASE_URL: postgres://${POSTGRES_USER:-lumibox}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-lumibox}
       REDIS_URL: redis://redis:6379/0
     volumes:
       - .:/app

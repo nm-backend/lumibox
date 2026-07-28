@@ -6,8 +6,8 @@ services:
     image: postgres:18-alpine
     restart: unless-stopped
     environment:
-      POSTGRES_DB: ${POSTGRES_DB:-moviehub}
-      POSTGRES_USER: ${POSTGRES_USER:-moviehub}
+      POSTGRES_DB: ${POSTGRES_DB:-lumibox}
+      POSTGRES_USER: ${POSTGRES_USER:-lumibox}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Задайте POSTGRES_PASSWORD в .env}
     volumes:
       # /var/lib/postgresql, а не .../data: в 18-м образе данные лежат
@@ -15,7 +15,7 @@ services:
       - postgres_data:/var/lib/postgresql
     # Пока база не готова принимать запросы, приложение стартовать не должно.
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-moviehub}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-lumibox}"]
       interval: 5s
       timeout: 3s
       retries: 5
@@ -44,7 +44,7 @@ services:
              gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 3"
     environment:
       DJANGO_SETTINGS_MODULE: config.settings.production
-      DATABASE_URL: postgres://${POSTGRES_USER:-moviehub}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-moviehub}
+      DATABASE_URL: postgres://${POSTGRES_USER:-lumibox}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-lumibox}
       REDIS_URL: redis://redis:6379/0
       DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:?Задайте DJANGO_SECRET_KEY в .env}
       DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-localhost,127.0.0.1}
@@ -78,7 +78,7 @@ services:
     command: celery -A config worker -l info
     environment:
       DJANGO_SETTINGS_MODULE: config.settings.production
-      DATABASE_URL: postgres://${POSTGRES_USER:-moviehub}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-moviehub}
+      DATABASE_URL: postgres://${POSTGRES_USER:-lumibox}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-lumibox}
       REDIS_URL: redis://redis:6379/0
       DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
       DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-localhost,127.0.0.1}
@@ -100,7 +100,7 @@ services:
     command: celery -A config beat -l info
     environment:
       DJANGO_SETTINGS_MODULE: config.settings.production
-      DATABASE_URL: postgres://${POSTGRES_USER:-moviehub}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-moviehub}
+      DATABASE_URL: postgres://${POSTGRES_USER:-lumibox}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-lumibox}
       REDIS_URL: redis://redis:6379/0
       DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
     depends_on:

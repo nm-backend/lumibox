@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>{% block page_title %}{% trans "MovieHub — каталог фильмов и сериалов" %}{% endblock %}</title>
+    <title>{% block page_title %}{% trans "LumiBox — каталог фильмов и сериалов" %}{% endblock %}</title>
     <meta name="description" content="{% block page_description %}{% trans "Каталог фильмов и сериалов: поиск, фильтры, подборки." %}{% endblock %}">
 
     <link rel="stylesheet" href="{% static 'css/variables.css' %}">
@@ -22,7 +22,7 @@
         <div class="container site-header__inner">
             <a class="logo" href="{% url 'catalog:home' %}">
                 <span class="logo__mark"></span>
-                <span>Movie<span class="logo__accent">Hub</span></span>
+                <span>Lumi<span class="logo__accent">Box</span></span>
             </a>
 
             {% cache 3600 site_nav request.path using="default" %}

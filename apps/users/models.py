@@ -8,7 +8,7 @@ from apps.users.managers import UserManager
 
 class User(AbstractUser):
     """
-    Пользователь MovieHub.
+    Пользователь LumiBox.
 
     Своя модель заведена сразу, до первой миграции: заменить встроенную
     модель пользователя на живом проекте очень дорого, а понадобится это

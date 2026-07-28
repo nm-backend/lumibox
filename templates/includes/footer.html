@@ -6,7 +6,7 @@
             <div class="footer-brand">
                 <a class="logo" href="{% url 'catalog:home' %}">
                     <span class="logo__mark"></span>
-                    <span>Movie<span class="logo__accent">Hub</span></span>
+                    <span>Lumi<span class="logo__accent">Box</span></span>
                 </a>
                 <p class="footer-brand__text">
                     {% trans "Каталог фильмов и сериалов с поиском, фильтрами, подборками и личной библиотекой. Учебный проект с открытым кодом, собранный на Django и PostgreSQL." %}
@@ -98,7 +98,7 @@
         <div class="footer-bottom">
             <p class="footer-bottom__copy">
                 {% now "Y" as current_year %}
-                {% blocktranslate %}© {{ current_year }} MovieHub. Собственный дизайн и код.{% endblocktranslate %}
+                {% blocktranslate %}© {{ current_year }} LumiBox. Собственный дизайн и код.{% endblocktranslate %}
             </p>
             <p class="footer-bottom__note">
                 {% trans "Данные о фильмах — общедоступные факты. Оформление создано для этого проекта." %}

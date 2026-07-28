@@ -19,7 +19,7 @@ from celery import Celery
 # поэтому настройки указываем ему сами.
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.development")
 
-app = Celery("moviehub")
+app = Celery("lumibox")
 
 # Все настройки берём из settings, префикс CELERY_ отбрасываем:
 # CELERY_BROKER_URL становится broker_url.

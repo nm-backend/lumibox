@@ -1,4 +1,4 @@
-# Деплой MovieHub на постоянный сервер
+# Деплой LumiBox на постоянный сервер
 
 Цель — сайт работает 24/7 и не зависит от вашего ноутбука. Ниже —
 разворачивание на **Render** одним файлом-описанием (`render.yaml`).
@@ -13,12 +13,12 @@ HTTPS, следит за здоровьем и перезапускает упа
 
 1. **Залейте проект на GitHub** (публичный или приватный репозиторий).
    ```bash
-   git add -A && git commit -m "Deploy MovieHub" && git push
+   git add -A && git commit -m "Deploy LumiBox" && git push
    ```
 
 2. **Render → New → Blueprint** → выберите репозиторий. Render найдёт
-   `render.yaml` и покажет, что создаст: `moviehub-web`, `moviehub-worker`,
-   `moviehub-db`, `moviehub-redis`.
+   `render.yaml` и покажет, что создаст: `lumibox-web`, `lumibox-worker`,
+   `lumibox-db`, `lumibox-redis`.
 
 3. **Заполните переменные** (помечены как «требует значения») и нажмите **Apply**:
    | Переменная | Значение |
@@ -30,12 +30,12 @@ HTTPS, следит за здоровьем и перезапускает упа
 
    `DJANGO_SECRET_KEY` Render сгенерирует сам, базу и Redis подключит сам.
 
-Через несколько минут сайт открыт на `https://moviehub-web.onrender.com`.
+Через несколько минут сайт открыт на `https://lumibox-web.onrender.com`.
 Миграции, демоданные и администратор создаются автоматически при первом деплое.
 
 ## Свой домен
 
-Render → сервис `moviehub-web` → **Settings → Custom Domains** → добавьте домен
+Render → сервис `lumibox-web` → **Settings → Custom Domains** → добавьте домен
 и пропишите у регистратора CNAME, который покажет Render. TLS-сертификат
 Render выпустит автоматически. После этого впишите домен в `DJANGO_ALLOWED_HOSTS`.
 
@@ -52,10 +52,10 @@ Render выпустит автоматически. После этого впи
 
 ## Резервные копии
 
-Render → `moviehub-db` → **Backups**: платные планы делают ежедневный бэкап
+Render → `lumibox-db` → **Backups**: платные планы делают ежедневный бэкап
 автоматически. Разовый дамп вручную:
 ```bash
-pg_dump "$DATABASE_URL" > moviehub-$(date +%F).sql
+pg_dump "$DATABASE_URL" > lumibox-$(date +%F).sql
 ```
 
 ## Честные ограничения

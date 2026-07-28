@@ -1,7 +1,7 @@
 # Fly.io. Разворачивает тот же production-образ из Dockerfile.
 # Postgres и Redis на Fly создаются отдельно (fly postgres create,
 # Upstash Redis) и подключаются секретами DATABASE_URL / REDIS_URL.
-app = "moviehub"
+app = "lumibox"
 primary_region = "fra"
 
 [build]
@@ -30,7 +30,7 @@ primary_region = "fra"
 
 # Загруженные постеры и кадры — на постоянном томе.
 [mounts]
-  source = "moviehub_media"
+  source = "lumibox_media"
   destination = "/app/media"
 
 [[vm]]

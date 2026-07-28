@@ -1,7 +1,7 @@
 #!/bin/sh
 # Восстановление базы из дампа, созданного backup_db.sh.
 #
-#   DATABASE_URL=postgres://... ./scripts/restore_db.sh backups/moviehub_2026-07-22.sql.gz
+#   DATABASE_URL=postgres://... ./scripts/restore_db.sh backups/lumibox_2026-07-22.sql.gz
 #
 # ВНИМАНИЕ: перезаписывает текущие данные. Требует подтверждения.
 set -e

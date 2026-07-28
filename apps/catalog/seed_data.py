@@ -535,16 +535,16 @@ COLLECTIONS = [
 
 # (никнейм, почта). Пароль этим аккаунтам не нужен: они только оставляют отзывы.
 DEMO_USERS = [
-    ("kinoved", "kinoved@demo.moviehub"),
-    ("mira_v", "mira@demo.moviehub"),
-    ("night_owl", "nightowl@demo.moviehub"),
-    ("polina87", "polina@demo.moviehub"),
-    ("sergey_d", "sergey@demo.moviehub"),
-    ("lena_k", "lena@demo.moviehub"),
-    ("the_critic", "critic@demo.moviehub"),
-    ("maxx", "maxx@demo.moviehub"),
-    ("olga_r", "olga@demo.moviehub"),
-    ("denis_kino", "denis@demo.moviehub"),
+    ("kinoved", "kinoved@demo.lumibox"),
+    ("mira_v", "mira@demo.lumibox"),
+    ("night_owl", "nightowl@demo.lumibox"),
+    ("polina87", "polina@demo.lumibox"),
+    ("sergey_d", "sergey@demo.lumibox"),
+    ("lena_k", "lena@demo.lumibox"),
+    ("the_critic", "critic@demo.lumibox"),
+    ("maxx", "maxx@demo.lumibox"),
+    ("olga_r", "olga@demo.lumibox"),
+    ("denis_kino", "denis@demo.lumibox"),
 ]
 
 # Адрес фильма -> список отзывов (оценка, текст). i-й отзыв оставляет i-й

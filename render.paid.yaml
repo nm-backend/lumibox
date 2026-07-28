@@ -1,4 +1,4 @@
-# MovieHub — Render Blueprint, ПЛАТНЫЙ always-on вариант.
+# LumiBox — Render Blueprint, ПЛАТНЫЙ always-on вариант.
 # Чтобы использовать: переименуйте этот файл в render.yaml (Render читает
 # Blueprint именно с таким именем) и задеплойте.
 #
@@ -7,28 +7,28 @@
 # диск под загруженные медиа. Стоит примерно $7/мес за сервис — оплата за вами.
 
 databases:
-  - name: moviehub-db
-    databaseName: moviehub
-    user: moviehub
+  - name: lumibox-db
+    databaseName: lumibox
+    user: lumibox
     plan: starter
     postgresMajorVersion: "16"
 
 services:
   - type: keyvalue
-    name: moviehub-redis
+    name: lumibox-redis
     plan: starter
     ipAllowList: []
     maxmemoryPolicy: noeviction
 
   - type: web
-    name: moviehub-web
+    name: lumibox-web
     runtime: docker
     dockerfilePath: ./Dockerfile
     dockerContext: .
     plan: starter
     healthCheckPath: /healthz/
     disk:
-      name: moviehub-media
+      name: lumibox-media
       mountPath: /app/media
       sizeGB: 1
     preDeployCommand: "python manage.py migrate --noinput && python manage.py ensure_demo_data"
@@ -44,12 +44,12 @@ services:
         sync: false
       - key: DATABASE_URL
         fromDatabase:
-          name: moviehub-db
+          name: lumibox-db
           property: connectionString
       - key: REDIS_URL
         fromService:
           type: keyvalue
-          name: moviehub-redis
+          name: lumibox-redis
           property: connectionString
       - key: DJANGO_NUM_PROXIES
         value: "1"
@@ -61,7 +61,7 @@ services:
         sync: false
 
   - type: worker
-    name: moviehub-worker
+    name: lumibox-worker
     runtime: docker
     dockerfilePath: ./Dockerfile
     dockerContext: .
@@ -73,14 +73,14 @@ services:
       - key: DJANGO_SECRET_KEY
         fromService:
           type: web
-          name: moviehub-web
+          name: lumibox-web
           envVarKey: DJANGO_SECRET_KEY
       - key: DATABASE_URL
         fromDatabase:
-          name: moviehub-db
+          name: lumibox-db
           property: connectionString
       - key: REDIS_URL
         fromService:
           type: keyvalue
-          name: moviehub-redis
+          name: lumibox-redis
           property: connectionString

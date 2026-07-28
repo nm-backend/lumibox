@@ -1,4 +1,4 @@
-# MovieHub — Render Blueprint, БЕСПЛАТНЫЙ тариф ($0, без карты).
+# LumiBox — Render Blueprint, БЕСПЛАТНЫЙ тариф ($0, без карты).
 # Один web-сервис + бесплатный PostgreSQL. Render сам выдаёт HTTPS,
 # следит за здоровьем и перезапускает упавшее.
 #
@@ -22,14 +22,14 @@
 # см. render.paid.yaml.
 
 databases:
-  - name: moviehub-db
-    databaseName: moviehub
-    user: moviehub
+  - name: lumibox-db
+    databaseName: lumibox
+    user: lumibox
     plan: free
 
 services:
   - type: web
-    name: moviehub-web
+    name: lumibox-web
     runtime: docker
     plan: free
     dockerfilePath: ./Dockerfile
@@ -51,7 +51,7 @@ services:
         sync: false
       - key: DATABASE_URL
         fromDatabase:
-          name: moviehub-db
+          name: lumibox-db
           property: connectionString
       # REDIS_URL намеренно НЕ задаём — включает локальный кэш и eager-задачи.
       - key: DJANGO_NUM_PROXIES

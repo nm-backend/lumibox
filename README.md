@@ -1,4 +1,4 @@
-# MovieHub
+# LumiBox
 
 Каталог фильмов и сериалов на Django: поиск, фильтры, подборки, личная
 библиотека, отзывы с оценками, рекомендации, REST API и админ-панель.
@@ -113,8 +113,8 @@ docker info
 ### 1. Клонирование
 
 ```bash
-git clone <адрес-репозитория> MovieHub
-cd MovieHub
+git clone <адрес-репозитория> LumiBox
+cd LumiBox
 ```
 
 ### 2. Создание .env
@@ -438,7 +438,7 @@ docker compose up -d
 ## Структура проекта
 
 ```
-MovieHub/
+LumiBox/
 ├── apps/                        приложения проекта
 │   ├── core/                    общее: абстрактные модели, валидаторы, миксины
 │   │   ├── models.py            TimeStampedModel, SeoModel

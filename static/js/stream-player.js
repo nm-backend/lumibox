@@ -1,4 +1,4 @@
-/* MovieHub HLS Player — Netflix-level player */
+/* LumiBox HLS Player — Netflix-level player */
 (function () {
     "use strict";
 
