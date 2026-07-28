@@ -61,28 +61,53 @@
             }
         }
 
+        /* Подсказки собираем узлами DOM, а не строкой в innerHTML.
+           Название фильма приходит из базы: пока его вставляли в шаблонную
+           строку, редактор мог сохранить фильм с именем вида
+           <img src=x onerror=...> — и этот код выполнялся бы в браузере
+           каждого, кто просто набирает запрос в поиске.
+           textContent подставляет текст текстом, что бы в нём ни лежало. */
+        function element(tag, className, text) {
+            const node = document.createElement(tag);
+            node.className = className;
+            if (text !== undefined && text !== null) node.textContent = text;
+            return node;
+        }
+
         function renderSuggestions(items) {
-            dropdown.innerHTML = '';
+            dropdown.replaceChildren();
             if (!items || items.length === 0) {
-                dropdown.innerHTML = '<div class="search__no-results">Ничего не найдено</div>';
+                dropdown.appendChild(element('div', 'search__no-results', 'Ничего не найдено'));
                 dropdown.classList.add('search__dropdown--open');
                 return;
             }
             const list = document.createElement('div');
             items.forEach(item => {
+                const name = item.name || '';
                 const link = document.createElement('a');
                 link.className = 'search__suggestion';
-                link.href = item.url || `/title/${item.slug}/`;
-                link.innerHTML = `
-                    ${item.poster
-                        ? `<img class="search__suggestion-poster" src="${item.poster}" alt="" loading="lazy">`
-                        : `<span class="search__suggestion-poster-placeholder">${(item.name || '?')[0]}</span>`
-                    }
-                    <span class="search__suggestion-body">
-                        <span class="search__suggestion-name">${item.name}</span>
-                        <span class="search__suggestion-meta">${item.release_year || ''}${item.type ? ' · ' + (item.type === 'movie' ? 'Фильм' : 'Сериал') : ''}</span>
-                    </span>
-                `;
+                link.href = item.url || `/title/${encodeURIComponent(item.slug || '')}/`;
+
+                if (item.poster) {
+                    const poster = element('img', 'search__suggestion-poster');
+                    poster.src = item.poster;
+                    poster.alt = '';
+                    poster.loading = 'lazy';
+                    link.appendChild(poster);
+                } else {
+                    link.appendChild(
+                        element('span', 'search__suggestion-poster-placeholder', (name || '?')[0])
+                    );
+                }
+
+                const kind = item.type === 'movie' ? 'Фильм' : (item.type ? 'Сериал' : '');
+                const meta = [item.release_year || '', kind].filter(Boolean).join(' · ');
+
+                const body = element('span', 'search__suggestion-body');
+                body.appendChild(element('span', 'search__suggestion-name', name));
+                body.appendChild(element('span', 'search__suggestion-meta', meta));
+                link.appendChild(body);
+
                 list.appendChild(link);
             });
             dropdown.appendChild(list);

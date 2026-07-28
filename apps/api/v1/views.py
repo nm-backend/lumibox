@@ -140,7 +140,7 @@ class TitleViewSet(viewsets.ReadOnlyModelViewSet):
     @action(detail=False, methods=["get"])
     def search(self, request):
         q = request.query_params.get("q", "").strip()
-        limit = min(int(request.query_params.get("limit", 6)), 20)
+        limit = self._parse_limit(request.query_params.get("limit"))
         results = []
         if len(q) >= 2:
             titles = (
@@ -162,6 +162,29 @@ class TitleViewSet(viewsets.ReadOnlyModelViewSet):
                 for t in titles
             ]
         return Response(results)
+
+    # Значения по умолчанию и границы держим рядом с разбором,
+    # чтобы схема в extend_schema и поведение не разъезжались.
+    DEFAULT_SEARCH_LIMIT = 6
+    MAX_SEARCH_LIMIT = 20
+
+    @classmethod
+    def _parse_limit(cls, raw_value):
+        """
+        Сколько подсказок вернуть.
+
+        Параметр приходит из адресной строки, то есть это произвольный текст.
+        Голый int() на «?limit=abc» поднимал ValueError и отдавал 500 — обычная
+        ошибка в запросе не должна выглядеть как поломка сервера. Мусор и
+        бессмысленные числа заменяем значением по умолчанию.
+        """
+        try:
+            limit = int(raw_value)
+        except (TypeError, ValueError):
+            return cls.DEFAULT_SEARCH_LIMIT
+        if limit < 1:
+            return cls.DEFAULT_SEARCH_LIMIT
+        return min(limit, cls.MAX_SEARCH_LIMIT)
 
     @extend_schema(
         summary="Похожие записи",
