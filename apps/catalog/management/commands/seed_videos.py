@@ -5,16 +5,11 @@ so the "Watch" button works on title pages. Idempotent.
 The video is downloaded straight into memory and saved through Django's
 default storage backend — whether that's local filesystem or Cloudflare R2.
 No temp files are written to disk.
-
-Provider (LOCAL vs CLOUDFLARE_R2) is auto-detected from the active storage
-backend so the player can serve the correct URL (direct file or R2 proxy).
 """
 
 import urllib.request
 
 from django.core.files.base import ContentFile
-from django.core.files.storage import default_storage
-from django.core.files.storage.filesystem import FileSystemStorage
 from django.core.management.base import BaseCommand
 from django.db import transaction
 
@@ -36,11 +31,18 @@ DEMO_VIDEOS = [
     },
 ]
 
-# Which provider to use depends on the active storage backend.
-# Local FS → LOCAL (served through LocalAssetFileView).
-# S3/R2 → CLOUDFLARE_R2 (served directly from R2 CDN).
-_IS_LOCAL_STORAGE = isinstance(default_storage, FileSystemStorage)
-_PROVIDER = VideoAsset.Provider.LOCAL if _IS_LOCAL_STORAGE else VideoAsset.Provider.CLOUDFLARE_R2
+# Провайдер всегда LOCAL, независимо от того, куда default_storage кладёт файл.
+#
+# «LOCAL» описывает не диск, а способ доставки: ролик отдаётся защищённым
+# маршрутом LocalAssetFileView, который читает media_file через тот же
+# default_storage. Для файловой системы это чтение с диска, для R2 — чтение
+# объекта из бакета; в обоих случаях доступ проверяется до отдачи байтов.
+#
+# Вариант CLOUDFLARE_R2 здесь не годится: он строит URL из asset_key и
+# CLOUDFLARE_R2_DELIVERY_BASE_URL, а команда сохраняет файл в media_file и
+# ключа не заполняет. Плеер получал бы PlaybackUnavailable, то есть 404
+# на кнопке «Смотреть» ровно там, где хранилище настроено.
+_PROVIDER = VideoAsset.Provider.LOCAL
 
 
 class Command(BaseCommand):
@@ -74,8 +76,19 @@ class Command(BaseCommand):
                 entry["url"],
                 headers={"User-Agent": "Mozilla/5.0"},
             )
-            with urllib.request.urlopen(req, timeout=30) as resp:
-                data = resp.read()
+            # Ролик лежит на чужом сайте, и его недоступность — обычное дело,
+            # а не поломка LumiBox. Команда стоит в цепочке запуска контейнера,
+            # поэтому необработанное исключение здесь означало бы, что сайт
+            # вообще не поднялся из-за демонстрационного видео. Пропускаем
+            # запись и продолжаем: каталог важнее ролика.
+            try:
+                with urllib.request.urlopen(req, timeout=30) as resp:
+                    data = resp.read()
+            except OSError as error:
+                self.stdout.write(self.style.WARNING(
+                    f"  Не удалось скачать {entry['url']}: {error}. Пропускаю."
+                ))
+                continue
             self.stdout.write(f"  -> {len(data)} bytes received")
             blobs.append((title, entry["filename"], data, entry["duration"]))
 

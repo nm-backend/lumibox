@@ -37,7 +37,11 @@ services:
     healthCheckPath: /healthz/
     # На старте: миграции, наполнение демоданными (и отрисовка заглушек-постеров
     # в эфемерную ФС, раз постоянного диска нет), затем gunicorn на порту Render.
-    dockerCommand: sh -c "python manage.py migrate --noinput && python manage.py ensure_demo_data && python manage.py seed_videos && gunicorn config.wsgi:application --bind 0.0.0.0:$PORT --workers 2 --timeout 60"
+    #
+    # Жёстко обязательны только миграции: без схемы сайт нерабочий. Наполнение
+    # демоданными обёрнуто в «|| echo» намеренно — seed_videos качает ролики со
+    # сторонних сайтов, и их недоступность не должна мешать сайту подняться.
+    dockerCommand: sh -c "python manage.py migrate --noinput && { python manage.py ensure_demo_data || echo 'ensure_demo_data failed - continuing'; } && { python manage.py seed_videos || echo 'seed_videos failed - continuing'; } && gunicorn config.wsgi:application --bind 0.0.0.0:$PORT --workers 2 --timeout 60"
     envVars:
       - key: DJANGO_SETTINGS_MODULE
         value: config.settings.production

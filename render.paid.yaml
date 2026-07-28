@@ -31,7 +31,9 @@ services:
       name: lumibox-media
       mountPath: /app/media
       sizeGB: 1
-    preDeployCommand: "python manage.py migrate --noinput && python manage.py ensure_demo_data"
+    # Миграции обязательны, наполнение демоданными — нет: его отказ не должен
+    # блокировать выкладку уже проверенного кода.
+    preDeployCommand: "python manage.py migrate --noinput && { python manage.py ensure_demo_data || echo 'ensure_demo_data failed - continuing'; }"
     dockerCommand: sh -c "gunicorn config.wsgi:application --bind 0.0.0.0:$PORT --workers 3 --timeout 60"
     envVars:
       - key: DJANGO_SETTINGS_MODULE

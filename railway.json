@@ -5,7 +5,7 @@
     "dockerfilePath": "Dockerfile"
   },
   "deploy": {
-    "startCommand": "sh -c \"python manage.py migrate --noinput && python manage.py ensure_demo_data && python manage.py seed_videos && gunicorn config.wsgi:application --bind 0.0.0.0:$PORT --workers 3 --timeout 60\"",
+    "startCommand": "sh -c \"python manage.py migrate --noinput && { python manage.py ensure_demo_data || echo 'ensure_demo_data failed - continuing'; } && { python manage.py seed_videos || echo 'seed_videos failed - continuing'; } && gunicorn config.wsgi:application --bind 0.0.0.0:$PORT --workers 3 --timeout 60\"",
     "healthcheckPath": "/healthz/",
     "healthcheckTimeout": 100,
     "env": {
