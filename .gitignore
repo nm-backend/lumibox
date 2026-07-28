@@ -33,3 +33,6 @@ media/*
 .DS_Store
 Thumbs.db
 .coverage
+
+# Freebuff worktrees (embedded git repos)
+.freebuff/worktrees/
