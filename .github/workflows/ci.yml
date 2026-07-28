@@ -43,6 +43,12 @@ jobs:
         with:
           python-version: "3.13"
           cache: pip
+          # Обязательно указать явно: без этого действие ищет requirements.txt
+          # или pyproject.toml в корне, не находит (зависимости лежат в
+          # requirements/) и роняет джобу на первом же шаге. Из-за этого CI
+          # падал ещё до установки зависимостей, а значит ни линт, ни миграции,
+          # ни тесты не выполнялись вовсе — красный CI ничего не проверял.
+          cache-dependency-path: requirements/*.txt
 
       - name: Установка зависимостей
         run: pip install -r requirements/development.txt
