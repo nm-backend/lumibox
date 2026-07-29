@@ -67,6 +67,8 @@
     border-radius: var(--radius-lg);
     box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6), 0 4px 12px rgba(0, 0, 0, 0.45), 0 0 20px var(--color-accent-glow);
     transition: transform var(--transition), box-shadow var(--transition);
+    /* Subtle border glow — makes the poster look like a cinema screen */
+    border: 1px solid rgba(255, 184, 48, 0.08);
 }
 
 .film-hero__poster:hover {
@@ -211,7 +213,7 @@
     display: inline-flex;
     align-items: baseline;
     gap: 2px;
-    padding: var(--space-1) var(--space-3);
+    padding: var(--space-2) var(--space-3);
     background-color: var(--color-accent-dim);
     border: 1px solid rgba(255, 184, 48, 0.15);
     border-radius: var(--radius-sm);
@@ -281,10 +283,11 @@
 
 .season-group {
     margin-bottom: var(--space-6);
-    padding: var(--space-4);
+    padding: var(--space-5);
     background: var(--color-surface);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
 }
 
 .season__title {
@@ -387,11 +390,11 @@
     display: flex;
     align-items: center;
     gap: var(--space-3);
-    padding: var(--space-2) var(--space-3);
+    padding: var(--space-3) var(--space-4);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
     transition: border-color var(--transition-fast), background-color var(--transition-fast),
-                transform var(--transition-fast);
+                transform var(--transition-fast), box-shadow var(--transition-fast);
 }
 
 .crew:hover {
@@ -399,6 +402,7 @@
     border-color: var(--color-accent);
     color: var(--color-text);
     transform: translateX(4px);
+    box-shadow: 0 0 12px var(--color-accent-glow);
 }
 
 .crew__body {

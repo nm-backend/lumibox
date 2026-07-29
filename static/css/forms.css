@@ -146,6 +146,7 @@
     border-left: 3px solid var(--color-accent);
     background-color: var(--color-surface);
     font-size: var(--text-sm);
+    box-shadow: var(--shadow-sm);
 }
 
 .message--success {

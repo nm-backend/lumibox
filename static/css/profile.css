@@ -22,6 +22,8 @@
     box-shadow: var(--shadow-card);
     position: relative;
     overflow: hidden;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border);
 }
 
 /* Subtle gradient accent at the top of the profile card */
@@ -74,6 +76,8 @@
     padding: var(--space-4);
     text-align: center;
     box-shadow: var(--shadow-sm);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border);
 }
 
 .profile-stat {
@@ -118,11 +122,25 @@
     gap: var(--space-5);
     align-items: flex-start;
     margin-bottom: var(--space-6);
-    padding: var(--space-5);
+    padding: var(--space-6);
     background: var(--color-surface);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-sm);
+    box-shadow: var(--shadow-sm), 0 0 20px var(--color-accent-glow);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Subtle gradient accent at the top of the profile header */
+.profile-header::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 15%;
+    right: 15%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--color-accent), transparent);
+    opacity: 0.3;
 }
 
 .profile-header__bio {

@@ -55,7 +55,7 @@
     transition: background var(--transition-fast), border-color var(--transition-fast),
                 opacity var(--transition-fast), transform var(--transition-fast);
     opacity: 0;
-    box-shadow: var(--shadow-glass);
+    box-shadow: var(--shadow-glass), 0 0 16px rgba(0, 0, 0, 0.3);
 }
 
 .carousel:hover .carousel__btn {
@@ -193,6 +193,8 @@
     background: none;
     border: none;
     color: var(--color-text);
+    font-size: var(--text-sm);
+    min-height: var(--touch-target);
 }
 
 .search__input::placeholder {
@@ -447,7 +449,7 @@
     align-items: center;
     gap: 2px;
     color: var(--color-text-dim);
-    font-size: 0.6rem;
+    font-size: 0.65rem;
     font-weight: 600;
     transition: color var(--transition-fast), transform var(--transition-fast);
     text-decoration: none;
@@ -493,11 +495,11 @@
 }
 
 .bottom-nav__icon {
-    width: 22px;
-    height: 22px;
+    width: 24px;
+    height: 24px;
     display: grid;
     place-items: center;
-    font-size: 1.1rem;
+    font-size: 1.2rem;
 }
 
 @media (max-width: 720px) {
@@ -617,6 +619,8 @@
     will-change: transform;
     transition: border-color var(--transition), transform var(--transition-spring),
                 box-shadow var(--transition);
+    /* Subtle inner shadow for depth — makes the poster look recessed */
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03);
 }
 
 .card:hover .card__poster {
@@ -690,7 +694,7 @@
     justify-content: center;
     padding: var(--space-4);
 
-    background: linear-gradient(180deg, transparent 30%, rgba(11, 13, 18, 0.95) 100%);
+    background: linear-gradient(180deg, transparent 0%, rgba(11, 13, 18, 0.2) 40%, rgba(11, 13, 18, 0.98) 100%);
     opacity: 0;
     transition: opacity var(--transition);
 }
@@ -748,13 +752,14 @@
 }
 
 .card__overlay-action {
-    padding: var(--space-2) var(--space-4);
+    padding: var(--space-2) var(--space-5);
 
     background-color: var(--color-accent);
     border-radius: var(--radius-full);
     color: var(--color-on-accent);
-    font-size: var(--text-xs);
+    font-size: var(--text-sm);
     font-weight: 700;
+    letter-spacing: 0.02em;
     box-shadow: var(--shadow-accent);
 
     transform: translateY(8px);
@@ -786,7 +791,7 @@
     top: var(--space-2);
     left: var(--space-2);
 
-    padding: 2px var(--space-2);
+    padding: 3px var(--space-3);
     background-color: rgba(11, 13, 18, 0.85);
     backdrop-filter: blur(6px);
     border-radius: var(--radius-sm);
@@ -809,9 +814,10 @@
     top: var(--space-2);
     right: var(--space-2);
 
-    padding: 2px var(--space-2);
+    padding: 3px var(--space-3);
     background-color: rgba(11, 13, 18, 0.85);
     backdrop-filter: blur(6px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: var(--radius-sm);
 
     color: var(--color-text-muted);
@@ -822,13 +828,9 @@
 .card__name {
     font-size: var(--text-sm);
     font-weight: 600;
-    line-height: 1.35;
-    /* Название больше не обёрнуто в ссылку (её заменил card__link),
-       поэтому подсветку при наведении задаём от карточки. */
+    line-height: 1.4;
     transition: color var(--transition-fast);
 
-    /* Длинное название обрезаем двумя строками, чтобы карточки
-       в сетке не разъезжались по высоте. */
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
@@ -840,8 +842,9 @@
 }
 
 .card__meta {
-    color: var(--color-text-dim);
+    color: var(--color-text-muted);
     font-size: var(--text-xs);
+    line-height: 1.4;
 }
 
 /* ---------- Бейджи ---------- */
@@ -884,14 +887,15 @@
     align-items: center;
     justify-content: center;
     gap: var(--space-2);
-    padding: var(--space-3) var(--space-5);
+    padding: var(--space-3) var(--space-6);
     position: relative;
     overflow: hidden;
 
-    border-radius: var(--radius-sm);
+    border-radius: var(--radius-md);
     font-size: var(--text-sm);
     font-weight: 600;
     white-space: nowrap;
+    min-height: var(--touch-target);
     transition: background-color var(--transition-fast), border-color var(--transition-fast),
                 color var(--transition-fast), transform var(--transition-fast),
                 box-shadow var(--transition);
@@ -1112,9 +1116,10 @@
     bottom: var(--space-2);
     left: var(--space-2);
 
-    padding: 2px var(--space-2);
+    padding: 3px var(--space-3);
     background-color: rgba(11, 13, 18, 0.85);
     backdrop-filter: blur(6px);
+    border: 1px solid rgba(255, 184, 48, 0.12);
     border-radius: var(--radius-sm);
     color: var(--color-accent);
     font-size: var(--text-xs);
@@ -1178,7 +1183,7 @@
     content: "";
     display: block;
     width: 48px;
-    height: 3px;
+    height: 4px;
     margin-top: var(--space-2);
     background: linear-gradient(90deg, var(--color-accent), var(--color-accent-dim), transparent);
     border-radius: 2px;
@@ -1348,7 +1353,7 @@
     display: flex;
     align-items: center;
     gap: var(--space-3);
-    padding: var(--space-3) var(--space-4);
+    padding: var(--space-4) var(--space-5);
     min-width: 280px;
     max-width: 420px;
     background: var(--glass-bg);

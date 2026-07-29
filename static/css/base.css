@@ -227,7 +227,8 @@ body:not([data-loading]) .site-main {
     display: flex;
     justify-content: center;
     margin-bottom: var(--space-5);
-    opacity: 0.6;
+    opacity: 0.5;
+    color: var(--color-accent);
 }
 
 .empty-state__title {
@@ -260,6 +261,7 @@ body:not([data-loading]) .site-main {
     padding: var(--space-10) var(--space-4);
     max-width: 520px;
     margin: 0 auto;
+    animation: fadeUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) both;
 }
 
 .error-page__illustration {
