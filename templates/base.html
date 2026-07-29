@@ -47,6 +47,23 @@
 
     {% block extra_meta %}{% endblock %}
     {% block extra_css %}{% endblock %}
+
+    {# Google Analytics / Google Tag Manager — вставляется только когда
+       GA_MEASUREMENT_ID задан через переменную окружения. Без него
+       на странице нет ни лишних байт, ни запросов к Google.
+    #}
+    {% if ga_measurement_id %}
+    <script async src="https://www.googletagmanager.com/gtag/js?id={{ ga_measurement_id }}"></script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', '{{ ga_measurement_id }}', {
+        'cookie_flags': 'SameSite=Lax;Secure',
+        'anonymize_ip': true,
+    });
+    </script>
+    {% endif %}
 </head>
 <body>
     <div class="cinema-glow" aria-hidden="true"></div>

@@ -83,3 +83,36 @@ services:
         value: auto
       - key: CLOUDFLARE_R2_PUBLIC_URL
         sync: false
+
+      # --- Sentry (опционально) ---
+      # Бесплатный tier: 5 000 событий/мес. Если не задан — не инициализируется.
+      - key: SENTRY_DSN
+        sync: false
+
+      # --- Google Analytics (опционально) ---
+      # Если не задан — gtag не вставляется в шаблон.
+      - key: GA_MEASUREMENT_ID
+        sync: false
+
+      # --- Email / SMTP (опционально, но нужен для сброса пароля) ---
+      # Без этих переменных письма печатаются в консоль (сброс пароля не работает).
+      # Бесплатные варианты: Mailgun (1 000/мес), SendGrid (100/день), Gmail SMTP.
+      - key: EMAIL_HOST
+        sync: false
+      - key: EMAIL_PORT
+        value: "587"
+      - key: EMAIL_HOST_USER
+        sync: false
+      - key: EMAIL_HOST_PASSWORD
+        sync: false
+      - key: EMAIL_USE_TLS
+        value: "True"
+      - key: DEFAULT_FROM_EMAIL
+        value: "LumiBox <noreply@lumibox.app>"
+
+      # --- Stripe (опционально) ---
+      # Без ключей Stripe работает в offline-режиме (платежи не проходят).
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false

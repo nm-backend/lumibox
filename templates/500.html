@@ -1,14 +1,19 @@
 {% extends "base.html" %}
-{% load static i18n %}
+{% load static i18n icons %}
 
 {% block page_title %}{% trans "Ошибка сервера (500) — LumiBox" %}{% endblock %}
+{% block page_description %}{% trans "На сервере произошла ошибка. Мы уже работаем над её исправлением." %}{% endblock %}
+{% block og_title %}{% trans "Ошибка сервера (500) — LumiBox" %}{% endblock %}
+{% block og_description %}{% trans "На сервере произошла ошибка. Мы уже работаем над её исправлением." %}{% endblock %}
+{% block twitter_title %}{% trans "Ошибка сервера (500) — LumiBox" %}{% endblock %}
+{% block twitter_description %}{% trans "На сервере произошла ошибка. Мы уже работаем над её исправлением." %}{% endblock %}
 
 {% block content %}
     <div class="empty-state" style="padding: var(--space-8) 0;">
         <p style="font-size: 5rem; font-weight: 800; color: var(--color-accent); line-height: 1; margin-bottom: var(--space-2);">500</p>
         <p class="empty-state__title">{% trans "Что-то пошло не так" %}</p>
         <p style="max-width: 40ch; margin: 0 auto; color: var(--color-text-muted);">
-            {% trans "Мы уже знаем об этой ошибке и работаем над её исправлением. Попробуйте обновить страницу позже." %}
+            {% trans "На сервере произошла внутренняя ошибка. Мы уже знаем о ней и чиним. Попробуйте обновить страницу через несколько минут." %}
         </p>
         <p class="empty-state__action" style="display: flex; flex-wrap: wrap; gap: var(--space-3); justify-content: center;">
             <a class="button button--primary" href="{% url 'catalog:home' %}">{% trans "На главную" %}</a>

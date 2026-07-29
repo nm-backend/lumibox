@@ -21,6 +21,10 @@
             {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
 
             <button class="button button--primary auth-card__submit" type="submit">{% trans "Войти" %}</button>
+
+            <p class="auth-card__forgot">
+                <a href="{% url 'users:password_reset' %}">{% trans "Забыли пароль?" %}</a>
+            </p>
         </form>
 
         <p class="auth-card__footer">

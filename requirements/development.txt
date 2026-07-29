@@ -10,3 +10,9 @@ ruff==0.15.22
 # не выполнялись — именно так нашлась команда seed_catalog с 0% покрытия.
 # Запуск: coverage run --source=apps manage.py test apps && coverage report
 coverage==7.15.2
+
+# Selenium: browser automation для healthcheck-тестов плеера.
+selenium==4.46.0
+
+# WebDriver Manager: авто-загрузка chromedriver под версию Chrome.
+webdriver-manager==4.1.2

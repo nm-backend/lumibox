@@ -144,6 +144,32 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 # Разрешаем скрипты и стили только с собственного домена.
 # unsafe-inline для стилей нужен, так как Django-админка и некоторые
 # плагины используют инлайновые стили.
+# ─── Sentry: отслеживание ошибок ─────────────────────────────────
+# Бесплатный tier (5 000 событий/мес). Если SENTRY_DSN не задан,
+# инициализация пропускается — проект работает без Sentry.
+_SENTRY_DSN = env("SENTRY_DSN", default="")  # noqa: F405
+if _SENTRY_DSN:
+    import sentry_sdk
+    from sentry_sdk.integrations.django import DjangoIntegration
+
+    sentry_sdk.init(
+        dsn=_SENTRY_DSN,
+        integrations=[DjangoIntegration()],
+        # Отправляем не больше одного события в секунду — защита от
+        # лавины ошибок при падении внешнего сервиса.
+        traces_sample_rate=0.1,
+        send_default_pii=False,
+        environment="production",
+    )
+
+
+# Stripe — платежи. Ключи задаются переменными окружения.
+# Если не заданы — StripeProvider работает в offline-режиме,
+# не создавая настоящих сессий.
+STRIPE_SECRET_KEY = env("STRIPE_SECRET_KEY", default="")  # noqa: F405
+STRIPE_WEBHOOK_SECRET = env("STRIPE_WEBHOOK_SECRET", default="")  # noqa: F405
+
+
 MIDDLEWARE += [  # noqa: F405
     "apps.core.middleware.ContentSecurityPolicyMiddleware",
 ]

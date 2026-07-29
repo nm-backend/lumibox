@@ -33,6 +33,23 @@ environ.Env.read_env(BASE_DIR / ".env")
 # Если переменной нет — проект упадёт сразу, а не втихую с небезопасным ключом.
 SECRET_KEY = env("DJANGO_SECRET_KEY")
 
+# Email — настройки SMTP. По умолчанию письма печатаются в консоль.
+# В продакшене задайте EMAIL_HOST/EMAIL_HOST_USER/EMAIL_HOST_PASSWORD
+# через переменные окружения (Mailgun, SendGrid, Gmail SMTP — все
+# бесплатны на малых объёмах).
+EMAIL_BACKEND = env("EMAIL_BACKEND", default="django.core.mail.backends.console.EmailBackend")
+EMAIL_HOST = env("EMAIL_HOST", default="")
+EMAIL_PORT = env.int("EMAIL_PORT", default=587)
+EMAIL_HOST_USER = env("EMAIL_HOST_USER", default="")
+EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", default="")
+EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS", default=True)
+DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="LumiBox <noreply@lumibox.app>")
+SERVER_EMAIL = env("SERVER_EMAIL", default="root@lumibox.app")
+
+# Google Analytics / Google Tag Manager — идентификатор отслеживания.
+# Если не задан, трекинг не вставляется в шаблон.
+GA_MEASUREMENT_ID = env("GA_MEASUREMENT_ID", default="")
+
 DEBUG = env("DJANGO_DEBUG")
 
 ALLOWED_HOSTS = env("DJANGO_ALLOWED_HOSTS")
@@ -89,6 +106,9 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     # Защита от brute-force: считает неудачные попытки и блокирует.
     "axes.middleware.AxesMiddleware",
+    # Content-Security-Policy: defence-in-depth заголовок, ограничивает,
+    # какие ресурсы браузер может загружать на странице.
+    "apps.core.middleware.ContentSecurityPolicyMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -106,6 +126,10 @@ TEMPLATES = [
                 "django.template.context_processors.i18n",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                # Google Analytics ID — доступен во всех шаблонах как
+                # {{ ga_measurement_id }}. Если не задан — пустая строка,
+                # в base.html блок gtag не рендерится.
+                "apps.core.context_processors.global_settings",
             ],
         },
     },
@@ -156,6 +180,10 @@ CACHE_TTL_RECOMMENDATIONS = 60 * 5
 # Провайдеры видео задаются только конфигурацией окружения/инфраструктуры. В БД
 # хранится ключ ресурса, а не URL, поэтому редактор не может добавить произвольный
 # источник в плеер. Для локальных файлов URL строится защищённым Django-маршрутом.
+# Используется в WebP-сигнале: True для локального диска (post_save
+# конвертирует файл на диске), False для S3/R2 (конвертацию делает CDN).
+USE_LOCAL_STORAGE = not bool(REDIS_URL) or not env("AWS_STORAGE_BUCKET_NAME", default="")
+
 STREAMING_PROVIDER_CONFIG = {
     "cloudflare_stream": {"delivery_base_url": env("CLOUDFLARE_STREAM_DELIVERY_BASE_URL", default="")},
     "cloudflare_r2": {"delivery_base_url": env("CLOUDFLARE_R2_DELIVERY_BASE_URL", default="")},

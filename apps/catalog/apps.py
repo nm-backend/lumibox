@@ -11,3 +11,6 @@ class CatalogConfig(AppConfig):
     def ready(self):
         # Импорт именно здесь: на момент импорта apps.py модели ещё не загружены.
         from apps.catalog import signals  # noqa: F401
+        # WebP-конвертация: при загрузке постера/фона/логотипа
+        # создаёт WebP-копию рядом с оригиналом.
+        from apps.catalog import webp  # noqa: F401
