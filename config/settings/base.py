@@ -436,3 +436,9 @@ LOGGING = {
         },
     },
 }
+
+
+# Python 3.14 workaround: подменяет BaseContext.__copy__,
+# который ломается на Python 3.14.14+.
+# TODO: Убрать после обновления Django.
+from apps.core import py314_compat  # noqa: F401, E402

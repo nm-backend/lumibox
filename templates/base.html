@@ -28,14 +28,14 @@
        одинаковых адресов. Страница может переопределить блок, если у неё
        есть свой основной адрес.
     {% endcomment %}
-    <link rel="canonical" href="{% block canonical_url %}{% absolute_url request.path %}{% endblock %}">
+    <link rel="canonical" href="{% block canonical_url %}{% if request %}{% absolute_url request.path %}{% endif %}{% endblock %}">
 
     {# Open Graph / Social sharing #}
     <meta property="og:site_name" content="LumiBox">
     <meta property="og:type" content="website">
     <meta property="og:title" content="{% block og_title %}{% trans 'LumiBox — каталог фильмов и сериалов' %}{% endblock %}">
     <meta property="og:description" content="{% block og_description %}{% trans 'Каталог фильмов и сериалов: поиск, фильтры, подборки.' %}{% endblock %}">
-    <meta property="og:url" content="{{ request.build_absolute_uri }}">
+    <meta property="og:url" content="{% if request %}{{ request.build_absolute_uri }}{% endif %}">
     <meta property="og:image" content="{% block og_image %}{% absolute_static 'img/og-default.png' %}{% endblock %}">
     <meta property="og:locale" content="{{ LANGUAGE_CODE }}">
 
@@ -47,6 +47,50 @@
 
     {% block extra_meta %}{% endblock %}
     {% block extra_css %}{% endblock %}
+
+    {# Organization Schema — основная информация о сайте для поисковиков #}
+    {% if request %}
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "LumiBox",
+        "url": "{{ request.build_absolute_uri|cut:request.get_full_path }}",
+        "description": "{% trans 'Каталог фильмов и сериалов: поиск, фильтры, подборки.' %}",
+        "logo": "{% absolute_static 'img/favicon.svg' %}",
+        "sameAs": [
+            "https://t.me/lumiboxxx",
+            "https://github.com/nm-backend/lumibox"
+        ]
+    }
+    </script>
+    {% endif %}
+
+    {# BreadcrumbList Schema — навигационная цепочка для поисковиков #}
+    {% block breadcrumb_schema %}
+    {% if request %}
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "{% trans 'Главная' %}",
+                "item": "{% absolute_url '/' %}"
+            }{% if request.resolver_match and request.resolver_match.url_name and request.resolver_match.url_name != 'home' %},
+            {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "{{ request.resolver_match.url_name|capfirst }}",
+                "item": "{{ request.build_absolute_uri }}"
+            }{% endif %}
+        ]
+    }
+    </script>
+    {% endif %}
+    {% endblock %}
 
     {# Google Analytics / Google Tag Manager — вставляется только когда
        GA_MEASUREMENT_ID задан через переменную окружения. Без него

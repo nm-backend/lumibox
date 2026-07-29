@@ -184,4 +184,129 @@
             </div>
         </section>
     {% endif %}
+
+    {# ---------- SEO-секция: информация о платформе ---------- #}
+    <section class="seo-info section reveal" aria-labelledby="seo-heading">
+        <div class="seo-info__grid">
+            <div class="seo-info__content">
+                <h2 id="seo-heading" class="seo-info__heading">{% trans "LumiBox — ваш проводник в мире кино" %}</h2>
+                <p class="seo-info__text">
+                    {% blocktranslate trimmed %}
+                        LumiBox — это современный каталог фильмов и сериалов, созданный для
+                        настоящих ценителей киноискусства. Мы объединяем удобный поиск,
+                        интеллектуальные рекомендации и богатый набор фильтров, чтобы вы
+                        всегда находили то, что хотите посмотреть.
+                    {% endblocktranslate %}
+                </p>
+            </div>
+
+            <div class="seo-info__features">
+                <article class="seo-feature">
+                    <div class="seo-feature__icon">{% icon "search" size=20 %}</div>
+                    <div>
+                        <h3 class="seo-feature__title">{% trans "Умный поиск и фильтры" %}</h3>
+                        <p class="seo-feature__desc">{% trans "Ищите по названию, жанру, стране, году выпуска, рейтингу и многим другим параметрам. Мгновенные подсказки при вводе." %}</p>
+                    </div>
+                </article>
+
+                <article class="seo-feature">
+                    <div class="seo-feature__icon">{% icon "heart" size=20 %}</div>
+                    <div>
+                        <h3 class="seo-feature__title">{% trans "Персональные рекомендации" %}</h3>
+                        <p class="seo-feature__desc">{% trans "Алгоритмы анализируют ваши предпочтения и предлагают фильмы, которые вам действительно понравятся. Коллекция растёт вместе с вашими интересами." %}</p>
+                    </div>
+                </article>
+
+                <article class="seo-feature">
+                    <div class="seo-feature__icon">{% icon "star" size=20 %}</div>
+                    <div>
+                        <h3 class="seo-feature__title">{% trans "Огромный каталог контента" %}</h3>
+                        <p class="seo-feature__desc">{% trans "Тысячи фильмов и сериалов — от мировой классики до свежих релизов. Регулярное пополнение и актуальные подборки." %}</p>
+                    </div>
+                </article>
+
+                <article class="seo-feature">
+                    <div class="seo-feature__icon">{% icon "play" size=20 %}</div>
+                    <div>
+                        <h3 class="seo-feature__title">{% trans "HD качество" %}</h3>
+                        <p class="seo-feature__desc">{% trans "Все видео доступны в высоком разрешении. Адаптивный плеер подстраивается под скорость вашего интернета." %}</p>
+                    </div>
+                </article>
+
+                <article class="seo-feature">
+                    <div class="seo-feature__icon">{% icon "list" size=20 %}</div>
+                    <div>
+                        <h3 class="seo-feature__title">{% trans "Личные списки и история" %}</h3>
+                        <p class="seo-feature__desc">{% trans "Сохраняйте фильмы в избранное, отмечайте просмотренные, возвращайтесь к недосмотренным. История просмотров синхронизируется на всех устройствах." %}</p>
+                    </div>
+                </article>
+
+                <article class="seo-feature">
+                    <div class="seo-feature__icon">{% icon "device" size=20 %}</div>
+                    <div>
+                        <h3 class="seo-feature__title">{% trans "Адаптивный дизайн" %}</h3>
+                        <p class="seo-feature__desc">{% trans "Удобный интерфейс на любом устройстве: компьютере, планшете или телефоне. Полная поддержка тёмной и светлой темы." %}</p>
+                    </div>
+                </article>
+            </div>
+
+            <div class="seo-info__closing">
+                <p class="seo-info__text">
+                    {% blocktranslate trimmed %}
+                        LumiBox — это больше, чем просто каталог. Мы создаём сообщество
+                        любителей кино, где каждый может найти что-то новое, поделиться
+                        мнением и открыть для себя мир качественного кинематографа.
+                        Присоединяйтесь к LumiBox и откройте для себя тысячи историй!
+                    {% endblocktranslate %}
+                </p>
+            </div>
+        </div>
+    </section>
+
+    {# ---------- Trust section ---------- #}
+    <section class="trust-section section reveal" aria-labelledby="trust-heading">
+        <h2 id="trust-heading" class="trust-section__heading">{% trans "Надёжность и безопасность" %}</h2>
+        <div class="trust-section__grid">
+            <div class="trust-item">
+                <svg class="trust-item__icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                </svg>
+                <span class="trust-item__label">{% trans "HTTPS" %}</span>
+            </div>
+            <div class="trust-item">
+                <svg class="trust-item__icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
+                <span class="trust-item__label">{% trans "Быстрая загрузка" %}</span>
+            </div>
+            <div class="trust-item">
+                <svg class="trust-item__icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"/>
+                    <line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/>
+                    <line x1="2" y1="12" x2="22" y2="12"/>
+                </svg>
+                <span class="trust-item__label">{% trans "Адаптивный дизайн" %}</span>
+            </div>
+            <div class="trust-item">
+                <svg class="trust-item__icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                </svg>
+                <span class="trust-item__label">{% trans "Безопасный вход" %}</span>
+            </div>
+            <div class="trust-item">
+                <svg class="trust-item__icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="23 4 23 10 17 10"/>
+                    <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+                </svg>
+                <span class="trust-item__label">{% trans "Регулярные обновления" %}</span>
+            </div>
+            <div class="trust-item">
+                <svg class="trust-item__icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
+                </svg>
+                <span class="trust-item__label">{% trans "Открытый код" %}</span>
+            </div>
+        </div>
+    </section>
 {% endblock %}

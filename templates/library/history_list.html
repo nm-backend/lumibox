@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load i18n %}
+{% load static i18n icons %}
 
 {% block page_title %}{% trans "История просмотров — LumiBox" %}{% endblock %}
 
@@ -13,7 +13,7 @@
         {% if history %}
             <form method="post" action="{% url 'library:clear_history' %}">
                 {% csrf_token %}
-                <button class="button button--ghost" type="submit">{% trans "Очистить историю" %}</button>
+                <button class="button button--ghost" type="submit">{% icon "trash" size=14 %} {% trans "Очистить историю" %}</button>
             </form>
         {% endif %}
     </div>
@@ -28,10 +28,20 @@
         {% include "includes/pagination.html" %}
     {% else %}
         <div class="empty-state">
+            <div class="empty-state__icon" aria-hidden="true">
+                <svg viewBox="0 0 64 64" width="64" height="64" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="32" cy="32" r="24" stroke-opacity="0.3"/>
+                    <polyline points="32,16 32,34 44,40" stroke-opacity="0.4"/>
+                    <line x1="16" y1="16" x2="22" y2="22" stroke-opacity="0.2"/>
+                    <line x1="48" y1="16" x2="42" y2="22" stroke-opacity="0.2"/>
+                    <line x1="16" y1="48" x2="22" y2="42" stroke-opacity="0.2"/>
+                    <line x1="48" y1="48" x2="42" y2="42" stroke-opacity="0.2"/>
+                </svg>
+            </div>
             <p class="empty-state__title">{% trans "История пуста" %}</p>
-            <p>{% trans "Здесь появятся фильмы и сериалы, страницы которых вы открывали." %}</p>
+            <p class="empty-state__desc">{% trans "Здесь появятся фильмы и сериалы, которые вы открывали. Включайте что-нибудь интересное!" %}</p>
             <p class="empty-state__action">
-                <a class="button button--primary" href="{% url 'catalog:title_list' %}">{% trans "Открыть каталог" %}</a>
+                <a class="button button--primary" href="{% url 'catalog:title_list' %}">{% icon "movie" size=14 %} {% trans "Открыть каталог" %}</a>
             </p>
         </div>
     {% endif %}

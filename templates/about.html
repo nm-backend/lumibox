@@ -1,0 +1,254 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block page_title %}{% trans "О проекте — LumiBox" %}{% endblock %}
+{% block page_description %}{% trans "LumiBox — современный каталог фильмов и сериалов с открытым кодом. Узнайте о миссии, преимуществах и планах развития платформы." %}{% endblock %}
+{% block og_title %}{% trans "О проекте LumiBox" %}{% endblock %}
+{% block og_description %}{% trans "Современный каталог фильмов и сериалов: миссия, преимущества, дорожная карта и ответы на частые вопросы." %}{% endblock %}
+{% block twitter_title %}{% trans "О проекте LumiBox" %}{% endblock %}
+{% block twitter_description %}{% trans "Современный каталог фильмов и сериалов: миссия, преимущества, дорожная карта." %}{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/forms.css' %}">
+{% endblock %}
+
+{% block content %}
+    <div class="legal-page">
+        <h1 class="legal-page__title">{% trans "О проекте LumiBox" %}</h1>
+
+        {# Mission #}
+        <section class="legal-section">
+            <h2 class="legal-section__title">{% trans "Что такое LumiBox?" %}</h2>
+            <p class="legal-section__text">
+                {% blocktranslate trimmed %}
+                    LumiBox — это современная платформа-каталог фильмов и сериалов,
+                    созданная для тех, кто ценит качественное кино. Мы объединяем
+                    удобный поиск, интеллектуальные рекомендации, тематические подборки
+                    и персональную библиотеку в одном интерфейсе.
+                {% endblocktranslate %}
+            </p>
+            <p class="legal-section__text">
+                {% blocktranslate trimmed %}
+                    Проект родился из желания сделать просмотр кино максимально
+                    удобным: без навязчивой рекламы, без сложных подписок, без
+                    необходимости разбираться в интерфейсе. Просто открываете —
+                    и находите то, что хотите посмотреть.
+                {% endblocktranslate %}
+            </p>
+        </section>
+
+        {# Mission #}
+        <section class="legal-section">
+            <h2 class="legal-section__title">{% trans "Наша миссия" %}</h2>
+            <p class="legal-section__text">
+                {% blocktranslate trimmed %}
+                    Мы верим, что хорошее кино должно быть доступно каждому. Наша
+                    миссия — создать удобный инструмент для поиска и каталогизации
+                    фильмов и сериалов, который помогает открывать новые произведения
+                    и не терять любимые.
+                {% endblocktranslate %}
+            </p>
+            <p class="legal-section__text">
+                {% blocktranslate trimmed %}
+                    LumiBox — проект с открытым исходным кодом. Это значит, что
+                    любой разработчик может изучить код, предложить улучшения или
+                    использовать наработки в своих проектах. Мы строим платформу
+                    сообща, а не за закрытыми дверями.
+                {% endblocktranslate %}
+            </p>
+        </section>
+
+        {# Why choose us #}
+        <section class="legal-section">
+            <h2 class="legal-section__title">{% trans "Почему выбирают LumiBox?" %}</h2>
+
+            <div class="legal-format">
+                <h3 class="legal-format__title">{% trans "Богатый каталог" %}</h3>
+                <p class="legal-section__text">
+                    {% blocktranslate trimmed %}
+                        Тысячи фильмов и сериалов: от золотой классики до последних
+                        новинок. Мы регулярно пополняем коллекцию и следим за
+                        актуальными релизами.
+                    {% endblocktranslate %}
+                </p>
+            </div>
+
+            <div class="legal-format">
+                <h3 class="legal-format__title">{% trans "Умный поиск" %}</h3>
+                <p class="legal-section__text">
+                    {% blocktranslate trimmed %}
+                        Ищите по названию, жанру, стране, году, рейтингу или
+                        режиссёру. Быстрые подсказки при вводе и гибкие фильтры
+                        помогают найти exactly то, что нужно.
+                    {% endblocktranslate %}
+                </p>
+            </div>
+
+            <div class="legal-format">
+                <h3 class="legal-format__title">{% trans "Персональные рекомендации" %}</h3>
+                <p class="legal-section__text">
+                    {% blocktranslate trimmed %}
+                        Платформа запоминает ваши предпочтения и предлагает фильмы,
+                        которые вам действительно могут понравиться. Чем больше вы
+                        смотрите — тем точнее рекомендации.
+                    {% endblocktranslate %}
+                </p>
+            </div>
+
+            <div class="legal-format">
+                <h3 class="legal-format__title">{% trans "Личная библиотека" %}</h3>
+                <p class="legal-section__text">
+                    {% blocktranslate trimmed %}
+                        Сохраняйте фильмы в избранное, отмечайте просмотренные,
+                        возвращайтесь к недосмотренным. История просмотров и
+                        список желаемого всегда под рукой.
+                    {% endblocktranslate %}
+                </p>
+            </div>
+
+            <div class="legal-format">
+                <h3 class="legal-format__title">{% trans "Современный дизайн" %}</h3>
+                <p class="legal-section__text">
+                    {% blocktranslate trimmed %}
+                        Продуманный интерфейс с тёмной и светлой темой, адаптивная
+                        вёрстка для любых устройств, плавные анимации — смотреть
+                        кино на LumiBox одинаково приятно на компьютере, планшете
+                        и телефоне.
+                    {% endblocktranslate %}
+                </p>
+            </div>
+
+            <div class="legal-format">
+                <h3 class="legal-format__title">{% trans "Безопасность и открытость" %}</h3>
+                <p class="legal-section__text">
+                    {% blocktranslate trimmed %}
+                        HTTPS, Argon2-хеширование паролей, Content-Security-Policy
+                        заголовки и открытый исходный код, который может проверить
+                        любой желающий. Ваши данные в безопасности.
+                    {% endblocktranslate %}
+                </p>
+            </div>
+        </section>
+
+        {# Supported devices #}
+        <section class="legal-section">
+            <h2 class="legal-section__title">{% trans "Поддерживаемые устройства" %}</h2>
+            <ul class="legal-list">
+                <li class="legal-list__item">{% trans "Компьютеры под управлением Windows, macOS, Linux" %}</li>
+                <li class="legal-list__item">{% trans "Планшеты на iPadOS и Android" %}</li>
+                <li class="legal-list__item">{% trans "Смартфоны с любым браузером (Safari, Chrome, Firefox)" %}</li>
+                <li class="legal-list__item">{% trans "Телевизоры с браузером (Smart TV, Apple TV)" %}</li>
+            </ul>
+            <p class="legal-section__text">
+                {% blocktranslate trimmed %}
+                    LumiBox — это веб-приложение, поэтому оно работает на любом
+                    устройстве с современным браузером. Никаких приложений не
+                    требуется: просто откройте сайт.
+                {% endblocktranslate %}
+            </p>
+        </section>
+
+        {# Roadmap #}
+        <section class="legal-section">
+            <h2 class="legal-section__title">{% trans "Планы развития" %}</h2>
+            <p class="legal-section__text">
+                {% blocktranslate trimmed %}
+                    LumiBox активно развивается. Вот что мы планируем в ближайшее время:
+                {% endblocktranslate %}
+            </p>
+            <ul class="legal-list">
+                <li class="legal-list__item">
+                    {% blocktranslate trimmed %}
+                        <strong>Расширение каталога:</strong> добавление новых фильмов
+                        и сериалов, подключение дополнительных источников контента.
+                    {% endblocktranslate %}
+                </li>
+                <li class="legal-list__item">
+                    {% blocktranslate trimmed %}
+                        <strong>Мобильное приложение:</strong> нативная версия для
+                        iOS и Android с поддержкой офлайн-списков.
+                    {% endblocktranslate %}
+                </li>
+                <li class="legal-list__item">
+                    {% blocktranslate trimmed %}
+                        <strong>Сообщество:</strong> расширенные профили пользователей,
+                        списки друзей, обсуждения и совместные подборки.
+                    {% endblocktranslate %}
+                </li>
+                <li class="legal-list__item">
+                    {% blocktranslate trimmed %}
+                        <strong>Интеграции:</strong> синхронизация с Kinopoisk, IMDb
+                        и другими сервисами для импорта оценок и списков.
+                    {% endblocktranslate %}
+                </li>
+                <li class="legal-list__item">
+                    {% blocktranslate trimmed %}
+                        <strong>Уведомления:</strong> подписка на новые серии, релизы
+                        любимых режиссёров и персональные дайджесты.
+                    {% endblocktranslate %}
+                </li>
+            </ul>
+        </section>
+
+        {# FAQ #}
+        <section class="legal-section">
+            <h2 class="legal-section__title">{% trans "Часто задаваемые вопросы" %}</h2>
+
+            <div class="legal-format">
+                <h3 class="legal-format__title">{% trans "LumiBox — это бесплатно?" %}</h3>
+                <p class="legal-section__text">
+                    {% blocktranslate trimmed %}
+                        Да, LumiBox полностью бесплатен. Никаких подписок, скрытых
+                        платежей или пробных периодов. Всё, что вы видите на сайте,
+                        доступно без каких-либо ограничений.
+                    {% endblocktranslate %}
+                </p>
+            </div>
+
+            <div class="legal-format">
+                <h3 class="legal-format__title">{% trans "Нужна ли регистрация?" %}</h3>
+                <p class="legal-section__text">
+                    {% blocktranslate trimmed %}
+                        Регистрация не обязательна для просмотра каталога. Однако
+                        она даёт доступ к избранному, истории просмотров и
+                        персональным рекомендациям.
+                    {% endblocktranslate %}
+                </p>
+            </div>
+
+            <div class="legal-format">
+                <h3 class="legal-format__title">{% trans "Как добавить фильм в каталог?" %}</h3>
+                <p class="legal-section__text">
+                    {% blocktranslate trimmed %}
+                        Каталог пополняется редакторами проекта. Если вы хотите
+                        предложить фильм или сериал — напишите нам через форму
+                        контактов. Мы рассмотрим все предложения.
+                    {% endblocktranslate %}
+                </p>
+            </div>
+
+            <div class="legal-format">
+                <h3 class="legal-format__title">{% trans "Почему не воспроизводится видео?" %}</h3>
+                <p class="legal-section__text">
+                    {% blocktranslate trimmed %}
+                        LumiBox — это каталог метаданных. Мы не храним видеофайлы
+                        на своих серверах. Воспроизведение возможно при наличии
+                        подключённого источника контента. Если видео не играет —
+                        проверьте интернет-соединение или обратитесь в поддержку.
+                    {% endblocktranslate %}
+                </p>
+            </div>
+
+            <div class="legal-format">
+                <h3 class="legal-format__title">{% trans "Как связаться с разработчиками?" %}</h3>
+                <p class="legal-section__text">
+                    {% blocktranslate trimmed %}
+                        Вы можете написать нам на hello@lumibox.app, в Telegram
+                        (@lumiboxxx) или открыть issue на GitHub. Мы всегда
+                        открыты к обратной связи и предложениям.
+                    {% endblocktranslate %}
+                </p>
+            </div>
+        </section>
+    </div>
+{% endblock %}

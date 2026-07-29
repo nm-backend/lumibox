@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block page_title %}{% trans "Рекламодателям — LumiBox" %}{% endblock %}
+{% block page_description %}{% trans "Предложение сотрудничества для рекламодателей: аудитория, форматы размещения, контакты." %}{% endblock %}
+{% block og_title %}{% trans "Рекламодателям — LumiBox" %}{% endblock %}
+{% block og_description %}{% trans "Предложение сотрудничества для рекламодателей: аудитория, форматы размещения, контакты." %}{% endblock %}
+{% block twitter_title %}{% trans "Рекламодателям — LumiBox" %}{% endblock %}
+{% block twitter_description %}{% trans "Предложение сотрудничества для рекламодателей: аудитория, форматы размещения, контакты." %}{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/forms.css' %}">
+{% endblock %}
+
+{% block content %}
+    <div class="legal-page">
+        <h1 class="legal-page__title">{% trans "Рекламодателям" %}</h1>
+
+        <section class="legal-section">
+            <h2 class="legal-section__title">{% trans "О проекте" %}</h2>
+            <p class="legal-section__text">
+                {% blocktranslate trimmed %}
+                    LumiBox — это современная платформа для поиска и каталогизации фильмов
+                    и сериалов. Наш проект объединяет любителей качественного кино, предлагая
+                    удобные инструменты для поиска, персонализированные рекомендации и
+                    тематические подборки.
+                {% endblocktranslate %}
+            </p>
+        </section>
+
+        <section class="legal-section">
+            <h2 class="legal-section__title">{% trans "Наша аудитория" %}</h2>
+            <p class="legal-section__text">
+                {% blocktranslate trimmed %}
+                    Аудитория LumiBox — это активные, образованные пользователи в возрасте
+                    от 18 до 45 лет, интересующиеся кино, сериалами и цифровым контентом.
+                    Наши посетители ценят качественный интерфейс, удобство поиска и
+                    персональные рекомендации.
+                {% endblocktranslate %}
+            </p>
+            <ul class="legal-list">
+                <li class="legal-list__item">{% trans "Возрастная группа: 18–45 лет" %}</li>
+                <li class="legal-list__item">{% trans "Интерес к кино, сериалам, индустрии развлечений" %}</li>
+                <li class="legal-list__item">{% trans "Высокая вовлечённость: среднее время на сайте более 5 минут" %}</li>
+                <li class="legal-list__item">{% trans "Мультиплатформенность: десктоп, планшеты, мобильные устройства" %}</li>
+                <li class="legal-list__item">{% trans "География: русскоязычная аудитория по всему миру" %}</li>
+            </ul>
+        </section>
+
+        <section class="legal-section">
+            <h2 class="legal-section__title">{% trans "Форматы размещения" %}</h2>
+
+            <div class="legal-format">
+                <h3 class="legal-format__title">{% trans "Боковые баннеры (160×600)" %}</h3>
+                <p class="legal-section__text">
+                    {% blocktranslate trimmed %}
+                        Фиксированные баннеры по бокам страницы, видимые на десктопных
+                        экранах шириной от 1750px. Идеальный формат для имиджевой рекламы
+                        и повышения узнаваемости бренда.
+                    {% endblocktranslate %}
+                </p>
+            </div>
+
+            <div class="legal-format">
+                <h3 class="legal-format__title">{% trans "Горизонтальные баннеры (728×90)" %}</h3>
+                <p class="legal-section__text">
+                    {% blocktranslate trimmed %}
+                        Размещаются между смысловыми блоками контента на главной странице.
+                        Высокая видимость и охват при ненавязчивом расположении.
+                    {% endblocktranslate %}
+                </p>
+            </div>
+
+            <div class="legal-format">
+                <h3 class="legal-format__title">{% trans "Партнёрские интеграции" %}</h3>
+                <p class="legal-section__text">
+                    {% blocktranslate trimmed %}
+                        Размещение информации о вашем продукте или сервисе в тематических
+                        подборках, рекомендательных блоках и других элементах интерфейса
+                        с учётом интересов целевой аудитории.
+                    {% endblocktranslate %}
+                </p>
+            </div>
+
+            <div class="legal-format">
+                <h3 class="legal-format__title">{% trans "Спонсорские размещения" %}</h3>
+                <p class="legal-section__text">
+                    {% blocktranslate trimmed %}
+                        Сотрудничество в формате спонсорства тематических разделов, сезонных
+                        подборок или специальных проектов на платформе.
+                    {% endblocktranslate %}
+                </p>
+            </div>
+        </section>
+
+        <section class="legal-section">
+            <h2 class="legal-section__title">{% trans "Почему стоит выбрать LumiBox" %}</h2>
+            <ul class="legal-list">
+                <li class="legal-list__item">
+                    {% blocktranslate trimmed %}
+                        <strong>Целевая аудитория:</strong> пользователи, пришедшие за конкретным
+                        контентом, с высокой вовлечённостью и временем на сайте.
+                    {% endblocktranslate %}
+                </li>
+                <li class="legal-list__item">
+                    {% blocktranslate trimmed %}
+                        <strong>Современная платформа:</strong> технологичный стек (Django,
+                        PostgreSQL, Redis), высокая скорость загрузки и стабильность.
+                    {% endblocktranslate %}
+                </li>
+                <li class="legal-list__item">
+                    {% blocktranslate trimmed %}
+                        <strong>Гибкость:</strong> индивидуальные условия сотрудничества
+                        и возможность тестовых размещений.
+                    {% endblocktranslate %}
+                </li>
+                <li class="legal-list__item">
+                    {% blocktranslate trimmed %}
+                        <strong>Прозрачность:</strong> подробная статистика показов и
+                        взаимодействия с рекламными материалами.
+                    {% endblocktranslate %}
+                </li>
+            </ul>
+        </section>
+
+        <section class="legal-section">
+            <h2 class="legal-section__title">{% trans "Контакты" %}</h2>
+            <div class="legal-contact-card">
+                <div class="legal-contact-card__item">
+                    <span class="legal-contact-card__label">{% trans "Электронная почта:" %}</span>
+                    <a class="legal-contact-card__value" href="mailto:ads@lumibox.app">ads@lumibox.app</a>
+                </div>
+                <div class="legal-contact-card__item">
+                    <span class="legal-contact-card__label">{% trans "Telegram:" %}</span>
+                    <a class="legal-contact-card__value" href="https://t.me/lumiboxxx" target="_blank" rel="noopener noreferrer">@lumiboxxx</a>
+                </div>
+            </div>
+        </section>
+    </div>
+{% endblock %}

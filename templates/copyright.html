@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block page_title %}{% trans "Правообладателям — LumiBox" %}{% endblock %}
+{% block page_description %}{% trans "Информация для правообладателей: как работает каталог, процедура подачи жалобы на нарушение авторских прав." %}{% endblock %}
+{% block og_title %}{% trans "Правообладателям — LumiBox" %}{% endblock %}
+{% block og_description %}{% trans "Информация для правообладателей: процедура подачи жалобы и контакты." %}{% endblock %}
+{% block twitter_title %}{% trans "Правообладателям — LumiBox" %}{% endblock %}
+{% block twitter_description %}{% trans "Информация для правообладателей: процедура подачи жалобы и контакты." %}{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/forms.css' %}">
+{% endblock %}
+
+{% block content %}
+    <div class="legal-page">
+        <h1 class="legal-page__title">{% trans "Правообладателям" %}</h1>
+
+        <section class="legal-section">
+            <h2 class="legal-section__title">{% trans "Как работает LumiBox" %}</h2>
+            <p class="legal-section__text">
+                {% blocktranslate trimmed %}
+                    LumiBox — это каталог фильмов и сериалов, который хранит исключительно метаданные:
+                    названия, описания, год выпуска, жанры, информацию о съёмочной группе, рейтинги
+                    и отзывы пользователей. Мы не размещаем на своих серверах видеофайлы, не храним
+                    копии фильмов и не предоставляем возможность скачивания контента без согласия
+                    правообладателя.
+                {% endblocktranslate %}
+            </p>
+            <p class="legal-section__text">
+                {% blocktranslate trimmed %}
+                    Все видеоресурсы, доступные для просмотра через наш плеер, предоставляются
+                    исключительно на основании лицензионных договоров с правообладателями или
+                    через официальные партнёрские интерфейсы. Ссылки на сторонние источники
+                    могут быть добавлены исключительно с согласия владельцев авторских прав.
+                {% endblocktranslate %}
+            </p>
+        </section>
+
+        <section class="legal-section">
+            <h2 class="legal-section__title">{% trans "Процедура подачи жалобы" %}</h2>
+            <p class="legal-section__text">
+                {% blocktranslate trimmed %}
+                    Если вы обнаружили в каталоге LumiBox контент, который нарушает ваши
+                    авторские или смежные права, пожалуйста, направьте уведомление на наш
+                    электронный адрес. Мы рассматриваем все обращения в строгом соответствии
+                    с действующим законодательством.
+                {% endblocktranslate %}
+            </p>
+        </section>
+
+        <section class="legal-section">
+            <h2 class="legal-section__title">{% trans "Контактная информация" %}</h2>
+            <div class="legal-contact-card">
+                <div class="legal-contact-card__item">
+                    <span class="legal-contact-card__label">{% trans "Электронная почта:" %}</span>
+                    <a class="legal-contact-card__value" href="mailto:copyright@lumibox.app">copyright@lumibox.app</a>
+                </div>
+                <div class="legal-contact-card__item">
+                    <span class="legal-contact-card__label">{% trans "Время ответа:" %}</span>
+                    <span class="legal-contact-card__value">{% trans "до 3 рабочих дней" %}</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="legal-section">
+            <h2 class="legal-section__title">{% trans "Необходимая информация для жалобы" %}</h2>
+            <p class="legal-section__text">
+                {% blocktranslate trimmed %}
+                    Для ускорения обработки вашего обращения, пожалуйста, включите в письмо
+                    следующие сведения:
+                {% endblocktranslate %}
+            </p>
+            <ul class="legal-list">
+                <li class="legal-list__item">
+                    {% blocktranslate trimmed %}
+                        Точное указание произведения, в отношении которого заявляются права
+                        (название, год выпуска, ссылка на страницу в каталоге LumiBox).
+                    {% endblocktranslate %}
+                </li>
+                <li class="legal-list__item">
+                    {% blocktranslate trimmed %}
+                        Информацию, подтверждающую ваше исключительное право на произведение
+                        (реквизиты лицензионного договора, свидетельства, иные документы).
+                    {% endblocktranslate %}
+                </li>
+                <li class="legal-list__item">
+                    {% blocktranslate trimmed %}
+                        Описание характера нарушения и ваши требования по его устранению
+                        (удаление из каталога, изменение описания и т.д.).
+                    {% endblocktranslate %}
+                </li>
+                <li class="legal-list__item">
+                    {% blocktranslate trimmed %}
+                        Ваши контактные данные для обратной связи: полное имя (для физического лица)
+                        или наименование организации, электронная почта, телефон.
+                    {% endblocktranslate %}
+                </li>
+                <li class="legal-list__item">
+                    {% blocktranslate trimmed %}
+                        Дату и подпись. Для юридических лиц — печать организации и подпись
+                        уполномоченного представителя.
+                    {% endblocktranslate %}
+                </li>
+            </ul>
+        </section>
+
+        <section class="legal-section">
+            <h2 class="legal-section__title">{% trans "Сроки рассмотрения" %}</h2>
+            <p class="legal-section__text">
+                {% blocktranslate trimmed %}
+                    Мы обязуемся рассмотреть ваше обращение в срок до 3 (трёх) рабочих дней
+                    с момента получения. В случае необходимости запроса дополнительной информации
+                    срок может быть продлён, о чем вы будете уведомлены дополнительно.
+                {% endblocktranslate %}
+            </p>
+            <p class="legal-section__text">
+                {% blocktranslate trimmed %}
+                    После принятия решения по вашему обращению мы незамедлительно принимаем
+                    необходимые меры: удаляем или блокируем доступ к спорному контенту,
+                    корректируем метаданные либо предоставляем мотивированный отказ с указанием
+                    причин.
+                {% endblocktranslate %}
+            </p>
+        </section>
+    </div>
+{% endblock %}

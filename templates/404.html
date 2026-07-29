@@ -1,24 +1,47 @@
 {% extends "base.html" %}
-{% load static i18n icons %}
+{% load static i18n icons lumibox_urls %}
 
 {% block page_title %}{% trans "Страница не найдена (404) — LumiBox" %}{% endblock %}
+{% block page_description %}{% trans "Страница не найдена. Попробуйте поискать или вернитесь на главную." %}{% endblock %}
+{% block og_title %}{% trans "Страница не найдена (404) — LumiBox" %}{% endblock %}
+{% block og_description %}{% trans "Запрашиваемая страница не найдена. Вернитесь на главную." %}{% endblock %}
+{% block og_image %}{% absolute_static 'img/og-default.png' %}{% endblock %}
+{% block twitter_title %}{% trans "Страница не найдена (404) — LumiBox" %}{% endblock %}
+{% block twitter_description %}{% trans "Запрашиваемая страница не найдена. Вернитесь на главную." %}{% endblock %}
+{% block twitter_image %}{% absolute_static 'img/og-default.png' %}{% endblock %}
 
 {% block content %}
-    <div class="empty-state" style="padding: var(--space-8) 0;">
-        <p style="font-size: 5rem; font-weight: 800; color: var(--color-accent); line-height: 1; margin-bottom: var(--space-2);">404</p>
-        <p class="empty-state__title">{% trans "Страница не найдена" %}</p>
-        <p style="max-width: 40ch; margin: 0 auto; color: var(--color-text-muted);">
-            {% trans "Возможно, фильм удалили из каталога или вы перешли по неверной ссылке." %}
+    <div class="error-page">
+        <div class="error-page__illustration" aria-hidden="true">
+            <svg viewBox="0 0 240 160" width="240" height="160" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="20" y="20" width="200" height="120" rx="8" stroke-opacity="0.3"/>
+                <circle cx="120" cy="80" r="36" stroke-opacity="0.3"/>
+                <circle cx="120" cy="80" r="20" stroke-opacity="0.2"/>
+                <line x1="100" y1="60" x2="140" y2="60" stroke-opacity="0.2"/>
+                <line x1="100" y1="80" x2="140" y2="80" stroke-opacity="0.2"/>
+                <line x1="100" y1="100" x2="130" y2="100" stroke-opacity="0.2"/>
+                <path d="M180 60 l20 20 l-20 20" stroke-opacity="0.15"/>
+                <path d="M60 60 l-20 20 l20 20" stroke-opacity="0.15"/>
+            </svg>
+        </div>
+
+        <h1 class="error-page__code" aria-hidden="true">404</h1>
+        <p class="error-page__title">{% trans "Здесь ничего нет" %}</p>
+        <p class="error-page__text">
+            {% trans "Возможно, страницу удалили, ссылка устарела или вы набрали адрес с ошибкой. Давайте поищем вместе." %}
         </p>
-        <p class="empty-state__action" style="display: flex; flex-wrap: wrap; gap: var(--space-3); justify-content: center;">
-            <a class="button button--primary" href="{% url 'catalog:home' %}">{% trans "На главную" %}</a>
-            <a class="button button--ghost" href="{% url 'catalog:title_list' %}">{% trans "Весь каталог" %}</a>
-        </p>
-        <div style="margin-top: var(--space-6); max-width: 400px; margin-left: auto; margin-right: auto;">
+
+        <div class="error-page__actions">
+            <a class="button button--primary" href="{% url 'catalog:home' %}">{% icon "home" size=14 %} {% trans "На главную" %}</a>
+            <a class="button button--ghost" href="{% url 'catalog:title_list' %}">{% icon "movie" size=14 %} {% trans "Каталог" %}</a>
+        </div>
+
+        <div class="error-page__search">
             <form class="search" action="{% url 'catalog:title_list' %}" method="get" role="search">
-                <label class="visually-hidden" for="search-404">{% trans "Поиск по каталогу" %}</label>
-                <input class="search__input" id="search-404" type="search" name="q" placeholder="{% trans 'Поиск по названию...' %}" autocomplete="off">
-                <button class="search__submit" type="submit">{% icon "search" size=16 %}</button>
+                <label class="visually-hidden" for="search-404-input">{% trans "Поиск по каталогу" %}</label>
+                <input class="search__input" id="search-404-input" type="search" name="q"
+                       placeholder="{% trans 'Поиск по названию...' %}" autocomplete="off">
+                <button class="search__submit" type="submit" aria-label="{% trans 'Найти' %}">{% icon "search" size=16 %}</button>
             </form>
         </div>
     </div>

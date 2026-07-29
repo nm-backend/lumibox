@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block page_title %}{% trans "Пользовательское соглашение — LumiBox" %}{% endblock %}
+{% block page_description %}{% trans "Условия использования сервиса LumiBox." %}{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/forms.css' %}">
+{% endblock %}
+
+{% block content %}
+    <div class="legal-page">
+        <h1 class="legal-page__title">{% trans "Пользовательское соглашение" %}</h1>
+
+        <section class="legal-section">
+            <h2 class="legal-section__title">{% trans "Общие положения" %}</h2>
+            <p class="legal-section__text">
+                {% blocktranslate trimmed %}
+                    Используя сервис LumiBox, вы соглашаетесь с условиями настоящего
+                    соглашения. Если вы не согласны с каким-либо из условий, пожалуйста,
+                    воздержитесь от использования сервиса.
+                {% endblocktranslate %}
+            </p>
+        </section>
+
+        <section class="legal-section">
+            <h2 class="legal-section__title">{% trans "Обязанности пользователя" %}</h2>
+            <ul class="legal-list">
+                <li class="legal-list__item">{% trans "Предоставлять достоверную информацию при регистрации" %}</li>
+                <li class="legal-list__item">{% trans "Не нарушать авторские и смежные права" %}</li>
+                <li class="legal-list__item">{% trans "Не использовать сервис для распространения вредоносного кода" %}</li>
+                <li class="legal-list__item">{% trans "Не предпринимать действий, направленных на нарушение работы сервиса" %}</li>
+                <li class="legal-list__item">{% trans "Нести ответственность за сохранность своих учётных данных" %}</li>
+            </ul>
+        </section>
+
+        <section class="legal-section">
+            <h2 class="legal-section__title">{% trans "Ограничение ответственности" %}</h2>
+            <p class="legal-section__text">
+                {% blocktranslate trimmed %}
+                    LumiBox предоставляется на условиях «как есть». Мы не гарантируем
+                    непрерывную доступность сервиса и не несём ответственности за
+                    возможные убытки, связанные с его использованием. Каталог может
+                    содержать ссылки на сторонние ресурсы — мы не несём ответственности
+                    за их содержание и доступность.
+                {% endblocktranslate %}
+            </p>
+        </section>
+
+        <section class="legal-section">
+            <h2 class="legal-section__title">{% trans "Изменение условий" %}</h2>
+            <p class="legal-section__text">
+                {% blocktranslate trimmed %}
+                    Мы оставляем за собой право вносить изменения в настоящее соглашение.
+                    Актуальная версия всегда доступна по данному адресу. Продолжение
+                    использования сервиса после внесения изменений означает ваше согласие
+                    с ними.
+                {% endblocktranslate %}
+            </p>
+        </section>
+    </div>
+{% endblock %}

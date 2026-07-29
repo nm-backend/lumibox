@@ -61,6 +61,9 @@
             {% endfor %}
         </ul>
     {% else %}
-        <p class="review-empty">{% trans "Отзывов пока нет. Будьте первым." %}</p>
+        <div class="empty-state empty-state--small">
+            <p class="empty-state__title">{% trans "Отзывов пока нет" %}</p>
+            <p class="empty-state__desc">{% trans "Будьте первым, кто поделится своим мнением." %}</p>
+        </div>
     {% endif %}
 </section>

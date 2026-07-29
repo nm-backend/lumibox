@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% load static i18n icons %}
+
+{% block page_title %}{% trans "Контакты — LumiBox" %}{% endblock %}
+{% block page_description %}{% trans "Контактная информация проекта LumiBox." %}{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/forms.css' %}">
+{% endblock %}
+
+{% block content %}
+    <div class="legal-page">
+        <h1 class="legal-page__title">{% trans "Контакты" %}</h1>
+
+        <section class="legal-section">
+            <h2 class="legal-section__title">{% trans "Свяжитесь с нами" %}</h2>
+            <p class="legal-section__text">
+                {% blocktranslate trimmed %}
+                    Мы открыты к сотрудничеству и всегда рады обратной связи. Вы можете
+                    связаться с нами любым удобным способом.
+                {% endblocktranslate %}
+            </p>
+        </section>
+
+        <section class="legal-section">
+            <h2 class="legal-section__title">{% trans "Способы связи" %}</h2>
+            <div class="legal-contact-card">
+                <div class="legal-contact-card__item">
+                    <span class="legal-contact-card__label">{% icon "mail" size=16 %} {% trans "Общие вопросы:" %}</span>
+                    <a class="legal-contact-card__value" href="mailto:hello@lumibox.app">hello@lumibox.app</a>
+                </div>
+                <div class="legal-contact-card__item">
+                    <span class="legal-contact-card__label">{% icon "shield" size=16 %} {% trans "Правообладателям:" %}</span>
+                    <a class="legal-contact-card__value" href="mailto:copyright@lumibox.app">copyright@lumibox.app</a>
+                </div>
+                <div class="legal-contact-card__item">
+                    <span class="legal-contact-card__label">{% icon "target" size=16 %} {% trans "Рекламодателям:" %}</span>
+                    <a class="legal-contact-card__value" href="mailto:ads@lumibox.app">ads@lumibox.app</a>
+                </div>
+                <div class="legal-contact-card__item">
+                    <span class="legal-contact-card__label">{% icon "lock" size=16 %} {% trans "Конфиденциальность:" %}</span>
+                    <a class="legal-contact-card__value" href="mailto:privacy@lumibox.app">privacy@lumibox.app</a>
+                </div>
+                <div class="legal-contact-card__item">
+                    <span class="legal-contact-card__label">{% icon "send" size=16 %} {% trans "Telegram:" %}</span>
+                    <a class="legal-contact-card__value" href="https://t.me/lumiboxxx" target="_blank" rel="noopener noreferrer">@lumiboxxx</a>
+                </div>
+                <div class="legal-contact-card__item">
+                    <span class="legal-contact-card__label">{% icon "github" size=16 %} {% trans "GitHub:" %}</span>
+                    <a class="legal-contact-card__value" href="https://github.com/nm-backend" target="_blank" rel="noopener noreferrer">nm-backend</a>
+                </div>
+            </div>
+        </section>
+    </div>
+{% endblock %}

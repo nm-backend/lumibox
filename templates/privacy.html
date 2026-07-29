@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block page_title %}{% trans "Политика конфиденциальности — LumiBox" %}{% endblock %}
+{% block page_description %}{% trans "Политика конфиденциальности LumiBox: какие данные мы собираем, как используем и защищаем." %}{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/forms.css' %}">
+{% endblock %}
+
+{% block content %}
+    <div class="legal-page">
+        <h1 class="legal-page__title">{% trans "Политика конфиденциальности" %}</h1>
+
+        <section class="legal-section">
+            <h2 class="legal-section__title">{% trans "Какие данные мы собираем" %}</h2>
+            <p class="legal-section__text">
+                {% blocktranslate trimmed %}
+                    LumiBox собирает минимально необходимый объём данных для обеспечения
+                    работы сервиса: адрес электронной почты, имя пользователя, историю
+                    просмотров и список избранного. Эти данные нужны для персонализации
+                    рекомендаций и сохранения ваших предпочтений между сессиями.
+                {% endblocktranslate %}
+            </p>
+        </section>
+
+        <section class="legal-section">
+            <h2 class="legal-section__title">{% trans "Как мы используем данные" %}</h2>
+            <ul class="legal-list">
+                <li class="legal-list__item">{% trans "Для обеспечения работы аккаунта и аутентификации" %}</li>
+                <li class="legal-list__item">{% trans "Для формирования персональных рекомендаций" %}</li>
+                <li class="legal-list__item">{% trans "Для улучшения качества сервиса на основе агрегированной статистики" %}</li>
+                <li class="legal-list__item">{% trans "Для обратной связи по запросам в службу поддержки" %}</li>
+            </ul>
+        </section>
+
+        <section class="legal-section">
+            <h2 class="legal-section__title">{% trans "Защита данных" %}</h2>
+            <p class="legal-section__text">
+                {% blocktranslate trimmed %}
+                    Мы используем современные методы защиты данных: шифрование паролей
+                    алгоритмом Argon2, защищённое HTTPS-соединение, Content-Security-Policy
+                    заголовки. Мы не передаём персональные данные третьим лицам и не
+                    используем их в целях, не указанных в данной политике.
+                {% endblocktranslate %}
+            </p>
+        </section>
+
+        <section class="legal-section">
+            <h2 class="legal-section__title">{% trans "Файлы cookie" %}</h2>
+            <p class="legal-section__text">
+                {% blocktranslate trimmed %}
+                    Мы используем минимальный набор технических cookie-файлов, необходимых
+                    для работы сессии и аутентификации. Сторонние аналитические сервисы
+                    (Google Analytics) могут устанавливать свои cookie только при наличии
+                    вашего согласия через настройки браузера. Мы не используем cookie для
+                    отслеживания вас на сторонних сайтах.
+                {% endblocktranslate %}
+            </p>
+        </section>
+
+        <section class="legal-section">
+            <h2 class="legal-section__title">{% trans "Контакты" %}</h2>
+            <p class="legal-section__text">
+                {% blocktranslate trimmed %}
+                    По вопросам, связанным с обработкой персональных данных, обращайтесь
+                    по адресу: privacy@lumibox.app
+                {% endblocktranslate %}
+            </p>
+        </section>
+    </div>
+{% endblock %}

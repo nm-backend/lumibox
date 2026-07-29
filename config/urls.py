@@ -26,6 +26,15 @@ urlpatterns = [
     # SEO: карта сайта и инструкции для поисковых роботов.
     path("sitemap.xml", sitemap, {"sitemaps": sitemaps}, name="django.contrib.sitemaps.views.sitemap"),
     path("robots.txt", TemplateView.as_view(template_name="robots.txt", content_type="text/plain")),
+
+    # Статические страницы.
+    path("about/", TemplateView.as_view(template_name="about.html"), name="about"),
+    path("copyright/", TemplateView.as_view(template_name="copyright.html"), name="copyright"),
+    path("advertisers/", TemplateView.as_view(template_name="advertisers.html"), name="advertisers"),
+    path("privacy/", TemplateView.as_view(template_name="privacy.html"), name="privacy"),
+    path("terms/", TemplateView.as_view(template_name="terms.html"), name="terms"),
+    path("contacts/", TemplateView.as_view(template_name="contacts.html"), name="contacts"),
+
     # Переключение языка: POST на /i18n/setlang/ с параметром language.
     path("i18n/", include("django.conf.urls.i18n")),
     path("", include("apps.users.urls")),
