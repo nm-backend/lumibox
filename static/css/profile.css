@@ -19,6 +19,21 @@
 .profile-card {
     padding: var(--space-6);
     text-align: center;
+    box-shadow: var(--shadow-card);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Subtle gradient accent at the top of the profile card */
+.profile-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 20%;
+    right: 20%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--color-accent), transparent);
+    opacity: 0.4;
 }
 
 .profile-card__avatar {
@@ -58,6 +73,7 @@
     overflow: hidden;
     padding: var(--space-4);
     text-align: center;
+    box-shadow: var(--shadow-sm);
 }
 
 .profile-stat {
@@ -106,6 +122,7 @@
     background: var(--color-surface);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
 }
 
 .profile-header__bio {
@@ -132,11 +149,12 @@
     background: var(--color-surface);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
-    transition: border-color var(--transition-fast);
+    transition: border-color var(--transition-fast), transform var(--transition-fast);
 }
 
 .award-item:hover {
     border-color: var(--color-accent);
+    transform: translateX(4px);
 }
 
 .award-item__icon {

@@ -8,7 +8,7 @@
   Шрифты: Bebas Neue для заголовков (афиша), Inter для текста (программа).
 */
 
-@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&display=swap');
+/* Fonts loaded via <link> in base.html with display=swap for non-blocking render */
 
 :root {
     /* --- Цвета --- */
@@ -121,6 +121,7 @@
     --color-accent: #d49001;
     --color-accent-hover: #b87a00;
     --color-accent-dim: rgba(212, 144, 1, 0.08);
+    --color-accent-glow: rgba(212, 144, 1, 0.06);
     --color-on-accent: #ffffff;
     --color-play: #c51a44;
     --color-play-hover: #d91f4d;
@@ -133,6 +134,7 @@
     --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.06), 0 4px 18px rgba(0, 0, 0, 0.04);
     --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.06), 0 8px 28px rgba(0, 0, 0, 0.04);
     --shadow-accent: 0 8px 24px rgba(212, 144, 1, 0.12);
+    --shadow-glass: 0 4px 16px rgba(0, 0, 0, 0.06);
     --shadow-play: 0 4px 16px rgba(197, 26, 68, 0.30);
 }
 

@@ -4,22 +4,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="dark light">
 
     <title>{% block page_title %}{% trans "LumiBox — каталог фильмов и сериалов" %}{% endblock %}</title>
     <meta name="description" content="{% block page_description %}{% trans "Каталог фильмов и сериалов: поиск, фильтры, подборки." %}{% endblock %}">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&display=swap">
+    {# Preload the most-used font files for faster text rendering #}
+    <link rel="preload" as="font" type="font/woff2" href="https://fonts.gstatic.com/s/bebasneue/v9/JTUSjIg69CK48gW7PXoo9Wlhyw.woff2" crossorigin>
+    <link rel="preload" as="font" type="font/woff2" href="https://fonts.gstatic.com/s/inter/v18/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuLyfAZ9hjQ.woff2" crossorigin>
+    <link rel="preload" as="font" type="font/woff2" href="https://fonts.gstatic.com/s/inter/v18/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuI6fAZ9hjQ.woff2" crossorigin>
 
     <link rel="stylesheet" href="{% static 'css/variables.css' %}">
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
     <link rel="stylesheet" href="{% static 'css/layout.css' %}">
     <link rel="stylesheet" href="{% static 'css/components.css' %}">
     <link rel="stylesheet" href="{% static 'css/footer.css' %}">
-    <link rel="stylesheet" href="{% static 'css/ads.css' %}">
+    {# Non-critical CSS: loaded async via print-media trick — no render blocking #}
+    <link rel="stylesheet" href="{% static 'css/ads.css' %}" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="{% static 'css/ads.css' %}"></noscript>
 
     <link rel="icon" type="image/svg+xml" href="{% static 'img/favicon.svg' %}">
     <link rel="alternate icon" href="{% static 'img/favicon.svg' %}">
+
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 
     {% comment %}
        Канонический адрес — без строки запроса: /catalog/?page=2&sort=name и
@@ -109,8 +119,10 @@
     </script>
     {% endif %}
 </head>
-<body>
+<body data-loading>
     <div class="cinema-glow" aria-hidden="true"></div>
+    {# Subtle film-grain texture overlay — adds premium cinema atmosphere #}
+    <div class="grain-overlay" aria-hidden="true"></div>
 
     {% ad_rail %}
 
@@ -184,7 +196,7 @@
                     <summary class="user-menu__trigger" aria-label="{% trans 'Меню пользователя' %}">
                         <span class="avatar">
                             {% if user.avatar %}
-                                <img class="avatar__image" src="{{ user.avatar.url }}" alt="">
+                                <img class="avatar__image" src="{{ user.avatar.url }}" alt="" loading="lazy" decoding="async">
                             {% else %}
                                 <span aria-hidden="true">{{ user.initial }}</span>
                             {% endif %}

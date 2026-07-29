@@ -471,6 +471,23 @@
     document.querySelector('.site-main').classList.add('page-enter');
 
     /* -----------------------------------------------
+       14b. Header scroll effect — add shadow when scrolled
+    ----------------------------------------------- */
+    const header = document.querySelector('.site-header');
+    if (header) {
+        let headerScrolled = false;
+        const updateHeader = () => {
+            const isScrolled = window.scrollY > 10;
+            if (isScrolled !== headerScrolled) {
+                header.classList.toggle('site-header--scrolled', isScrolled);
+                headerScrolled = isScrolled;
+            }
+        };
+        window.addEventListener('scroll', updateHeader, { passive: true });
+        updateHeader();
+    }
+
+    /* -----------------------------------------------
        15. Button ripple effect
     ----------------------------------------------- */
     document.querySelectorAll('.button').forEach(function (btn) {
@@ -495,20 +512,110 @@
     });
 
     /* -----------------------------------------------
-       17. Staggered icon fade-in
+       17. Staggered icon fade-in (removed — icons now render instantly)
     ----------------------------------------------- */
-    // Каждой SVG-иконке на странице проставляем --icon-delay с каскадным
-    // увеличением: первая иконка ждёт 30ms, вторая 60ms, и т.д. до 1.5s.
-    // Иконки появляются последовательно — последняя спустя ~1.5s после первой.
-    {
-        const icons = document.querySelectorAll('.icon');
-        if (icons.length > 0) {
-            const step = Math.max(20, Math.min(60, 600 / icons.length));
-            icons.forEach(function (icon, i) {
-                const delay = (i * step) / 1000;
-                icon.style.setProperty('--icon-delay', delay + 's');
+
+    /* -----------------------------------------------
+       18. Skeleton loading — show skeleton state, then reveal
+    ----------------------------------------------- */
+    (function initSkeleton() {
+        // Remove the loading attribute from body to signal CSS is ready
+        document.body.removeAttribute('data-loading');
+
+        // Add skeleton class to card containers that are initially hidden
+        // and remove it once images are loaded
+        var skeletonSections = document.querySelectorAll('.section');
+        var SECTION_REVEAL_DELAY = 100; // ms after images load to remove skeleton
+
+        skeletonSections.forEach(function (section) {
+            var cards = section.querySelectorAll('.card');
+            if (cards.length === 0) return;
+
+            // Mark section as loading initially
+            section.classList.add('section--loading');
+
+            var loadedCount = 0;
+            var totalCards = cards.length;
+
+            cards.forEach(function (card) {
+                var img = card.querySelector('.card__image');
+                if (!img) {
+                    // No image — count as loaded
+                    loadedCount++;
+                    if (loadedCount >= totalCards) {
+                        revealSection(section);
+                    }
+                    return;
+                }
+
+                if (img.complete && img.naturalWidth > 0) {
+                    loadedCount++;
+                    if (loadedCount >= totalCards) {
+                        revealSection(section);
+                    }
+                } else {
+                    img.addEventListener('load', function () {
+                        loadedCount++;
+                        if (loadedCount >= totalCards) {
+                            revealSection(section);
+                        }
+                    }, { once: true });
+                    img.addEventListener('error', function () {
+                        loadedCount++;
+                        if (loadedCount >= totalCards) {
+                            revealSection(section);
+                        }
+                    }, { once: true });
+                }
             });
+
+            // Fallback: reveal section after 3s even if not all images loaded
+            setTimeout(function () {
+                revealSection(section);
+            }, 3000);
+        });
+
+        function revealSection(section) {
+            if (!section.classList.contains('section--loading')) return;
+            section.classList.remove('section--loading');
+            section.classList.add('section--revealed');
         }
+    })();
+
+    /* -----------------------------------------------
+       18. Blur-up image loading — mark images as loaded
+       Triggers the CSS blurUp animation for progressive enhancement.
+    ----------------------------------------------- */
+    function markImageLoaded(img) {
+        if (img.complete && img.naturalWidth > 0) {
+            img.dataset.loaded = '';
+        } else {
+            img.addEventListener('load', function () {
+                this.dataset.loaded = '';
+            }, { once: true });
+            img.addEventListener('error', function () {
+                this.dataset.loaded = '';
+                this.style.opacity = '0.3';
+            }, { once: true });
+        }
+    }
+
+    document.querySelectorAll('img').forEach(markImageLoaded);
+
+    // Also observe dynamically added images (e.g. search suggestions)
+    if ('MutationObserver' in window) {
+        const imgObserver = new MutationObserver(function (mutations) {
+            mutations.forEach(function (mutation) {
+                mutation.addedNodes.forEach(function (node) {
+                    if (node.nodeName === 'IMG') {
+                        markImageLoaded(node);
+                    } else if (node.querySelectorAll) {
+                        node.querySelectorAll('img').forEach(markImageLoaded);
+                    }
+                });
+            });
+        });
+        imgObserver.observe(document.body, { childList: true, subtree: true });
     }
 
 })();

@@ -17,12 +17,13 @@
     transition: transform var(--transition), border-color var(--transition), box-shadow var(--transition);
     text-decoration: none;
     color: var(--color-text);
+    contain: layout style;
 }
 
 .collection-card:hover {
-    transform: translateY(-4px);
+    transform: translateY(-6px);
     border-color: var(--color-accent);
-    box-shadow: var(--shadow-card);
+    box-shadow: var(--shadow-card), 0 0 0 1px var(--color-accent-dim), 0 0 20px var(--color-accent-glow);
     color: var(--color-text);
 }
 
@@ -30,6 +31,15 @@
     aspect-ratio: 16 / 9;
     overflow: hidden;
     background: linear-gradient(145deg, var(--color-surface-hover), var(--color-surface));
+}
+
+.collection-card__placeholder {
+    width: 100%;
+    height: 100%;
+    display: grid;
+    place-items: center;
+    color: var(--color-text-dim);
+    opacity: 0.4;
 }
 
 .collection-card__image {

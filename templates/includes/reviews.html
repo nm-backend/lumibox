@@ -41,7 +41,7 @@
                 <li class="review">
                     <div class="avatar">
                         {% if review.user.avatar %}
-                            <img class="avatar__image" src="{{ review.user.avatar.url }}" alt="">
+                            <img class="avatar__image" src="{{ review.user.avatar.url }}" alt="" loading="lazy" decoding="async">
                         {% else %}
                             <span aria-hidden="true">{{ review.user.initial }}</span>
                         {% endif %}

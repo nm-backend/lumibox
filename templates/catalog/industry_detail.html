@@ -11,7 +11,7 @@
 {% block content %}
     <section class="collection-hero">
         {% if entity.logo %}
-            <img class="collection-hero__image" src="{{ entity.logo.url }}" alt="">
+            <img class="collection-hero__image" src="{{ entity.logo.url }}" alt="" loading="lazy" decoding="async">
         {% endif %}
         <div class="collection-hero__body">
             <p class="hero__label">{{ entity_label }}</p>

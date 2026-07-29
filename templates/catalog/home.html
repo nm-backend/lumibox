@@ -14,7 +14,7 @@
             {% for hero in hero_titles %}
                 <div class="showcase__slide {% if forloop.first %}showcase__slide--active{% endif %}" data-hero-slide>
                     {% if hero.backdrop %}
-                        <img class="showcase__backdrop" src="{{ hero.backdrop.url }}" alt="" aria-hidden="true" loading="{% if forloop.first %}eager{% else %}lazy{% endif %}">
+                        <img class="showcase__backdrop" src="{{ hero.backdrop.url }}" alt="" aria-hidden="true" loading="{% if forloop.first %}eager{% else %}lazy{% endif %}"{% if forloop.first %} fetchpriority="high"{% else %} decoding="async"{% endif %}>
                     {% endif %}
                     <div class="showcase__scrim" aria-hidden="true"></div>
 
@@ -25,7 +25,7 @@
                     <div class="container showcase__inner">
                         {% if hero.logo %}
                             <h1 class="showcase__logo-title">
-                                <img class="showcase__logo" src="{{ hero.logo.url }}" alt="{{ hero.name }}">
+                                <img class="showcase__logo" src="{{ hero.logo.url }}" alt="{{ hero.name }}" loading="lazy" decoding="async">
                             </h1>
                         {% else %}
                             <p class="showcase__label">{% trans "Свежее в каталоге" %}</p>
@@ -114,9 +114,9 @@
                                     {% endif %}
                                 ">
                                     {% if watch_title.backdrop %}
-                                        <img class="continue-card__image" src="{{ watch_title.backdrop.url }}" alt="{{ watch_title.name }}" loading="lazy">
+                                        <img class="continue-card__image" src="{{ watch_title.backdrop.url }}" alt="{{ watch_title.name }}" loading="lazy" decoding="async">
                                     {% elif watch_title.poster %}
-                                        <img class="continue-card__image" src="{{ watch_title.poster.url }}" alt="{{ watch_title.name }}" loading="lazy">
+                                        <img class="continue-card__image" src="{{ watch_title.poster.url }}" alt="{{ watch_title.name }}" loading="lazy" decoding="async">
                                     {% else %}
                                         <span class="continue-card__placeholder" aria-hidden="true">{{ watch_title.name|first }}</span>
                                     {% endif %}

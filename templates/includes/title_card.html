@@ -9,7 +9,8 @@
             <img class="card__image"
                  src="{{ title.poster.url }}"
                  alt="{% blocktranslate with name=title.name %}Постер: {{ name }}{% endblocktranslate %}"
-                 loading="lazy">
+                 loading="lazy"
+                 decoding="async">
         {% else %}
             <span class="card__placeholder" aria-hidden="true">{{ title.name|first }}</span>
         {% endif %}

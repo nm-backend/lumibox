@@ -89,7 +89,7 @@ document.addEventListener('DOMContentLoaded', function () {
 {% block hero %}
 <section class="film-hero">
     {% if title.backdrop %}
-        <img class="film-hero__backdrop" src="{{ title.backdrop.url }}" alt="" aria-hidden="true" loading="eager">
+        <img class="film-hero__backdrop" src="{{ title.backdrop.url }}" alt="" aria-hidden="true" loading="eager" fetchpriority="high">
     {% endif %}
     <div class="film-hero__scrim" aria-hidden="true"></div>
 
@@ -100,7 +100,7 @@ document.addEventListener('DOMContentLoaded', function () {
     <div class="container film-hero__inner">
         <div class="film-hero__poster">
             {% if title.poster %}
-                <img class="film-hero__poster-image" src="{{ title.poster.url }}" alt="{% blocktranslate with name=title.name %}Постер: {{ name }}{% endblocktranslate %}">
+                <img class="film-hero__poster-image" src="{{ title.poster.url }}" alt="{% blocktranslate with name=title.name %}Постер: {{ name }}{% endblocktranslate %}" decoding="async">
             {% else %}
                 <span class="card__placeholder" aria-hidden="true">{{ title.name|first }}</span>
             {% endif %}
@@ -109,7 +109,7 @@ document.addEventListener('DOMContentLoaded', function () {
         <div class="film-hero__body">
             {% if title.logo %}
                 <h1 class="film-hero__name film-hero__name--logo">
-                    <img class="film-hero__logo" src="{{ title.logo.url }}" alt="{{ title.name }}">
+                    <img class="film-hero__logo" src="{{ title.logo.url }}" alt="{{ title.name }}" loading="lazy" decoding="async">
                 </h1>
             {% else %}
                 <h1 class="film-hero__name">{{ title.name }}</h1>
@@ -366,7 +366,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                 <a class="crew" href="{{ participation.person.get_absolute_url }}">
                                     <span class="avatar">
                                         {% if participation.person.photo %}
-                                            <img class="avatar__image" src="{{ participation.person.photo.url }}" alt="" loading="lazy">
+                                            <img class="avatar__image" src="{{ participation.person.photo.url }}" alt="" loading="lazy" decoding="async">
                                         {% else %}
                                             <span aria-hidden="true">{{ participation.person.initial }}</span>
                                         {% endif %}
@@ -397,6 +397,7 @@ document.addEventListener('DOMContentLoaded', function () {
                              src="{{ frame.image.url }}"
                              alt="{{ frame.caption|default:title.name }}"
                              loading="lazy"
+                             decoding="async"
                              data-lightbox-trigger="{{ frame.image.url }}">
                 {% endfor %}
             </div>
