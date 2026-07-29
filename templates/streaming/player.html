@@ -126,9 +126,10 @@
 {% endblock %}
 
 {% block extra_js %}
-    <script src="https://cdn.jsdelivr.net/npm/hls.js@v1.6.0" crossorigin="anonymous"></script>
-    <script>
-    window.Hls = window.Hls || (typeof Hls !== 'undefined' ? Hls : null);
-    </script>
+    {# HLS.js — локальная копия, а не CDN: без внешних зависимостей
+       плеер работает даже при проблемах с сетью, и нет риска, что
+       CDN-версия изменится или станет недоступна. Обновлять скопировав
+       свежий hls.min.js с GitHub в static/js/. #}
+    <script src="{% static 'js/hls.min.js' %}" defer></script>
     <script src="{% static 'js/stream-player.js' %}" defer></script>
 {% endblock %}
