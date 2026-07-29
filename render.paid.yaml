@@ -62,6 +62,34 @@ services:
       - key: DJANGO_SUPERUSER_PASSWORD
         sync: false
 
+      # --- Sentry (опционально) ---
+      - key: SENTRY_DSN
+        sync: false
+
+      # --- Google Analytics (опционально) ---
+      - key: GA_MEASUREMENT_ID
+        sync: false
+
+      # --- Email / SMTP (опционально, но нужен для сброса пароля) ---
+      - key: EMAIL_HOST
+        sync: false
+      - key: EMAIL_PORT
+        value: "587"
+      - key: EMAIL_HOST_USER
+        sync: false
+      - key: EMAIL_HOST_PASSWORD
+        sync: false
+      - key: EMAIL_USE_TLS
+        value: "True"
+      - key: DEFAULT_FROM_EMAIL
+        value: "LumiBox <noreply@lumibox.app>"
+
+      # --- Stripe (опционально) ---
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false
+
   - type: worker
     name: lumibox-worker
     runtime: docker
