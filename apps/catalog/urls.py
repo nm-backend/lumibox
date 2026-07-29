@@ -25,6 +25,7 @@ urlpatterns = [
     path("awards/", views.AwardListView.as_view(), name="award_list"),
     path("awards/<slug:slug>/", views.AwardDetailView.as_view(), name="award_detail"),
 
+    path("search-by-actor/", views.ActorSearchView.as_view(), name="actor_search"),
     path("random/", views.RandomTitleView.as_view(), name="random_title"),
 
     path("collections/", views.CollectionListView.as_view(), name="collection_list"),

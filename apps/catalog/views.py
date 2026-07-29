@@ -3,6 +3,7 @@ from random import randrange
 from django.conf import settings
 from django.core.cache import cache
 from django.db.models import Count, Q
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
 from django.views.generic import DetailView, ListView, TemplateView
@@ -453,6 +454,87 @@ class AwardDetailView(ElidedPaginationMixin, ListView):
         context["entity"] = self.award
         context["entity_label"] = "Премия"
         return context
+
+
+class ActorSearchView(TemplateView):
+    """
+    Поиск фильмов по актёру.
+
+    GET  — форма поиска + результаты, если задан q.
+    GET ?q=xxx&json=1 — JSON для AJAX-подсказок.
+    """
+
+    template_name = "catalog/actor_search.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        q = self.request.GET.get("q", "").strip()
+
+        context["query"] = q
+        context["results"] = None
+
+        if q:
+            persons = (
+                Person.objects.filter(name__icontains=q)
+                .order_by("name")[:20]
+            )
+
+            data = []
+            for person in persons:
+                participations = (
+                    Participation.objects.filter(
+                        person=person,
+                        title__status=Title.Status.PUBLISHED,
+                    )
+                    .select_related("title")
+                    .prefetch_related("title__genres")
+                    .order_by("-title__release_year")
+                )
+                data.append({
+                    "person": person,
+                    "participations": participations,
+                })
+
+            context["results"] = data
+
+        return context
+
+    def get(self, request, *args, **kwargs):
+        # AJAX-запрос: возвращаем JSON с подсказками
+        if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+            q = request.GET.get("q", "").strip()
+            if len(q) < 2:
+                return JsonResponse({"results": []})
+
+            persons = (
+                Person.objects.filter(name__icontains=q)
+                .annotate(
+                    film_count=Count(
+                        "participations__title",
+                        filter=Q(participations__title__status=Title.Status.PUBLISHED),
+                        distinct=True,
+                    )
+                )
+                .filter(film_count__gt=0)
+                .order_by("name")[:10]
+            )
+
+            results = []
+            for person in persons:
+                item = {
+                    "id": person.id,
+                    "name": person.name,
+                    "original_name": person.original_name,
+                    "slug": person.slug,
+                    "photo": person.photo.url if person.photo else None,
+                    "film_count": person.film_count,
+                    "url": person.get_absolute_url(),
+                }
+                results.append(item)
+
+            return JsonResponse({"results": results})
+
+        return super().get(request, *args, **kwargs)
 
 
 class RandomTitleView(ListView):

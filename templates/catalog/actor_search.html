@@ -1,0 +1,209 @@
+{% extends "base.html" %}
+{% load static i18n icons %}
+
+{% block page_title %}{% trans "Поиск по актёру — LumiBox" %}{% endblock %}
+{% block page_description %}{% trans "Найдите фильмы и сериалы с участием любимого актёра. Поиск по имени актёра с фильмографией и постерами." %}{% endblock %}
+{% block og_title %}{% trans "Поиск по актёру — LumiBox" %}{% endblock %}
+{% block og_description %}{% trans "Найдите все фильмы и сериалы с любимым актёром." %}{% endblock %}
+{% block twitter_title %}{% trans "Поиск по актёру — LumiBox" %}{% endblock %}
+{% block twitter_description %}{% trans "Найдите все фильмы и сериалы с любимым актёром." %}{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/catalog.css' %}">
+{% endblock %}
+
+{% block content %}
+    {# Breadcrumbs #}
+    <nav class="breadcrumbs" aria-label="{% trans 'Вы здесь' %}">
+        <a href="{% url 'catalog:home' %}">{% trans "Главная" %}</a>
+        <span class="breadcrumbs__sep" aria-hidden="true">›</span>
+        <a href="{% url 'catalog:actor_list' %}">{% trans "Актёры" %}</a>
+        <span class="breadcrumbs__sep" aria-hidden="true">›</span>
+        <span aria-current="page">{% trans "Поиск по актёру" %}</span>
+    </nav>
+
+    <div class="page-header">
+        <h1 class="page-title">{% trans "Поиск фильмов по актёру" %}</h1>
+        <p class="page-subtitle">{% trans "Введите имя актёра — и найдите все фильмы и сериалы с его участием." %}</p>
+    </div>
+
+    {# Search form #}
+    <div class="actor-search">
+        <div class="actor-search__form-wrapper">
+            <form class="actor-search__form" action="{% url 'catalog:actor_search' %}" method="get" role="search" data-actor-search-form>
+                <label class="visually-hidden" for="actor-search-input">{% trans "Имя актёра" %}</label>
+                <div class="actor-search__input-group">
+                    <input class="actor-search__input"
+                           id="actor-search-input"
+                           type="text"
+                           name="q"
+                           value="{{ query }}"
+                           placeholder="{% trans 'Например: Киану Ривз...' %}"
+                           autocomplete="off"
+                           data-actor-search-input>
+                    <button class="button button--primary" type="submit">
+                        {% icon "search" size=14 %} {% trans "Найти" %}
+                    </button>
+                </div>
+                <div class="actor-search__suggestions" data-actor-suggestions></div>
+            </form>
+        </div>
+
+        {# Results #}
+        {% if results is not None %}
+            <div class="actor-search__results">
+                {% if results %}
+                    {% for item in results %}
+                        <section class="actor-group">
+                            <div class="actor-group__header">
+                                <div class="actor-group__person">
+                                    {% if item.person.photo %}
+                                        <img class="avatar avatar--md" src="{{ item.person.photo.url }}" alt="" loading="lazy">
+                                    {% else %}
+                                        <span class="avatar avatar--md avatar--placeholder" aria-hidden="true">{{ item.person.initial }}</span>
+                                    {% endif %}
+                                    <div>
+                                        <h2 class="actor-group__name">
+                                            <a href="{{ item.person.get_absolute_url }}">{{ item.person.name }}</a>
+                                        </h2>
+                                        {% if item.person.original_name %}
+                                            <p class="actor-group__original">{{ item.person.original_name }}</p>
+                                        {% endif %}
+                                        <p class="actor-group__count">{% blocktranslate with count=item.participations|length %}{{ count }} проектов{% endblocktranslate %}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {% if item.participations %}
+                                <div class="title-grid">
+                                    {% for participation in item.participations %}
+                                        {% include "includes/title_card.html" with title=participation.title %}
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <p class="actor-group__empty">{% trans "Нет опубликованных проектов." %}</p>
+                            {% endif %}
+                        </section>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state">
+                        <div class="empty-state__icon" aria-hidden="true">
+                            <svg viewBox="0 0 64 64" width="64" height="64" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="28" cy="28" r="18" stroke-opacity="0.3"/>
+                                <line x1="41" y1="41" x2="54" y2="54" stroke-opacity="0.3"/>
+                                <line x1="22" y1="28" x2="34" y2="28" stroke-opacity="0.2"/>
+                                <line x1="28" y1="22" x2="28" y2="34" stroke-opacity="0.2"/>
+                            </svg>
+                        </div>
+                        <p class="empty-state__title">{% trans "Актёр не найден" %}</p>
+                        <p class="empty-state__desc">{% trans "Попробуйте изменить запрос — возможно, актёр указан под другим именем." %}</p>
+                        <p class="empty-state__action">
+                            <a class="button button--ghost" href="{% url 'catalog:actor_list' %}">{% trans "Все актёры" %}</a>
+                        </p>
+                    </div>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const input = document.querySelector('[data-actor-search-input]');
+    const suggestions = document.querySelector('[data-actor-suggestions]');
+    let timer = null;
+
+    if (!input || !suggestions) return;
+
+    input.addEventListener('input', function () {
+        const q = this.value.trim();
+        if (q.length < 2) {
+            suggestions.classList.remove('actor-search__suggestions--open');
+            return;
+        }
+        clearTimeout(timer);
+        timer = setTimeout(() => fetchActorSuggestions(q), 300);
+    });
+
+    document.addEventListener('click', function (e) {
+        if (!e.target.closest('.actor-search__form-wrapper')) {
+            suggestions.classList.remove('actor-search__suggestions--open');
+        }
+    });
+
+    input.addEventListener('focus', function () {
+        if (this.value.trim().length >= 2) {
+            suggestions.classList.add('actor-search__suggestions--open');
+        }
+    });
+
+    async function fetchActorSuggestions(q) {
+        try {
+            const response = await fetch('{% url "catalog:actor_search" %}?q=' + encodeURIComponent(q), {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            });
+            if (!response.ok) throw new Error('Search failed');
+            const data = await response.json();
+            renderSuggestions(data.results || []);
+        } catch {
+            suggestions.classList.remove('actor-search__suggestions--open');
+        }
+    }
+
+    function renderSuggestions(items) {
+        suggestions.innerHTML = '';
+        if (!items || items.length === 0) {
+            const empty = document.createElement('p');
+            empty.className = 'actor-search__suggestions-empty';
+            empty.textContent = '{% trans "Ничего не найдено" %}';
+            suggestions.appendChild(empty);
+            suggestions.classList.add('actor-search__suggestions--open');
+            return;
+        }
+        items.forEach(item => {
+            const link = document.createElement('a');
+            link.className = 'actor-search__suggestion';
+            link.href = item.url;
+
+            if (item.photo) {
+                const img = document.createElement('img');
+                img.className = 'actor-search__suggestion-photo';
+                img.src = item.photo;
+                img.alt = '';
+                img.loading = 'lazy';
+                link.appendChild(img);
+            } else {
+                const placeholder = document.createElement('span');
+                placeholder.className = 'actor-search__suggestion-photo actor-search__suggestion-photo--placeholder';
+                placeholder.textContent = item.name[0];
+                link.appendChild(placeholder);
+            }
+
+            const body = document.createElement('span');
+            body.className = 'actor-search__suggestion-body';
+
+            const name = document.createElement('span');
+            name.className = 'actor-search__suggestion-name';
+            name.textContent = item.name;
+            body.appendChild(name);
+
+            const meta = document.createElement('span');
+            meta.className = 'actor-search__suggestion-meta';
+            meta.textContent = item.film_count + ' {% trans "проектов" %}' + (item.original_name ? ' · ' + item.original_name : '');
+            body.appendChild(meta);
+
+            link.appendChild(body);
+
+            const icon = document.createElement('span');
+            icon.className = 'actor-search__suggestion-arrow';
+            icon.innerHTML = '→';
+            link.appendChild(icon);
+
+            suggestions.appendChild(link);
+        });
+        suggestions.classList.add('actor-search__suggestions--open');
+    }
+});
+</script>
+{% endblock %}
