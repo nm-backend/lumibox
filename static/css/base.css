@@ -35,6 +35,7 @@ body {
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    transition: background-color 0.25s ease, color 0.25s ease;
 }
 
 img {
@@ -94,6 +95,27 @@ button {
     outline-offset: 2px;
     border-radius: var(--radius-sm);
     transition: outline-offset var(--transition-fast);
+}
+
+/* ---------- Skip-to-content link ---------- */
+
+.skip-link {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+    padding: var(--space-3) var(--space-5);
+    background: var(--color-accent);
+    color: var(--color-on-accent);
+    font-weight: 600;
+    text-decoration: none;
+    transform: translateY(-100%);
+    transition: transform var(--transition-fast);
+}
+
+.skip-link:focus {
+    transform: translateY(0);
+    outline: none;
 }
 
 .visually-hidden {

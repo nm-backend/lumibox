@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static i18n lumibox_urls %}
+{% load static i18n lumibox_urls icons %}
 
 {% block page_title %}{% blocktranslate with name=title.name year=title.release_year %}{{ name }} ({{ year }}) — LumiBox{% endblocktranslate %}{% endblock %}
 {% block page_description %}{{ title.get_meta_description }}{% endblock %}
@@ -166,13 +166,13 @@ document.addEventListener('DOMContentLoaded', function () {
             <div class="film-hero__actions">
                 {% if watch_url %}
                     <a class="button button--primary button--large" href="{{ watch_url }}">
-                        <span aria-hidden="true">▶</span>
+                        {% icon "play" size=14 %}
                         {% trans "Смотреть" %}
                     </a>
                 {% endif %}
                 {% if title.trailer_source %}
                     <a class="button {% if watch_url %}button--ghost{% else %}button--primary{% endif %}" href="#trailer">
-                        <span aria-hidden="true">▶</span>
+                        {% icon "play" size=14 %}
                         {% trans "Трейлер" %}
                     </a>
                 {% endif %}
@@ -182,12 +182,12 @@ document.addEventListener('DOMContentLoaded', function () {
                         {% csrf_token %}
                         <input type="hidden" name="next" value="{{ request.path }}">
                         <button class="button button--ghost {% if is_favorite %}button--active{% endif %}" type="submit" data-favorite-button>
-                            {% if is_favorite %}❤️ {% trans "В избранном" %}{% else %}🤍 {% trans "В избранное" %}{% endif %}
+                            {% if is_favorite %}{% icon "heart-filled" size=16 %} {% trans "В избранном" %}{% else %}{% icon "heart" size=16 %} {% trans "В избранное" %}{% endif %}
                         </button>
                     </form>
                 {% else %}
                     <a class="button button--ghost" href="{% url 'users:login' %}?next={{ request.path }}">
-                        🤍 {% trans "В избранное" %}
+                        {% icon "heart" size=16 %} {% trans "В избранное" %}
                     </a>
                 {% endif %}
             </div>
@@ -195,7 +195,7 @@ document.addEventListener('DOMContentLoaded', function () {
             <div class="film-hero__specs">
                 {% if title.countries.all %}
                     <span class="film-hero__spec">
-                        <span class="film-hero__spec-icon">🌍</span>
+                        <span class="film-hero__spec-icon">{% icon "globe" size=16 %}</span>
                         {% for country in title.countries.all %}
                             <a href="{% url 'catalog:country_titles' country.slug %}">{{ country.name }}</a>{% if not forloop.last %}, {% endif %}
                         {% endfor %}
@@ -203,7 +203,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 {% endif %}
                 {% if title.studios.all %}
                     <span class="film-hero__spec">
-                        <span class="film-hero__spec-icon">🏢</span>
+                        <span class="film-hero__spec-icon">{% icon "building" size=16 %}</span>
                         {% for studio in title.studios.all %}
                             <a href="{% url 'catalog:studio_detail' studio.slug %}">{{ studio.name }}</a>{% if not forloop.last %}, {% endif %}
                         {% endfor %}
@@ -341,7 +341,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                             {% endif %}
                                         </span>
                                         {% if episode.video_asset.status == 'ready' %}
-                                            <span class="episode__play">▶</span>
+                                            <span class="episode__play">{% icon "play" size=14 %}</span>
                                         {% endif %}
                                     </a>
                                 {% endfor %}
@@ -414,13 +414,13 @@ document.addEventListener('DOMContentLoaded', function () {
     <div class="tab-content" data-tab-content="similar">
         <section class="section">
             <div class="carousel">
-                <button class="carousel__btn carousel__btn--prev" type="button" aria-label="{% trans 'Назад' %}">‹</button>
+                <button class="carousel__btn carousel__btn--prev" type="button" aria-label="{% trans 'Назад' %}">{% icon "chevron-left" size=18 %}</button>
                 <div class="carousel__track">
                     {% for similar in similar_titles %}
                         {% include "includes/title_card.html" with title=similar %}
                     {% endfor %}
                 </div>
-                <button class="carousel__btn carousel__btn--next" type="button" aria-label="{% trans 'Вперёд' %}">›</button>
+                <button class="carousel__btn carousel__btn--next" type="button" aria-label="{% trans 'Вперёд' %}">{% icon "chevron-right" size=18 %}</button>
             </div>
         </section>
     </div>

@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static i18n %}
+{% load static i18n icons %}
 
 {% block page_title %}{% trans "Страница не найдена (404) — LumiBox" %}{% endblock %}
 
@@ -18,7 +18,7 @@
             <form class="search" action="{% url 'catalog:title_list' %}" method="get" role="search">
                 <label class="visually-hidden" for="search-404">{% trans "Поиск по каталогу" %}</label>
                 <input class="search__input" id="search-404" type="search" name="q" placeholder="{% trans 'Поиск по названию...' %}" autocomplete="off">
-                <button class="search__submit" type="submit">🔍</button>
+                <button class="search__submit" type="submit">{% icon "search" size=16 %}</button>
             </form>
         </div>
     </div>

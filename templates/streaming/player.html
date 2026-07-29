@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static i18n %}
+{% load static i18n icons %}
 
 {% block page_title %}{% blocktranslate with name=title.name %}Смотреть {{ name }} — LumiBox{% endblocktranslate %}{% endblock %}
 {% block page_description %}{% blocktranslate with name=title.name %}Просмотр {{ name }} на LumiBox.{% endblocktranslate %}{% endblock %}
@@ -29,12 +29,12 @@
 
                 <div class="stream-player__scrim" data-player-scrim></div>
                 <button class="stream-player__big-play" type="button" data-player-toggle aria-label="{% trans 'Воспроизвести' %}">
-                    <span aria-hidden="true">▶</span>
+                    {% icon "play" size=28 %}
                 </button>
 
                 {# Center play/pause overlay on click #}
                 <div class="stream-player__center-play" data-player-center-play hidden>
-                    <span class="stream-player__center-icon">▶</span>
+                    <span class="stream-player__center-icon">{% icon "play" size=40 %}</span>
                 </div>
 
                 <div class="stream-player__skip-actions" aria-live="polite">
@@ -65,7 +65,7 @@
                             <span class="stream-player__shortcut-key">S</span><span>{% trans "Скриншот кадра" %}</span>
                             <span class="stream-player__shortcut-key">?</span><span>{% trans "Это окно" %}</span>
                         </div>
-                        <button class="stream-player__shortcuts-close" type="button" data-shortcuts-close>{% trans "Закрыть" %} ✕</button>
+                        <button class="stream-player__shortcuts-close" type="button" data-shortcuts-close>{% trans "Закрыть" %} {% icon "close" size=14 %}</button>
                     </div>
                 </div>
 
@@ -76,20 +76,20 @@
                         <span class="stream-player__tooltip" data-player-tooltip hidden aria-hidden="true">0:00</span>
                     </div>
                     <div class="stream-player__toolbar">
-                        <button class="stream-player__control" type="button" data-player-toggle aria-label="{% trans 'Воспроизвести' %}">▶</button>
-                        <button class="stream-player__control" type="button" data-player-seek="-10" aria-label="{% trans 'Назад на 10 секунд' %}">↶ 10</button>
-                        <button class="stream-player__control" type="button" data-player-seek="10" aria-label="{% trans 'Вперёд на 10 секунд' %}">10 ↷</button>
+                        <button class="stream-player__control" type="button" data-player-toggle aria-label="{% trans 'Воспроизвести' %}">{% icon "play" size=18 %}</button>
+                        <button class="stream-player__control" type="button" data-player-seek="-10" aria-label="{% trans 'Назад на 10 секунд' %}">{% icon "rotate-ccw" size=14 %} 10</button>
+                        <button class="stream-player__control" type="button" data-player-seek="10" aria-label="{% trans 'Вперёд на 10 секунд' %}">10 {% icon "rotate-cw" size=14 %}</button>
                         <time class="stream-player__time" data-player-time>0:00 / 0:00</time>
 
                         {# Volume slider #}
-                        <button class="stream-player__control" type="button" data-player-mute aria-label="{% trans 'Выключить звук' %}">🔊</button>
+                        <button class="stream-player__control" type="button" data-player-mute aria-label="{% trans 'Выключить звук' %}">{% icon "volume" size=18 %}</button>
                         <div class="stream-player__volume-wrap">
                             <input class="stream-player__volume-range" data-player-volume type="range" min="0" max="1" step="0.05" value="1" aria-label="{% trans 'Громкость' %}">
                         </div>
 
                         <div class="stream-player__toolbar-spacer"></div>
 
-                        <button class="stream-player__control" type="button" data-player-screenshot aria-label="{% trans 'Скриншот' %}">📷</button>
+                        <button class="stream-player__control" type="button" data-player-screenshot aria-label="{% trans 'Скриншот' %}">{% icon "camera" size=18 %}</button>
 
                         <label class="visually-hidden" for="player-speed">{% trans "Скорость воспроизведения" %}</label>
                         <select class="stream-player__select" id="player-speed" data-player-speed aria-label="{% trans 'Скорость воспроизведения' %}">
@@ -99,9 +99,9 @@
                         <select class="stream-player__select" id="player-quality" data-player-quality aria-label="{% trans 'Качество' %}"></select>
                         <label class="visually-hidden" for="player-subtitles">{% trans "Субтитры" %}</label>
                         <select class="stream-player__select" id="player-subtitles" data-player-subtitles aria-label="{% trans 'Субтитры' %}"><option value="off">{% trans "Субтитры: выкл." %}</option></select>
-                        <button class="stream-player__control" type="button" data-player-pip aria-label="{% trans 'Картинка в картинке' %}">▣</button>
-                        <button class="stream-player__control" type="button" data-player-fullscreen aria-label="{% trans 'Полный экран' %}">⛶</button>
-                        <button class="stream-player__control" type="button" data-player-help aria-label="{% trans 'Горячие клавиши' %}">❓</button>
+                        <button class="stream-player__control" type="button" data-player-pip aria-label="{% trans 'Картинка в картинке' %}">{% icon "pip" size=18 %}</button>
+                        <button class="stream-player__control" type="button" data-player-fullscreen aria-label="{% trans 'Полный экран' %}">{% icon "maximize" size=18 %}</button>
+                        <button class="stream-player__control" type="button" data-player-help aria-label="{% trans 'Горячие клавиши' %}">{% icon "help" size=18 %}</button>
                     </div>
                 </div>
                 <span class="stream-player__speed-toast" data-player-speed-toast hidden>1×</span>

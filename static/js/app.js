@@ -351,22 +351,25 @@
         document.body.appendChild(container);
     }
 
+    /* Иконки для тостов — inline SVG, чтобы не зависеть от спрайта
+       в динамически создаваемом контенте. */
+    const TOAST_ICONS = {
+        success: '<svg class="toast__icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>',
+        error: '<svg class="toast__icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>',
+        info: '<svg class="toast__icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>',
+    };
+    const TOAST_CLOSE_ICON = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+
     window.showToast = function (message, type = 'info', duration = 4000) {
         const container = document.querySelector('[data-toast-container]');
         if (!container) return;
 
-        const icons = {
-            success: '✅',
-            error: '❌',
-            info: 'ℹ️',
-        };
-
         const toast = document.createElement('div');
         toast.className = `toast toast--${type}`;
         toast.innerHTML = `
-            <span class="toast__icon">${icons[type] || 'ℹ️'}</span>
+            ${TOAST_ICONS[type] || TOAST_ICONS.info}
             <span class="toast__message">${message}</span>
-            <button class="toast__close" type="button" aria-label="Закрыть">✕</button>
+            <button class="toast__close" type="button" aria-label="Закрыть">${TOAST_CLOSE_ICON}</button>
         `;
 
         toast.querySelector('.toast__close').addEventListener('click', () => {
@@ -421,7 +424,7 @@
         btn.className = 'scroll-top';
         btn.setAttribute('data-scroll-top', '');
         btn.setAttribute('aria-label', 'Наверх');
-        btn.textContent = '↑';
+        btn.innerHTML = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>';
         document.body.appendChild(btn);
 
         let scrollVisible = false;
@@ -491,5 +494,22 @@
             if (input) input.focus();
         }
     });
+
+    /* -----------------------------------------------
+       17. Staggered icon fade-in
+    ----------------------------------------------- */
+    // Каждой SVG-иконке на странице проставляем --icon-delay с каскадным
+    // увеличением: первая иконка ждёт 30ms, вторая 60ms, и т.д. до 1.5s.
+    // Иконки появляются последовательно — последняя спустя ~1.5s после первой.
+    {
+        const icons = document.querySelectorAll('.icon');
+        if (icons.length > 0) {
+            const step = Math.max(20, Math.min(60, 600 / icons.length));
+            icons.forEach(function (icon, i) {
+                const delay = (i * step) / 1000;
+                icon.style.setProperty('--icon-delay', delay + 's');
+            });
+        }
+    }
 
 })();

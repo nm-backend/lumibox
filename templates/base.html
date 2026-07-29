@@ -1,4 +1,4 @@
-{% load static i18n lumibox_urls promotions %}<!DOCTYPE html>
+{% load static i18n lumibox_urls promotions icons %}<!DOCTYPE html>
 {% get_current_language as LANGUAGE_CODE %}
 <html lang="{{ LANGUAGE_CODE }}" data-theme="">
 <head>
@@ -7,6 +7,9 @@
 
     <title>{% block page_title %}{% trans "LumiBox — каталог фильмов и сериалов" %}{% endblock %}</title>
     <meta name="description" content="{% block page_description %}{% trans "Каталог фильмов и сериалов: поиск, фильтры, подборки." %}{% endblock %}">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
     <link rel="stylesheet" href="{% static 'css/variables.css' %}">
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
@@ -50,6 +53,12 @@
 
     {% ad_rail %}
 
+    {# Skip-to-content: скринридеры и навигация с клавиатуры пропускают
+       повторяющиеся блоки шапки и сразу переходят к основному контенту.
+       Ссылка визуально скрыта и появляется при фокусе с клавиатуры.
+    #}
+    <a class="skip-link" href="#main-content">{% trans "К содержанию" %}</a>
+
     <header class="site-header">
         <div class="container site-header__inner">
             <a class="logo" href="{% url 'catalog:home' %}">
@@ -88,12 +97,12 @@
                            placeholder="{% trans 'Поиск...' %}"
                            autocomplete="off"
                            data-search-input>
-                    <button class="search__submit" type="submit" aria-label="{% trans 'Найти' %}">🔍</button>
+                    <button class="search__submit" type="submit" aria-label="{% trans 'Найти' %}">{% icon "search" size=16 %}</button>
                 </form>
                 <div class="search__dropdown" data-search-dropdown></div>
             </div>
 
-            <button class="theme-toggle" type="button" data-theme-toggle aria-label="{% trans 'Toggle theme' %}">🌙</button>
+            <button class="theme-toggle" type="button" data-theme-toggle aria-label="{% trans 'Toggle theme' %}">{% icon "moon" class_name="theme-moon" %}{% icon "sun" class_name="theme-sun" %}</button>
 
             <a class="telegram-header-link" href="https://t.me/lumiboxxx" target="_blank" rel="noopener noreferrer" aria-label="{% trans 'Telegram' %}">
                 <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
@@ -103,7 +112,7 @@
 
             {% include "includes/language_switcher.html" %}
 
-            <button class="hamburger" type="button" data-hamburger aria-label="{% trans 'Меню' %}" aria-expanded="false">
+            <button class="hamburger" type="button" data-hamburger aria-controls="mobile-nav" aria-label="{% trans 'Меню' %}" aria-expanded="false">
                 <span class="hamburger__line"></span>
                 <span class="hamburger__line"></span>
                 <span class="hamburger__line"></span>
@@ -139,7 +148,7 @@
     </header>
 
     {# Mobile drawer nav #}
-    <nav class="mobile-nav" data-mobile-nav aria-label="{% trans 'Мобильная навигация' %}">
+    <nav id="mobile-nav" class="mobile-nav" data-mobile-nav aria-label="{% trans 'Мобильная навигация' %}">
         <a class="mobile-nav__link" href="{% url 'catalog:home' %}">{% trans "Главная" %}</a>
         <a class="mobile-nav__link" href="{% url 'catalog:title_list' %}">{% trans "Весь каталог" %}</a>
         <a class="mobile-nav__link" href="{% url 'catalog:title_list' %}?type=movie">{% trans "Фильмы" %}</a>
@@ -156,7 +165,7 @@
         {% endif %}
     </nav>
 
-    <main class="site-main{% if messages %} site-main--with-messages{% endif %}">
+    <main id="main-content" class="site-main{% if messages %} site-main--with-messages{% endif %}">
         {% if messages %}
             <div class="container">
                 <ul class="messages">
@@ -179,7 +188,7 @@
 
     {# Lightbox #}
     <div class="lightbox" data-lightbox role="dialog" aria-modal="true" aria-label="{% trans 'Просмотр изображения' %}">
-        <button class="lightbox__close" type="button" data-lightbox-close aria-label="{% trans 'Закрыть' %}">✕</button>
+        <button class="lightbox__close" type="button" data-lightbox-close aria-label="{% trans 'Закрыть' %}">{% icon "close" size=24 %}</button>
         <img class="lightbox__img" src="" alt="" data-lightbox-img>
     </div>
 
@@ -191,25 +200,25 @@
     {% endcomment %}
     <nav class="bottom-nav" aria-label="{% trans 'Быстрая навигация' %}">
         <a class="bottom-nav__link" href="{% url 'catalog:home' %}">
-            <span class="bottom-nav__icon">🏠</span>
+            <span class="bottom-nav__icon">{% icon "home" %}</span>
             {% trans "Главная" %}
         </a>
         <a class="bottom-nav__link" href="{% url 'catalog:title_list' %}">
-            <span class="bottom-nav__icon">🎬</span>
+            <span class="bottom-nav__icon">{% icon "movie" %}</span>
             {% trans "Каталог" %}
         </a>
         <a class="bottom-nav__link" href="{% url 'catalog:genre_list' %}">
-            <span class="bottom-nav__icon">🏷️</span>
+            <span class="bottom-nav__icon">{% icon "tag" %}</span>
             {% trans "Жанры" %}
         </a>
         {% if user.is_authenticated %}
             <a class="bottom-nav__link" href="{% url 'library:favorites' %}">
-                <span class="bottom-nav__icon">❤️</span>
+                <span class="bottom-nav__icon">{% icon "heart" %}</span>
                 {% trans "Избранное" %}
             </a>
         {% else %}
             <a class="bottom-nav__link" href="{% url 'users:login' %}">
-                <span class="bottom-nav__icon">👤</span>
+                <span class="bottom-nav__icon">{% icon "user" %}</span>
                 {% trans "Войти" %}
             </a>
         {% endif %}

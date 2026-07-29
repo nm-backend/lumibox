@@ -184,12 +184,12 @@ CELERY_BEAT_SCHEDULE = {
     },
     # Прогрев кэша главной каждые 2 минуты — первый посетитель не ждёт
     "warm-home-cache": {
-        "task": "apps.reviews.tasks.warm_home_cache",
+        "task": "apps.catalog.tasks.warm_home_cache",
         "schedule": 60 * 2,
     },
     # Прогрев справочников каждые 30 минут
     "warm-reference-caches": {
-        "task": "apps.reviews.tasks.warm_reference_caches",
+        "task": "apps.catalog.tasks.warm_reference_caches",
         "schedule": 60 * 30,
     },
 }

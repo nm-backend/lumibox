@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load i18n icons %}
 
 {% if section_titles %}
     <section class="section reveal">
@@ -10,13 +10,13 @@
         </div>
 
         <div class="carousel">
-            <button class="carousel__btn carousel__btn--prev" type="button" aria-label="{% trans 'Назад' %}">‹</button>
+            <button class="carousel__btn carousel__btn--prev" type="button" aria-label="{% trans 'Назад' %}">{% icon "chevron-left" size=18 %}</button>
             <div class="carousel__track">
                 {% for title in section_titles %}
                     {% include "includes/title_card.html" %}
                 {% endfor %}
             </div>
-            <button class="carousel__btn carousel__btn--next" type="button" aria-label="{% trans 'Вперёд' %}">›</button>
+            <button class="carousel__btn carousel__btn--next" type="button" aria-label="{% trans 'Вперёд' %}">{% icon "chevron-right" size=18 %}</button>
         </div>
     </section>
 {% endif %}

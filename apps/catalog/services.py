@@ -271,5 +271,15 @@ def clear_reference_cache():
 
     Зовётся при добавлении/удалении Genre или Country: новый жанр должен
     появиться в списке на сайте сразу, а не через час.
+
+    Чипсы навигации (GENRE_CHIPS_CACHE_KEY) сбрасываем здесь же: они
+    кэшируются отдельным ключом в catalog/views.py и без этого оставались
+    бы устаревшими до истечения TTL (1 час).
     """
-    cache.delete_many([REFERENCE_GENRE_CACHE_KEY, REFERENCE_COUNTRY_CACHE_KEY])
+    from apps.catalog.views import GENRE_CHIPS_CACHE_KEY
+
+    cache.delete_many([
+        REFERENCE_GENRE_CACHE_KEY,
+        REFERENCE_COUNTRY_CACHE_KEY,
+        GENRE_CHIPS_CACHE_KEY,
+    ])

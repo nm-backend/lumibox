@@ -9,6 +9,7 @@ from django.db import models
 from django.utils import timezone
 
 from apps.core.models import TimeStampedModel
+from apps.core.validators import validate_image_file
 
 PROMO_CODE_VALIDATOR = RegexValidator(
     regex=r"^[A-Z0-9][A-Z0-9_-]{2,31}$",
@@ -281,7 +282,12 @@ class Promotion(TimeStampedModel):
     placement = models.CharField("Размещение", max_length=12, choices=Placement.choices)
     title = models.CharField("Заголовок", max_length=160)
     text = models.CharField("Текст", max_length=280, blank=True)
-    image = models.ImageField("Изображение", upload_to="promotions/%Y/%m", blank=True)
+    image = models.ImageField(
+        "Изображение",
+        upload_to="promotions/%Y/%m",
+        blank=True,
+        validators=[validate_image_file],
+    )
     target_url = models.URLField("Целевая ссылка")
     starts_at = models.DateTimeField("Показывать с", null=True, blank=True)
     ends_at = models.DateTimeField("Показывать до", null=True, blank=True)

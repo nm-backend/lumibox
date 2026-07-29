@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static i18n %}
+{% load static i18n icons %}
 
 {% block page_title %}{% blocktranslate with name=user.display_name %}Профиль — {{ name }} — LumiBox{% endblocktranslate %}{% endblock %}
 
@@ -60,13 +60,13 @@
                     <h2 class="section__title">{% trans "Недавняя активность" %}</h2>
                     {% if recent_favorites %}
                         <div class="carousel">
-                            <button class="carousel__btn carousel__btn--prev" type="button" aria-label="{% trans 'Назад' %}">‹</button>
+                            <button class="carousel__btn carousel__btn--prev" type="button" aria-label="{% trans 'Назад' %}">{% icon "chevron-left" size=18 %}</button>
                             <div class="carousel__track">
                                 {% for favorite in recent_favorites %}
                                     {% include "includes/title_card.html" with title=favorite.title %}
                                 {% endfor %}
                             </div>
-                            <button class="carousel__btn carousel__btn--next" type="button" aria-label="{% trans 'Вперёд' %}">›</button>
+                            <button class="carousel__btn carousel__btn--next" type="button" aria-label="{% trans 'Вперёд' %}">{% icon "chevron-right" size=18 %}</button>
                         </div>
                     {% else %}
                         <div class="empty-state">

@@ -12,7 +12,14 @@ from apps.users.forms import LoginForm, ProfileForm, RegistrationForm
 
 
 class RegisterView(CreateView):
-    """Регистрация. После успеха сразу входим — лишний шаг никому не нужен."""
+    """
+    Регистрация. После успеха сразу входим — лишний шаг никому не нужен.
+
+    Ограничение частоты: не более 10 регистраций в час с одного IP.
+    Без этого лимита злоумышленник за минуту заведёт тысячи аккаунтов.
+    django-axes защищает только /login/, регистрация должна себя
+    обезопасить самостоятельно.
+    """
 
     form_class = RegistrationForm
     template_name = "users/register.html"
@@ -22,6 +29,24 @@ class RegisterView(CreateView):
         # Авторизованному регистрация не нужна — уводим на главную.
         if request.user.is_authenticated:
             return redirect("catalog:home")
+
+        # Rate limiting: 10 регистраций в час с одного IP.
+        # Ключ — IP адрес. Используем cache.get/set для совместимости
+        # с любым бэкендом (не только Redis).
+        from django.core.cache import cache
+        from django.http import HttpResponse
+
+        ip = request.META.get("REMOTE_ADDR", "unknown")
+        cache_key = f"register:rate:{ip}"
+
+        count = cache.get(cache_key, 0)
+        if count >= 10:
+            return HttpResponse(
+                "Слишком много попыток регистрации. Повторите позже.",
+                status=429,
+            )
+        cache.set(cache_key, count + 1, 3600)
+
         return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):

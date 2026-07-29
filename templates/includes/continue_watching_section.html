@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load i18n icons %}
 <section class="section">
     <div class="section__header">
         <h2 class="section__title">{% trans "Продолжить просмотр" %}</h2>
@@ -21,7 +21,7 @@
                             <span class="continue-card__placeholder" aria-hidden="true">{{ watch_title.initial }}</span>
                         {% endif %}
                         <span class="continue-card__shade" aria-hidden="true"></span>
-                        <span class="continue-card__play" aria-hidden="true">▶</span>
+                        {% icon "play" class_name="continue-card__play" size=20 %}
                         <span class="continue-card__progress"><span style="width: {{ progress.percentage }}%"></span></span>
                         <span class="continue-card__body">
                             <strong>{{ watch_title.name }}</strong>

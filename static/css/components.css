@@ -1504,17 +1504,45 @@
     opacity: 1;
 }
 
+/* ---------- Анимация появления иконок ---------- */
+
+@keyframes iconFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.5);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
 /* ---------- Иконки ---------- */
 
 /*
   Собственные inline-SVG. currentColor означает, что иконка красится
   цветом текста рядом — не нужно дублировать правила наведения.
+
+  Иконки fadeIn с небольшой задержкой, заданной через CSS-переменную
+  --icon-delay. JS в app.js проставляет каждой иконке свой индекс для
+  каскадного появления — последняя иконка на странице появляется
+  примерно на 1.5 секунды позже первой.
 */
 
 .icon {
     width: 18px;
     height: 18px;
     flex-shrink: 0;
+    opacity: 0;
+    animation: iconFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) both;
+    animation-delay: var(--icon-delay, 0s);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .icon {
+        opacity: 1;
+        animation: none;
+    }
 }
 
 .icon--sm {
