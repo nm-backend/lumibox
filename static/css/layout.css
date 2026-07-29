@@ -252,6 +252,7 @@
 
 .page-header {
     margin-bottom: var(--space-5);
+    position: relative;
 }
 
 .page-title {
@@ -259,10 +260,22 @@
     letter-spacing: -0.02em;
 }
 
+/* Subtle accent underline for page titles */
+.page-header .page-title::after {
+    content: "";
+    display: block;
+    width: 48px;
+    height: 3px;
+    margin-top: var(--space-3);
+    background: linear-gradient(90deg, var(--color-accent), var(--color-accent-dim), transparent);
+    border-radius: 2px;
+}
+
 .page-subtitle {
-    margin-top: var(--space-1);
+    margin-top: var(--space-2);
     color: var(--color-text-muted);
     font-size: var(--text-sm);
+    line-height: 1.5;
 }
 
 /* Подвал целиком живёт в footer.css — там же, где его разметка.
