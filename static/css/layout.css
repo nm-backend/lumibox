@@ -248,11 +248,11 @@
 
 /* ---------- Theme toggle: показываем moon в тёмной теме, sun в светлой ---------- */
 
-/* Тёмная тема (data-theme=""): показываем moon (нажать → переключить на светлую) */
-[data-theme=""] .theme-sun { display: none; }
+/* Тёмная тема (data-theme=""): показываем sun (нажать → переключить на светлую) */
+[data-theme=""] .theme-moon { display: none; }
 
-/* Светлая тема (data-theme="light"): показываем sun (нажать → переключить на тёмную) */
-[data-theme="light"] .theme-moon { display: none; }
+/* Светлая тема (data-theme="light"): показываем moon (нажать → переключить на тёмную) */
+[data-theme="light"] .theme-sun { display: none; }
 
 /* ---------- Телефоны ---------- */
 
