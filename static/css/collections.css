@@ -64,7 +64,7 @@
 .collection-card__name {
     font-size: var(--text-sm);
     font-weight: 600;
-    line-height: 1.35;
+    line-height: 1.4;
     transition: color var(--transition-fast);
 }
 

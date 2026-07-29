@@ -1428,7 +1428,7 @@
     border-radius: 50%;
     background: var(--glass-bg);
     backdrop-filter: blur(var(--glass-blur));
-    box-shadow: var(--shadow-glass);
+    box-shadow: var(--shadow-glass), 0 0 16px var(--color-accent-glow);
     color: var(--color-text-muted);
     font-size: var(--text-lg);
     cursor: pointer;

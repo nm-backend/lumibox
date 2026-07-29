@@ -108,6 +108,8 @@ button {
     color: var(--color-on-accent);
     font-weight: 600;
     text-decoration: none;
+    border-radius: 0 0 var(--radius-md) 0;
+    box-shadow: var(--shadow-accent);
     transform: translateY(-100%);
     transition: transform var(--transition-fast);
 }

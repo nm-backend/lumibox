@@ -104,6 +104,20 @@
     font-weight: 700;
     margin-bottom: var(--space-5);
     color: var(--color-text);
+    position: relative;
+}
+
+/* Subtle accent underline for advantages heading */
+.footer-advantages__heading::after {
+    content: "";
+    display: block;
+    width: 48px;
+    height: 3px;
+    margin-top: var(--space-3);
+    background: linear-gradient(90deg, var(--color-accent), var(--color-accent-dim), transparent);
+    border-radius: 2px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .footer-advantages__grid {
