@@ -11,15 +11,14 @@
     const stored = localStorage.getItem('lumibox-theme');
     if (stored) html.dataset.theme = stored;
     if (themeToggle) {
-        const updateIcon = () => {
-            themeToggle.textContent = html.dataset.theme === 'light' ? '🌙' : '☀️';
+        const setAriaLabel = () => {
             themeToggle.setAttribute('aria-label', html.dataset.theme === 'light' ? 'Тёмная тема' : 'Светлая тема');
         };
-        updateIcon();
+        setAriaLabel();
         themeToggle.addEventListener('click', () => {
             html.dataset.theme = html.dataset.theme === 'light' ? '' : 'light';
             localStorage.setItem('lumibox-theme', html.dataset.theme);
-            updateIcon();
+            setAriaLabel();
         });
     }
 
