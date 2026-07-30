@@ -190,13 +190,7 @@ button {
         var(--color-accent-glow) 0%,
         transparent 60%
     );
-    opacity: 0.6;
-    animation: glowPulse 6s ease-in-out infinite alternate;
-}
-
-@keyframes glowPulse {
-    0% { opacity: 0.35; transform: scale(0.95); }
-    100% { opacity: 0.7; transform: scale(1.05); }
+    opacity: 0.5;
 }
 
 /* ---------- Blur-up image loading (progressive enhancement) ---------- */
@@ -263,39 +257,91 @@ img[data-loaded] {
 .error-page {
     text-align: center;
     padding: var(--space-10) var(--space-4);
-    max-width: 520px;
+    max-width: 540px;
     margin: 0 auto;
     animation: fadeUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+.error-page__atmosphere {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.error-page__grain {
+    position: absolute;
+    inset: -50%;
+    width: 200%;
+    height: 200%;
+    opacity: 0.035;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+    animation: grainShift 8s steps(4) infinite;
+}
+
+@keyframes grainShift {
+    0% { transform: translate(0, 0); }
+    25% { transform: translate(-5%, -3%); }
+    50% { transform: translate(3%, 5%); }
+    75% { transform: translate(-3%, -3%); }
+}
+
+.error-page__beam {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 2px;
+    height: 100%;
+    background: linear-gradient(180deg, transparent 0%, rgba(255, 184, 48, 0.06) 30%, rgba(255, 184, 48, 0.10) 50%, rgba(255, 184, 48, 0.06) 70%, transparent 100%);
+    transform: translateX(-50%);
 }
 
 .error-page__illustration {
     display: flex;
     justify-content: center;
-    margin-bottom: var(--space-5);
-    opacity: 0.5;
+    margin-bottom: var(--space-4);
+}
+
+.error-page__illustration svg {
+    width: 200px;
+    height: 140px;
 }
 
 .error-page__code {
-    font-size: 6rem;
+    font-size: 7rem;
     font-weight: 800;
-    background: linear-gradient(135deg, var(--color-accent), rgba(255, 184, 48, 0.4));
+    background: linear-gradient(135deg, var(--color-accent), rgba(255, 184, 48, 0.3));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
     line-height: 1;
-    margin-bottom: var(--space-3);
+    margin-bottom: var(--space-2);
     letter-spacing: -0.04em;
+    font-family: var(--font-display);
+    text-transform: uppercase;
 }
 
 @supports not (background-clip: text) {
     .error-page__code {
         color: var(--color-accent);
-        opacity: 0.7;
+        opacity: 0.8;
     }
 }
 
+.error-page__subtitle {
+    font-size: var(--text-xs);
+    color: var(--color-text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-weight: 600;
+    margin-bottom: var(--space-5);
+}
+
 .error-page__title {
-    font-size: var(--text-xl);
+    font-size: var(--text-lg);
     font-weight: 600;
     margin-bottom: var(--space-3);
     color: var(--color-text);
@@ -319,7 +365,48 @@ img[data-loaded] {
 
 .error-page__search {
     max-width: 380px;
+    margin: 0 auto var(--space-6);
+}
+
+.error-page__suggestions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: var(--space-2);
+    max-width: 360px;
     margin: 0 auto;
+}
+
+.error-page__suggestion {
+    padding: var(--space-2) var(--space-3);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    font-size: var(--text-xs);
+    color: var(--color-text-muted);
+    transition: all var(--transition-fast);
+    text-align: center;
+}
+
+.error-page__suggestion:hover {
+    border-color: var(--color-accent-dim);
+    color: var(--color-accent);
+    background: var(--color-accent-dim);
+}
+
+.error-page__divider {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin: var(--space-5) 0;
+    color: var(--color-text-dim);
+    font-size: var(--text-xs);
+}
+
+.error-page__divider::before,
+.error-page__divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--color-border);
 }
 
 .error-page__contact {
@@ -338,10 +425,14 @@ img[data-loaded] {
 
 @media (max-width: 560px) {
     .error-page__code {
-        font-size: 4rem;
+        font-size: 4.5rem;
     }
     .error-page {
         padding: var(--space-6) var(--space-3);
+    }
+    .error-page__illustration svg {
+        width: 150px;
+        height: 105px;
     }
 }
 

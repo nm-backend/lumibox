@@ -95,6 +95,37 @@
 {% endblock %}
 
 {% block content %}
+    {# ---------- Activity ticker with real stats ---------- #}
+    <div class="activity-ticker" aria-hidden="true">
+        <div class="activity-ticker__track">
+            <span class="activity-ticker__item">{{ statistics.movies_count }} фильмов в каталоге</span>
+            <span class="activity-ticker__sep" aria-hidden="true">✦</span>
+            <span class="activity-ticker__item">{{ statistics.series_count }} сериалов</span>
+            <span class="activity-ticker__sep" aria-hidden="true">✦</span>
+            <span class="activity-ticker__item">{{ statistics.users_count|default:"Тысячи" }} пользователей</span>
+            <span class="activity-ticker__sep" aria-hidden="true">✦</span>
+            <span class="activity-ticker__item">HD качество без подписок</span>
+            <span class="activity-ticker__sep" aria-hidden="true">✦</span>
+            <span class="activity-ticker__item">Удобный поиск и фильтры</span>
+            <span class="activity-ticker__sep" aria-hidden="true">✦</span>
+            <span class="activity-ticker__item">{{ statistics.movies_count }} фильмов в каталоге</span>
+            <span class="activity-ticker__sep" aria-hidden="true">✦</span>
+            <span class="activity-ticker__item">{{ statistics.series_count }} сериалов</span>
+            <span class="activity-ticker__sep" aria-hidden="true">✦</span>
+            <span class="activity-ticker__item">{{ statistics.users_count|default:"Тысячи" }} пользователей</span>
+            <span class="activity-ticker__sep" aria-hidden="true">✦</span>
+            <span class="activity-ticker__item">HD качество без подписок</span>
+            <span class="activity-ticker__sep" aria-hidden="true">✦</span>
+            <span class="activity-ticker__item">Удобный поиск и фильтры</span>
+        </div>
+    </div>
+
+    {% if trending|length >= 4 %}
+        {% include "includes/title_section.html" with section_title=_("Популярное за неделю") section_titles=trending section_url=request.path section_class="section--trending" %}
+    {% endif %}
+
+    {% ad_block %}
+
     {% if continue_watching %}
         <section class="section reveal">
             <div class="section__header">

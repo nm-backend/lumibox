@@ -130,6 +130,7 @@ TEMPLATES = [
                 # {{ ga_measurement_id }}. Если не задан — пустая строка,
                 # в base.html блок gtag не рендерится.
                 "apps.core.context_processors.global_settings",
+                "apps.core.context_processors.static_version",
             ],
         },
     },

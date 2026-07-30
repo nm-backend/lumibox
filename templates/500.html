@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static i18n icons %}
+{% load static i18n icons lumibox_urls %}
 
 {% block page_title %}{% trans "Ошибка сервера (500) — LumiBox" %}{% endblock %}
 {% block page_description %}{% trans "На сервере произошла ошибка. Мы уже работаем над её исправлением." %}{% endblock %}
@@ -7,38 +7,62 @@
 {% block og_description %}{% trans "На сервере произошла ошибка. Мы уже работаем над её исправлением." %}{% endblock %}
 {% block twitter_title %}{% trans "Ошибка сервера (500) — LumiBox" %}{% endblock %}
 {% block twitter_description %}{% trans "На сервере произошла ошибка. Мы уже работаем над её исправлением." %}{% endblock %}
+{% block twitter_image %}{% absolute_static 'img/og-default.png' %}{% endblock %}
 
 {% block content %}
-    {% url 'contacts' as contacts_url %}
-    <div class="error-page">
-        <div class="error-page__illustration" aria-hidden="true">
-            <svg viewBox="0 0 240 160" width="240" height="160" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="30" y="30" width="180" height="100" rx="8" stroke-opacity="0.3"/>
-                <circle cx="120" cy="65" r="24" stroke-opacity="0.2"/>
-                <circle cx="120" cy="65" r="14" stroke-opacity="0.15"/>
-                <line x1="145" y1="80" x2="165" y2="100" stroke-opacity="0.2"/>
-                <path d="M70 120 M100 120 M130 120" stroke-opacity="0.15"/>
-                <rect x="60" y="42" width="16" height="4" rx="2" stroke-opacity="0.15"/>
-                <rect x="62" y="50" width="12" height="3" rx="1.5" stroke-opacity="0.12"/>
-            </svg>
-        </div>
-
-        <h1 class="error-page__code" aria-hidden="true">500</h1>
-        <p class="error-page__title">{% trans "Что-то пошло не так" %}</p>
-        <p class="error-page__text">
-            {% trans "На сервере произошла внутренняя ошибка. Мы уже знаем о ней и работаем над исправлением. Попробуйте обновить страницу через несколько минут." %}
-        </p>
-
-        <div class="error-page__actions">
-            <a class="button button--primary" href="{% url 'catalog:home' %}">{% icon "home" size=14 %} {% trans "На главную" %}</a>
-            <a class="button button--ghost" href="{% url 'catalog:title_list' %}">{% icon "movie" size=14 %} {% trans "Каталог" %}</a>
-        </div>
-
-        <p class="error-page__contact">
-            {% blocktranslate trimmed %}
-                Если ошибка повторяется — сообщите нам в разделе
-            {% endblocktranslate %}
-            <a href="{{ contacts_url }}">{% trans "Контакты" %}</a>.
-        </p>
+{% url 'contacts' as contacts_url %}
+<div class="error-page">
+    <div class="error-page__atmosphere" aria-hidden="true">
+        <div class="error-page__grain"></div>
+        <div class="error-page__beam"></div>
     </div>
+
+    <div class="error-page__illustration" aria-hidden="true">
+        <svg viewBox="0 0 200 140" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="20" y="25" width="160" height="90" rx="4" stroke-opacity="0.25"/>
+            <rect x="35" y="40" width="130" height="60" rx="3" stroke-opacity="0.1" fill="currentColor" fill-opacity="0.03"/>
+            <line x1="55" y1="55" x2="145" y2="55" stroke-opacity="0.15" stroke-dasharray="4 3"/>
+            <line x1="55" y1="70" x2="145" y2="70" stroke-opacity="0.12" stroke-dasharray="4 3"/>
+            <line x1="55" y1="85" x2="120" y2="85" stroke-opacity="0.12" stroke-dasharray="4 3"/>
+            <path d="M80 40 l12 -8 l12 8" stroke-opacity="0.1"/>
+            <circle cx="100" cy="40" r="3" stroke-opacity="0.15"/>
+            <line x1="100" y1="55" x2="100" y2="95" stroke-opacity="0.08"/>
+            <line x1="85" y1="100" x2="115" y2="100" stroke-opacity="0.1"/>
+            <line x1="75" y1="105" x2="125" y2="105" stroke-opacity="0.08"/>
+            <line x1="65" y1="110" x2="135" y2="110" stroke-opacity="0.06"/>
+            <line x1="95" y1="118" x2="105" y2="122" stroke-opacity="0.15"/>
+            <line x1="105" y1="118" x2="95" y2="122" stroke-opacity="0.15"/>
+        </svg>
+    </div>
+
+    <h1 class="error-page__code" aria-hidden="true">500</h1>
+    <p class="error-page__subtitle">{% trans "Ошибка сервера" %}</p>
+    <p class="error-page__title">{% trans "В кинобудке что-то задымилось" %}</p>
+    <p class="error-page__text">
+        {% trans "На сервере произошла внутренняя ошибка. Мы уже знаем о ней и делаем всё возможное, чтобы исправить её как можно скорее." %}
+    </p>
+
+    <div class="error-page__actions">
+        <a class="button button--primary" href="{% url 'catalog:home' %}">{% icon "home" size=14 %} {% trans "На главную" %}</a>
+        <a class="button button--ghost" href="{% url 'catalog:title_list' %}">{% trans "Каталог" %}</a>
+    </div>
+
+    <div class="error-page__search">
+        <form class="search" action="{% url 'catalog:title_list' %}" method="get" role="search">
+            <label class="visually-hidden" for="search-500">{% trans "Поиск по каталогу" %}</label>
+            <input class="search__input" id="search-500" type="search" name="q"
+                   placeholder="{% trans 'Поиск по названию...' %}" autocomplete="off">
+            <button class="search__submit" type="submit" aria-label="{% trans 'Найти' %}">{% icon "search" size=16 %}</button>
+        </form>
+    </div>
+
+    <div class="error-page__divider" aria-hidden="true"></div>
+
+    <p class="error-page__contact">
+        {% blocktranslate trimmed %}
+            Если ошибка повторяется — сообщите нам в разделе
+        {% endblocktranslate %}
+        <a href="{{ contacts_url }}">{% trans "Контакты" %}</a>.
+    </p>
+</div>
 {% endblock %}

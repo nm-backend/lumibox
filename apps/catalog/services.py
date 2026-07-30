@@ -265,6 +265,57 @@ def clear_home_cache():
     ])
 
 
+def get_home_statistics():
+    """Счётчики для главной: фильмы, сериалы, пользователи, отзывы."""
+    from django.contrib.auth import get_user_model
+    from apps.reviews.models import Review
+
+    cached = cache.get(HOME_STATS_CACHE_KEY)
+    if cached is not None:
+        return cached
+    stats = {
+        "movies_count": Title.objects.published().movies().count(),
+        "series_count": Title.objects.published().series().count(),
+        "users_count": get_user_model().objects.count(),
+        "reviews_count": Review.objects.count(),
+    }
+    cache.set(HOME_STATS_CACHE_KEY, stats, settings.CACHE_TTL_HOME)
+    return stats
+
+
+HOME_STATS_CACHE_KEY = "home:statistics:v1"
+
+
+def get_trending_titles():
+    """Популярное за неделю (по просмотрам)."""
+    from django.utils import timezone
+    from datetime import timedelta
+    from apps.library.models import WatchHistory
+
+    cached = cache.get(HOME_TRENDING_CACHE_KEY)
+    if cached is not None:
+        return cached
+    week_ago = timezone.now() - timedelta(days=7)
+    trending_ids = (
+        WatchHistory.objects
+        .filter(watched_at__gte=week_ago, title__status=Title.Status.PUBLISHED)
+        .values("title_id")
+        .annotate(views=Count("id"))
+        .order_by("-views")[:12]
+    )
+    ids = [t["title_id"] for t in trending_ids]
+    if ids:
+        titles = list(Title.objects.published().with_related().filter(id__in=ids))
+        titles.sort(key=lambda t: ids.index(t.id))
+    else:
+        titles = list(Title.objects.published().with_related().order_by("-rating_average")[:6])
+    cache.set(HOME_TRENDING_CACHE_KEY, titles, settings.CACHE_TTL_HOME)
+    return titles
+
+
+HOME_TRENDING_CACHE_KEY = "home:trending:v1"
+
+
 def clear_reference_cache():
     """
     Сбрасывает кэш списков жанров и стран.

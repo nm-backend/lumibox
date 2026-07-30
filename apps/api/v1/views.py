@@ -13,6 +13,7 @@ from drf_spectacular.utils import (
 from rest_framework import filters, mixins, permissions, serializers, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from apps.api.permissions import IsAuthorOrReadOnly
 from apps.api.v1.serializers import (
@@ -23,7 +24,7 @@ from apps.api.v1.serializers import (
     TitleDetailSerializer,
     TitleListSerializer,
 )
-from apps.catalog.models import Collection, Country, Genre, Title
+from apps.catalog.models import Collection, Country, Genre, Person, Title
 from apps.catalog.services import get_similar_titles
 from apps.library.services import toggle_favorite
 from apps.reviews.models import Review
@@ -126,16 +127,16 @@ class TitleViewSet(viewsets.ReadOnlyModelViewSet):
     @extend_schema(
         summary="Поиск по каталогу",
         description=(
-            "Глобальный поиск по названию и оригинальному названию. "
-            "Возвращает компактные результаты для автодополнения в поисковой строке. "
-            "Максимум limit записей."
+            "Глобальный поиск по названиям фильмов/сериалов и персонам (актёры,"
+            " режиссёры). Возвращает компактные результаты для автодополнения"
+            " в поисковой строке. Максимум limit записей + до 3 персон."
         ),
         parameters=[
             OpenApiParameter(name="q", type=str, required=True, description="Поисковый запрос, минимум 2 символа"),
             OpenApiParameter(name="limit", type=int, required=False, default=6, description="Максимум результатов"),
         ],
         responses=SearchResultSerializer(many=True),
-        tags=["titles"],
+        tags=["titles", "persons"],
     )
     @action(detail=False, methods=["get"])
     def search(self, request):
@@ -161,6 +162,23 @@ class TitleViewSet(viewsets.ReadOnlyModelViewSet):
                 }
                 for t in titles
             ]
+            persons = (
+                Person.objects.filter(
+                    Q(name__icontains=q) | Q(original_name__icontains=q)
+                )
+                .only("id", "name", "slug", "photo")
+                .order_by("name")[:3]
+            )
+            for p in persons:
+                results.append({
+                    "id": p.id,
+                    "name": p.name,
+                    "slug": p.slug,
+                    "type": "person",
+                    "release_year": None,
+                    "poster": p.photo.url if p.photo else None,
+                    "url": p.get_absolute_url(),
+                })
         return Response(results)
 
     # Значения по умолчанию и границы держим рядом с разбором,
@@ -369,3 +387,32 @@ class ReviewViewSet(
             # проходят её оба, и второй упирается в unique_review_per_user.
             # Без этого перехвата гонка оборачивалась бы для клиента 500.
             raise serializers.ValidationError("Вы уже оставили отзыв на эту запись.")
+
+
+@extend_schema(
+    summary="Поставить оценку",
+    description="Быстрая оценка без текста отзыва (1–10). Если оценка уже есть — обновляет.",
+    request=serializers.Serializer,
+    responses={200: OpenApiResponse(description="Оценка сохранена")},
+    tags=["titles"],
+)
+class RateTitleView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, title_slug):
+        try:
+            title = Title.objects.published().get(slug=title_slug)
+        except Title.DoesNotExist:
+            return Response({"detail": "Запись не найдена."}, status=404)
+
+        rating = request.data.get("rating")
+        if not isinstance(rating, int) or rating < 1 or rating > 10:
+            return Response({"detail": "Оценка от 1 до 10."}, status=400)
+
+        review, created = Review.objects.update_or_create(
+            user=request.user,
+            title=title,
+            defaults={"rating": rating, "text": ""},
+        )
+
+        return Response({"rating": rating, "created": created})

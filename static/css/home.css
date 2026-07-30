@@ -135,19 +135,13 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
-    opacity: 0.38;
-    will-change: transform, translate;
-    transition: transform 6s cubic-bezier(0.4, 0, 0.2, 1), translate 0.15s linear;
-    translate: 0 var(--parallax-y, 0px);
+    opacity: 0.4;
+    will-change: transform;
+    transition: transform 6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .showcase:hover .showcase__backdrop {
     transform: scale(1.03);
-}
-
-.showcase__slide--animating .showcase__backdrop {
-    transform: scale(1.08);
-    transition: transform 4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Trailer video in hero */
@@ -187,14 +181,12 @@
 }
 
 .showcase__inner > * {
-    animation: fadeUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) both;
+    animation: fadeUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) both;
 }
 
 .showcase__inner > *:nth-child(1) { animation-delay: 0.05s; }
 .showcase__inner > *:nth-child(2) { animation-delay: 0.15s; }
 .showcase__inner > *:nth-child(3) { animation-delay: 0.25s; }
-.showcase__inner > *:nth-child(4) { animation-delay: 0.35s; }
-.showcase__inner > *:nth-child(5) { animation-delay: 0.45s; }
 
 .showcase__label {
     margin-bottom: var(--space-3);
@@ -266,27 +258,11 @@
     align-items: center;
     gap: 2px;
     padding: var(--space-3) var(--space-4);
-    background: var(--glass-bg);
-    backdrop-filter: blur(var(--glass-blur));
-    border: 1px solid var(--glass-border);
+    background: rgba(18, 21, 30, 0.85);
+    border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
-    animation: heroBadgeIn 0.8s 0.3s cubic-bezier(0.4, 0, 0.2, 1) both;
+    animation: fadeUp 0.5s 0.3s cubic-bezier(0.4, 0, 0.2, 1) both;
     z-index: 2;
-}
-
-@keyframes heroBadgeIn {
-    0% {
-        opacity: 0;
-        transform: translateY(16px) scale(0.8);
-    }
-    60% {
-        opacity: 1;
-        transform: translateY(-4px) scale(1.05);
-    }
-    100% {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
 }
 
 .showcase__badge-value {
@@ -295,12 +271,6 @@
     color: var(--color-accent);
     line-height: 1;
     text-shadow: 0 0 20px rgba(255, 184, 48, 0.3);
-    animation: badgeGlow 3s ease-in-out infinite alternate;
-}
-
-@keyframes badgeGlow {
-    0% { text-shadow: 0 0 20px rgba(255, 184, 48, 0.3); }
-    100% { text-shadow: 0 0 40px rgba(255, 184, 48, 0.5), 0 0 80px rgba(255, 184, 48, 0.2); }
 }
 
 .showcase__badge-label {
@@ -316,76 +286,71 @@
     }
 }
 
-/* ---------- Ряды подборок ---------- */
+/* ---------- Activity ticker ---------- */
 
-.section {
-    margin-bottom: var(--space-8);
+.activity-ticker {
+    overflow: hidden;
+    margin-bottom: var(--space-6);
+    padding: var(--space-2) 0;
+    border-top: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-border);
+    mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent);
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent);
 }
 
-.section__header {
+.activity-ticker__track {
     display: flex;
-    align-items: baseline;
-    justify-content: space-between;
     gap: var(--space-4);
-    margin-bottom: var(--space-5);
-    position: relative;
+    width: max-content;
+    animation: tickerScroll 40s linear infinite;
 }
 
-.section__header::after {
-    content: '';
-    position: absolute;
-    bottom: calc(var(--space-2) * -1);
-    left: 0;
-    width: 48px;
-    height: 3px;
-    background: linear-gradient(90deg, var(--color-accent), transparent);
-    border-radius: 2px;
-    opacity: 0.7;
-}
-
-.section__title {
-    font-size: var(--text-lg);
-    letter-spacing: -0.01em;
-}
-
-.section__link {
+.activity-ticker__item {
+    font-size: var(--text-xs);
     color: var(--color-text-muted);
-    font-size: var(--text-sm);
-    font-weight: 500;
     white-space: nowrap;
-    transition: color var(--transition-fast), transform var(--transition-fast);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.activity-ticker__sep {
+    color: var(--color-accent);
+    font-size: 7px;
     display: inline-flex;
     align-items: center;
-    gap: var(--space-1);
+    opacity: 0.6;
 }
 
-.section__link:hover {
-    color: var(--color-accent);
-    transform: translateX(4px);
+@keyframes tickerScroll {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
 }
 
-/* Section variants */
+@media (max-width: 720px) {
+    .activity-ticker {
+        margin-bottom: var(--space-4);
+    }
+}
+
+/* Section variants — uses .section from components.css */
 .section--trending .section__title::before {
-    content: '';
-    display: inline-block;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--color-accent);
+    content: '🔥';
+    display: inline;
+    font-size: 1.15em;
     margin-right: var(--space-2);
-    box-shadow: 0 0 8px var(--color-accent);
     vertical-align: middle;
-    animation: pulse-dot 2s ease-in-out infinite;
+    animation: pulse-fire 1.5s ease-in-out infinite;
+    filter: drop-shadow(0 0 4px rgba(255, 100, 0, 0.5));
 }
 
-@keyframes pulse-dot {
-    0%, 100% { opacity: 0.6; }
-    50% { opacity: 1; }
+@keyframes pulse-fire {
+    0%, 100% { transform: scale(1); filter: drop-shadow(0 0 4px rgba(255, 100, 0, 0.4)); }
+    50% { transform: scale(1.25); filter: drop-shadow(0 0 14px rgba(255, 60, 0, 0.8)); }
 }
 
 .section--trending .section__header::after {
-    width: 64px;
-    background: linear-gradient(90deg, var(--color-accent), var(--color-play), transparent);
+    width: 72px;
+    background: linear-gradient(90deg, #ff6b35, var(--color-accent), transparent);
 }
 
 .section--spotlight .section__header {
@@ -582,9 +547,8 @@
 .value-card {
     padding: var(--space-6);
     border-radius: var(--radius-lg);
-    background: var(--glass-bg);
-    backdrop-filter: blur(var(--glass-blur));
-    border: 1px solid var(--glass-border);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
     transition: transform var(--transition), border-color var(--transition), box-shadow var(--transition);
     text-align: left;
     position: relative;
@@ -669,3 +633,28 @@
         padding: var(--space-10) 0 var(--space-8);
     }
 }
+
+/* ---------- Genre badge decorative dots ---------- */
+
+.badge-list .badge::after {
+    content: '';
+    display: inline-block;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    margin-left: 6px;
+    vertical-align: middle;
+    background: var(--color-accent);
+    opacity: 0.15;
+    transition: opacity var(--transition-fast), transform var(--transition-fast);
+}
+
+.badge-list .badge:hover::after {
+    opacity: 0.6;
+    transform: scale(1.4);
+}
+
+.badge-list .badge:nth-child(4n+1)::after { opacity: 0.1; }
+.badge-list .badge:nth-child(4n+2)::after { opacity: 0.3; }
+.badge-list .badge:nth-child(4n+3)::after { opacity: 0.5; }
+.badge-list .badge:nth-child(4n)::after { opacity: 0.7; }

@@ -2,18 +2,79 @@
 
 .catalog {
     display: grid;
-    grid-template-columns: 240px 1fr;
+    grid-template-columns: 220px 1fr;
     gap: var(--space-6);
     align-items: start;
+}
+
+/* ---------- Боковая навигация ---------- */
+
+.catalog-sidebar {
+    margin-bottom: var(--space-4);
+}
+
+.sidebar-category {
+    margin-bottom: var(--space-3);
+}
+
+.sidebar-category__title {
+    font-size: var(--text-xs);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-text-dim);
+    margin-bottom: var(--space-2);
+    padding-bottom: var(--space-1);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.sidebar-category__link {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-1) var(--space-2);
+    border-radius: var(--radius-sm);
+    color: var(--color-text);
+    font-size: var(--text-sm);
+    text-decoration: none;
+    transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.sidebar-category__link:hover {
+    background: var(--color-surface-hover);
+    color: var(--color-accent);
+}
+
+.sidebar-category__link--active {
+    background: var(--color-accent-dim);
+    color: var(--color-accent);
+    font-weight: 600;
+}
+
+.sidebar-category__count {
+    font-size: var(--text-xs);
+    color: var(--color-text-muted);
+    background: var(--color-bg);
+    padding: 0 var(--space-1);
+    border-radius: var(--radius-sm);
+    min-width: 20px;
+    text-align: center;
+    line-height: 1.6;
+}
+
+.sidebar-category__link:hover .sidebar-category__count,
+.sidebar-category__link--active .sidebar-category__count {
+    color: var(--color-accent);
 }
 
 /* ---------- Панель фильтров ---------- */
 
 .filters {
     position: sticky;
-    top: calc(var(--header-height) + var(--space-4));
+    top: calc(var(--header-height) + var(--space-3));
 
-    padding: var(--space-5);
+    padding: var(--space-4);
+    padding-top: var(--space-3);
     background: var(--glass-bg);
     backdrop-filter: blur(var(--glass-blur));
     -webkit-backdrop-filter: blur(var(--glass-blur));
@@ -26,37 +87,42 @@
 .filters__active {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--space-2);
-    margin-bottom: var(--space-4);
-    padding-bottom: var(--space-4);
+    gap: var(--space-1);
+    margin-bottom: var(--space-3);
+    padding-bottom: var(--space-3);
     border-bottom: 1px solid var(--color-border);
 }
 
 .filters__field {
-    margin-bottom: var(--space-4);
+    margin-bottom: var(--space-3);
+}
+
+.filters__field:hover .filters__label {
+    color: var(--color-text);
 }
 
 .filters__label {
     display: block;
-    margin-bottom: var(--space-2);
+    margin-bottom: var(--space-1);
     color: var(--color-text-dim);
-    font-size: var(--text-xs);
+    font-size: 11px;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.05em;
+    transition: color var(--transition-fast);
 }
 
 /* Оформляем select сами: браузерный вид ломает тёмную тему */
 .filters__field select,
 .filters__field input[type="text"] {
     width: 100%;
-    padding: var(--space-2) var(--space-3);
+    padding: var(--space-1) var(--space-2);
 
     background-color: var(--color-bg);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-sm);
     color: var(--color-text);
-    font-size: var(--text-sm);
+    font-size: 12px;
     transition: border-color var(--transition-fast), box-shadow var(--transition-fast), transform var(--transition-fast);
 
     /* Убираем родную стрелку и рисуем свою фоном */
@@ -65,14 +131,16 @@
 
 .filters__field select:hover,
 .filters__field input[type="text"]:hover {
-    border-color: var(--color-text-dim);
+    border-color: var(--color-accent-dim);
+    box-shadow: 0 0 0 2px rgba(255, 184, 48, 0.08);
+    transform: scale(1.01);
 }
 
 .filters__field select {
-    padding-right: var(--space-6);
+    padding-right: var(--space-5);
     background-image: linear-gradient(45deg, transparent 50%, var(--color-text-dim) 50%),
                       linear-gradient(135deg, var(--color-text-dim) 50%, transparent 50%);
-    background-position: right 16px center, right 11px center;
+    background-position: right 12px center, right 7px center;
     background-size: 5px 5px, 5px 5px;
     background-repeat: no-repeat;
     cursor: pointer;
@@ -83,7 +151,6 @@
     outline: none;
     border-color: var(--color-accent);
     box-shadow: 0 0 0 3px rgba(255, 184, 48, 0.15);
-    transform: scale(1.01);
 }
 
 .filters__count {
@@ -107,7 +174,7 @@
     display: flex;
     flex-direction: column;
     gap: var(--space-2);
-    margin-top: var(--space-5);
+    margin-top: var(--space-4);
 }
 
 .filters__actions .button {
@@ -139,6 +206,33 @@
     color: var(--color-text-muted);
     font-size: var(--text-sm);
     margin-right: auto;
+}
+
+.catalog__view-toggle {
+    display: flex;
+    gap: 2px;
+    margin-left: var(--space-2);
+}
+
+.catalog__view-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-sm);
+    color: var(--color-text-dim);
+    transition: color var(--transition-fast), background-color var(--transition-fast);
+}
+
+.catalog__view-btn:hover {
+    color: var(--color-text);
+    background-color: var(--color-surface-hover);
+}
+
+.catalog__view-btn--active {
+    color: var(--color-accent);
+    background-color: var(--color-surface-hover);
 }
 
 /* .chip и .chip__remove переехали в components.css: их использует и подвал,
@@ -188,6 +282,10 @@
         grid-template-columns: 1fr;
     }
 
+    .catalog-sidebar {
+        display: none;
+    }
+
     .filters {
         position: static;
     }
@@ -223,23 +321,37 @@
     }
 
     .filters__body {
-        margin-top: var(--space-4);
+        max-height: 0;
+        opacity: 0;
         overflow: hidden;
-        animation: filtersSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        margin-top: 0;
+        transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+                    opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+                    margin-top 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    @keyframes filtersSlideIn {
-        from {
-            opacity: 0;
-            max-height: 0;
-            margin-top: 0;
-        }
-        to {
-            opacity: 1;
-            max-height: 600px;
-            margin-top: var(--space-4);
-        }
+    .filters[open] .filters__body {
+        max-height: 600px;
+        opacity: 1;
+        margin-top: var(--space-4);
     }
+
+    .filters__body > * {
+        transition: transform 0.2s ease, opacity 0.2s ease;
+        transform: translateY(-4px);
+        opacity: 0;
+    }
+
+    .filters[open] .filters__body > * {
+        transform: translateY(0);
+        opacity: 1;
+    }
+
+    .filters[open] .filters__body > *:nth-child(1) { transition-delay: 0.05s; }
+    .filters[open] .filters__body > *:nth-child(2) { transition-delay: 0.1s; }
+    .filters[open] .filters__body > *:nth-child(3) { transition-delay: 0.15s; }
+    .filters[open] .filters__body > *:nth-child(4) { transition-delay: 0.2s; }
+    .filters[open] .filters__body > *:nth-child(5) { transition-delay: 0.25s; }
 }
 
 /* На большом экране details всегда раскрыт, заголовок не кликабелен */
@@ -247,9 +359,9 @@
     .filters__summary {
         list-style: none;
         pointer-events: none;
-        font-size: var(--text-md);
+        font-size: var(--text-sm);
         font-weight: 600;
-        margin-bottom: var(--space-4);
+        margin-bottom: var(--space-3);
         display: flex;
         align-items: center;
         gap: var(--space-2);

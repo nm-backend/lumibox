@@ -22,6 +22,7 @@ urlpatterns = [
     path("", include(router.urls)),
     path("titles/<slug:title_slug>/reviews/", reviews, name="title-reviews"),
     path("titles/<slug:title_slug>/reviews/<int:pk>/", review_detail, name="title-review-detail"),
+    path("titles/<slug:title_slug>/rate/", views.RateTitleView.as_view(), name="title-rate"),
     # Stripe — платёжный шлюз.
     path("billing/checkout/", CreateCheckoutSessionView.as_view(), name="billing-checkout"),
     path("billing/webhook/", StripeWebhookView.as_view(), name="billing-webhook"),

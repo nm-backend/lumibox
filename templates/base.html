@@ -13,12 +13,12 @@
     <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&display=swap">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&display=swap" media="print" onload="this.media='all'">
 
-    <link rel="stylesheet" href="{% static 'css/variables.css' %}">
-    <link rel="stylesheet" href="{% static 'css/base.css' %}">
-    <link rel="stylesheet" href="{% static 'css/layout.css' %}">
-    <link rel="stylesheet" href="{% static 'css/components.css' %}">
-    <link rel="stylesheet" href="{% static 'css/footer.css' %}">
-    <link rel="stylesheet" href="{% static 'css/ads.css' %}">
+    <link rel="stylesheet" href="{% static 'css/variables.css' %}?v={{ static_version }}">
+    <link rel="stylesheet" href="{% static 'css/base.css' %}?v={{ static_version }}">
+    <link rel="stylesheet" href="{% static 'css/layout.css' %}?v={{ static_version }}">
+    <link rel="stylesheet" href="{% static 'css/components.css' %}?v={{ static_version }}">
+    <link rel="stylesheet" href="{% static 'css/footer.css' %}?v={{ static_version }}">
+    <link rel="stylesheet" href="{% static 'css/ads.css' %}?v={{ static_version }}">
 
     <link rel="icon" type="image/svg+xml" href="{% static 'img/favicon.svg' %}">
     <link rel="alternate icon" href="{% static 'img/favicon.svg' %}">

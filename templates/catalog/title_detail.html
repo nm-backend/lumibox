@@ -52,37 +52,64 @@
 {% block extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    const ratingContainer = document.querySelector('[data-star-rating]');
+    var ratingContainer = document.querySelector('[data-star-rating]');
     if (!ratingContainer) return;
 
-    const inputs = ratingContainer.querySelectorAll('.star-rating__input');
-    const stars = ratingContainer.querySelectorAll('.star-rating__star');
+    var stars = ratingContainer.querySelectorAll('[data-star]');
+    var statusEl = ratingContainer.querySelector('[data-star-status]');
+    var currentRating = {{ user_review.rating|default:"0" }};
+    var slug = '{{ title.slug }}';
 
-    inputs.forEach(input => {
-        input.addEventListener('change', function () {});
-    });
+    function setStars(value) {
+        stars.forEach(function (s) {
+            s.classList.toggle('star-rating__star--active', parseInt(s.dataset.value) <= value);
+        });
+    }
 
-    stars.forEach(star => {
+    setStars(currentRating);
+
+    stars.forEach(function (star) {
         star.addEventListener('mouseenter', function () {
-            const value = this.dataset.value;
-            stars.forEach(s => {
-                s.style.color = parseInt(s.dataset.value) <= parseInt(value)
-                    ? 'var(--color-accent)'
-                    : 'var(--color-border)';
-            });
+            setStars(parseInt(this.dataset.value));
         });
 
         star.addEventListener('mouseleave', function () {
-            const checked = ratingContainer.querySelector('.star-rating__input:checked');
-            const val = checked ? parseInt(checked.value) : 0;
-            stars.forEach(s => {
-                s.style.color = parseInt(s.dataset.value) <= val
-                    ? 'var(--color-accent)'
-                    : 'var(--color-border)';
-            });
+            setStars(currentRating);
+        });
+
+        star.addEventListener('click', function () {
+            var value = parseInt(this.dataset.value);
+            if (value === currentRating) return;
+
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/api/v1/titles/' + slug + '/rate/');
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.setRequestHeader('X-CSRFToken', getCookie('csrftoken'));
+            xhr.onload = function () {
+                if (xhr.status === 200) {
+                    currentRating = value;
+                    setStars(value);
+                    if (statusEl) {
+                        statusEl.textContent = '{% trans "Оценка сохранена" %}';
+                        setTimeout(function () { statusEl.textContent = ''; }, 3000);
+                    }
+                } else {
+                    if (statusEl) {
+                        statusEl.textContent = '{% trans "Ошибка" %}';
+                        setTimeout(function () { statusEl.textContent = ''; }, 3000);
+                    }
+                }
+            };
+            xhr.send(JSON.stringify({ rating: value }));
         });
     });
 });
+
+function getCookie(name) {
+    var value = '; ' + document.cookie;
+    var parts = value.split('; ' + name + '=');
+    if (parts.length === 2) return parts.pop().split(';').shift();
+}
 
     var shareBtn = document.querySelector('[data-share]');
     if (shareBtn) {
@@ -184,6 +211,20 @@ document.addEventListener('DOMContentLoaded', function () {
                 <p class="film-hero__description">{{ title.description }}</p>
             {% endif %}
 
+            {% if user.is_authenticated %}
+                <div class="film-hero__rating-section" data-star-rating>
+                    <p class="film-hero__rating-label">{% trans "Оценить" %}</p>
+                    <div class="star-rating" data-star-rating-widget>
+                        {% for i in "123456789"|make_list %}
+                            <label class="star-rating__star" data-value="{{ forloop.counter }}" data-star>
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path d="M10 1.5l2.47 5.01 5.53.8-4 3.9.95 5.49L10 13.5l-4.95 2.6.95-5.49-4-3.9 5.53-.8L10 1.5z"/></svg>
+                            </label>
+                        {% endfor %}
+                    </div>
+                    <span class="star-rating__status" data-star-status></span>
+                </div>
+            {% endif %}
+
             <div class="film-hero__actions">
                 {% if watch_url %}
                     <a class="button button--primary button--large" href="{{ watch_url }}">
@@ -256,203 +297,231 @@ document.addEventListener('DOMContentLoaded', function () {
         <span aria-current="page">{{ title.name }}</span>
     </nav>
 
-    {# Tabs #}
-    <div class="tabs" data-tabs>
-        <button class="tab tab--active" data-tab="about" type="button">{% trans "О проекте" %}</button>
-        {% if title.seasons.exists %}
-            <button class="tab" data-tab="seasons" type="button">{% trans "Сезоны" %}</button>
-        {% endif %}
-        {% if crew_by_role %}
-            <button class="tab" data-tab="crew" type="button">{% trans "Создатели" %}</button>
-        {% endif %}
-        {% if title.frames.all %}
-            <button class="tab" data-tab="gallery" type="button">{% trans "Галерея" %}</button>
-        {% endif %}
-        <button class="tab" data-tab="reviews" type="button">{% trans "Отзывы" %}</button>
-        {% if similar_titles %}
-            <button class="tab" data-tab="similar" type="button">{% trans "Похожее" %}</button>
-        {% endif %}
-    </div>
-
-    {# Tab: About #}
-    <div class="tab-content tab-content--active" data-tab-content="about">
-        {% if title.trailer_source %}
-            <section class="section" id="trailer">
-                <h2 class="section__title">{% trans "Трейлер" %}</h2>
-                {% if title.trailer_source == "file" %}
-                    <div class="player">
-                        <video class="player__frame" controls preload="metadata"
-                               {% if title.backdrop %}poster="{{ title.backdrop.url }}"{% endif %}>
-                            <source src="{{ title.trailer_file.url }}">
-                            {% trans "Ваш браузер не умеет проигрывать видео." %}
-                            <a href="{{ title.trailer_file.url }}">{% trans "Скачать файл" %}</a>.
-                        </video>
-                    </div>
-                {% elif title.trailer_embed_url %}
-                    <div class="player">
-                        <iframe class="player__frame"
-                                src="{{ title.trailer_embed_url }}"
-                                title="{% blocktranslate with name=title.name %}Трейлер: {{ name }}{% endblocktranslate %}"
-                                loading="lazy"
-                                referrerpolicy="strict-origin-when-cross-origin"
-                                allow="accelerometer; clipboard-write; encrypted-media; picture-in-picture"
-                                allowfullscreen></iframe>
-                    </div>
-                {% else %}
-                    <p class="player-fallback">
-                        {% trans "Трейлер размещён на стороннем сервисе." %}
-                        <a class="button button--ghost" href="{{ title.trailer_url }}"
-                           target="_blank" rel="noopener noreferrer">{% trans "Открыть трейлер" %}</a>
-                    </p>
+    <div class="detail-layout">
+        <div class="detail-layout__main">
+            {# Tabs #}
+            <div class="tabs" data-tabs>
+                <button class="tab tab--active" data-tab="about" type="button">{% trans "О проекте" %}</button>
+                {% if title.seasons.exists %}
+                    <button class="tab" data-tab="seasons" type="button">{% trans "Сезоны" %}</button>
                 {% endif %}
-            </section>
-        {% endif %}
-
-        <section class="section">
-            <h2 class="section__title">{% trans "О проекте" %}</h2>
-            <dl class="spec-list">
-                <dt class="spec-list__label">{% if title.release_date %}{% trans "Дата выхода" %}{% else %}{% trans "Год" %}{% endif %}</dt>
-                <dd class="spec-list__value">
-                    {% if title.release_date %}{{ title.release_date|date:"j E Y" }}{% else %}{{ title.release_year }}{% endif %}
-                </dd>
-                {% if title.duration_minutes %}
-                    <dt class="spec-list__label">{% if title.is_series %}{% trans "Серия" %}{% else %}{% trans "Длительность" %}{% endif %}</dt>
-                    <dd class="spec-list__value">{% blocktranslate with min=title.duration_minutes %}{{ min }} мин{% endblocktranslate %}</dd>
+                {% if crew_by_role %}
+                    <button class="tab" data-tab="crew" type="button">{% trans "Создатели" %}</button>
                 {% endif %}
-                {% if title.countries.all %}
-                    <dt class="spec-list__label">{% trans "Страны" %}</dt>
-                    <dd class="spec-list__value">
-                        <div class="badge-list">
-                            {% for country in title.countries.all %}
-                                <a class="badge" href="{% url 'catalog:country_titles' country.slug %}">{{ country.name }}</a>
-                            {% endfor %}
-                        </div>
-                    </dd>
+                {% if title.frames.all %}
+                    <button class="tab" data-tab="gallery" type="button">{% trans "Галерея" %}</button>
                 {% endif %}
-                {% if title.studios.all %}
-                    <dt class="spec-list__label">{% trans "Студии" %}</dt>
-                    <dd class="spec-list__value">
-                        <div class="badge-list">
-                            {% for studio in title.studios.all %}
-                                <a class="badge" href="{% url 'catalog:studio_detail' studio.slug %}">{{ studio.name }}</a>
-                            {% endfor %}
-                        </div>
-                    </dd>
-                {% endif %}
-                {% if title.rating_average %}
-                    <dt class="spec-list__label">{% trans "Оценка зрителей" %}</dt>
-                    <dd class="spec-list__value">{% blocktranslate with avg=title.rating_average count=title.rating_count %}{{ avg }} / 10 ({{ count }}){% endblocktranslate %}</dd>
-                {% endif %}
-            </dl>
-        </section>
-    </div>
-
-    {# Tab: Seasons #}
-    {% if title.seasons.exists %}
-        <div class="tab-content" data-tab-content="seasons">
-            <section class="section">
-                <h2 class="section__title">{% trans "Сезоны" %}</h2>
-                {% for season in title.seasons.all %}
-                    <div class="season-group">
-                        <h3 class="season__title">{{ season.display_name }}</h3>
-                        {% if season.description %}
-                            <p class="season__description">{{ season.description }}</p>
-                        {% endif %}
-                        {% if season.episodes.exists %}
-                            <div class="episode-list">
-                                {% for episode in season.episodes.all %}
-                                    <a class="episode" href="{% if episode.video_asset.status == 'ready' %}{{ episode.get_absolute_url }}{% else %}#{% endif %}">
-                                        <span class="episode__number">{{ episode.number }}</span>
-                                        <span class="episode__body">
-                                            <span class="episode__name">{{ episode.name }}</span>
-                                            {% if episode.duration_seconds %}
-                                                <span class="episode__duration">{% blocktranslate with sec=episode.duration_seconds|floatformat:0 %}{{ sec }} мин{% endblocktranslate %}</span>
-                                            {% endif %}
-                                        </span>
-                                        {% if episode.video_asset.status == 'ready' %}
-                                            <span class="episode__play">{% icon "play" size=14 %}</span>
-                                        {% endif %}
-                                    </a>
-                                {% endfor %}
-                            </div>
-                        {% endif %}
-                    </div>
-                {% endfor %}
-            </section>
-        </div>
-    {% endif %}
-
-    {# Tab: Crew #}
-    {% if crew_by_role %}
-        <div class="tab-content" data-tab-content="crew">
-            <section class="section">
-                <h2 class="section__title">{% trans "Создатели" %}</h2>
-                {% for role_label, participations in crew_by_role %}
-                    <div class="crew-group">
-                        <p class="crew-group__role">{{ role_label }}</p>
-                        <div class="crew-list">
-                            {% for participation in participations %}
-                                <a class="crew" href="{{ participation.person.get_absolute_url }}">
-                                    <span class="avatar">
-                                        {% if participation.person.photo %}
-                                            <img class="avatar__image" src="{{ participation.person.photo.url }}" alt="" loading="lazy">
-                                        {% else %}
-                                            <span aria-hidden="true">{{ participation.person.initial }}</span>
-                                        {% endif %}
-                                    </span>
-                                    <span class="crew__body">
-                                        <span class="crew__name">{{ participation.person.name }}</span>
-                                        {% if participation.character %}
-                                            <span class="crew__character">{{ participation.character }}</span>
-                                        {% endif %}
-                                    </span>
-                                </a>
-                            {% endfor %}
-                        </div>
-                    </div>
-                {% endfor %}
-            </section>
-        </div>
-    {% endif %}
-
-    {# Tab: Gallery #}
-    {% if title.frames.all %}
-        <div class="tab-content" data-tab-content="gallery">
-            <section class="section">
-                <h2 class="section__title">{% trans "Галерея кадров" %}</h2>
-                <div class="frames">
-                    {% for frame in title.frames.all %}
-                        <img class="frames__item"
-                             src="{{ frame.image.url }}"
-                             alt="{{ frame.caption|default:title.name }}"
-                             loading="lazy"
-                             data-lightbox-trigger="{{ frame.image.url }}">
-                {% endfor %}
+                <button class="tab" data-tab="reviews" type="button">{% trans "Отзывы" %}</button>
             </div>
-        </section>
+
+            {# Tab: About #}
+            <div class="tab-content tab-content--active" data-tab-content="about">
+                {% if title.trailer_source %}
+                    <section class="section" id="trailer">
+                        <h2 class="section__title">{% trans "Трейлер" %}</h2>
+                        {% if title.trailer_source == "file" %}
+                            <div class="player">
+                                <video class="player__frame" controls preload="metadata"
+                                       {% if title.backdrop %}poster="{{ title.backdrop.url }}"{% endif %}>
+                                    <source src="{{ title.trailer_file.url }}">
+                                    {% trans "Ваш браузер не умеет проигрывать видео." %}
+                                    <a href="{{ title.trailer_file.url }}">{% trans "Скачать файл" %}</a>.
+                                </video>
+                            </div>
+                        {% elif title.trailer_embed_url %}
+                            <div class="player">
+                                <iframe class="player__frame"
+                                        src="{{ title.trailer_embed_url }}"
+                                        title="{% blocktranslate with name=title.name %}Трейлер: {{ name }}{% endblocktranslate %}"
+                                        loading="lazy"
+                                        referrerpolicy="strict-origin-when-cross-origin"
+                                        allow="accelerometer; clipboard-write; encrypted-media; picture-in-picture"
+                                        allowfullscreen></iframe>
+                            </div>
+                        {% else %}
+                            <p class="player-fallback">
+                                {% trans "Трейлер размещён на стороннем сервисе." %}
+                                <a class="button button--ghost" href="{{ title.trailer_url }}"
+                                   target="_blank" rel="noopener noreferrer">{% trans "Открыть трейлер" %}</a>
+                            </p>
+                        {% endif %}
+                    </section>
+                {% endif %}
+
+                <section class="section">
+                    <h2 class="section__title">{% trans "О проекте" %}</h2>
+                    <dl class="spec-list">
+                        <dt class="spec-list__label">{% if title.release_date %}{% trans "Дата выхода" %}{% else %}{% trans "Год" %}{% endif %}</dt>
+                        <dd class="spec-list__value">
+                            {% if title.release_date %}{{ title.release_date|date:"j E Y" }}{% else %}{{ title.release_year }}{% endif %}
+                        </dd>
+                        {% if title.duration_minutes %}
+                            <dt class="spec-list__label">{% if title.is_series %}{% trans "Серия" %}{% else %}{% trans "Длительность" %}{% endif %}</dt>
+                            <dd class="spec-list__value">{% blocktranslate with min=title.duration_minutes %}{{ min }} мин{% endblocktranslate %}</dd>
+                        {% endif %}
+                        {% if title.countries.all %}
+                            <dt class="spec-list__label">{% trans "Страны" %}</dt>
+                            <dd class="spec-list__value">
+                                <div class="badge-list">
+                                    {% for country in title.countries.all %}
+                                        <a class="badge" href="{% url 'catalog:country_titles' country.slug %}">{{ country.name }}</a>
+                                    {% endfor %}
+                                </div>
+                            </dd>
+                        {% endif %}
+                        {% if title.studios.all %}
+                            <dt class="spec-list__label">{% trans "Студии" %}</dt>
+                            <dd class="spec-list__value">
+                                <div class="badge-list">
+                                    {% for studio in title.studios.all %}
+                                        <a class="badge" href="{% url 'catalog:studio_detail' studio.slug %}">{{ studio.name }}</a>
+                                    {% endfor %}
+                                </div>
+                            </dd>
+                        {% endif %}
+                        {% if title.rating_average %}
+                            <dt class="spec-list__label">{% trans "Оценка зрителей" %}</dt>
+                            <dd class="spec-list__value">{% blocktranslate with avg=title.rating_average count=title.rating_count %}{{ avg }} / 10 ({{ count }}){% endblocktranslate %}</dd>
+                        {% endif %}
+                    </dl>
+                </section>
+            </div>
+
+            {# Tab: Seasons #}
+            {% if title.seasons.exists %}
+                <div class="tab-content" data-tab-content="seasons">
+                    <section class="section">
+                        <h2 class="section__title">{% trans "Сезоны" %}</h2>
+                        {% for season in title.seasons.all %}
+                            <div class="season-group">
+                                <h3 class="season__title">{{ season.display_name }}</h3>
+                                {% if season.description %}
+                                    <p class="season__description">{{ season.description }}</p>
+                                {% endif %}
+                                {% if season.episodes.exists %}
+                                    <div class="episode-list">
+                                        {% for episode in season.episodes.all %}
+                                            <a class="episode" href="{% if episode.video_asset.status == 'ready' %}{{ episode.get_absolute_url }}{% else %}#{% endif %}">
+                                                <span class="episode__number">{{ episode.number }}</span>
+                                                <span class="episode__body">
+                                                    <span class="episode__name">{{ episode.name }}</span>
+                                                    {% if episode.duration_seconds %}
+                                                        <span class="episode__duration">{% blocktranslate with sec=episode.duration_seconds|floatformat:0 %}{{ sec }} мин{% endblocktranslate %}</span>
+                                                    {% endif %}
+                                                </span>
+                                                {% if episode.video_asset.status == 'ready' %}
+                                                    <span class="episode__play">{% icon "play" size=14 %}</span>
+                                                {% endif %}
+                                            </a>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </section>
+                </div>
+            {% endif %}
+
+            {# Tab: Crew #}
+            {% if crew_by_role %}
+                <div class="tab-content" data-tab-content="crew">
+                    <section class="section">
+                        <h2 class="section__title">{% trans "Создатели" %}</h2>
+                        {% for role_label, participations in crew_by_role %}
+                            <div class="crew-group">
+                                <p class="crew-group__role">{{ role_label }}</p>
+                                <div class="crew-list">
+                                    {% for participation in participations %}
+                                        <a class="crew" href="{{ participation.person.get_absolute_url }}">
+                                            <span class="avatar">
+                                                {% if participation.person.photo %}
+                                                    <img class="avatar__image" src="{{ participation.person.photo.url }}" alt="" loading="lazy">
+                                                {% else %}
+                                                    <span aria-hidden="true">{{ participation.person.initial }}</span>
+                                                {% endif %}
+                                            </span>
+                                            <span class="crew__body">
+                                                <span class="crew__name">{{ participation.person.name }}</span>
+                                                {% if participation.character %}
+                                                    <span class="crew__character">{{ participation.character }}</span>
+                                                {% endif %}
+                                            </span>
+                                        </a>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </section>
+                </div>
+            {% endif %}
+
+            {# Tab: Gallery #}
+            {% if title.frames.all %}
+                <div class="tab-content" data-tab-content="gallery">
+                    <section class="section">
+                        <h2 class="section__title">{% trans "Галерея кадров" %}</h2>
+                        <div class="frames">
+                            {% for frame in title.frames.all %}
+                                <img class="frames__item"
+                                     src="{{ frame.image.url }}"
+                                     alt="{{ frame.caption|default:title.name }}"
+                                     loading="lazy"
+                                     data-lightbox-trigger="{{ frame.image.url }}">
+                            {% endfor %}
+                        </div>
+                    </section>
+                </div>
+            {% endif %}
+
+        {# Tab: Reviews #}
+        <div class="tab-content" data-tab-content="reviews">
+            {% include "includes/reviews.html" %}
+        </div>
     </div>
-{% endif %}
 
-{# Tab: Reviews #}
-<div class="tab-content" data-tab-content="reviews">
-    {% include "includes/reviews.html" %}
-</div>
-
-{# Tab: Similar #}
-{% if similar_titles %}
-    <div class="tab-content" data-tab-content="similar">
-        <section class="section">
-            <div class="carousel">
-                <button class="carousel__btn carousel__btn--prev" type="button" aria-label="{% trans 'Назад' %}">{% icon "chevron-left" size=18 %}</button>
-                <div class="carousel__track">
-                    {% for similar in similar_titles %}
-                        {% include "includes/title_card.html" with title=similar %}
+    {# Sidebar #}
+    <aside class="detail-layout__sidebar">
+        {% if similar_titles %}
+            <section class="sidebar-section">
+                <h2 class="sidebar-section__title">{% trans "Похожие" %}</h2>
+                <div class="sidebar-carousel">
+                    {% for similar in similar_titles|slice:":8" %}
+                        <a class="sidebar-card" href="{{ similar.get_absolute_url }}">
+                            <div class="sidebar-card__poster">
+                                {% if similar.poster %}
+                                    <img class="sidebar-card__image" src="{{ similar.poster.url }}" alt="" loading="lazy">
+                                {% else %}
+                                    <span class="sidebar-card__placeholder">{{ similar.name|first }}</span>
+                                {% endif %}
+                            </div>
+                            <div class="sidebar-card__body">
+                                <span class="sidebar-card__name">{{ similar.name }}</span>
+                                <span class="sidebar-card__meta">
+                                    {{ similar.release_year }}
+                                    {% if similar.rating_average %} · {{ similar.rating_average }}{% endif %}
+                                </span>
+                            </div>
+                        </a>
                     {% endfor %}
                 </div>
-                <button class="carousel__btn carousel__btn--next" type="button" aria-label="{% trans 'Вперёд' %}">{% icon "chevron-right" size=18 %}</button>
+                {% with first_genre=title.genres.first %}{% if first_genre %}<a class="sidebar-section__more" href="{% url 'catalog:title_list' %}?genres__slug={{ first_genre.slug }}">{% trans "Больше похожих" %} →</a>{% endif %}{% endwith %}
+            </section>
+        {% endif %}
+
+        <section class="sidebar-section">
+            <h2 class="sidebar-section__title">{% trans "Поделиться" %}</h2>
+            <div class="sidebar-share">
+                <button class="sidebar-share__btn" data-share title="{% trans 'Копировать ссылку' %}">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+                </button>
+                <a class="sidebar-share__btn" href="https://t.me/share/url?url={{ request.build_absolute_uri|urlencode }}&text={{ title.name|urlencode }}" target="_blank" rel="noopener noreferrer" title="Telegram">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.127.087.775.047 1.19-.055.702-.248 2.38-.35 3.153-.042.346-.267.477-.459.51l-1.454.16c.168.168.368.349.554.528a9.07 9.07 0 0 1 1.48 1.54c.367.543.468 1.116.323 1.332-.157.233-.483.362-.892.362-1.409 0-1.984-.723-2.541-1.392l-.052-.063c-.316-.368-.585-.68-.984-.726-.093-.005-.185.01-.274.036a10.261 10.261 0 0 0-.637.213c-.234.082-.434.152-.665.15-.399-.004-.786-.25-1.127-.46-.442-.272-1.002-.705-1.437-1.19a14.5 14.5 0 0 1-.98-1.15l-.005-.007a91.6 91.6 0 0 1-.578-.698c-.31-.387-.66-.824-.689-1.037-.05-.38.26-.594.69-.82l.098-.051c.255-.137.57-.31.86-.48.485-.285.735-.453.878-.72.047-.086.104-.177.159-.276.386-.699.773-1.513.886-1.95.05-.195.063-.33-.01-.46a.52.52 0 0 0-.322-.236c-.12-.029-.277-.012-.376-.008-.1.004-.694.09-1.002.146a2.2 2.2 0 0 1-.216.028c-.05-.004-.114-.007-.186-.016-.443-.051-.71-.16-.97-.24-.305-.096-.486-.177-.58-.292-.143-.174-.066-.45.306-.679.257-.155.443-.225.68-.298.532-.16 1.567-.338 2.38-.42.788-.08 1.695-.114 2.24.02.381.095.575.226.644.41z"/></svg>
+                </a>
+                <a class="sidebar-share__btn" href="https://vk.com/share.php?url={{ request.build_absolute_uri|urlencode }}" target="_blank" rel="noopener noreferrer" title="VK">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M15.684 0H8.316C2.835 0 0 2.835 0 8.316v7.368C0 21.165 2.835 24 8.316 24h7.368C21.165 24 24 21.165 24 15.684V8.316C24 2.835 21.165 0 15.684 0zm3.267 16.758h-1.908c-.66 0-.864-.516-2.052-1.704-1.032-.996-1.488-1.128-1.74-1.128-.36 0-.456.132-.456.636v1.548c0 .456-.144.708-1.296.708-1.908 0-4.02-1.176-5.496-3.36C4.413 11.106 3.777 8.886 3.777 8.586c0-.24.108-.456.576-.456h1.908c.432 0 .6.204.768.684.84 2.244 2.256 4.212 2.832 4.212.216 0 .324-.108.324-.708v-2.46c-.072-1.248-.744-1.356-.744-1.8 0-.216.168-.408.432-.408h3.012c.36 0 .48.204.48.636v3.396c0 .36.156.48.252.48.204 0 .372-.12.744-.492 1.044-1.176 1.788-3.012 1.788-3.012.084-.24.276-.456.708-.456h1.908c.6 0 .732.312.6.744-.276 1.26-2.472 4.056-2.472 4.056-.192.288-.252.432 0 .768.18.264.792.768 1.2 1.236.72.816 1.284 1.488 1.428 1.956.144.48-.144.708-.6.708z"/></svg>
+                </a>
             </div>
         </section>
-    </div>
-{% endif %}
-
+    </aside>
+</div>
 {% endblock %}

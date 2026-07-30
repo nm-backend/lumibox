@@ -3,6 +3,28 @@
 Панель фильтров каталога.
 {% endcomment %}
 
+<nav class="catalog-sidebar">
+    <div class="sidebar-category">
+        <div class="sidebar-category__title">{% trans "Разделы" %}</div>
+        <a class="sidebar-category__link {% if request.GET.type == 'movie' or not request.GET.type %}sidebar-category__link--active{% endif %}" href="{% url 'catalog:title_list' %}?type=movie">
+            {% trans "Все фильмы" %}
+        </a>
+        <a class="sidebar-category__link {% if request.GET.type == 'series' %}sidebar-category__link--active{% endif %}" href="{% url 'catalog:title_list' %}?type=series">
+            {% trans "Сериалы" %}
+            {% if category_counts.series %}<span class="sidebar-category__count">{{ category_counts.series }}</span>{% endif %}
+        </a>
+    </div>
+    <div class="sidebar-category">
+        <div class="sidebar-category__title">{% trans "Сортировка" %}</div>
+        <a class="sidebar-category__link {% if request.GET.sort == '-rating_average' %}sidebar-category__link--active{% endif %}" href="{% url 'catalog:title_list' %}?sort=-rating_average">
+            {% trans "Высокий рейтинг" %}
+        </a>
+        <a class="sidebar-category__link {% if request.GET.sort == '-published_at' %}sidebar-category__link--active{% endif %}" href="{% url 'catalog:title_list' %}?sort=-published_at">
+            {% trans "Новинки" %}
+        </a>
+    </div>
+</nav>
+
 <details class="filters" open>
     <summary class="filters__summary">
         {% icon "filter" size=16 %}

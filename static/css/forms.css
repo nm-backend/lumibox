@@ -141,6 +141,13 @@
     font-weight: 500;
 }
 
+.auth-card__note {
+    color: var(--color-text-muted);
+    text-align: center;
+    font-size: var(--text-sm);
+    margin-top: var(--space-3);
+}
+
 /* ---------- Сообщения ---------- */
 
 .messages {

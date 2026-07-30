@@ -1,6 +1,6 @@
 {% load i18n icons %}
 
-<article class="card" itemscope itemtype="https://schema.org/Movie">
+<article class="card {% if compact %}card--compact{% endif %}" itemscope itemtype="https://schema.org/Movie">
     <div class="card__poster">
         {% if title.poster %}
             <img class="card__image"
@@ -12,7 +12,7 @@
             <span class="card__placeholder" aria-hidden="true">{{ title.name|first }}</span>
         {% endif %}
 
-        <span class="card__badge">{{ title.get_type_display }}</span>
+        <span class="card__badge">{% if title.is_series %}{% trans "Сериал" %}{% else %}{% trans "Фильм" %}{% endif %}</span>
 
         {% if title.age_rating %}
             <span class="card__age">{{ title.age_rating }}</span>
@@ -31,7 +31,7 @@
                 {% if title.duration_minutes %}
                     <span class="card__overlay-duration">{{ title.duration_minutes }} {% trans "мин" %}</span>
                 {% endif %}
-                <span class="card__overlay-action">{% icon "play" size=12 %} {% trans "Подробнее" %}</span>
+                <span class="card__overlay-action">{% icon "play" size=12 %} {% trans "Смотреть" %}</span>
             </div>
         </div>
     </div>
@@ -46,16 +46,27 @@
             <span class="card__meta-year">{{ title.release_year }}</span>
         {% endif %}
         {% if title.duration_minutes %}
-            <span class="card__meta-duration">{{ title.duration_minutes }}{% trans "мин" %}</span>
+            <span class="card__meta-duration">{% if not compact %}{{ title.duration_minutes }}{% trans "мин" %}{% else %}{{ title.duration_minutes }}{% trans "м" %}{% endif %}</span>
         {% endif %}
     </div>
 
-    {% if title.genres.all|slice:":3" %}
+    {% if title.genres.all|slice:":2" %}
         <div class="card__genres">
-            {% for genre in title.genres.all|slice:":3" %}
+            {% for genre in title.genres.all|slice:":2" %}
                 <span class="card__genre">{{ genre.name }}</span>
             {% endfor %}
         </div>
+    {% endif %}
+
+    {% if title.description %}
+    <div class="card__preview" aria-hidden="true">
+        <div class="card__preview-title">{{ title.name }}</div>
+        <div class="card__preview-meta">
+            {{ title.release_year }}{% if title.duration_minutes %} · {{ title.duration_minutes }} мин{% endif %}
+            {% if title.rating_average %} · ⭐ {{ title.rating_average }}{% endif %}
+        </div>
+        <div class="card__preview-desc">{{ title.description|truncatewords:30 }}</div>
+    </div>
     {% endif %}
 
     <a class="card__link" href="{{ title.get_absolute_url }}" itemprop="url">

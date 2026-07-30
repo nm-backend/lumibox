@@ -1,119 +1,116 @@
 /*
   Рекламные места LumiBox.
 
-  Sidebar rails (160×600) появляются на широких экранах,
-  горизонтальный блок (728×90) — между секциями на главной.
-  Всё в одном файле: можно убрать целиком, не задев остальной сайт.
+  Sidebar rails (160x600) на широких экранах — фиксированные,
+  горизонтальный блок (728x90) между секциями контента.
 */
 
 /* ===== Боковые рельсы ===== */
 
 .ad-rail {
-    display: none;
+    display: block;
+    position: fixed;
+    z-index: 1;
+    width: 160px;
+    pointer-events: auto;
+    visibility: hidden;
 }
 
-/*
-  Показываем только на очень широких экранах (≥1750px),
-  где слева и справа от контейнера (1280px) есть свободное место.
-  Баннер 160px + отступ 20px = 180px с каждой стороны.
-  Нужно минимум 1280 + 180 + 180 = 1640px.
-  Ставим 1750px — запас на скроллбар.
-*/
 @media (min-width: 1640px) {
     .ad-rail {
-        display: block;
-        position: fixed;
+        visibility: visible;
         top: 50%;
         transform: translateY(-50%);
-        z-index: 5;
-        width: 160px;
     }
 
     .ad-rail--left {
-        left: calc(50% - 820px);
+        left: max(8px, calc(50% - 820px));
     }
 
     .ad-rail--right {
-        right: calc(50% - 820px);
+        right: max(8px, calc(50% - 820px));
     }
+}
 
-    .ad-rail__inner {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: var(--space-2);
-    }
+.ad-rail__inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: 600px;
+    justify-content: center;
+}
 
-    .ad-rail__label {
-        font-size: var(--text-xs);
-        color: var(--color-text-dim);
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-        font-weight: 600;
-    }
+.ad-rail__label {
+    font-size: var(--text-xs);
+    color: var(--color-text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 600;
+}
 
-    .ad-rail__link {
-        display: block;
-        line-height: 0;
-        border-radius: var(--radius-md);
-        overflow: hidden;
-        transition: box-shadow var(--transition-fast);
-    }
+.ad-rail__link {
+    display: block;
+    line-height: 0;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    transition: box-shadow var(--transition-fast);
+}
 
-    .ad-rail__link:hover {
-        box-shadow: 0 0 0 2px var(--color-accent), 0 4px 16px rgba(0, 0, 0, 0.3);
-    }
+.ad-rail__link:hover {
+    box-shadow: 0 0 0 2px var(--color-accent), 0 4px 16px rgba(0, 0, 0, 0.3);
+}
 
-    .ad-rail__banner {
-        display: block;
-        width: 160px;
-        height: 600px;
-        border: 1px solid var(--color-border);
-        border-radius: var(--radius-md);
-        transition: opacity var(--transition-fast);
-    }
+.ad-rail__banner {
+    display: block;
+    width: 160px;
+    height: 600px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    transition: opacity var(--transition-fast);
+}
 
-    .ad-rail__banner:hover {
-        opacity: 0.9;
-    }
+.ad-rail__banner:hover {
+    opacity: 0.9;
+}
 
-    .ad-rail__disclaimer {
-        font-size: 10px;
-        color: var(--color-text-dim);
-        opacity: 0.6;
-    }
+.ad-rail__disclaimer {
+    font-size: 10px;
+    color: var(--color-text-dim);
+    opacity: 0.6;
+}
 
-    /* Плейсхолдер для пустого рекламного места */
-    .ad-rail__placeholder {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: var(--space-3);
-        width: 160px;
-        height: 600px;
-        border: 1px dashed var(--color-border);
-        border-radius: var(--radius-md);
-        background: var(--color-surface);
-    }
+/* Плейсхолдер пустого рекламного места */
+.ad-rail__placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-3);
+    width: 160px;
+    height: 600px;
+    border: 1px dashed var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    cursor: default;
+}
 
-    .ad-rail__placeholder-icon {
-        color: var(--color-text-dim);
-        opacity: 0.4;
-    }
+.ad-rail__placeholder-icon {
+    color: var(--color-text-dim);
+    opacity: 0.4;
+}
 
-    .ad-rail__placeholder-title {
-        color: var(--color-text-dim);
-        font-size: var(--text-xs);
-        font-weight: 600;
-        text-align: center;
-    }
+.ad-rail__placeholder-title {
+    color: var(--color-text-dim);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    text-align: center;
+}
 
-    .ad-rail__placeholder-size {
-        color: var(--color-text-dim);
-        font-size: 10px;
-        opacity: 0.5;
-    }
+.ad-rail__placeholder-size {
+    color: var(--color-text-dim);
+    font-size: 10px;
+    opacity: 0.5;
 }
 
 /* ===== Горизонтальный блок между секциями ===== */
@@ -202,6 +199,13 @@
 
 .ad-block__cta:hover {
     color: var(--color-accent-hover);
+}
+
+/* Широкие экраны — контейнер расширяется, заполняя пространство между рекламой */
+@media (min-width: 1640px) {
+    .container {
+        max-width: 1480px;
+    }
 }
 
 /* На печати реклама не нужна */

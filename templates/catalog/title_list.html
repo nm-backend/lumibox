@@ -46,6 +46,15 @@
                     {% endif %}
                 </p>
 
+                <div class="catalog__view-toggle">
+                    <a class="catalog__view-btn {% if request.GET.view != 'grid' %}catalog__view-btn--active{% endif %}" href="?{% if request.GET %}{{ request.GET.urlencode }}&{% endif %}view=compact" title="{% trans 'Компактно' %}">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>
+                    </a>
+                    <a class="catalog__view-btn {% if request.GET.view == 'grid' %}catalog__view-btn--active{% endif %}" href="?{% if request.GET %}{{ request.GET.urlencode }}&{% endif %}view=grid" title="{% trans 'Подробно' %}">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="1" width="14" height="6" rx="1"/><rect x="1" y="9" width="14" height="6" rx="1"/></svg>
+                    </a>
+                </div>
+
                 {% for filter in active_filters %}
                     <span class="chip">
                         {{ filter.label }}
@@ -55,11 +64,14 @@
             </div>
 
             {% if titles %}
-                <div class="title-grid">
+                <div class="title-grid{% if request.GET.view == 'grid' %}{% else %} title-grid--dense{% endif %}">
                     {% for title in titles %}
-                        {% include "includes/title_card.html" %}
+                        {% if request.GET.view == 'grid' %}
+                            {% include "includes/title_card.html" %}
+                        {% else %}
+                            {% include "includes/title_card.html" with compact=True %}
+                        {% endif %}
                     {% endfor %}
-                </div>
 
                 {% include "includes/pagination.html" %}
             {% else %}

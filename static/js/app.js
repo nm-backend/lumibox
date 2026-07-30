@@ -87,26 +87,44 @@
                 link.className = 'search__suggestion';
                 link.href = item.url || `/title/${encodeURIComponent(item.slug || '')}/`;
 
-                if (item.poster) {
-                    const poster = element('img', 'search__suggestion-poster');
-                    poster.src = item.poster;
-                    poster.alt = '';
-                    poster.loading = 'lazy';
-                    link.appendChild(poster);
+                if (item.type === 'person') {
+                    if (item.poster) {
+                        const photo = element('img', 'search__suggestion-photo');
+                        photo.src = item.poster;
+                        photo.alt = '';
+                        photo.loading = 'lazy';
+                        link.appendChild(photo);
+                    } else {
+                        link.appendChild(
+                            element('span', 'search__suggestion-photo--placeholder', (name || '?')[0])
+                        );
+                    }
                 } else {
-                    link.appendChild(
-                        element('span', 'search__suggestion-poster-placeholder', (name || '?')[0])
-                    );
+                    if (item.poster) {
+                        const poster = element('img', 'search__suggestion-poster');
+                        poster.src = item.poster;
+                        poster.alt = '';
+                        poster.loading = 'lazy';
+                        link.appendChild(poster);
+                    } else {
+                        link.appendChild(
+                            element('span', 'search__suggestion-poster-placeholder', (name || '?')[0])
+                        );
+                    }
                 }
-
-                const kind = item.type === 'movie' ? 'Фильм' : (item.type ? 'Сериал' : '');
-                const meta = [item.release_year || '', kind].filter(Boolean).join(' · ');
 
                 const body = element('span', 'search__suggestion-body');
                 body.appendChild(element('span', 'search__suggestion-name', name));
-                body.appendChild(element('span', 'search__suggestion-meta', meta));
-                link.appendChild(body);
 
+                if (item.type === 'person') {
+                    body.appendChild(element('span', 'search__suggestion-meta', 'Персона'));
+                } else {
+                    const kind = item.type === 'movie' ? 'Фильм' : 'Сериал';
+                    const meta = [item.release_year || '', kind].filter(Boolean).join(' · ');
+                    body.appendChild(element('span', 'search__suggestion-meta', meta));
+                }
+
+                link.appendChild(body);
                 list.appendChild(link);
             });
             dropdown.appendChild(list);
@@ -129,17 +147,6 @@
             return first.offsetWidth + parseInt(getComputedStyle(track).gap || '16');
         };
 
-        if (prevBtn) {
-            prevBtn.addEventListener('click', function () {
-                track.scrollBy({ left: -scrollAmount(), behavior: 'smooth' });
-            });
-        }
-        if (nextBtn) {
-            nextBtn.addEventListener('click', function () {
-                track.scrollBy({ left: scrollAmount(), behavior: 'smooth' });
-            });
-        }
-
         const updateButtons = () => {
             if (prevBtn) prevBtn.style.display = track.scrollLeft <= 0 ? 'none' : '';
             if (nextBtn) {
@@ -147,7 +154,19 @@
                 nextBtn.style.display = track.scrollLeft >= maxScroll - 5 ? 'none' : '';
             }
         };
-        track.addEventListener('scroll', updateButtons);
+
+        if (prevBtn) {
+            prevBtn.addEventListener('click', function () {
+                track.scrollBy({ left: -scrollAmount(), behavior: 'smooth' });
+                updateButtons();
+            });
+        }
+        if (nextBtn) {
+            nextBtn.addEventListener('click', function () {
+                track.scrollBy({ left: scrollAmount(), behavior: 'smooth' });
+                updateButtons();
+            });
+        }
         updateButtons();
     });
 
@@ -205,25 +224,7 @@
     }
 
     /* -----------------------------------------------
-       6. Scroll reveal animation
-    ----------------------------------------------- */
-    if ('IntersectionObserver' in window) {
-        const revealObserver = new IntersectionObserver(function (entries) {
-            entries.forEach(function (entry) {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('reveal--visible');
-                    revealObserver.unobserve(entry.target);
-                }
-            });
-        }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
-
-        document.querySelectorAll('.reveal').forEach(function (el) {
-            revealObserver.observe(el);
-        });
-    }
-
-    /* -----------------------------------------------
-       7. Tabs
+        6. Tabs
     ----------------------------------------------- */
     document.querySelectorAll('[data-tabs]').forEach(function (container) {
         const tabs = container.querySelectorAll('[data-tab]');
@@ -255,26 +256,10 @@
     }
 
     /* -----------------------------------------------
-       9. Hero auto-rotation with smooth crossfade
+        9. Hero auto-rotation with smooth crossfade
     ----------------------------------------------- */
     const heroRotation = document.querySelector('[data-hero-rotation]');
     if (heroRotation) {
-        const heroBackdrops = heroRotation.querySelectorAll('.showcase__backdrop');
-
-        var parallaxTicking = false;
-        window.addEventListener('scroll', function () {
-            if (!parallaxTicking) {
-                window.requestAnimationFrame(function () {
-                    var offset = heroRotation.getBoundingClientRect().top;
-                    var factor = Math.max(-0.15, Math.min(0.15, offset * -0.0008));
-                    heroBackdrops.forEach(function (bd) {
-                        bd.style.setProperty('--parallax-y', (factor * 100) + 'px');
-                    });
-                    parallaxTicking = false;
-                });
-                parallaxTicking = true;
-            }
-        }, { passive: true });
         const slides = heroRotation.querySelectorAll('[data-hero-slide]');
         const videos = heroRotation.querySelectorAll('[data-hero-video]');
         const dots = heroRotation.querySelectorAll('[data-hero-dot]');
@@ -405,34 +390,19 @@
     };
 
     /* -----------------------------------------------
-       11. Scroll progress indicator
+        11. Unified scroll handler
     ----------------------------------------------- */
-    const createScrollProgress = () => {
-        const container = document.createElement('div');
-        container.className = 'scroll-progress';
-        container.innerHTML = '<div class="scroll-progress__bar" data-scroll-bar></div>';
-        document.body.prepend(container);
-        const bar = container.querySelector('[data-scroll-bar]');
+    const header = document.querySelector('.site-header');
+    let isScrolled = false;
 
-        let ticking = false;
-        window.addEventListener('scroll', () => {
-            if (!ticking) {
-                window.requestAnimationFrame(() => {
-                    const scrollTop = window.scrollY;
-                    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-                    const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
-                    bar.style.width = progress + '%';
-                    ticking = false;
-                });
-                ticking = true;
-            }
-        }, { passive: true });
-    };
-    createScrollProgress();
+    const scrollBar = (function () {
+        const c = document.createElement('div');
+        c.className = 'scroll-progress';
+        c.innerHTML = '<div class="scroll-progress__bar" data-scroll-bar></div>';
+        document.body.prepend(c);
+        return c.querySelector('[data-scroll-bar]');
+    })();
 
-    /* -----------------------------------------------
-       12. Scroll-to-top button
-    ----------------------------------------------- */
     const scrollBtn = document.querySelector('[data-scroll-top]');
     if (!scrollBtn) {
         const btn = document.createElement('button');
@@ -441,36 +411,36 @@
         btn.setAttribute('aria-label', 'Наверх');
         btn.innerHTML = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>';
         document.body.appendChild(btn);
-
-        let scrollVisible = false;
-        window.addEventListener('scroll', () => {
-            const shouldShow = window.scrollY > 400;
-            if (shouldShow !== scrollVisible) {
-                btn.classList.toggle('scroll-top--visible', shouldShow);
-                scrollVisible = shouldShow;
-            }
-        }, { passive: true });
-
         btn.addEventListener('click', () => {
             window.scrollTo({ top: 0, behavior: 'smooth' });
         });
     }
 
-    /* -----------------------------------------------
-       13. Header scroll shadow
-    ----------------------------------------------- */
-    (function () {
-        const header = document.querySelector('.site-header');
-        if (!header) return;
-        let isScrolled = false;
-        window.addEventListener('scroll', function () {
-            const shouldScroll = window.scrollY > 10;
+    let scrollVisible = false;
+    window.addEventListener('scroll', () => {
+        const y = window.scrollY;
+        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+
+        // Scroll progress bar
+        scrollBar.style.width = (docHeight > 0 ? (y / docHeight) * 100 : 0) + '%';
+
+        // Header shadow
+        if (header) {
+            const shouldScroll = y > 10;
             if (shouldScroll !== isScrolled) {
                 header.classList.toggle('site-header--scrolled', shouldScroll);
                 isScrolled = shouldScroll;
             }
-        }, { passive: true });
-    })();
+        }
+
+        // Scroll-to-top button
+        const shouldShow = y > 400;
+        if (shouldShow !== scrollVisible) {
+            const st = document.querySelector('[data-scroll-top]');
+            if (st) { st.classList.toggle('scroll-top--visible', shouldShow); }
+            scrollVisible = shouldShow;
+        }
+    }, { passive: true });
 
     /* -----------------------------------------------
        14. Touch swipe for carousels
@@ -498,23 +468,7 @@
     });
 
     /* -----------------------------------------------
-       14. Page entrance animation on load
-    ----------------------------------------------- */
-    document.querySelector('.site-main').classList.add('page-enter');
-
-    /* -----------------------------------------------
-       15. Button ripple effect
-    ----------------------------------------------- */
-    document.querySelectorAll('.button').forEach(function (btn) {
-        btn.addEventListener('pointerdown', function (e) {
-            const rect = this.getBoundingClientRect();
-            this.style.setProperty('--ripple-x', ((e.clientX - rect.left) / rect.width * 100) + '%');
-            this.style.setProperty('--ripple-y', ((e.clientY - rect.top) / rect.height * 100) + '%');
-        });
-    });
-
-    /* -----------------------------------------------
-       16. Keyboard shortcuts (global)
+       15. Keyboard shortcuts (global)
     ----------------------------------------------- */
     document.addEventListener('keydown', function (e) {
         if (e.target.matches('input, select, textarea, [contenteditable]')) return;
@@ -527,7 +481,7 @@
     });
 
     /* -----------------------------------------------
-       17. Card placeholder deterministic gradients
+       16. Card placeholder deterministic gradients
     ----------------------------------------------- */
     document.querySelectorAll('.card__placeholder').forEach(function(el) {
         var card = el.closest('.card');
@@ -554,24 +508,7 @@
     });
 
     /* -----------------------------------------------
-       18. Staggered icon fade-in
-    ----------------------------------------------- */
-    // Каждой SVG-иконке на странице проставляем --icon-delay с каскадным
-    // увеличением: первая иконка ждёт 30ms, вторая 60ms, и т.д. до 1.5s.
-    // Иконки появляются последовательно — последняя спустя ~1.5s после первой.
-    {
-        const icons = document.querySelectorAll('.icon');
-        if (icons.length > 0) {
-            const step = Math.max(20, Math.min(60, 600 / icons.length));
-            icons.forEach(function (icon, i) {
-                const delay = (i * step) / 1000;
-                icon.style.setProperty('--icon-delay', delay + 's');
-            });
-        }
-    }
-
-    /* -----------------------------------------------
-       19. Bottom-nav active link
+       17. Bottom-nav active link
     ----------------------------------------------- */
     {
         const nav = document.querySelector('.bottom-nav');

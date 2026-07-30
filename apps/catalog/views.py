@@ -92,6 +92,9 @@ class HomeView(TemplateView):
         context["collections"] = get_featured_collections()
 
         context["genres"] = _get_cached_genre_chip_list(12)
+        from apps.catalog.services import get_home_statistics, get_trending_titles
+        context["statistics"] = get_home_statistics()
+        context["trending"] = get_trending_titles()
         return context
 
 
