@@ -26,30 +26,33 @@
     border-bottom-color: transparent;
 }
 
-@supports (border-image: linear-gradient(90deg, red, blue) 1) {
-    .site-header {
-        border-bottom: none;
-        position: relative;
-    }
-    .site-header::after {
-        content: '';
-        position: absolute;
-        bottom: -1px;
-        left: 0;
-        right: 0;
-        height: 1px;
-        background: linear-gradient(90deg, transparent, var(--color-accent), transparent);
-        opacity: 0.3;
-        pointer-events: none;
-        transition: opacity var(--transition);
-    }
-}
+/* Accent border line: gradient across bottom of the header.
+   We use ::after on the inner container so the site-header keeps
+   position: sticky without being overridden by position: relative. */
 
 .site-header__inner {
+    position: relative;
     min-height: var(--header-height);
     display: flex;
     align-items: center;
     gap: var(--space-5);
+}
+
+.site-header__inner::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--color-accent), transparent);
+    opacity: 0.3;
+    pointer-events: none;
+    transition: opacity var(--transition);
+}
+
+.site-header--scrolled .site-header__inner::after {
+    opacity: 0;
 }
 
 .logo {

@@ -440,6 +440,19 @@
     cursor: pointer;
     white-space: nowrap;
     transition: color var(--transition-fast), border-color var(--transition-fast);
+    position: relative;
+}
+
+.tab::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 50%;
+    width: 0;
+    height: 2px;
+    background: var(--color-accent);
+    transition: width var(--transition), left var(--transition);
+    border-radius: 2px 2px 0 0;
 }
 
 .tab:hover {
@@ -448,7 +461,12 @@
 
 .tab--active {
     color: var(--color-text);
-    border-bottom-color: var(--color-accent);
+    border-bottom-color: transparent;
+}
+
+.tab--active::after {
+    width: 100%;
+    left: 0;
 }
 
 .tab-content {
@@ -677,6 +695,8 @@
     border-radius: var(--radius-md);
     transition: border-color var(--transition), transform var(--transition-spring),
                 box-shadow var(--transition);
+    contain: paint;
+    will-change: transform;
 }
 
 .card:hover .card__poster {
