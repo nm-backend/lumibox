@@ -259,6 +259,22 @@
     ----------------------------------------------- */
     const heroRotation = document.querySelector('[data-hero-rotation]');
     if (heroRotation) {
+        const heroBackdrops = heroRotation.querySelectorAll('.showcase__backdrop');
+
+        var parallaxTicking = false;
+        window.addEventListener('scroll', function () {
+            if (!parallaxTicking) {
+                window.requestAnimationFrame(function () {
+                    var offset = heroRotation.getBoundingClientRect().top;
+                    var factor = Math.max(-0.15, Math.min(0.15, offset * -0.0008));
+                    heroBackdrops.forEach(function (bd) {
+                        bd.style.setProperty('--parallax-y', (factor * 100) + 'px');
+                    });
+                    parallaxTicking = false;
+                });
+                parallaxTicking = true;
+            }
+        }, { passive: true });
         const slides = heroRotation.querySelectorAll('[data-hero-slide]');
         const videos = heroRotation.querySelectorAll('[data-hero-video]');
         const dots = heroRotation.querySelectorAll('[data-hero-dot]');
@@ -441,7 +457,23 @@
     }
 
     /* -----------------------------------------------
-       13. Touch swipe for carousels
+       13. Header scroll shadow
+    ----------------------------------------------- */
+    (function () {
+        const header = document.querySelector('.site-header');
+        if (!header) return;
+        let isScrolled = false;
+        window.addEventListener('scroll', function () {
+            const shouldScroll = window.scrollY > 10;
+            if (shouldScroll !== isScrolled) {
+                header.classList.toggle('site-header--scrolled', shouldScroll);
+                isScrolled = shouldScroll;
+            }
+        }, { passive: true });
+    })();
+
+    /* -----------------------------------------------
+       14. Touch swipe for carousels
     ----------------------------------------------- */
     document.querySelectorAll('.carousel__track').forEach(function (track) {
         let startX = 0;
@@ -495,7 +527,34 @@
     });
 
     /* -----------------------------------------------
-       17. Staggered icon fade-in
+       17. Card placeholder deterministic gradients
+    ----------------------------------------------- */
+    document.querySelectorAll('.card__placeholder').forEach(function(el) {
+        var card = el.closest('.card');
+        if (!card) return;
+        var name = card.querySelector('.card__name');
+        if (!name) return;
+        var text = name.textContent || '';
+        var hash = 0;
+        for (var i = 0; i < text.length; i++) {
+            hash = text.charCodeAt(i) + ((hash << 5) - hash);
+        }
+        var hue = Math.abs(hash % 360);
+        el.style.setProperty('--card-hue', hue);
+    });
+
+    document.querySelectorAll('.collection-card__fallback').forEach(function(el) {
+        var text = el.textContent || '';
+        var hash = 0;
+        for (var i = 0; i < text.length; i++) {
+            hash = text.charCodeAt(i) + ((hash << 5) - hash);
+        }
+        var hue = Math.abs(hash % 360);
+        el.style.setProperty('--card-hue', hue);
+    });
+
+    /* -----------------------------------------------
+       18. Staggered icon fade-in
     ----------------------------------------------- */
     // Каждой SVG-иконке на странице проставляем --icon-delay с каскадным
     // увеличением: первая иконка ждёт 30ms, вторая 60ms, и т.д. до 1.5s.
@@ -507,6 +566,22 @@
             icons.forEach(function (icon, i) {
                 const delay = (i * step) / 1000;
                 icon.style.setProperty('--icon-delay', delay + 's');
+            });
+        }
+    }
+
+    /* -----------------------------------------------
+       19. Bottom-nav active link
+    ----------------------------------------------- */
+    {
+        const nav = document.querySelector('.bottom-nav');
+        if (nav) {
+            const current = window.location.pathname;
+            nav.querySelectorAll('.bottom-nav__link').forEach(function (link) {
+                const href = link.getAttribute('href');
+                if (href && href !== '#' && current.startsWith(href)) {
+                    link.setAttribute('data-current', '');
+                }
             });
         }
     }

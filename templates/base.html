@@ -8,8 +8,10 @@
     <title>{% block page_title %}{% trans "LumiBox — каталог фильмов и сериалов" %}{% endblock %}</title>
     <meta name="description" content="{% block page_description %}{% trans "Каталог фильмов и сериалов: поиск, фильтры, подборки." %}{% endblock %}">
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&display=swap" media="print" onload="this.media='all'">
 
     <link rel="stylesheet" href="{% static 'css/variables.css' %}">
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
@@ -92,10 +94,10 @@
     {% endif %}
     {% endblock %}
 
-    {# Google Analytics / Google Tag Manager — вставляется только когда
+    {% comment %} Google Analytics / Google Tag Manager — вставляется только когда
        GA_MEASUREMENT_ID задан через переменную окружения. Без него
        на странице нет ни лишних байт, ни запросов к Google.
-    #}
+    {% endcomment %}
     {% if ga_measurement_id %}
     <script async src="https://www.googletagmanager.com/gtag/js?id={{ ga_measurement_id }}"></script>
     <script>
@@ -114,10 +116,10 @@
 
     {% ad_rail %}
 
-    {# Skip-to-content: скринридеры и навигация с клавиатуры пропускают
+    {% comment %} Skip-to-content: скринридеры и навигация с клавиатуры пропускают
        повторяющиеся блоки шапки и сразу переходят к основному контенту.
        Ссылка визуально скрыта и появляется при фокусе с клавиатуры.
-    #}
+    {% endcomment %}
     <a class="skip-link" href="#main-content">{% trans "К содержанию" %}</a>
 
     <header class="site-header">
@@ -145,6 +147,7 @@
                    href="{% url 'catalog:genre_list' %}"{% if request.resolver_match.url_name == 'genre_list' %} aria-current="page"{% endif %}>{% trans "Жанры" %}</a>
                 <a class="site-nav__link {% if request.resolver_match.url_name == 'collection_list' %}site-nav__link--active{% endif %}"
                    href="{% url 'catalog:collection_list' %}"{% if request.resolver_match.url_name == 'collection_list' %} aria-current="page"{% endif %}>{% trans "Подборки" %}</a>
+                <a class="site-nav__link" href="{% url 'catalog:random_title' %}">{% trans "Случайный" %}</a>
             </nav>
 
             <div class="search-wrapper site-header__search">
@@ -218,6 +221,7 @@
         <a class="mobile-nav__link" href="{% url 'catalog:collection_list' %}">{% trans "Подборки" %}</a>
         <a class="mobile-nav__link" href="{% url 'catalog:title_list' %}?sort=-rating_average">{% trans "Высокий рейтинг" %}</a>
         <a class="mobile-nav__link" href="{% url 'catalog:title_list' %}?sort=-published_at">{% trans "Новинки" %}</a>
+        <a class="mobile-nav__link" href="{% url 'catalog:random_title' %}">{% trans "Случайный фильм" %}</a>
         {% if user.is_authenticated %}
             <hr style="border-color: var(--color-border); margin: var(--space-2) 0;">
             <a class="mobile-nav__link" href="{% url 'users:profile' %}">{% trans "Профиль" %}</a>

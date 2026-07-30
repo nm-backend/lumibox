@@ -1,7 +1,4 @@
 {% load i18n %}
-{% comment %}
-Карточка подборки. Ждёт переменную collection.
-{% endcomment %}
 
 <a class="collection-card" href="{{ collection.get_absolute_url }}">
     <span class="collection-card__cover">
@@ -10,13 +7,23 @@
                  src="{{ collection.cover.url }}"
                  alt=""
                  loading="lazy">
+        {% else %}
+            <span class="collection-card__fallback" aria-hidden="true">
+                <svg class="collection-card__fallback-icon" viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"/>
+                    <line x1="7" y1="2" x2="7" y2="22"/>
+                    <line x1="17" y1="2" x2="17" y2="22"/>
+                    <line x1="2" y1="12" x2="22" y2="12"/>
+                </svg>
+                <span class="collection-card__fallback-label">{{ collection.name|first }}</span>
+            </span>
         {% endif %}
     </span>
 
     <span class="collection-card__body">
         <span class="collection-card__name">{{ collection.name }}</span>
         {% if collection.titles_count %}
-            <span class="collection-card__count">{% blocktranslate count count=collection.titles_count trimmed %}{{ count }} в подборке{% plural %}{{ count }} в подборке{% endblocktranslate %}</span>
+            <span class="collection-card__count">{% blocktranslate count count=collection.titles_count trimmed %}{{ count }} title{% plural %}{{ count }} titles{% endblocktranslate %}</span>
         {% endif %}
     </span>
 </a>

@@ -17,14 +17,16 @@
     position: absolute;
     inset: 0;
     width: 100%;
-    height: 100%;
+    height: 120%;
     object-fit: cover;
     opacity: 0.32;
-    transition: transform 6s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: translateY(-5%);
+    transition: transform 8s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform;
 }
 
 .film-hero:hover .film-hero__backdrop {
-    transform: scale(1.03);
+    transform: translateY(-5%) scale(1.03);
 }
 
 .film-hero__trailer {
@@ -54,6 +56,33 @@
 }
 
 .film-hero__poster {
+    animation: heroPosterEntrance 0.7s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+.film-hero__body > * {
+    animation: fadeUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+.film-hero__body > :nth-child(1) { animation-delay: 0.10s; }
+.film-hero__body > :nth-child(2) { animation-delay: 0.15s; }
+.film-hero__body > :nth-child(3) { animation-delay: 0.20s; }
+.film-hero__body > :nth-child(4) { animation-delay: 0.25s; }
+.film-hero__body > :nth-child(5) { animation-delay: 0.30s; }
+.film-hero__body > :nth-child(6) { animation-delay: 0.35s; }
+.film-hero__body > :nth-child(7) { animation-delay: 0.40s; }
+
+@keyframes heroPosterEntrance {
+    from {
+        opacity: 0;
+        transform: translateX(-20px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+    }
+}
+
+.film-hero__poster {
     aspect-ratio: 2 / 3;
     overflow: hidden;
     display: grid;
@@ -61,12 +90,23 @@
     background-color: var(--color-surface);
     border-radius: var(--radius-lg);
     box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55), 0 2px 8px rgba(0, 0, 0, 0.4);
+    transition: box-shadow var(--transition), transform var(--transition);
+}
+
+.film-hero__poster:hover {
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 184, 48, 0.15);
+    transform: translateY(-2px);
 }
 
 .film-hero__poster-image {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.film-hero__poster:hover .film-hero__poster-image {
+    transform: scale(1.03);
 }
 
 .film-hero__name {
@@ -183,6 +223,11 @@
     padding: var(--space-1) var(--space-3);
     background-color: var(--color-accent-dim);
     border-radius: var(--radius-sm);
+    transition: box-shadow var(--transition);
+}
+
+.score:hover {
+    box-shadow: 0 0 16px rgba(255, 184, 48, 0.15);
 }
 
 .score__value {
@@ -237,10 +282,12 @@
 .spec-list__label {
     color: var(--color-text-dim);
     font-size: var(--text-sm);
+    padding: var(--space-1) 0;
 }
 
 .spec-list__value {
     font-size: var(--text-sm);
+    padding: var(--space-1) 0;
 }
 
 /* ---------- Сезоны ---------- */
@@ -251,6 +298,13 @@
     background: var(--color-surface);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
+    transition: border-color var(--transition-fast);
+    content-visibility: auto;
+    contain-intrinsic-size: 120px;
+}
+
+.season-group:hover {
+    border-color: var(--color-accent-dim);
 }
 
 .season__title {
@@ -280,13 +334,19 @@
     border-radius: var(--radius-sm);
     color: var(--color-text);
     text-decoration: none;
-    transition: border-color var(--transition-fast), background var(--transition-fast);
+    transition: border-color var(--transition-fast), background var(--transition-fast), transform var(--transition-fast);
+    contain: layout style;
 }
 
 .episode:hover {
     border-color: var(--color-accent);
     background: var(--color-surface-hover);
     color: var(--color-text);
+    transform: translateX(3px);
+}
+
+.episode:hover .episode__play {
+    transform: scale(1.2);
 }
 
 .episode__number {
@@ -324,6 +384,7 @@
 .episode__play {
     color: var(--color-accent);
     font-size: var(--text-xs);
+    transition: transform var(--transition-fast);
 }
 
 /* ---------- Съёмочная группа ---------- */
@@ -346,6 +407,19 @@
     grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
     gap: var(--space-3);
 }
+
+.crew-list > .crew {
+    animation: cardEntrance 0.4s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+.crew-list > .crew:nth-child(1) { animation-delay: 0.00s; }
+.crew-list > .crew:nth-child(2) { animation-delay: 0.03s; }
+.crew-list > .crew:nth-child(3) { animation-delay: 0.06s; }
+.crew-list > .crew:nth-child(4) { animation-delay: 0.09s; }
+.crew-list > .crew:nth-child(5) { animation-delay: 0.12s; }
+.crew-list > .crew:nth-child(6) { animation-delay: 0.15s; }
+.crew-list > .crew:nth-child(7) { animation-delay: 0.18s; }
+.crew-list > .crew:nth-child(8) { animation-delay: 0.21s; }
 
 .crew {
     display: flex;
@@ -402,10 +476,12 @@
     transition: transform var(--transition), box-shadow var(--transition),
                 border-color var(--transition-fast);
     cursor: zoom-in;
+    content-visibility: auto;
+    contain-intrinsic-size: 200px;
 }
 
 .frames__item:hover {
-    transform: translateY(-4px);
+    transform: translateY(-4px) scale(1.02);
     border-color: var(--color-accent);
     box-shadow: var(--shadow-card);
 }

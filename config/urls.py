@@ -34,6 +34,7 @@ urlpatterns = [
     path("privacy/", TemplateView.as_view(template_name="privacy.html"), name="privacy"),
     path("terms/", TemplateView.as_view(template_name="terms.html"), name="terms"),
     path("contacts/", TemplateView.as_view(template_name="contacts.html"), name="contacts"),
+    path("faq/", TemplateView.as_view(template_name="faq.html"), name="faq"),
 
     # Переключение языка: POST на /i18n/setlang/ с параметром language.
     path("i18n/", include("django.conf.urls.i18n")),

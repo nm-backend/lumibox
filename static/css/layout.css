@@ -14,9 +14,35 @@
     top: 0;
     z-index: 10;
 
-    background-color: rgba(11, 13, 18, 0.85);
-    backdrop-filter: blur(12px);
+    background-color: rgba(11, 13, 18, 0.9);
+    backdrop-filter: blur(16px);
     border-bottom: 1px solid var(--color-border);
+    transition: background-color var(--transition), backdrop-filter var(--transition),
+                box-shadow var(--transition), border-bottom-color var(--transition);
+}
+
+.site-header--scrolled {
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+    border-bottom-color: transparent;
+}
+
+@supports (border-image: linear-gradient(90deg, red, blue) 1) {
+    .site-header {
+        border-bottom: none;
+        position: relative;
+    }
+    .site-header::after {
+        content: '';
+        position: absolute;
+        bottom: -1px;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, var(--color-accent), transparent);
+        opacity: 0.3;
+        pointer-events: none;
+        transition: opacity var(--transition);
+    }
 }
 
 .site-header__inner {
@@ -39,6 +65,15 @@
 
 .logo:hover {
     color: var(--color-text);
+}
+
+.logo:hover .logo__mark {
+    transform: scale(1.1);
+    box-shadow: 0 0 20px var(--color-accent-glow, rgba(255, 184, 48, 0.3));
+}
+
+.logo__mark {
+    transition: transform var(--transition), box-shadow var(--transition);
 }
 
 /* Значок логотипа — треугольник «play», нарисованный рамками.
@@ -80,17 +115,36 @@
     color: var(--color-text-muted);
     font-size: var(--text-sm);
     font-weight: 500;
-    border-bottom: 2px solid transparent;
-    transition: color var(--transition-fast), border-color var(--transition-fast);
+    position: relative;
+    transition: color var(--transition-fast);
+}
+
+.site-nav__link::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--color-accent);
+    transform: scaleX(0);
+    transition: transform var(--transition);
 }
 
 .site-nav__link:hover {
     color: var(--color-text);
 }
 
+.site-nav__link:hover::after {
+    transform: scaleX(0.5);
+}
+
 .site-nav__link--active {
     color: var(--color-text);
-    border-bottom-color: var(--color-accent);
+}
+
+.site-nav__link--active::after {
+    transform: scaleX(1);
 }
 
 /* Поиск занимает всё свободное место между навигацией и краем */
@@ -249,10 +303,21 @@
 /* ---------- Theme toggle: показываем moon в тёмной теме, sun в светлой ---------- */
 
 /* Тёмная тема (data-theme=""): показываем sun (нажать → переключить на светлую) */
+[data-theme=""] .theme-sun { display: block; }
 [data-theme=""] .theme-moon { display: none; }
 
 /* Светлая тема (data-theme="light"): показываем moon (нажать → переключить на тёмную) */
+[data-theme="light"] .theme-moon { display: block; }
 [data-theme="light"] .theme-sun { display: none; }
+
+/* Smooth icon transition */
+.theme-toggle .icon {
+    transition: transform var(--transition), opacity var(--transition);
+}
+
+.theme-toggle:hover .icon {
+    transform: rotate(15deg);
+}
 
 /* ---------- Телефоны ---------- */
 

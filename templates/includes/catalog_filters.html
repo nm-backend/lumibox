@@ -1,10 +1,28 @@
-{% load i18n %}
+{% load i18n icons %}
 {% comment %}
 Панель фильтров каталога.
 {% endcomment %}
 
 <details class="filters" open>
-    <summary class="filters__summary">{% trans "Фильтры" %}</summary>
+    <summary class="filters__summary">
+        {% icon "filter" size=16 %}
+        <span>{% trans "Фильтры" %}</span>
+        {% if active_filters|length > 0 %}
+            <span class="filters__count">{{ active_filters|length }}</span>
+        {% endif %}
+    </summary>
+
+    {% if active_filters %}
+        <div class="filters__active">
+            {% for filter in active_filters %}
+                <span class="chip">
+                    {{ filter.label }}
+                    <a class="chip__remove" href="{{ filter.remove_url }}" aria-label="{% blocktranslate with label=filter.label %}Убрать фильтр «{{ label }}»{% endblocktranslate %}">×</a>
+                </span>
+            {% endfor %}
+            <a class="chip chip--clear" href="{{ request.path }}">{% trans "Очистить" %}</a>
+        </div>
+    {% endif %}
 
     <form class="filters__body" action="{{ request.path }}" method="get">
         {% for field in filter_form %}
@@ -17,7 +35,7 @@
         <div class="filters__actions">
             <button class="button button--primary" type="submit">{% trans "Показать" %}</button>
             {% if active_filters or request.GET.q %}
-                <a class="button button--ghost" href="{{ request.path }}">{% trans "Сбросить" %}</a>
+                <a class="button button--ghost" href="{{ request.path }}">{% trans "Сбросить все" %}</a>
             {% endif %}
         </div>
     </form>

@@ -8,8 +8,6 @@
   Шрифты: Bebas Neue для заголовков (афиша), Inter для текста (программа).
 */
 
-@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&display=swap');
-
 :root {
     /* --- Цвета --- */
 
@@ -101,7 +99,11 @@
     /* --- Макет --- */
     --container-width: 1280px;
     --header-height: 68px;
-    --touch-target: 44px;  /* Минимальный размер тач-цели по рекомендациям UX */
+    --touch-target: 44px;
+
+    /* Выделение текста — цвет кинопроектора */
+    --color-selection-bg: rgba(255, 184, 48, 0.25);
+    --color-selection-text: inherit;
 
     /* --- Скелетон --- */
     --skeleton-base: var(--color-surface);

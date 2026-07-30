@@ -14,9 +14,22 @@
     top: calc(var(--header-height) + var(--space-4));
 
     padding: var(--space-5);
-    background-color: var(--color-surface);
-    border: 1px solid var(--color-border);
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
     border-radius: var(--radius-md);
+    box-shadow: var(--shadow-glass);
+    transition: box-shadow var(--transition);
+}
+
+.filters__active {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-bottom: var(--space-4);
+    padding-bottom: var(--space-4);
+    border-bottom: 1px solid var(--color-border);
 }
 
 .filters__field {
@@ -44,9 +57,15 @@
     border-radius: var(--radius-sm);
     color: var(--color-text);
     font-size: var(--text-sm);
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast), transform var(--transition-fast);
 
     /* Убираем родную стрелку и рисуем свою фоном */
     appearance: none;
+}
+
+.filters__field select:hover,
+.filters__field input[type="text"]:hover {
+    border-color: var(--color-text-dim);
 }
 
 .filters__field select {
@@ -63,6 +82,25 @@
 .filters__field input[type="text"]:focus {
     outline: none;
     border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px rgba(255, 184, 48, 0.15);
+    transform: scale(1.01);
+}
+
+.filters__count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 var(--space-1);
+    margin-left: var(--space-2);
+    background: var(--color-accent);
+    border-radius: var(--radius-full);
+    color: var(--color-on-accent);
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1;
+    vertical-align: middle;
 }
 
 .filters__actions {
@@ -74,6 +112,12 @@
 
 .filters__actions .button {
     justify-content: center;
+    transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.filters__actions .button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 /* ---------- Результаты ---------- */
@@ -84,11 +128,17 @@
     gap: var(--space-3);
     align-items: center;
     margin-bottom: var(--space-5);
+    padding: var(--space-3) var(--space-4);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    min-height: 48px;
 }
 
 .catalog__count {
     color: var(--color-text-muted);
     font-size: var(--text-sm);
+    margin-right: auto;
 }
 
 /* .chip и .chip__remove переехали в components.css: их использует и подвал,
@@ -151,6 +201,11 @@
         cursor: pointer;
         font-weight: 600;
         list-style: none;
+        gap: var(--space-2);
+    }
+
+    .filters__summary .icon {
+        flex-shrink: 0;
     }
 
     .filters__summary::-webkit-details-marker {
@@ -169,6 +224,21 @@
 
     .filters__body {
         margin-top: var(--space-4);
+        overflow: hidden;
+        animation: filtersSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    @keyframes filtersSlideIn {
+        from {
+            opacity: 0;
+            max-height: 0;
+            margin-top: 0;
+        }
+        to {
+            opacity: 1;
+            max-height: 600px;
+            margin-top: var(--space-4);
+        }
     }
 }
 
@@ -180,6 +250,9 @@
         font-size: var(--text-md);
         font-weight: 600;
         margin-bottom: var(--space-4);
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
     }
 
     .filters__summary::-webkit-details-marker {

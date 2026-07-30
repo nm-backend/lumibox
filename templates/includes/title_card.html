@@ -1,15 +1,13 @@
-{% load i18n %}
-{% comment %}
-Карточка фильма или сериала. Ждёт переменную title.
-{% endcomment %}
+{% load i18n icons %}
 
-<article class="card">
+<article class="card" itemscope itemtype="https://schema.org/Movie">
     <div class="card__poster">
         {% if title.poster %}
             <img class="card__image"
                  src="{{ title.poster.url }}"
-                 alt="{% blocktranslate with name=title.name %}Постер: {{ name }}{% endblocktranslate %}"
-                 loading="lazy">
+                 alt=""
+                 loading="lazy"
+                 itemprop="image">
         {% else %}
             <span class="card__placeholder" aria-hidden="true">{{ title.name|first }}</span>
         {% endif %}
@@ -21,21 +19,46 @@
         {% endif %}
 
         {% if title.rating_average %}
-            <span class="card__rating">{{ title.rating_average }}</span>
+            <span class="card__rating">{% icon "star" size=10 %} {{ title.rating_average }}</span>
+        {% endif %}
+
+        {% if title.release_year %}
+            <span class="card__year">{{ title.release_year }}</span>
         {% endif %}
 
         <div class="card__overlay" aria-hidden="true">
-            <span class="card__overlay-action">{% trans "Подробнее" %}</span>
+            <div class="card__overlay-content">
+                {% if title.duration_minutes %}
+                    <span class="card__overlay-duration">{{ title.duration_minutes }} {% trans "мин" %}</span>
+                {% endif %}
+                <span class="card__overlay-action">{% icon "play" size=12 %} {% trans "Подробнее" %}</span>
+            </div>
         </div>
     </div>
 
-    <h3 class="card__name">{{ title.name }}</h3>
+    <h3 class="card__name" itemprop="name">{{ title.name }}</h3>
 
-    <p class="card__meta">
-        {{ title.release_year }}{% for genre in title.genres.all|slice:":1" %} · {{ genre.name }}{% endfor %}
-    </p>
+    <div class="card__meta">
+        {% if title.rating_average %}
+            <span class="card__meta-rating">{% icon "star" size=10 %} {{ title.rating_average }}</span>
+        {% endif %}
+        {% if title.release_year %}
+            <span class="card__meta-year">{{ title.release_year }}</span>
+        {% endif %}
+        {% if title.duration_minutes %}
+            <span class="card__meta-duration">{{ title.duration_minutes }}{% trans "мин" %}</span>
+        {% endif %}
+    </div>
 
-    <a class="card__link" href="{{ title.get_absolute_url }}">
+    {% if title.genres.all|slice:":3" %}
+        <div class="card__genres">
+            {% for genre in title.genres.all|slice:":3" %}
+                <span class="card__genre">{{ genre.name }}</span>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <a class="card__link" href="{{ title.get_absolute_url }}" itemprop="url">
         <span class="visually-hidden">{% blocktranslate with name=title.name year=title.release_year %}{{ name }}, {{ year }}{% endblocktranslate %}</span>
     </a>
 </article>

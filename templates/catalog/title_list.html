@@ -72,8 +72,13 @@
                             <line x1="28" y1="22" x2="28" y2="34" stroke-opacity="0.2"/>
                         </svg>
                     </div>
-                    <p class="empty-state__title">{% trans "Ничего не найдено" %}</p>
-                    <p class="empty-state__desc">{% trans "Попробуйте изменить условия поиска — или посмотрите весь каталог." %}</p>
+                    {% if request.GET.q %}
+                        <p class="empty-state__title">{% blocktranslate with q=request.GET.q %}По запросу «{{ q }}» ничего не найдено{% endblocktranslate %}</p>
+                        <p class="empty-state__text">{% trans "Попробуйте сократить запрос, проверить орфографию — или посмотрите весь каталог." %}</p>
+                    {% else %}
+                        <p class="empty-state__title">{% trans "Ничего не найдено" %}</p>
+                        <p class="empty-state__text">{% trans "Попробуйте изменить условия фильтров — или посмотрите весь каталог." %}</p>
+                    {% endif %}
                     <p class="empty-state__action">
                         <a class="button button--primary" href="{% url 'catalog:title_list' %}">{% icon "movie" size=14 %} {% trans "Открыть весь каталог" %}</a>
                     </p>

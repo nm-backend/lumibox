@@ -16,12 +16,26 @@
 }
 
 .watch-page__breadcrumb a {
+    position: relative;
     color: var(--color-text);
     text-decoration: none;
 }
 
-.watch-page__breadcrumb a:hover {
-    color: var(--color-accent);
+.watch-page__breadcrumb a::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background: var(--color-accent);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform var(--transition-fast);
+}
+
+.watch-page__breadcrumb a:hover::after {
+    transform: scaleX(1);
 }
 
 /* ---------- Player shell ---------- */
@@ -34,6 +48,18 @@
     background: #05070d;
     box-shadow: 0 1.5rem 4rem rgba(0, 0, 0, .32);
     position: relative;
+    animation: playerEntrance 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes playerEntrance {
+    from {
+        opacity: 0;
+        transform: translateY(16px) scale(0.99);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
 }
 
 /* Loading skeleton */
@@ -133,6 +159,7 @@
     cursor: pointer;
     font-size: 1.5rem;
     transition: transform 0.2s ease, opacity 0.3s ease, background 0.2s ease;
+    will-change: transform, opacity;
     z-index: 5;
 }
 
@@ -331,6 +358,13 @@
     max-width: 9rem;
     padding: 0.3rem 0.45rem;
     font-size: 0.82rem;
+    appearance: none;
+    background-image: linear-gradient(45deg, transparent 50%, rgba(255,255,255,0.5) 50%),
+                      linear-gradient(135deg, rgba(255,255,255,0.5) 50%, transparent 50%);
+    background-position: right 10px center, right 6px center;
+    background-size: 4px 4px, 4px 4px;
+    background-repeat: no-repeat;
+    padding-right: 1.4rem;
 }
 
 .stream-player__control:hover,
@@ -656,9 +690,18 @@
 }
 
 .watch-page__hint {
-    margin: 0 0.25rem;
-    color: var(--color-text-dim);
+    margin: 0.5rem 0.25rem 0;
+    color: var(--color-text-muted);
     font-size: 0.82rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.watch-page__hint::before {
+    content: '⌨';
+    opacity: 0.5;
+    font-size: 0.75rem;
 }
 
 /* ---------- Screenshot flash ---------- */

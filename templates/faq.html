@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block page_title %}{% trans "FAQ — LumiBox" %}{% endblock %}
+{% block page_description %}{% trans "Часто задаваемые вопросы о LumiBox: регистрация, просмотр, избранное, рекомендации." %}{% endblock %}
+{% block og_title %}{% trans "Часто задаваемые вопросы — LumiBox" %}{% endblock %}
+{% block og_description %}{% trans "Ответы на популярные вопросы о платформе LumiBox." %}{% endblock %}
+
+{% block content %}
+    <div class="legal-page">
+        <h1 class="legal-page__title">{% trans "Часто задаваемые вопросы" %}</h1>
+
+        <section class="legal-section">
+            <h2 class="legal-section__title">{% trans "О платформе" %}</h2>
+
+            <div class="legal-format">
+                <h3 class="legal-format__title">{% trans "LumiBox — это бесплатно?" %}</h3>
+                <p class="legal-section__text">
+                    {% blocktranslate trimmed %}
+                        Да, LumiBox полностью бесплатен. Никаких подписок, скрытых
+                        платежей или пробных периодов. Все фильмы и сериалы доступны
+                        без ограничений.
+                    {% endblocktranslate %}
+                </p>
+            </div>
+
+            <div class="legal-format">
+                <h3 class="legal-format__title">{% trans "Нужна ли регистрация?" %}</h3>
+                <p class="legal-section__text">
+                    {% blocktranslate trimmed %}
+                        Регистрация не обязательна для просмотра каталога. Однако
+                        она открывает доступ к избранному, истории просмотров и
+                        персональным рекомендациям.
+                    {% endblocktranslate %}
+                </p>
+            </div>
+
+            <div class="legal-format">
+                <h3 class="legal-format__title">{% trans "Как LumiBox отличается от других сервисов?" %}</h3>
+                <p class="legal-section__text">
+                    {% blocktranslate trimmed %}
+                        Мы делаем акцент на удобстве поиска и навигации: умные
+                        фильтры, тематические подборки, персональные рекомендации.
+                        Никакой рекламы в плеере, никаких ограничений — только кино.
+                    {% endblocktranslate %}
+                </p>
+            </div>
+        </section>
+
+        <section class="legal-section">
+            <h2 class="legal-section__title">{% trans "Просмотр и каталог" %}</h2>
+
+            <div class="legal-format">
+                <h3 class="legal-format__title">{% trans "Почему не воспроизводится видео?" %}</h3>
+                <p class="legal-section__text">
+                    {% blocktranslate trimmed %}
+                        Проверьте интернет-соединение и попробуйте обновить страницу.
+                        Если проблема сохраняется — напишите нам в Telegram или на
+                        почту, мы поможем.
+                    {% endblocktranslate %}
+                </p>
+            </div>
+
+            <div class="legal-format">
+                <h3 class="legal-format__title">{% trans "Как найти фильм?" %}</h3>
+                <p class="legal-section__text">
+                    {% blocktranslate trimmed %}
+                        Используйте строку поиска в верхней части страницы — она
+                        ищет по названию на русском и оригинальном языке. Также
+                        доступны фильтры по жанру, стране, году и рейтингу.
+                    {% endblocktranslate %}
+                </p>
+            </div>
+
+            <div class="legal-format">
+                <h3 class="legal-format__title">{% trans "Как добавить фильм в избранное?" %}</h3>
+                <p class="legal-section__text">
+                    {% blocktranslate trimmed %}
+                        На странице фильма нажмите кнопку «В избранное» — иконка
+                        сердца. Чтобы просмотреть избранное, откройте меню
+                        пользователя и выберите «Избранное».
+                    {% endblocktranslate %}
+                </p>
+            </div>
+        </section>
+
+        <section class="legal-section">
+            <h2 class="legal-section__title">{% trans "Профиль и рекомендации" %}</h2>
+
+            <div class="legal-format">
+                <h3 class="legal-format__title">{% trans "Как работают рекомендации?" %}</h3>
+                <p class="legal-section__text">
+                    {% blocktranslate trimmed %}
+                        Система анализирует ваши просмотры и оценки, чтобы
+                        предлагать фильмы и сериалы, которые вам могут
+                        понравиться. Чем больше вы смотрите — тем точнее
+                        рекомендации.
+                    {% endblocktranslate %}
+                </p>
+            </div>
+
+            <div class="legal-format">
+                <h3 class="legal-format__title">{% trans "Где посмотреть историю просмотров?" %}</h3>
+                <p class="legal-section__text">
+                    {% blocktranslate trimmed %}
+                        В меню пользователя выберите пункт «История». Там
+                        отображаются все фильмы и сериалы, которые вы начали
+                        смотреть.
+                    {% endblocktranslate %}
+                </p>
+            </div>
+
+            <div class="legal-format">
+                <h3 class="legal-format__title">{% trans "Как изменить данные профиля?" %}</h3>
+                <p class="legal-section__text">
+                    {% blocktranslate trimmed %}
+                        Перейдите в «Профиль» через меню пользователя. Там можно
+                        изменить имя, аватар и другие настройки.
+                    {% endblocktranslate %}
+                </p>
+            </div>
+        </section>
+    </div>
+{% endblock %}

@@ -28,6 +28,34 @@ body {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--color-bg);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--color-border);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--color-accent-dim);
+}
+
+@supports (scrollbar-color: auto) {
+    * {
+        scrollbar-color: var(--color-border) var(--color-bg);
+        scrollbar-width: thin;
+    }
+}
+
+body {
     background-color: var(--color-bg);
     color: var(--color-text);
     font-family: var(--font-base);
@@ -54,6 +82,20 @@ a:hover {
     color: var(--color-accent);
 }
 
+/* Text links in content areas get animated underline on hover */
+.content a,
+.text a {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-color: var(--color-accent-dim);
+    transition: text-decoration-color var(--transition-fast), color var(--transition-fast);
+}
+
+.content a:hover,
+.text a:hover {
+    text-decoration-color: var(--color-accent);
+}
+
 ul,
 ol {
     list-style: none;
@@ -64,6 +106,12 @@ button,
 select {
     font: inherit;
     color: inherit;
+}
+
+/* Выделение текста в кинематографичном янтаре */
+::selection {
+    background: var(--color-selection-bg);
+    color: var(--color-selection-text);
 }
 
 /*
@@ -217,6 +265,7 @@ img[data-loaded] {
     padding: var(--space-10) var(--space-4);
     max-width: 520px;
     margin: 0 auto;
+    animation: fadeUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .error-page__illustration {
@@ -229,11 +278,20 @@ img[data-loaded] {
 .error-page__code {
     font-size: 6rem;
     font-weight: 800;
-    color: var(--color-accent);
+    background: linear-gradient(135deg, var(--color-accent), rgba(255, 184, 48, 0.4));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
     line-height: 1;
     margin-bottom: var(--space-3);
     letter-spacing: -0.04em;
-    opacity: 0.7;
+}
+
+@supports not (background-clip: text) {
+    .error-page__code {
+        color: var(--color-accent);
+        opacity: 0.7;
+    }
 }
 
 .error-page__title {
@@ -284,5 +342,13 @@ img[data-loaded] {
     }
     .error-page {
         padding: var(--space-6) var(--space-3);
+    }
+}
+
+/* ---------- Ultra-wide ---------- */
+
+@media (min-width: 1600px) {
+    .container {
+        max-width: 1440px;
     }
 }

@@ -19,7 +19,7 @@
   Нужно минимум 1280 + 180 + 180 = 1640px.
   Ставим 1750px — запас на скроллбар.
 */
-@media (min-width: 1750px) {
+@media (min-width: 1640px) {
     .ad-rail {
         display: block;
         position: fixed;

@@ -83,13 +83,34 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 });
+
+    var shareBtn = document.querySelector('[data-share]');
+    if (shareBtn) {
+        shareBtn.addEventListener('click', function() {
+            var url = window.location.href;
+            var title = document.title;
+            if (navigator.share) {
+                navigator.share({ title: title, url: url }).catch(function() {});
+            } else {
+                var input = document.createElement('input');
+                input.value = url;
+                document.body.appendChild(input);
+                input.select();
+                document.execCommand('copy');
+                document.body.removeChild(input);
+                var original = shareBtn.innerHTML;
+                shareBtn.innerHTML = '{% trans "Скопировано" %}';
+                setTimeout(function() { shareBtn.innerHTML = original; }, 2000);
+            }
+        });
+    }
 </script>
 {% endblock %}
 
 {% block hero %}
 <section class="film-hero">
     {% if title.backdrop %}
-        <img class="film-hero__backdrop" src="{{ title.backdrop.url }}" alt="" aria-hidden="true" loading="eager">
+        <img class="film-hero__backdrop" src="{{ title.backdrop.url }}" alt="" aria-hidden="true" loading="eager" fetchpriority="high">
     {% endif %}
     <div class="film-hero__scrim" aria-hidden="true"></div>
 
@@ -190,6 +211,14 @@ document.addEventListener('DOMContentLoaded', function () {
                         {% icon "heart" size=16 %} {% trans "В избранное" %}
                     </a>
                 {% endif %}
+
+                <button class="button button--ghost" type="button" data-share title="{% trans 'Поделиться' %}">
+                    {% icon "share" size=16 %} <span class="button__label">{% trans "Поделиться" %}</span>
+                </button>
+
+                <a class="button button--ghost" href="{% url 'contacts' %}?subject={% blocktranslate with name=title.name %}Жалоба: {{ name }}{% endblocktranslate %}" title="{% trans 'Пожаловаться' %}">
+                    {% icon "flag" size=16 %} <span class="button__label">{% trans "Пожаловаться" %}</span>
+                </a>
             </div>
 
             <div class="film-hero__specs">
@@ -425,4 +454,5 @@ document.addEventListener('DOMContentLoaded', function () {
         </section>
     </div>
 {% endif %}
+
 {% endblock %}

@@ -29,7 +29,57 @@
 .collection-card__cover {
     aspect-ratio: 16 / 9;
     overflow: hidden;
+    position: relative;
     background: linear-gradient(145deg, var(--color-surface-hover), var(--color-surface));
+}
+
+.collection-card__fallback {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    background: linear-gradient(145deg,
+        hsl(var(--card-hue, 30), 30%, 10%),
+        hsl(calc(var(--card-hue, 30) + 40), 20%, 6%)
+    );
+    color: hsla(var(--card-hue, 30), 40%, 60%, 0.5);
+    transition: opacity var(--transition-fast), transform var(--transition-slow);
+    position: relative;
+    overflow: hidden;
+}
+
+.collection-card__fallback::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(ellipse at 70% 20%, hsla(var(--card-hue, 30), 50%, 50%, 0.1) 0%, transparent 50%);
+    pointer-events: none;
+}
+
+.collection-card:hover .collection-card__fallback {
+    opacity: 1;
+    transform: scale(1.05);
+}
+
+.collection-card__fallback-icon {
+    opacity: 0.5;
+    position: relative;
+    z-index: 1;
+}
+
+.collection-card__fallback-label {
+    font-size: var(--text-lg);
+    font-weight: 700;
+    font-family: var(--font-display);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    opacity: 0.5;
+    position: relative;
+    z-index: 1;
 }
 
 .collection-card__image {

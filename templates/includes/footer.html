@@ -12,10 +12,7 @@
                     {% trans "Каталог фильмов и сериалов с поиском, фильтрами, подборками и личной библиотекой. Современная кино-платформа с открытым кодом на Django." %}
                 </p>
                 <p class="footer-brand__stack">
-                    <span class="chip chip--muted">Django 5.2</span>
-                    <span class="chip chip--muted">PostgreSQL</span>
-                    <span class="chip chip--muted">Redis</span>
-                    <span class="chip chip--muted">Celery</span>
+                    <span>{% trans "Сделано на" %}&nbsp;Django</span>
                 </p>
             </div>
 
@@ -50,62 +47,12 @@
                     <li><a class="footer-nav__link" href="{% url 'advertisers' %}">{% trans "Рекламодателям" %}</a></li>
                     <li><a class="footer-nav__link" href="{% url 'privacy' %}">{% trans "Политика конфиденциальности" %}</a></li>
                     <li><a class="footer-nav__link" href="{% url 'terms' %}">{% trans "Пользовательское соглашение" %}</a></li>
+                    <li><a class="footer-nav__link" href="{% url 'faq' %}">{% trans "FAQ" %}</a></li>
                     <li><a class="footer-nav__link" href="{% url 'contacts' %}">{% trans "Контакты" %}</a></li>
                 </ul>
             </nav>
 
         </div>
-
-        {# ---------- Преимущества LumiBox ---------- #}
-        <section class="footer-advantages" aria-label="{% trans 'Преимущества LumiBox' %}">
-            <h2 class="footer-advantages__heading">
-                {% trans "Почему LumiBox?" %}
-            </h2>
-            <div class="footer-advantages__grid">
-                <div class="footer-advantage">
-                    <span class="footer-advantage__icon">{% icon "movie" size=24 %}</span>
-                    <div>
-                        <strong class="footer-advantage__title">{% trans "Огромный каталог" %}</strong>
-                        <p class="footer-advantage__desc">{% trans "Фильмы и сериалы на любой вкус: от классики до новинок." %}</p>
-                    </div>
-                </div>
-                <div class="footer-advantage">
-                    <span class="footer-advantage__icon">{% icon "free" size=24 %}</span>
-                    <div>
-                        <strong class="footer-advantage__title">{% trans "Полностью бесплатно" %}</strong>
-                        <p class="footer-advantage__desc">{% trans "Никаких подписок, скрытых платежей и пробных периодов." %}</p>
-                    </div>
-                </div>
-                <div class="footer-advantage">
-                    <span class="footer-advantage__icon">{% icon "target" size=24 %}</span>
-                    <div>
-                        <strong class="footer-advantage__title">{% trans "Умные подборки" %}</strong>
-                        <p class="footer-advantage__desc">{% trans "Персональные рекомендации и тематические коллекции." %}</p>
-                    </div>
-                </div>
-                <div class="footer-advantage">
-                    <span class="footer-advantage__icon">{% icon "rocket" size=24 %}</span>
-                    <div>
-                        <strong class="footer-advantage__title">{% trans "Мгновенный поиск" %}</strong>
-                        <p class="footer-advantage__desc">{% trans "Удобные фильтры, сортировка и поиск по жанрам, году, стране." %}</p>
-                    </div>
-                </div>
-                <div class="footer-advantage">
-                    <span class="footer-advantage__icon">{% icon "shield" size=24 %}</span>
-                    <div>
-                        <strong class="footer-advantage__title">{% trans "Без рекламы" %}</strong>
-                        <p class="footer-advantage__desc">{% trans "Чистый просмотр без всплывающих баннеров и видео-вставок." %}</p>
-                    </div>
-                </div>
-                <div class="footer-advantage">
-                    <span class="footer-advantage__icon">{% icon "device" size=24 %}</span>
-                    <div>
-                        <strong class="footer-advantage__title">{% trans "Адаптивный дизайн" %}</strong>
-                        <p class="footer-advantage__desc">{% trans "Удобно смотреть с телефона, планшета или компьютера." %}</p>
-                    </div>
-                </div>
-            </div>
-        </section>
 
         {# ---------- Trust signals / Юридическая информация ---------- #}
         <div class="footer-trust">
@@ -120,7 +67,7 @@
         <div class="footer-bottom">
             <p class="footer-bottom__copy">
                 {% now "Y" as current_year %}
-                {% blocktranslate %}© {{ current_year }} LumiBox. Собственный дизайн и код.{% endblocktranslate %}
+                {% blocktranslate %}© {{ current_year }} LumiBox.{% endblocktranslate %}
             </p>
             <div class="footer-bottom__links">
                 <a class="footer-bottom__telegram-link" href="https://t.me/lumiboxxx" target="_blank" rel="noopener noreferrer" aria-label="{% trans 'Telegram' %}">

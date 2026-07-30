@@ -19,6 +19,17 @@
 .profile-card {
     padding: var(--space-6);
     text-align: center;
+    background: rgba(18, 22, 32, 0.5);
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.06));
+    border-radius: var(--radius-lg);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    transition: box-shadow var(--transition), transform var(--transition);
+}
+
+.profile-card:hover {
+    box-shadow: 0 12px 48px rgba(0, 0, 0, 0.3);
+    transform: translateY(-1px);
 }
 
 .profile-card__avatar {
@@ -62,6 +73,22 @@
 
 .profile-stat {
     padding: var(--space-2);
+    animation: statEntrance 0.4s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+.profile-stat:nth-child(1) { animation-delay: 0.05s; }
+.profile-stat:nth-child(2) { animation-delay: 0.10s; }
+.profile-stat:nth-child(3) { animation-delay: 0.15s; }
+
+@keyframes statEntrance {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .profile-stat + .profile-stat {
@@ -94,6 +121,12 @@
     background: var(--color-surface);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.profile-form:focus-within {
+    border-color: var(--color-accent-dim);
+    box-shadow: 0 0 0 3px rgba(255, 184, 48, 0.08);
 }
 
 /* Profile header (person page) */
