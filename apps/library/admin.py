@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from apps.library.models import Favorite, WatchHistory
+from apps.library.models import Favorite, WatchHistory, Watchlist
 
 
 class UserTitleAdmin(admin.ModelAdmin):
@@ -25,3 +25,8 @@ class FavoriteAdmin(UserTitleAdmin):
 class WatchHistoryAdmin(UserTitleAdmin):
     list_display = ["user", "title", "watched_at"]
     date_hierarchy = "watched_at"
+
+
+@admin.register(Watchlist)
+class WatchlistAdmin(UserTitleAdmin):
+    pass

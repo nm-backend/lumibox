@@ -21,11 +21,10 @@ from apps.catalog.services import (
     get_similar_titles,
 )
 from apps.core.views import ElidedPaginationMixin
-from apps.library.models import Favorite
+from apps.library.models import Favorite, Watchlist
 from apps.library.services import remember_view
 from apps.reviews.forms import ReviewForm
 from apps.reviews.models import Review
-from apps.streaming.services import get_continue_watching, get_watch_url
 
 # Условие «считать только опубликованное» для annotate(Count(...)).
 # Вынесено в константу: используется и для жанров, и для стран.
@@ -87,7 +86,6 @@ class HomeView(TemplateView):
         # лишний запрос на каждой загрузке главной ни к чему.
         if self.request.user.is_authenticated:
             context["recommendations"] = get_recommendations(self.request.user)
-            context["continue_watching"] = get_continue_watching(self.request.user)
 
         context["collections"] = get_featured_collections()
 
@@ -95,6 +93,12 @@ class HomeView(TemplateView):
         from apps.catalog.services import get_home_statistics, get_trending_titles
         context["statistics"] = get_home_statistics()
         context["trending"] = get_trending_titles()
+
+        # Боковая панель: берём те же данные, что и секции — отдельных
+        # запросов не делаем, slice() на уже полученном списке бесплатен.
+        context["sidebar_popular"] = context.get("top_rated", [])[:6]
+        context["sidebar_new"] = context.get("new_titles", [])[:6]
+        context["sidebar_genres"] = context["genres"]
         return context
 
 
@@ -122,10 +126,7 @@ class TitleListView(ElidedPaginationMixin, ListView):
 
     def get_base_queryset(self):
         """Точка расширения для страниц жанра и страны."""
-        # defer("description"): на списке не нужно описание, только в карточке.
-        # Без этого текстовое поле тянется на каждую из 24 записей —
-        # лишние мегабайты в ответе сервера.
-        return Title.objects.published().with_related().defer("description")
+        return Title.objects.published().with_related()
 
     def get_queryset(self):
         return self.get_filter_form().filter(self.get_base_queryset())
@@ -140,6 +141,13 @@ class TitleListView(ElidedPaginationMixin, ListView):
         context["page_subtitle"] = self.page_subtitle
         # Genre chips for quick filter navigation
         context["genres"] = _get_cached_genre_chip_list()
+
+        # Боковая панель каталога: лёгкие запросы без with_related —
+        # для списка достаточно названия, года и постера.
+        base = Title.objects.published()
+        context["sidebar_popular"] = list(base.order_by("-rating_average")[:6])
+        context["sidebar_new"] = list(base.order_by("-published_at", "-id")[:6])
+        context["sidebar_genres"] = context["genres"]
         return context
 
     def build_active_filters(self, form):
@@ -272,11 +280,7 @@ class TitleDetailView(DetailView):
     # with_crew подтягивает съёмочную группу заранее — иначе шаблон
     # сходит в базу за каждым именем отдельно.
     # Рейтинг брать неоткуда не нужно: он лежит готовым в полях модели.
-    # prefetch_related("seasons__episodes__video_asset") подтягивает
-    # сезоны с сериями и их видеоресурсами — без N+1 во вкладке сезонов.
-    queryset = Title.objects.published().with_related().with_crew().prefetch_related(
-        "seasons__episodes__video_asset"
-    )
+    queryset = Title.objects.published().with_related().with_crew()
 
     def get(self, request, *args, **kwargs):
         response = super().get(request, *args, **kwargs)
@@ -294,7 +298,7 @@ class TitleDetailView(DetailView):
         context["review_form"] = ReviewForm(instance=user_review)
         context["user_review"] = user_review
         context["is_favorite"] = self.is_favorite()
-        context["watch_url"] = get_watch_url(self.object)
+        context["is_watchlist"] = self.is_watchlist()
         return context
 
     def get_user_review(self):
@@ -312,6 +316,11 @@ class TitleDetailView(DetailView):
         if not self.request.user.is_authenticated:
             return False
         return Favorite.objects.filter(user=self.request.user, title=self.object).exists()
+
+    def is_watchlist(self):
+        if not self.request.user.is_authenticated:
+            return False
+        return Watchlist.objects.filter(user=self.request.user, title=self.object).exists()
 
 
 class PersonDetailView(DetailView):
@@ -398,7 +407,7 @@ class StudioDetailView(ElidedPaginationMixin, ListView):
 
     def get_queryset(self):
         self.studio = get_object_or_404(Studio, slug=self.kwargs["slug"])
-        return Title.objects.published().with_related().filter(studios=self.studio).defer("description")
+        return Title.objects.published().with_related().filter(studios=self.studio)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -449,7 +458,6 @@ class AwardDetailView(ElidedPaginationMixin, ListView):
             .with_related()
             .filter(pk__in=award_pks)
             .order_by("-award_entries__year", "name")
-            .defer("description")
         )
 
     def get_context_data(self, **kwargs):
@@ -586,7 +594,7 @@ class CollectionDetailView(ElidedPaginationMixin, ListView):
         self.collection = get_object_or_404(
             Collection.objects.published(), slug=self.kwargs["slug"]
         )
-        return Title.objects.published().with_related().in_collection(self.collection).defer("description")
+        return Title.objects.published().with_related().in_collection(self.collection)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

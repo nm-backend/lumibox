@@ -83,8 +83,6 @@ LOCAL_APPS = [
     "apps.catalog",
     "apps.library",
     "apps.reviews",
-    "apps.streaming",
-    "apps.billing",
     # api последним: он представляет модели всех остальных приложений.
     "apps.api",
 ]
@@ -177,22 +175,6 @@ CACHE_TTL_REFERENCE = 60 * 60
 CACHE_TTL_SIMILAR = 60 * 30
 # Персональные рекомендации — индивидуальны для пользователя
 CACHE_TTL_RECOMMENDATIONS = 60 * 5
-
-# Провайдеры видео задаются только конфигурацией окружения/инфраструктуры. В БД
-# хранится ключ ресурса, а не URL, поэтому редактор не может добавить произвольный
-# источник в плеер. Для локальных файлов URL строится защищённым Django-маршрутом.
-# Используется в WebP-сигнале: True для локального диска (post_save
-# конвертирует файл на диске), False для S3/R2 (конвертацию делает CDN).
-USE_LOCAL_STORAGE = not bool(REDIS_URL) or not env("AWS_STORAGE_BUCKET_NAME", default="")
-
-STREAMING_PROVIDER_CONFIG = {
-    "cloudflare_stream": {"delivery_base_url": env("CLOUDFLARE_STREAM_DELIVERY_BASE_URL", default="")},
-    "cloudflare_r2": {"delivery_base_url": env("CLOUDFLARE_R2_DELIVERY_BASE_URL", default="")},
-    "aws_s3": {"delivery_base_url": env("AWS_S3_DELIVERY_BASE_URL", default="")},
-    "backblaze_b2": {"delivery_base_url": env("BACKBLAZE_B2_DELIVERY_BASE_URL", default="")},
-    "minio": {"delivery_base_url": env("MINIO_DELIVERY_BASE_URL", default="")},
-}
-
 
 # Celery. Брокер — тот же Redis. Без него задачи выполнятся прямо
 # в процессе запроса (task_always_eager), и разработка не встанет.
@@ -367,22 +349,8 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 MEDIA_URL = "media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
-# Два хранилища вместо одного, потому что у файлов разные требования к доступу.
-#
-#   default — то, что браузер обязан показать сам: постеры, фоны, логотипы,
-#             кадры, аватары, картинки баннеров. Читать их может кто угодно.
-#   private — видеофайлы и субтитры. Их отдаёт только Django и только после
-#             проверки прав (LocalAssetFileView), поэтому прямой ссылки
-#             на них быть не должно.
-#
-# Локально оба лежат на диске в MEDIA_ROOT, и приватные пути дополнительно
-# закрыты в apps.core.views.serve_public_media. Разница появляется в продакшене
-# на объектном хранилище: там default получает публичный ACL, а private — нет
-# (см. production.py). Без такого разделения видео уезжало в бакет публичным,
-# и прямая ссылка обходила проверку доступа.
 STORAGES = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
-    "private": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
     "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
 }
 

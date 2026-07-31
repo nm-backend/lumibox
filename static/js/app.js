@@ -230,8 +230,11 @@
         6. Tabs
     ----------------------------------------------- */
     document.querySelectorAll('[data-tabs]').forEach(function (container) {
-        const tabs = container.querySelectorAll('[data-tab]');
-        const contents = container.querySelectorAll('[data-tab-content]');
+        // Контент вкладок лежит рядом с контейнером, а не внутри него:
+        // в шаблонах это соседние <div class="tab-content">. Ищем в родителе.
+        const scope = container.parentElement || document;
+        const tabs = scope.querySelectorAll('[data-tab]');
+        const contents = scope.querySelectorAll('[data-tab-content]');
 
         tabs.forEach(function (tab) {
             tab.addEventListener('click', function () {
@@ -239,7 +242,7 @@
                 tabs.forEach(t => t.classList.remove('tab--active'));
                 contents.forEach(c => c.classList.remove('tab-content--active'));
                 this.classList.add('tab--active');
-                const content = container.querySelector(`[data-tab-content="${target}"]`);
+                const content = scope.querySelector(`[data-tab-content="${target}"]`);
                 if (content) content.classList.add('tab-content--active');
             });
         });

@@ -14,6 +14,39 @@ from apps.core.test_factories import (
 )
 
 
+def results_grid_html(response):
+    """
+    Возвращает HTML только блока с результатами каталога.
+
+    Страница теперь включает сайдбар с популярным и новинками, которые
+    показывают фильмы независимо от активных фильтров — как на Kinogo.
+    Поэтому проверять «отфильтрованное не показывается» нужно по сетке
+    результатов, а не по всей странице.
+    """
+    content = response.content.decode("utf-8")
+    marker = 'class="title-grid'
+    start = content.find(marker)
+    if start == -1:
+        return ""
+
+    tag_end = content.find(">", start)
+    depth = 0
+    pos = tag_end + 1
+    while True:
+        open_idx = content.find("<div", pos)
+        close_idx = content.find("</div>", pos)
+        if close_idx == -1:
+            return content[start:]
+        if open_idx != -1 and open_idx < close_idx:
+            depth += 1
+            pos = open_idx + 4
+        else:
+            if depth == 0:
+                return content[start : close_idx + len("</div>")]
+            depth -= 1
+            pos = close_idx + 6
+
+
 class HomeViewTests(TestCase):
     def setUp(self):
         cache.clear()
@@ -70,22 +103,22 @@ class TitleListViewTests(TestCase):
     def test_filter_by_type(self):
         response = self.client.get(reverse("catalog:title_list"), {"type": "series"})
         self.assertContains(response, "Тестовый сериал")
-        self.assertNotContains(response, "Тестовый фильм")
+        self.assertNotIn("Тестовый фильм", results_grid_html(response))
 
     def test_filter_by_genre(self):
         response = self.client.get(reverse("catalog:title_list"), {"genre": "drama"})
         self.assertContains(response, "Тестовый фильм")
-        self.assertNotContains(response, "Тестовый сериал")
+        self.assertNotIn("Тестовый сериал", results_grid_html(response))
 
     def test_filter_by_year(self):
         response = self.client.get(reverse("catalog:title_list"), {"year": "2019"})
         self.assertContains(response, "Тестовый фильм")
-        self.assertNotContains(response, "Тестовый сериал")
+        self.assertNotIn("Тестовый сериал", results_grid_html(response))
 
     def test_search_by_name(self):
         response = self.client.get(reverse("catalog:title_list"), {"q": "сериал"})
         self.assertContains(response, "Тестовый сериал")
-        self.assertNotContains(response, "Тестовый фильм")
+        self.assertNotIn("Тестовый фильм", results_grid_html(response))
 
     def test_garbage_filter_does_not_break_catalog(self):
         """Мусор в адресе должен игнорироваться, а не ронять страницу."""
@@ -184,7 +217,7 @@ class ReferencePagesTests(TestCase):
         response = self.client.get(reverse("catalog:genre_titles", args=["drama"]))
 
         self.assertContains(response, "Наш фильм")
-        self.assertNotContains(response, "Чужой фильм")
+        self.assertNotIn("Чужой фильм", results_grid_html(response))
 
     def test_unknown_genre_returns_404(self):
         response = self.client.get(reverse("catalog:genre_titles", args=["net-takogo"]))

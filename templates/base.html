@@ -1,4 +1,4 @@
-{% load static i18n lumibox_urls promotions icons %}<!DOCTYPE html>
+{% load static i18n lumibox_urls icons %}<!DOCTYPE html>
 {% get_current_language as LANGUAGE_CODE %}
 <html lang="{{ LANGUAGE_CODE }}" data-theme="">
 <head>
@@ -114,7 +114,13 @@
 <body>
     <div class="cinema-glow" aria-hidden="true"></div>
 
-    {% ad_rail %}
+    {% comment %} Боковые рекламные рельсы. Видны только на широких экранах
+       (≥1640px) — там, где контейнер не занимает всю ширину окна. Сейчас
+       это плейсхолдеры: вёрстка и размеры (160×600) финальные, подставить
+       реальные баннеры можно без изменения разметки.
+    {% endcomment %}
+    {% include "includes/ad_rail.html" with side="left" %}
+    {% include "includes/ad_rail.html" with side="right" %}
 
     {% comment %} Skip-to-content: скринридеры и навигация с клавиатуры пропускают
        повторяющиеся блоки шапки и сразу переходят к основному контенту.
@@ -198,6 +204,7 @@
                         <p class="user-menu__name">{{ user.display_name }}</p>
                         <a class="user-menu__link" href="{% url 'users:profile' %}">{% trans "Профиль" %}</a>
                         <a class="user-menu__link" href="{% url 'library:favorites' %}">{% trans "Избранное" %}</a>
+                        <a class="user-menu__link" href="{% url 'library:watchlist' %}">{% trans "Смотреть позже" %}</a>
                         <a class="user-menu__link" href="{% url 'library:history' %}">{% trans "История" %}</a>
                         <form method="post" action="{% url 'users:logout' %}">
                             {% csrf_token %}
@@ -226,6 +233,7 @@
             <hr style="border-color: var(--color-border); margin: var(--space-2) 0;">
             <a class="mobile-nav__link" href="{% url 'users:profile' %}">{% trans "Профиль" %}</a>
             <a class="mobile-nav__link" href="{% url 'library:favorites' %}">{% trans "Избранное" %}</a>
+            <a class="mobile-nav__link" href="{% url 'library:watchlist' %}">{% trans "Смотреть позже" %}</a>
             <a class="mobile-nav__link" href="{% url 'library:history' %}">{% trans "История" %}</a>
         {% endif %}
     </nav>
@@ -291,8 +299,8 @@
 
     {% include "includes/footer.html" %}
 
-    <script src="{% static 'js/favorite.js' %}" defer></script>
-    <script src="{% static 'js/app.js' %}" defer></script>
+    <script src="{% static 'js/favorite.js' %}?v={{ static_version }}" defer></script>
+    <script src="{% static 'js/app.js' %}?v={{ static_version }}" defer></script>
     {% block extra_js %}{% endblock %}
 </body>
 </html>

@@ -5,7 +5,7 @@ from django.test import TestCase
 from django.urls import reverse
 
 from apps.core.test_factories import create_title, create_user
-from apps.library.models import Favorite, WatchHistory
+from apps.library.models import Favorite, WatchHistory, Watchlist
 from apps.library.services import remember_view
 
 
@@ -47,6 +47,23 @@ class WatchHistoryModelTests(TestCase):
         second = WatchHistory.objects.get(user=user, title=title).watched_at
 
         self.assertGreater(second, first)
+
+
+class WatchlistModelTests(TestCase):
+    def test_same_title_cannot_be_added_twice(self):
+        user = create_user()
+        title = create_title()
+        Watchlist.objects.create(user=user, title=title)
+
+        with self.assertRaises(IntegrityError):
+            Watchlist.objects.create(user=user, title=title)
+
+    def test_different_users_add_same_title(self):
+        title = create_title()
+        Watchlist.objects.create(user=create_user(), title=title)
+        Watchlist.objects.create(user=create_user(), title=title)
+
+        self.assertEqual(Watchlist.objects.filter(title=title).count(), 2)
 
 
 class ToggleFavoriteViewTests(TestCase):
@@ -129,6 +146,76 @@ class ToggleFavoriteViewTests(TestCase):
         self.assertEqual(Favorite.objects.count(), 0)
 
 
+class ToggleWatchlistViewTests(TestCase):
+    def setUp(self):
+        self.user = create_user()
+        self.title = create_title()
+        self.url = reverse("library:toggle_watchlist", args=[self.title.slug])
+
+    def test_guest_redirected_to_login(self):
+        response = self.client.post(self.url)
+
+        self.assertEqual(response.status_code, 302)
+        self.assertIn(reverse("users:login"), response.url)
+        self.assertEqual(Watchlist.objects.count(), 0)
+
+    def test_get_does_not_change_anything(self):
+        self.client.force_login(self.user)
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, 405)
+        self.assertEqual(Watchlist.objects.count(), 0)
+
+    def test_post_toggles_on_and_off(self):
+        self.client.force_login(self.user)
+
+        self.client.post(self.url)
+        self.assertTrue(Watchlist.objects.filter(user=self.user, title=self.title).exists())
+
+        self.client.post(self.url)
+        self.assertFalse(Watchlist.objects.filter(user=self.user, title=self.title).exists())
+
+    def test_ajax_request_gets_json(self):
+        self.client.force_login(self.user)
+        response = self.client.post(self.url, headers={"x-requested-with": "XMLHttpRequest"})
+
+        self.assertEqual(response["Content-Type"], "application/json")
+        self.assertEqual(json.loads(response.content), {"is_watchlist": True})
+
+    def test_plain_form_gets_redirect(self):
+        self.client.force_login(self.user)
+        response = self.client.post(self.url)
+
+        self.assertEqual(response.status_code, 302)
+
+    def test_next_cannot_send_user_to_another_site(self):
+        self.client.force_login(self.user)
+
+        response = self.client.post(self.url, {"next": "https://evil.example.com/phish"})
+
+        self.assertEqual(response.status_code, 302)
+        self.assertNotIn("evil.example.com", response["Location"])
+        self.assertEqual(response["Location"], self.title.get_absolute_url())
+
+    def test_next_within_site_still_works(self):
+        self.client.force_login(self.user)
+
+        response = self.client.post(self.url, {"next": "/catalog/?type=movie"})
+
+        self.assertEqual(response["Location"], "/catalog/?type=movie")
+
+    def test_draft_cannot_be_added(self):
+        from apps.catalog.models import Title
+
+        draft = create_title(status=Title.Status.DRAFT)
+        self.client.force_login(self.user)
+
+        response = self.client.post(reverse("library:toggle_watchlist", args=[draft.slug]))
+
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(Watchlist.objects.count(), 0)
+
+
 class LibraryPagesTests(TestCase):
     def setUp(self):
         self.user = create_user()
@@ -140,6 +227,39 @@ class LibraryPagesTests(TestCase):
     def test_history_requires_login(self):
         response = self.client.get(reverse("library:history"))
         self.assertEqual(response.status_code, 302)
+
+    def test_watchlist_requires_login(self):
+        response = self.client.get(reverse("library:watchlist"))
+        self.assertEqual(response.status_code, 302)
+
+    def test_user_sees_only_own_watchlist(self):
+        mine = create_title(name="Мой фильм")
+        stranger_title = create_title(name="Чужой фильм")
+
+        Watchlist.objects.create(user=self.user, title=mine)
+        Watchlist.objects.create(user=create_user(), title=stranger_title)
+
+        self.client.force_login(self.user)
+        response = self.client.get(reverse("library:watchlist"))
+
+        self.assertContains(response, "Мой фильм")
+        self.assertNotContains(response, "Чужой фильм")
+
+    def test_unpublished_title_hidden_from_watchlist(self):
+        from apps.catalog.models import Title
+
+        live = create_title(name="Живой фильм")
+        pulled = create_title(name="Снятый фильм")
+        Watchlist.objects.create(user=self.user, title=live)
+        Watchlist.objects.create(user=self.user, title=pulled)
+
+        Title.objects.filter(pk=pulled.pk).update(status=Title.Status.DRAFT)
+
+        self.client.force_login(self.user)
+        response = self.client.get(reverse("library:watchlist"))
+
+        self.assertContains(response, "Живой фильм")
+        self.assertNotContains(response, "Снятый фильм")
 
     def test_user_sees_only_own_favorites(self):
         mine = create_title(name="Мой фильм")

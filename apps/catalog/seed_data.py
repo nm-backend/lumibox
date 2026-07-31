@@ -61,6 +61,7 @@ TITLES = [
         "countries": ["США", "Великобритания"],
         "short_description": "Сон во сне, где украсть можно даже чужую мысль.",
         "description": "Фантастический триллер о команде, которая работает внутри чужих снов. Фильм известен многослойной структурой повествования и практическими спецэффектами.",
+        "trailer_url": "https://www.youtube.com/watch?v=F977gw0ecwY",
         "status": "published",
     },
     {
@@ -75,6 +76,7 @@ TITLES = [
         "countries": ["Южная Корея"],
         "short_description": "Две семьи, одна лестница — и пропасть между этажами.",
         "description": "Социальная драма о двух семьях из разных слоёв общества. Первый неанглоязычный фильм, получивший главный «Оскар».",
+        "trailer_url": "https://www.youtube.com/watch?v=Pf8ymf6HYkc",
         "status": "published",
     },
     {
@@ -89,6 +91,7 @@ TITLES = [
         "countries": ["США", "Великобритания"],
         "short_description": "Чтобы спасти Землю, придётся её покинуть.",
         "description": "Космическая экспедиция ищет новый дом для человечества. При работе над фильмом консультировал физик-теоретик Кип Торн.",
+        "trailer_url": "https://www.youtube.com/watch?v=5DKSiMFHHxY",
         "status": "published",
     },
     {
@@ -103,6 +106,7 @@ TITLES = [
         "countries": ["Япония"],
         "short_description": "Девочка, поезд без обратного билета и мир духов.",
         "description": "Рисованная история девочки, попавшей в мир духов. Режиссёр — Хаяо Миядзаки, студия Ghibli.",
+        "trailer_url": "https://www.youtube.com/watch?v=mLbShBO05j4",
         "status": "published",
     },
     {
@@ -117,6 +121,7 @@ TITLES = [
         "countries": ["США", "Канада"],
         "short_description": "Иногда первый контакт — это вопрос перевода.",
         "description": "Лингвист пытается наладить контакт с инопланетной цивилизацией. Фантастика, построенная вокруг языка, а не оружия.",
+        "trailer_url": "https://www.youtube.com/watch?v=3SLTv9kP6NA",
         "status": "published",
     },
     {
@@ -173,6 +178,7 @@ TITLES = [
         "countries": ["США"],
         "short_description": "Пять историй, в которых всё идёт не по плану.",
         "description": "Несколько криминальных историй, рассказанных вперемешку. Фильм заметно повлиял на кино девяностых.",
+        "trailer_url": "https://www.youtube.com/watch?v=tGpTpVyI_OQ",
         "status": "published",
     },
     {
@@ -229,6 +235,7 @@ TITLES = [
         "countries": ["Южная Корея"],
         "short_description": "456 игроков, один приз и никакого милосердия.",
         "description": "Должники соглашаются участвовать в смертельно опасных играх ради денежного приза.",
+        "trailer_url": "https://www.youtube.com/watch?v=fNKyxkIuKSI",
         "status": "published",
     },
     {
@@ -259,6 +266,7 @@ TITLES = [
         "countries": ["США", "Канада"],
         "short_description": "Месть, пророчество и пустыня, что помнит всё.",
         "description": "Продолжение экранизации романа Фрэнка Герберта.",
+        "trailer_url": "https://www.youtube.com/watch?v=Way9Dexny3w",
         "status": "draft",
     },
     {

@@ -41,7 +41,6 @@ urlpatterns = [
     path("", include("apps.users.urls")),
     path("", include("apps.library.urls")),
     path("", include("apps.reviews.urls")),
-    path("", include("apps.streaming.urls")),
     # Каталог подключаем последним: у него маршрут "" для главной,
     # и он не должен перехватывать адреса остальных приложений.
     path("", include("apps.catalog.urls")),

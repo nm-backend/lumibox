@@ -1,4 +1,4 @@
-from apps.library.models import Favorite, WatchHistory
+from apps.library.models import Favorite, WatchHistory, Watchlist
 
 
 def toggle_favorite(user, title):
@@ -20,6 +20,22 @@ def toggle_favorite(user, title):
         return True
 
     favorite.delete()
+    return False
+
+
+def toggle_watchlist(user, title):
+    """
+    Добавляет запись в «Смотреть позже» или убирает её оттуда.
+
+    Устроено так же, как toggle_favorite: get_or_create защищает
+    от двойного клика на ограничении уникальности.
+    """
+    watchlist_item, created = Watchlist.objects.get_or_create(user=user, title=title)
+
+    if created:
+        return True
+
+    watchlist_item.delete()
     return False
 
 

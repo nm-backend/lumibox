@@ -75,3 +75,20 @@ class WatchHistory(UserTitleRelation):
         indexes = [
             models.Index(fields=["user", "-watched_at"], name="history_user_date_idx"),
         ]
+
+
+class Watchlist(UserTitleRelation):
+    """Запись в списке «Смотреть позже»."""
+
+    class Meta:
+        verbose_name = "Смотреть позже"
+        verbose_name_plural = "Смотреть позже"
+        ordering = ["-created_at"]
+        constraints = [
+            # Те же гарантии, что и у избранного: база не даст продублировать
+            # запись, даже если два запроса придут одновременно.
+            models.UniqueConstraint(fields=["user", "title"], name="unique_watchlist"),
+        ]
+        indexes = [
+            models.Index(fields=["user", "-created_at"], name="watchlist_user_date_idx"),
+        ]

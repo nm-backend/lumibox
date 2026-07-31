@@ -28,7 +28,6 @@ IMAGE_FIELDS_BY_MODEL: dict[str, list[str]] = {
     "catalog.Frame": ["image"],
     "catalog.Collection": ["cover"],
     "users.User": ["avatar"],
-    "billing.Promotion": ["image"],
 }
 
 

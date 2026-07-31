@@ -6,7 +6,7 @@ from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, UpdateView
 
-from apps.library.models import Favorite, WatchHistory
+from apps.library.models import Favorite, WatchHistory, Watchlist
 from apps.reviews.models import Review
 from apps.users.forms import LoginForm, ProfileForm, RegistrationForm
 
@@ -89,10 +89,12 @@ class ProfileView(LoginRequiredMixin, UpdateView):
         user = self.request.user
 
         context["favorites_count"] = Favorite.objects.for_user(user).count()
+        context["watchlist_count"] = Watchlist.objects.for_user(user).count()
         context["history_count"] = WatchHistory.objects.for_user(user).count()
         context["reviews_count"] = Review.objects.filter(user=user).count()
 
         # Немного свежего избранного прямо в профиле — чтобы страница
         # не была пустой анкетой.
         context["recent_favorites"] = Favorite.objects.for_user(user).with_title()[:6]
+        context["recent_watchlist"] = Watchlist.objects.for_user(user).with_title()[:6]
         return context

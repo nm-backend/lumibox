@@ -22,6 +22,8 @@
         <h1 class="page-title">{{ page_heading }}</h1>
     </div>
 
+    <div class="layout-sidebar">
+        <div class="layout-sidebar__main">
     <div class="catalog">
         {# Quick filter genre chips #}
         {% if genres %}
@@ -97,5 +99,8 @@
                 </div>
             {% endif %}
         </div>
+    </div>
+
+        {% include "includes/sidebar.html" %}
     </div>
 {% endblock %}

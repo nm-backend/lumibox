@@ -19,8 +19,8 @@ from django.db import connections
 from django.test import TransactionTestCase
 
 from apps.core.test_factories import create_title, create_user
-from apps.library.models import Favorite
-from apps.library.services import toggle_favorite
+from apps.library.models import Favorite, Watchlist
+from apps.library.services import toggle_favorite, toggle_watchlist
 from apps.reviews.models import Review
 from apps.reviews.services import save_review
 
@@ -78,6 +78,24 @@ class FavoriteRaceTests(TransactionTestCase):
         self.assertEqual(errors, [], "одновременные клики уронили сервер")
         # Переключатель: один поток добавил, второй убрал. Дублей быть не может.
         self.assertLessEqual(Favorite.objects.filter(user=user, title=title).count(), 1)
+
+
+class WatchlistRaceTests(TransactionTestCase):
+    def test_double_click_does_not_crash(self):
+        """
+        Кнопка «Смотреть позже» кликается так же, как избранное:
+        двойной клик не должен уронить сервер на ограничении уникальности.
+        """
+        if _is_sqlite():
+            self.skipTest("SQLite не поддерживает конкурентную запись (нужен PostgreSQL)")
+
+        user = create_user()
+        title = create_title()
+
+        errors = run_concurrently(lambda: toggle_watchlist(user, title))
+
+        self.assertEqual(errors, [], "одновременные клики уронили сервер")
+        self.assertLessEqual(Watchlist.objects.filter(user=user, title=title).count(), 1)
 
 
 class ReviewRaceTests(TransactionTestCase):

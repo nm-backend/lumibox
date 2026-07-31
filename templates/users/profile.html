@@ -35,6 +35,10 @@
                     <span class="profile-stat__label">{% trans "В избранном" %}</span>
                 </div>
                 <div class="profile-stat">
+                    <span class="profile-stat__value">{{ watchlist_count }}</span>
+                    <span class="profile-stat__label">{% trans "Смотреть позже" %}</span>
+                </div>
+                <div class="profile-stat">
                     <span class="profile-stat__value">{{ history_count }}</span>
                     <span class="profile-stat__label">{% trans "В истории" %}</span>
                 </div>
@@ -50,6 +54,7 @@
             <div class="tabs" data-tabs>
                 <button class="tab tab--active" data-tab="recent" type="button">{% trans "Недавнее" %}</button>
                 <button class="tab" data-tab="favorites" type="button">{% trans "Избранное" %}</button>
+                <button class="tab" data-tab="watchlist" type="button">{% trans "Смотреть позже" %}</button>
                 <button class="tab" data-tab="history" type="button">{% trans "История" %}</button>
                 <button class="tab" data-tab="settings" type="button">{% trans "Настройки" %}</button>
             </div>
@@ -97,6 +102,27 @@
                         </div>
                     {% else %}
                         <p class="review-empty">{% trans "Нет добавленных фильмов." %}</p>
+                    {% endif %}
+                </section>
+            </div>
+
+            {# Tab: Watchlist #}
+            <div class="tab-content" data-tab-content="watchlist">
+                <section class="section">
+                    <div class="section__header">
+                        <h2 class="section__title">{% trans "Смотреть позже" %}</h2>
+                        {% if watchlist_count %}
+                            <a class="section__link" href="{% url 'library:watchlist' %}">{% trans "Все" %} →</a>
+                        {% endif %}
+                    </div>
+                    {% if recent_watchlist %}
+                        <div class="title-grid">
+                            {% for item in recent_watchlist %}
+                                {% include "includes/title_card.html" with title=item.title %}
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="review-empty">{% trans "Список «Смотреть позже» пуст." %}</p>
                     {% endif %}
                 </section>
             </div>

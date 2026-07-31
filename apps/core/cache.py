@@ -70,22 +70,6 @@ def _clear_recommendations_cache():
     bump_generation(RECOMMENDATIONS_GENERATION_KEY)
 
 
-def _clear_promotion_cache():
-    """
-    Партнёрские баннеры — по ключу на каждое размещение.
-
-    Размещений всего три и они заданы в модели, поэтому ключи просто
-    перечисляем: заводить ради них счётчик поколений незачем.
-    """
-    from apps.billing.models import Promotion
-    from apps.billing.templatetags.promotions import PROMOTIONS_CACHE_KEY
-
-    cache.delete_many([
-        PROMOTIONS_CACHE_KEY.format(placement=placement)
-        for placement in Promotion.Placement.values
-    ])
-
-
 def _clear_industry_cache():
     """Студии и награды — чистим страницы списков."""
     cache.delete_many([
@@ -114,14 +98,8 @@ CACHE_INVALIDATORS: dict[str, list[callable]] = {
     "catalog.studio": [_clear_industry_cache],
     "catalog.award": [_clear_industry_cache],
     "catalog.titleaward": [_clear_home_collections_similar],
-    # Стриминг
-    "streaming.season": [_clear_home_collections_similar],
-    "streaming.episode": [_clear_home_collections_similar],
-    "streaming.videoasset": [_clear_home_collections_similar],
     # Отзывы
     "reviews.review": [_clear_all_title_caches],
-    # Партнёрские баннеры
-    "billing.promotion": [_clear_promotion_cache],
 }
 
 
@@ -129,7 +107,7 @@ def invalidate_for_model(model_label: str) -> None:
     """
     Сбрасывает все кэши, которые зависят от указанной модели.
 
-    Принимает: 'catalog.title', 'streaming.episode' и т.д. (lowercase).
+    Принимает: 'catalog.title', 'reviews.review' и т.д. (lowercase).
     Ничего не делает, если модель не зарегистрирована в CACHE_INVALIDATORS.
     """
     actions = CACHE_INVALIDATORS.get(model_label.lower())

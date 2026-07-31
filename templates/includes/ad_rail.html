@@ -1,49 +1,11 @@
-{% load i18n static %}
-<aside class="ad-rail ad-rail--left" role="complementary" aria-label="{% trans 'Реклама' %}">
+{% load i18n %}
+<aside class="ad-rail ad-rail--{{ side }}" aria-hidden="true">
     <div class="ad-rail__inner">
         <span class="ad-rail__label">{% trans "Реклама" %}</span>
-        {% if left %}
-        <a class="ad-rail__link" href="{{ left.target_url }}" target="_blank" rel="noopener noreferrer sponsored">
-            <img class="ad-rail__banner"
-                 src="{% if left.image %}{{ left.image.url }}{% else %}{% static 'img/ad-placeholder.svg' %}{% endif %}"
-                 width="160" height="600"
-                 alt="{{ left.title }}"
-                 loading="lazy">
-        </a>
-        {% else %}
-        <div class="ad-rail__placeholder" aria-hidden="true">
-            <svg class="ad-rail__placeholder-icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="2" y="2" width="20" height="20" rx="3"/>
-                <path d="M10 8l6 4-6 4V8z"/>
-            </svg>
-            <span class="ad-rail__placeholder-title">{% trans "Место для рекламы" %}</span>
+        <div class="ad-rail__placeholder">
+            <span class="ad-rail__placeholder-title">{% trans "Рекламное место" %}</span>
             <span class="ad-rail__placeholder-size">160 × 600</span>
         </div>
-        {% endif %}
-        <span class="ad-rail__disclaimer">{% trans "Реклама · 16+" %}</span>
-    </div>
-</aside>
-<aside class="ad-rail ad-rail--right" role="complementary" aria-label="{% trans 'Реклама' %}">
-    <div class="ad-rail__inner">
-        <span class="ad-rail__label">{% trans "Реклама" %}</span>
-        {% if right %}
-        <a class="ad-rail__link" href="{{ right.target_url }}" target="_blank" rel="noopener noreferrer sponsored">
-            <img class="ad-rail__banner"
-                 src="{% if right.image %}{{ right.image.url }}{% else %}{% static 'img/ad-placeholder.svg' %}{% endif %}"
-                 width="160" height="600"
-                 alt="{{ right.title }}"
-                 loading="lazy">
-        </a>
-        {% else %}
-        <div class="ad-rail__placeholder" aria-hidden="true">
-            <svg class="ad-rail__placeholder-icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="2" y="2" width="20" height="20" rx="3"/>
-                <path d="M10 8l6 4-6 4V8z"/>
-            </svg>
-            <span class="ad-rail__placeholder-title">{% trans "Место для рекламы" %}</span>
-            <span class="ad-rail__placeholder-size">160 × 600</span>
-        </div>
-        {% endif %}
-        <span class="ad-rail__disclaimer">{% trans "Реклама · 16+" %}</span>
+        <span class="ad-rail__disclaimer">{% trans "Здесь будет реклама" %}</span>
     </div>
 </aside>

@@ -7,8 +7,33 @@ from django.views.generic import ListView
 
 from apps.catalog.models import Title
 from apps.core.views import ElidedPaginationMixin
-from apps.library.models import Favorite, WatchHistory
-from apps.library.services import toggle_favorite
+from apps.library.models import Favorite, WatchHistory, Watchlist
+from apps.library.services import toggle_favorite, toggle_watchlist
+
+
+def safe_next_url(request, title):
+    """
+    Куда вернуть пользователя после переключения.
+
+    Принимает: запрос и запись каталога.
+    Возвращает: безопасный адрес в пределах сайта.
+
+    Значение next приходит из формы, то есть от клиента, и без проверки
+    уводило бы на любой чужой домен. Сейчас это не эксплуатируется —
+    подделать POST мешает CSRF, — но проверка стоит трёх строк и убирает
+    целый класс ошибок: снимут CSRF или добавят вход по токену, и дыра
+    оживёт. Ровно так же поступает LoginView самого Django.
+    """
+    next_url = request.POST.get("next")
+
+    if next_url and url_has_allowed_host_and_scheme(
+        url=next_url,
+        allowed_hosts={request.get_host()},
+        require_https=request.is_secure(),
+    ):
+        return next_url
+
+    return title.get_absolute_url()
 
 
 class ToggleFavoriteView(LoginRequiredMixin, View):
@@ -30,31 +55,23 @@ class ToggleFavoriteView(LoginRequiredMixin, View):
         if request.headers.get("X-Requested-With") == "XMLHttpRequest":
             return JsonResponse({"is_favorite": is_favorite})
 
-        return redirect(self.get_redirect_url(request, title))
+        return redirect(safe_next_url(request, title))
 
-    def get_redirect_url(self, request, title):
-        """
-        Куда вернуть пользователя после переключения.
 
-        Принимает: запрос и запись каталога.
-        Возвращает: безопасный адрес в пределах сайта.
+class ToggleWatchlistView(LoginRequiredMixin, View):
+    """
+    Переключает «Смотреть позже». Зеркало ToggleFavoriteView:
+    те же гарантии POST-только, JSON для скрипта, редирект без него.
+    """
 
-        Значение next приходит из формы, то есть от клиента, и без проверки
-        уводило бы на любой чужой домен. Сейчас это не эксплуатируется —
-        подделать POST мешает CSRF, — но проверка стоит трёх строк и убирает
-        целый класс ошибок: снимут CSRF или добавят вход по токену, и дыра
-        оживёт. Ровно так же поступает LoginView самого Django.
-        """
-        next_url = request.POST.get("next")
+    def post(self, request, slug):
+        title = get_object_or_404(Title.objects.published(), slug=slug)
+        is_watchlist = toggle_watchlist(request.user, title)
 
-        if next_url and url_has_allowed_host_and_scheme(
-            url=next_url,
-            allowed_hosts={request.get_host()},
-            require_https=request.is_secure(),
-        ):
-            return next_url
+        if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+            return JsonResponse({"is_watchlist": is_watchlist})
 
-        return title.get_absolute_url()
+        return redirect(safe_next_url(request, title))
 
 
 class FavoriteListView(LoginRequiredMixin, ElidedPaginationMixin, ListView):
@@ -70,6 +87,23 @@ class FavoriteListView(LoginRequiredMixin, ElidedPaginationMixin, ListView):
         # ссылкой, ведущей на 404. Пользователь видит «битый» фильм.
         return (
             Favorite.objects.for_user(self.request.user)
+            .filter(title__status=Title.Status.PUBLISHED)
+            .with_title()
+        )
+
+
+class WatchlistListView(LoginRequiredMixin, ElidedPaginationMixin, ListView):
+    """Список «Смотреть позже» пользователя."""
+
+    template_name = "library/watchlist_list.html"
+    context_object_name = "watchlist"
+    paginate_by = 24
+
+    def get_queryset(self):
+        # Та же причина, что и в избранном: снятый с публикации фильм
+        # не должен маячить ссылкой на 404.
+        return (
+            Watchlist.objects.for_user(self.request.user)
             .filter(title__status=Title.Status.PUBLISHED)
             .with_title()
         )

@@ -86,18 +86,13 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: var(--space-3);
+    gap: var(--space-2);
     width: 160px;
     height: 600px;
     border: 1px dashed var(--color-border);
     border-radius: var(--radius-md);
     background: var(--color-surface);
     cursor: default;
-}
-
-.ad-rail__placeholder-icon {
-    color: var(--color-text-dim);
-    opacity: 0.4;
 }
 
 .ad-rail__placeholder-title {

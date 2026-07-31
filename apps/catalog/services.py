@@ -268,6 +268,7 @@ def clear_home_cache():
 def get_home_statistics():
     """Счётчики для главной: фильмы, сериалы, пользователи, отзывы."""
     from django.contrib.auth import get_user_model
+
     from apps.reviews.models import Review
 
     cached = cache.get(HOME_STATS_CACHE_KEY)
@@ -288,8 +289,10 @@ HOME_STATS_CACHE_KEY = "home:statistics:v1"
 
 def get_trending_titles():
     """Популярное за неделю (по просмотрам)."""
-    from django.utils import timezone
     from datetime import timedelta
+
+    from django.utils import timezone
+
     from apps.library.models import WatchHistory
 
     cached = cache.get(HOME_TRENDING_CACHE_KEY)

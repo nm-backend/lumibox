@@ -7,6 +7,8 @@ app_name = "library"
 urlpatterns = [
     path("favorites/", views.FavoriteListView.as_view(), name="favorites"),
     path("favorites/toggle/<slug:slug>/", views.ToggleFavoriteView.as_view(), name="toggle_favorite"),
+    path("watchlist/", views.WatchlistListView.as_view(), name="watchlist"),
+    path("watchlist/toggle/<slug:slug>/", views.ToggleWatchlistView.as_view(), name="toggle_watchlist"),
     path("history/", views.WatchHistoryListView.as_view(), name="history"),
     path("history/clear/", views.ClearHistoryView.as_view(), name="clear_history"),
 ]

@@ -31,14 +31,6 @@ class CacheInvalidatorsRegistrationTests(TestCase):
         """Genre должен быть зарегистрирован."""
         self.assertIn("catalog.genre", CACHE_INVALIDATORS)
 
-    def test_has_invalidator_for_promotion(self):
-        """Promotion должен быть зарегистрирован."""
-        self.assertIn("billing.promotion", CACHE_INVALIDATORS)
-
-    def test_has_invalidator_for_video_asset(self):
-        """VideoAsset должен быть зарегистрирован."""
-        self.assertIn("streaming.videoasset", CACHE_INVALIDATORS)
-
 
 class InvalidateForModelTests(TestCase):
     """Проверки вызова действий инвалидации."""
@@ -89,7 +81,7 @@ class InvalidateAllTests(TestCase):
             self.fail(f"invalidate_all raised {e}")
 
     def test_register_all_major_models(self):
-        """Проверка, что ключевые модели каталога и стриминга зарегистрированы."""
+        """Проверка, что ключевые модели каталога зарегистрированы."""
         expected_models = {
             "catalog.title",
             "catalog.collection",
@@ -102,11 +94,7 @@ class InvalidateAllTests(TestCase):
             "catalog.studio",
             "catalog.award",
             "catalog.titleaward",
-            "streaming.season",
-            "streaming.episode",
-            "streaming.videoasset",
             "reviews.review",
-            "billing.promotion",
         }
         for model in expected_models:
             self.assertIn(model, CACHE_INVALIDATORS, f"Missing invalidator for {model}")

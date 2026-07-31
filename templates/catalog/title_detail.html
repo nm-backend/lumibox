@@ -131,6 +131,45 @@ function getCookie(name) {
             }
         });
     }
+
+    /* ---------- Модальный плеер трейлера ---------- */
+    var modal = document.querySelector('[data-trailer-modal]');
+    var openBtn = document.querySelector('[data-trailer-open]');
+    if (modal && openBtn) {
+        var modalVideo = modal.querySelector('[data-trailer-video]');
+        var modalFrame = modal.querySelector('[data-trailer-iframe]');
+        var lastFocus = null;
+
+        function openModal() {
+            lastFocus = document.activeElement;
+            modal.hidden = false;
+            document.body.style.overflow = 'hidden';
+            if (modalVideo) modalVideo.play().catch(function() {});
+            if (modalFrame && !modalFrame.getAttribute('src')) modalFrame.src = modalFrame.dataset.src;
+            var close = modal.querySelector('[data-trailer-close]');
+            if (close) close.focus();
+        }
+
+        function closeModal() {
+            if (modal.hidden) return;
+            modal.hidden = true;
+            document.body.style.overflow = '';
+            if (modalVideo) {
+                modalVideo.pause();
+                modalVideo.currentTime = 0;
+            }
+            if (modalFrame) modalFrame.src = '';
+            if (lastFocus) lastFocus.focus();
+        }
+
+        openBtn.addEventListener('click', openModal);
+        modal.querySelectorAll('[data-trailer-close]').forEach(function (el) {
+            el.addEventListener('click', closeModal);
+        });
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && !modal.hidden) closeModal();
+        });
+    }
 </script>
 {% endblock %}
 
@@ -226,17 +265,11 @@ function getCookie(name) {
             {% endif %}
 
             <div class="film-hero__actions">
-                {% if watch_url %}
-                    <a class="button button--primary button--large" href="{{ watch_url }}">
-                        {% icon "play" size=14 %}
-                        {% trans "Смотреть" %}
-                    </a>
-                {% endif %}
                 {% if title.trailer_source %}
-                    <a class="button {% if watch_url %}button--ghost{% else %}button--primary{% endif %}" href="#trailer">
+                    <button class="button button--primary button--large" type="button" data-trailer-open>
                         {% icon "play" size=14 %}
-                        {% trans "Трейлер" %}
-                    </a>
+                        {% trans "Смотреть трейлер" %}
+                    </button>
                 {% endif %}
 
                 {% if user.is_authenticated %}
@@ -244,12 +277,25 @@ function getCookie(name) {
                         {% csrf_token %}
                         <input type="hidden" name="next" value="{{ request.path }}">
                         <button class="button button--ghost {% if is_favorite %}button--active{% endif %}" type="submit" data-favorite-button>
-                            {% if is_favorite %}{% icon "heart-filled" size=16 %} {% trans "В избранном" %}{% else %}{% icon "heart" size=16 %} {% trans "В избранное" %}{% endif %}
+                            {% if is_favorite %}{% icon "heart-filled" size=16 %}{% else %}{% icon "heart" size=16 %}{% endif %}
+                            <span data-button-label>{% if is_favorite %}{% trans "В избранном" %}{% else %}{% trans "В избранное" %}{% endif %}</span>
+                        </button>
+                    </form>
+
+                    <form method="post" action="{% url 'library:toggle_watchlist' title.slug %}" data-watchlist-form>
+                        {% csrf_token %}
+                        <input type="hidden" name="next" value="{{ request.path }}">
+                        <button class="button button--ghost {% if is_watchlist %}button--active{% endif %}" type="submit" data-watchlist-button>
+                            {% icon "bookmark" size=16 %}
+                            <span data-button-label>{% if is_watchlist %}{% trans "В списке" %}{% else %}{% trans "Смотреть позже" %}{% endif %}</span>
                         </button>
                     </form>
                 {% else %}
                     <a class="button button--ghost" href="{% url 'users:login' %}?next={{ request.path }}">
                         {% icon "heart" size=16 %} {% trans "В избранное" %}
+                    </a>
+                    <a class="button button--ghost" href="{% url 'users:login' %}?next={{ request.path }}">
+                        {% icon "bookmark" size=16 %} {% trans "Смотреть позже" %}
                     </a>
                 {% endif %}
 
@@ -302,9 +348,6 @@ function getCookie(name) {
             {# Tabs #}
             <div class="tabs" data-tabs>
                 <button class="tab tab--active" data-tab="about" type="button">{% trans "О проекте" %}</button>
-                {% if title.seasons.exists %}
-                    <button class="tab" data-tab="seasons" type="button">{% trans "Сезоны" %}</button>
-                {% endif %}
                 {% if crew_by_role %}
                     <button class="tab" data-tab="crew" type="button">{% trans "Создатели" %}</button>
                 {% endif %}
@@ -386,41 +429,6 @@ function getCookie(name) {
                     </dl>
                 </section>
             </div>
-
-            {# Tab: Seasons #}
-            {% if title.seasons.exists %}
-                <div class="tab-content" data-tab-content="seasons">
-                    <section class="section">
-                        <h2 class="section__title">{% trans "Сезоны" %}</h2>
-                        {% for season in title.seasons.all %}
-                            <div class="season-group">
-                                <h3 class="season__title">{{ season.display_name }}</h3>
-                                {% if season.description %}
-                                    <p class="season__description">{{ season.description }}</p>
-                                {% endif %}
-                                {% if season.episodes.exists %}
-                                    <div class="episode-list">
-                                        {% for episode in season.episodes.all %}
-                                            <a class="episode" href="{% if episode.video_asset.status == 'ready' %}{{ episode.get_absolute_url }}{% else %}#{% endif %}">
-                                                <span class="episode__number">{{ episode.number }}</span>
-                                                <span class="episode__body">
-                                                    <span class="episode__name">{{ episode.name }}</span>
-                                                    {% if episode.duration_seconds %}
-                                                        <span class="episode__duration">{% blocktranslate with sec=episode.duration_seconds|floatformat:0 %}{{ sec }} мин{% endblocktranslate %}</span>
-                                                    {% endif %}
-                                                </span>
-                                                {% if episode.video_asset.status == 'ready' %}
-                                                    <span class="episode__play">{% icon "play" size=14 %}</span>
-                                                {% endif %}
-                                            </a>
-                                        {% endfor %}
-                                    </div>
-                                {% endif %}
-                            </div>
-                        {% endfor %}
-                    </section>
-                </div>
-            {% endif %}
 
             {# Tab: Crew #}
             {% if crew_by_role %}
@@ -524,4 +532,30 @@ function getCookie(name) {
         </section>
     </aside>
 </div>
+
+{% if title.trailer_source %}
+    {# Модальный плеер трейлера — быстрый просмотр без ухода со страницы #}
+    <div class="trailer-modal" data-trailer-modal hidden>
+        <div class="trailer-modal__backdrop" data-trailer-close></div>
+        <div class="trailer-modal__dialog" role="dialog" aria-modal="true" aria-label="{% trans 'Трейлер' %}">
+            <button class="trailer-modal__close" type="button" data-trailer-close aria-label="{% trans 'Закрыть' %}">{% icon "close" size=22 %}</button>
+            <div class="trailer-modal__player">
+                {% if title.trailer_source == "file" %}
+                    <video class="trailer-modal__video" controls preload="none" data-trailer-video>
+                        <source src="{{ title.trailer_file.url }}">
+                    </video>
+                {% else %}
+                    <iframe class="trailer-modal__iframe"
+                            data-trailer-iframe
+                            src=""
+                            data-src="{{ title.trailer_embed_url }}"
+                            title="{% blocktranslate with name=title.name %}Трейлер: {{ name }}{% endblocktranslate %}"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; picture-in-picture"
+                            allowfullscreen></iframe>
+                {% endif %}
+            </div>
+            <p class="trailer-modal__caption">{{ title.name }} — {% trans "трейлер" %}</p>
+        </div>
+    </div>
+{% endif %}
 {% endblock %}

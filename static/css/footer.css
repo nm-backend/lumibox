@@ -113,31 +113,48 @@
     font-weight: 600;
 }
 
-/* ---------- Social row ---------- */
+/* ---------- Credits (Разработка / Руководитель проекта) ---------- */
 
-.footer-social {
+.footer-credits {
     display: flex;
-    gap: var(--space-2);
-    margin: var(--space-3) 0 var(--space-2);
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-4);
+    align-items: center;
+    margin: var(--space-3) 0;
+    padding: var(--space-3) 0;
+    border-top: 1px solid var(--color-border);
 }
 
-.footer-social__link {
+.footer-credits__item {
     display: inline-flex;
     align-items: center;
-    justify-content: center;
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    color: var(--color-text-muted);
-    background: var(--color-surface);
-    border: 1px solid var(--color-border);
-    transition: color var(--transition-fast), background-color var(--transition-fast), border-color var(--transition-fast);
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    color: var(--color-text-dim);
+    font-size: 12px;
 }
 
-.footer-social__link:hover {
+.footer-credits__label {
+    color: var(--color-text-muted);
+    font-weight: 600;
+}
+
+.footer-credits__link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    color: var(--color-text);
+    text-decoration: none;
+    transition: color var(--transition-fast);
+}
+
+.footer-credits__link:hover {
     color: var(--color-accent);
-    border-color: var(--color-accent);
-    background: color-mix(in srgb, var(--color-accent) 8%, transparent);
+}
+
+.footer-credits__sep {
+    color: var(--color-text-dim);
+    font-size: 12px;
 }
 
 .footer-bottom {
@@ -197,29 +214,16 @@
     flex-shrink: 0;
 }
 
-.footer-bottom__link-item {
-    color: var(--color-text-muted);
-    font-size: 12px;
-    text-decoration: none;
-    transition: color var(--transition-fast);
-}
+@media (max-width: 560px) {
+    .footer-credits {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--space-2);
+    }
 
-.footer-bottom__link-item:hover {
-    color: var(--color-accent);
-    text-decoration: underline;
-}
-
-.footer-bottom__author-link {
-    color: var(--color-accent);
-    font-weight: 600;
-    font-size: 12px;
-    text-decoration: none;
-    transition: color var(--transition-fast), opacity var(--transition-fast);
-}
-
-.footer-bottom__author-link:hover {
-    color: var(--color-accent-hover);
-    text-decoration: underline;
+    .footer-credits__sep {
+        display: none;
+    }
 }
 
 /* ---------- Планшет и телефон ---------- */

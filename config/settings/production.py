@@ -78,28 +78,12 @@ if _USE_R2:
                 "default_acl": "public-read",
             },
         },
-        "private": {
-            "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
-            "OPTIONS": {
-                **_R2_OPTIONS,
-                # Видео и субтитры. Приватный ACL — единственное, что мешает
-                # скачать фильм по прямой ссылке в обход проверки прав.
-                "default_acl": "private",
-                # Публичный домен намеренно не подставляем: адрес объекта
-                # наружу не отдаётся вовсе. Плеер получает ссылку на маршрут
-                # streaming:asset_file, а тот читает файл через это хранилище
-                # уже после require_playback_access.
-                "custom_domain": None,
-            },
-        },
         "staticfiles": _STATICFILES_STORAGE,
     }
 else:
-    # R2 не настроен — локальный диск. Приватные файлы лежат под
-    # media/private_media/, куда serve_public_media не пускает.
+    # R2 не настроен — локальный диск.
     STORAGES = {
         "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
-        "private": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
         "staticfiles": _STATICFILES_STORAGE,
     }
 
@@ -161,13 +145,6 @@ if _SENTRY_DSN:
         send_default_pii=False,
         environment="production",
     )
-
-
-# Stripe — платежи. Ключи задаются переменными окружения.
-# Если не заданы — StripeProvider работает в offline-режиме,
-# не создавая настоящих сессий.
-STRIPE_SECRET_KEY = env("STRIPE_SECRET_KEY", default="")  # noqa: F405
-STRIPE_WEBHOOK_SECRET = env("STRIPE_WEBHOOK_SECRET", default="")  # noqa: F405
 
 
 MIDDLEWARE += [  # noqa: F405

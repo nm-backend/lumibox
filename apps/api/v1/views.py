@@ -26,7 +26,7 @@ from apps.api.v1.serializers import (
 )
 from apps.catalog.models import Collection, Country, Genre, Person, Title
 from apps.catalog.services import get_similar_titles
-from apps.library.services import toggle_favorite
+from apps.library.services import toggle_favorite, toggle_watchlist
 from apps.reviews.models import Review
 
 
@@ -45,6 +45,12 @@ class StableOrderingFilter(filters.OrderingFilter):
         if ordering and "pk" not in ordering and "-pk" not in ordering:
             return [*ordering, "pk"]
         return ordering
+
+
+class RateRequestSerializer(serializers.Serializer):
+    """Оценка фильма или сериала от 1 до 10."""
+
+    rating = serializers.IntegerField(min_value=1, max_value=10)
 
 
 class SearchResultSerializer(serializers.Serializer):
@@ -72,6 +78,16 @@ class FavoriteResponseSerializer(serializers.Serializer):
 
     is_favorite = serializers.BooleanField(
         help_text="True — запись теперь в избранном, False — убрана из него",
+    )
+
+
+class WatchlistResponseSerializer(serializers.Serializer):
+    """
+    Ответ переключателя «Смотреть позже». Тоже только ради схемы.
+    """
+
+    is_watchlist = serializers.BooleanField(
+        help_text="True — запись теперь в списке, False — убрана из него",
     )
 
 
@@ -250,6 +266,37 @@ class TitleViewSet(viewsets.ReadOnlyModelViewSet):
         is_favorite = toggle_favorite(request.user, self.get_object())
         return Response({"is_favorite": is_favorite})
 
+    @extend_schema(
+        summary="Добавить в «Смотреть позже» или убрать из него",
+        description=(
+            "Переключатель: повторный вызов убирает запись из списка. "
+            "Тело запроса не нужно. Требует авторизации."
+        ),
+        request=None,
+        responses={
+            200: OpenApiResponse(
+                response=WatchlistResponseSerializer,
+                description="Новое состояние записи",
+                examples=[
+                    OpenApiExample("Добавлено", value={"is_watchlist": True}),
+                    OpenApiExample("Убрано", value={"is_watchlist": False}),
+                ],
+            ),
+            403: OpenApiResponse(description="Требуется вход"),
+            404: OpenApiResponse(description="Записи нет или она в черновиках"),
+        },
+        tags=["titles"],
+    )
+    @action(
+        detail=True,
+        methods=["post"],
+        permission_classes=[permissions.IsAuthenticated],
+    )
+    def watchlist(self, request, slug=None):
+        # Тот же сервис, что и у переключателя на сайте.
+        is_watchlist = toggle_watchlist(request.user, self.get_object())
+        return Response({"is_watchlist": is_watchlist})
+
 
 class ReferenceViewSet(viewsets.ReadOnlyModelViewSet):
     """Общая основа для справочников — жанров и стран."""
@@ -392,7 +439,7 @@ class ReviewViewSet(
 @extend_schema(
     summary="Поставить оценку",
     description="Быстрая оценка без текста отзыва (1–10). Если оценка уже есть — обновляет.",
-    request=serializers.Serializer,
+    request=RateRequestSerializer,
     responses={200: OpenApiResponse(description="Оценка сохранена")},
     tags=["titles"],
 )

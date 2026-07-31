@@ -10,7 +10,7 @@ from apps.core.test_factories import (
     create_title,
     create_user,
 )
-from apps.library.models import Favorite
+from apps.library.models import Favorite, Watchlist
 from apps.reviews.models import Review
 
 
@@ -87,6 +87,24 @@ class FavoriteApiTests(TestCase):
 
         self.assertEqual(self.client.post(self.url).json(), {"is_favorite": True})
         self.assertEqual(self.client.post(self.url).json(), {"is_favorite": False})
+
+
+class WatchlistApiTests(TestCase):
+    def setUp(self):
+        self.user = create_user()
+        self.title = create_title()
+        self.url = reverse("api:v1:title-watchlist", args=[self.title.slug])
+
+    def test_guest_cannot_toggle(self):
+        response = self.client.post(self.url)
+        self.assertIn(response.status_code, (401, 403))
+        self.assertEqual(Watchlist.objects.count(), 0)
+
+    def test_user_toggles_on_and_off(self):
+        self.client.force_login(self.user)
+
+        self.assertEqual(self.client.post(self.url).json(), {"is_watchlist": True})
+        self.assertEqual(self.client.post(self.url).json(), {"is_watchlist": False})
 
 
 class ReviewApiTests(TestCase):
