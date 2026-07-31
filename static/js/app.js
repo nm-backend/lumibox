@@ -1,4 +1,4 @@
-/* Main LumiBox application JS */
+﻿/* Main LumiBox application JS */
 
 (function () {
     'use strict';
@@ -166,6 +166,9 @@
                 track.scrollBy({ left: scrollAmount(), behavior: 'smooth' });
                 updateButtons();
             });
+        }
+        if ('onscrollend' in window) {
+            track.addEventListener('scrollend', updateButtons);
         }
         updateButtons();
     });
@@ -422,7 +425,7 @@
         const docHeight = document.documentElement.scrollHeight - window.innerHeight;
 
         // Scroll progress bar
-        scrollBar.style.width = (docHeight > 0 ? (y / docHeight) * 100 : 0) + '%';
+        scrollBar.style.transform = 'scaleX(' + (docHeight > 0 ? (y / docHeight) : 0) + ')';
 
         // Header shadow
         if (header) {
@@ -443,7 +446,7 @@
     }, { passive: true });
 
     /* -----------------------------------------------
-       14. Touch swipe for carousels
+       12. Touch swipe for carousels
     ----------------------------------------------- */
     document.querySelectorAll('.carousel__track').forEach(function (track) {
         let startX = 0;
@@ -468,7 +471,7 @@
     });
 
     /* -----------------------------------------------
-       15. Keyboard shortcuts (global)
+       13. Keyboard shortcuts (global)
     ----------------------------------------------- */
     document.addEventListener('keydown', function (e) {
         if (e.target.matches('input, select, textarea, [contenteditable]')) return;
@@ -481,7 +484,7 @@
     });
 
     /* -----------------------------------------------
-       16. Card placeholder deterministic gradients
+       14. Card placeholder deterministic gradients
     ----------------------------------------------- */
     document.querySelectorAll('.card__placeholder').forEach(function(el) {
         var card = el.closest('.card');
@@ -508,7 +511,7 @@
     });
 
     /* -----------------------------------------------
-       17. Bottom-nav active link
+       15. Bottom-nav active link
     ----------------------------------------------- */
     {
         const nav = document.querySelector('.bottom-nav');

@@ -94,7 +94,6 @@
     transition: background var(--transition-fast), border-color var(--transition-fast), opacity var(--transition-fast);
     opacity: 0;
     box-shadow: var(--shadow-glass);
-    will-change: opacity;
 }
 
 .carousel:hover .carousel__btn {
@@ -350,7 +349,7 @@
     font-size: var(--text-sm);
 }
 
-/* ---------- Scroll Reveal ---------- */
+/* ---------- Lightbox ---------- */
 
 @keyframes fadeUp {
     from {
@@ -362,16 +361,6 @@
         transform: translateY(0);
     }
 }
-
-.reveal {
-    opacity: 0;
-}
-
-.reveal--visible {
-    animation: fadeUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-}
-
-/* ---------- Lightbox ---------- */
 
 .lightbox {
     position: fixed;
@@ -518,8 +507,7 @@
     justify-content: space-around;
     padding: var(--space-2) 0;
     padding-bottom: max(var(--space-2), env(safe-area-inset-bottom));
-    background: var(--glass-bg);
-    backdrop-filter: blur(var(--glass-blur));
+    background: rgba(11, 13, 18, 0.97);
     border-top: 1px solid var(--glass-border);
     animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -1847,13 +1835,6 @@
     flex-shrink: 0;
 }
 
-@media (prefers-reduced-motion: reduce) {
-    .icon {
-        opacity: 1;
-        animation: none;
-    }
-}
-
 .icon--sm {
     width: 13px;
     height: 13px;
@@ -1873,29 +1854,14 @@
 }
 
 .scroll-progress__bar {
+    width: 100%;
     height: 100%;
-    width: 0%;
+    transform: scaleX(0);
+    transform-origin: left;
     background: linear-gradient(90deg, var(--color-accent), var(--color-play));
     border-radius: 0 2px 2px 0;
-    transition: width 50ms linear;
+    transition: transform 50ms linear;
     box-shadow: 0 0 8px var(--color-accent-glow);
-}
-
-/* ---------- Page transition overlay ---------- */
-
-@keyframes pageFadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(8px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.page-enter {
-    animation: pageFadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) both;
 }
 
 /* ---------- Loading skeleton for sections ---------- */

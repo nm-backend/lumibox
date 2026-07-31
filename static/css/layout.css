@@ -14,10 +14,9 @@
     top: 0;
     z-index: 10;
 
-    background-color: rgba(11, 13, 18, 0.9);
-    backdrop-filter: blur(16px);
+    background-color: rgba(11, 13, 18, 0.97);
     border-bottom: 1px solid var(--color-border);
-    transition: background-color var(--transition), backdrop-filter var(--transition),
+    transition: background-color var(--transition),
                 box-shadow var(--transition), border-bottom-color var(--transition);
 }
 

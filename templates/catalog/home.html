@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+﻿{% extends "base.html" %}
 {% load static i18n promotions icons %}
 
 {% block page_title %}{% trans "LumiBox — каталог фильмов и сериалов" %}{% endblock %}
@@ -127,7 +127,7 @@
     {% ad_block %}
 
     {% if continue_watching %}
-        <section class="section reveal">
+        <section class="section">
             <div class="section__header">
                 <h2 class="section__title">{% trans "Продолжить просмотр" %}</h2>
                 <a class="section__link" href="{% url 'library:history' %}">{% trans "История" %} →</a>
@@ -176,7 +176,7 @@
     {% endif %}
 
     {% if collections %}
-        <section class="section reveal">
+        <section class="section">
             <div class="section__header">
                 <h2 class="section__title">{% trans "Подборки" %}</h2>
                 <a class="section__link" href="{% url 'catalog:collection_list' %}">{% trans "Все" %} →</a>
@@ -204,7 +204,7 @@
     {% include "includes/title_section.html" with section_title=_("Сериалы") section_titles=series section_url=series_url section_class="section--compact" %}
 
     {% if genres %}
-        <section class="section reveal">
+        <section class="section">
             <div class="section__header">
                 <h2 class="section__title">{% trans "Жанры" %}</h2>
                 <a class="section__link" href="{% url 'catalog:genre_list' %}">{% trans "Все" %} →</a>
@@ -218,7 +218,7 @@
     {% endif %}
 
     {# ---------- Value proposition ---------- #}
-    <section class="value-section section reveal" aria-labelledby="value-heading">
+    <section class="value-section section" aria-labelledby="value-heading">
         <h2 id="value-heading" class="value-section__heading">{% trans "Смотреть кино — просто" %}</h2>
         <p class="value-section__sub">{% trans "Тысячи фильмов и сериалов. Без подписок." %}</p>
         <div class="value-grid">

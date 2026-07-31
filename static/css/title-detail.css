@@ -22,7 +22,6 @@
     opacity: 0.32;
     transform: translateY(-5%);
     transition: transform 8s cubic-bezier(0.4, 0, 0.2, 1);
-    will-change: transform;
 }
 
 .film-hero:hover .film-hero__backdrop {
