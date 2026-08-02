@@ -95,9 +95,9 @@
                         {% endif %}
                     </div>
                     {% if recent_favorites %}
-                        <div class="title-grid">
+                        <div class="kg-main" id="dle-content">
                             {% for favorite in recent_favorites %}
-                                {% include "includes/title_card.html" with title=favorite.title %}
+                                {% include "includes/story_card.html" with title=favorite.title %}
                             {% endfor %}
                         </div>
                     {% else %}
@@ -116,9 +116,9 @@
                         {% endif %}
                     </div>
                     {% if recent_watchlist %}
-                        <div class="title-grid">
+                        <div class="kg-main" id="dle-content">
                             {% for item in recent_watchlist %}
-                                {% include "includes/title_card.html" with title=item.title %}
+                                {% include "includes/story_card.html" with title=item.title %}
                             {% endfor %}
                         </div>
                     {% else %}

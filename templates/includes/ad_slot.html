@@ -1,0 +1,16 @@
+{% load i18n %}
+{% comment %}
+   Горизонтальное рекламное место между секциями (как баннеры в ленте Kinogo).
+   Сейчас это красивая заглушка: размеры и вёрстка финальные, реальный баннер
+   подключается без изменения разметки — достаточно заменить содержимое
+   .ad-slot__inner или вставить код баннера в слот.
+{% endcomment %}
+<aside class="ad-slot" aria-label="{% trans 'Реклама' %}">
+    <div class="ad-slot__inner">
+        <span class="ad-slot__label">{% trans "Реклама" %}</span>
+        <div class="ad-slot__placeholder">
+            <span class="ad-slot__placeholder-title">{% trans "Рекламное место" %}</span>
+            <span class="ad-slot__placeholder-size">970 × 250</span>
+        </div>
+    </div>
+</aside>

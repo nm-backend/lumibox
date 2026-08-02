@@ -1,198 +1,310 @@
 ﻿{% extends "base.html" %}
-{% load static i18n icons %}
+{% load static i18n catalog_filters %}
 
-{% block page_title %}{% trans "LumiBox — каталог фильмов и сериалов" %}{% endblock %}
+{% block body_class %}kg-body{% endblock %}
 
-{% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/home.css' %}">
-    <link rel="stylesheet" href="{% static 'css/collections.css' %}">
-{% endblock %}
-
-{% block hero %}
-    {% if hero_titles %}
-        <section class="showcase" data-hero-rotation>
-            {% for hero in hero_titles %}
-                <div class="showcase__slide {% if forloop.first %}showcase__slide--active{% endif %}" data-hero-slide>
-                    {% if hero.backdrop %}
-                        <img class="showcase__backdrop" src="{{ hero.backdrop.url }}" alt="" aria-hidden="true" loading="{% if forloop.first %}eager{% else %}lazy{% endif %}" {% if forloop.first %}fetchpriority="high"{% endif %}>
-                    {% endif %}
-                    <div class="showcase__scrim" aria-hidden="true"></div>
-                    <div class="showcase__grain" aria-hidden="true"></div>
-
-                    {% if hero.trailer_file %}
-                        <video class="showcase__trailer" src="{{ hero.trailer_file.url }}" muted loop playsinline data-hero-video aria-hidden="true"></video>
-                    {% endif %}
-
-                    <div class="container showcase__inner">
-                        {% if hero.logo %}
-                            <h1 class="showcase__logo-title">
-                                <img class="showcase__logo" src="{{ hero.logo.url }}" alt="{{ hero.name }}">
-                            </h1>
-                        {% else %}
-                            <p class="showcase__label">{% trans "Свежее в каталоге" %}</p>
-                            <h1 class="showcase__name">{{ hero.name }}</h1>
-                        {% endif %}
-
-                        <div class="showcase__meta">
-                            {% if hero.rating_average %}
-                                <span class="score">
-                                    <span class="score__value">{{ hero.rating_average }}</span>
-                                    <span class="score__max">/10</span>
-                                </span>
-                            {% endif %}
-                            <span>{{ hero.get_type_display }}</span>
-                            <span class="showcase__dot" aria-hidden="true">·</span>
-                            <span>{{ hero.release_year }}</span>
-                            {% for genre in hero.genres.all|slice:":3" %}
-                                <span class="showcase__dot" aria-hidden="true">·</span>
-                                <span>{{ genre.name }}</span>
-                            {% endfor %}
-                            {% if hero.age_rating %}
-                                <span class="film-hero__age">{{ hero.age_rating }}</span>
-                            {% endif %}
-                        </div>
-
-                        {% if hero.description %}
-                            <p class="showcase__description">{{ hero.description|truncatewords:40 }}</p>
-                        {% endif %}
-
-                        <div class="showcase__actions">
-                            <a class="button button--primary" href="{{ hero.get_absolute_url }}">
-                                {% icon "play" size=14 %}
-                                {% trans "Подробнее" %}
-                            </a>
-                            {% if hero.trailer_source %}
-                                <a class="button button--ghost" href="{{ hero.get_absolute_url }}#trailer">
-                                    {% icon "play" size=14 %}
-                                    {% trans "Трейлер" %}
-                                </a>
-                            {% endif %}
-                            <a class="button button--ghost" href="{% url 'catalog:title_list' %}">{% trans "Весь каталог" %}</a>
-                        </div>
-                    </div>
-
-                    {% if hero.rating_average %}
-                        <div class="showcase__badge" aria-hidden="true">
-                            <span class="showcase__badge-value">{{ hero.rating_average }}</span>
-                            <span class="showcase__badge-label">{% trans "Рейтинг" %}</span>
-                        </div>
-                    {% endif %}
-                </div>
-            {% endfor %}
-
-            {% if hero_titles|length > 1 %}
-                <div class="showcase__dots" aria-label="{% trans 'Навигация по баннерам' %}">
-                    {% for hero in hero_titles %}
-                        <button class="showcase__dot-btn {% if forloop.first %}showcase__dot-btn--active{% endif %}"
-                                type="button"
-                                data-hero-dot
-                                aria-label="{% blocktranslate with name=hero.name %}Показать: {{ name }}{% endblocktranslate %}"></button>
-                    {% endfor %}
-                </div>
-            {% endif %}
-        </section>
-    {% endif %}
-{% endblock %}
+{% block page_title %}{% trans "LumiBox — смотреть фильмы и сериалы онлайн" %}{% endblock %}
 
 {% block content %}
-    <div class="layout-sidebar">
-        <div class="layout-sidebar__main">
-    {# ---------- Activity ticker with real stats ---------- #}
-    <div class="activity-ticker" aria-hidden="true">
-        <div class="activity-ticker__track">
-            <span class="activity-ticker__item">{{ statistics.movies_count }} фильмов в каталоге</span>
-            <span class="activity-ticker__sep" aria-hidden="true">✦</span>
-            <span class="activity-ticker__item">{{ statistics.series_count }} сериалов</span>
-            <span class="activity-ticker__sep" aria-hidden="true">✦</span>
-            <span class="activity-ticker__item">{{ statistics.users_count|default:"Тысячи" }} пользователей</span>
-            <span class="activity-ticker__sep" aria-hidden="true">✦</span>
-            <span class="activity-ticker__item">HD качество без подписок</span>
-            <span class="activity-ticker__sep" aria-hidden="true">✦</span>
-            <span class="activity-ticker__item">Удобный поиск и фильтры</span>
-            <span class="activity-ticker__sep" aria-hidden="true">✦</span>
-            <span class="activity-ticker__item">{{ statistics.movies_count }} фильмов в каталоге</span>
-            <span class="activity-ticker__sep" aria-hidden="true">✦</span>
-            <span class="activity-ticker__item">{{ statistics.series_count }} сериалов</span>
-            <span class="activity-ticker__sep" aria-hidden="true">✦</span>
-            <span class="activity-ticker__item">{{ statistics.users_count|default:"Тысячи" }} пользователей</span>
-            <span class="activity-ticker__sep" aria-hidden="true">✦</span>
-            <span class="activity-ticker__item">HD качество без подписок</span>
-            <span class="activity-ticker__sep" aria-hidden="true">✦</span>
-            <span class="activity-ticker__item">Удобный поиск и фильтры</span>
-        </div>
-    </div>
+<div class="kg-home">
+    <div class="kg-wrap">
 
-    {% if trending|length >= 4 %}
-        {% include "includes/title_section.html" with section_title=_("Популярное за неделю") section_titles=trending section_url=request.path section_class="section--trending" %}
-    {% endif %}
-
-    {% if collections %}
-        <section class="section">
-            <div class="section__header">
-                <h2 class="section__title">{% trans "Подборки" %}</h2>
-                <a class="section__link" href="{% url 'catalog:collection_list' %}">{% trans "Все" %} →</a>
-            </div>
-            <div class="collection-grid">
-                {% for collection in collections %}
-                    {% include "includes/collection_card.html" %}
-                {% endfor %}
+        {# ---------- Промо-зона (место баннера оригинала) ---------- #}
+        <section class="kg-promo" aria-label="{% trans "О кинотеатре" %}">
+            <div class="kg-promo__inner">
+                <div class="kg-promo__copy">
+                    <h1 class="kg-promo__title">{% trans "Смотреть фильмы и сериалы онлайн бесплатно" %}</h1>
+                    <p class="kg-promo__text">{% trans "Новинки кино, сериалы и аниме в хорошем качестве. Каждый день свежие премьеры." %}</p>
+                    <a class="kg-promo__btn" href="{% url 'catalog:title_list' %}">{% trans "Смотреть" %}</a>
+                </div>
+                {% if kg_carousel %}
+                    <div class="kg-promo__posters">
+                        {% for title in kg_carousel|slice:":4" %}
+                            <a class="kg-promo__poster" href="{{ title.get_absolute_url }}" title="{{ title.name }}">
+                                {% if title.poster %}
+                                    <img src="{{ title.poster.url }}" width="90" height="130" alt="{{ title.name }}" loading="lazy">
+                                {% else %}
+                                    <img src="{% static 'img/favicon.svg' %}" width="90" height="130" alt="{{ title.name }}" loading="lazy">
+                                {% endif %}
+                            </a>
+                        {% endfor %}
+                    </div>
+                {% endif %}
             </div>
         </section>
-    {% endif %}
 
-    {% include "includes/title_section.html" with section_title=_("Новинки") section_titles=new_titles section_url=new_url %}
+        {# ---------- Панель сортировки (xSort) ---------- #}
+        <div class="kg-xsort-area">
+            <span class="kg-xsort-label">{% trans "Сортировать:" %}</span>
 
-    {% if user.is_authenticated and recommendations %}
-        {% include "includes/title_section.html" with section_title=_("Вам может понравиться") section_titles=recommendations section_url=None %}
-    {% endif %}
-
-    {% include "includes/title_section.html" with section_title=_("Высокий рейтинг") section_titles=top_rated section_url=top_rated_url section_class="section--trending" %}
-
-    {% include "includes/title_section.html" with section_title=_("Фильмы") section_titles=movies section_url=movies_url section_class="section--compact" %}
-
-    {% include "includes/title_section.html" with section_title=_("Сериалы") section_titles=series section_url=series_url section_class="section--compact" %}
-
-    {% if genres %}
-        <section class="section">
-            <div class="section__header">
-                <h2 class="section__title">{% trans "Жанры" %}</h2>
-                <a class="section__link" href="{% url 'catalog:genre_list' %}">{% trans "Все" %} →</a>
+            <div class="kg-xsort-div kg-xsort-div--active" data-kg-dropdown>
+                <div class="kg-xsort-selected">{% trans "топ за неделю" %}</div>
+                <ul class="kg-xsort-ul">
+                    {% for label, url in kg_sort_links %}
+                        <li class="kg-xsort-option{% if forloop.counter == 3 %} kg-xsort-option--current{% endif %}">
+                            <a href="{{ url }}">{{ label }}</a>
+                        </li>
+                    {% endfor %}
+                </ul>
             </div>
-            <div class="badge-list">
-                {% for genre in genres %}
-                    <a class="badge" href="{% url 'catalog:genre_titles' genre.slug %}">{{ genre.name }}</a>
+
+            {% if collections %}
+                <div class="kg-xsort-div" data-kg-dropdown>
+                    <div class="kg-xsort-selected">{% trans "Подборка" %}</div>
+                    <ul class="kg-xsort-ul">
+                        {% for collection in collections %}
+                            <li class="kg-xsort-option"><a href="{{ collection.get_absolute_url }}">{{ collection.name }}</a></li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+
+            <div class="kg-xsort-div" data-kg-dropdown>
+                <div class="kg-xsort-selected">{% trans "Год" %}</div>
+                <ul class="kg-xsort-ul">
+                    {% for year in kg_years %}
+                        <li class="kg-xsort-option"><a href="{% url 'catalog:title_list' %}?year={{ year }}">{{ year }}</a></li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            {% if kg_country_links %}
+                <div class="kg-xsort-div" data-kg-dropdown>
+                    <div class="kg-xsort-selected">{% trans "Страны" %}</div>
+                    <ul class="kg-xsort-ul">
+                        {% for url, label in kg_country_links %}
+                            <li class="kg-xsort-option"><a href="{{ url }}">{{ label }}</a></li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+
+            <a class="kg-xsort-clearall" href="{% url 'catalog:home' %}" title="{% trans "Сбросить выбранные значения" %}" aria-label="{% trans "Сбросить фильтры" %}">✕</a>
+        </div>
+
+        {# ---------- Лента справа + сайдбар слева (как в Kinogo) ---------- #}
+        <div class="kg-contentwrap">
+
+            <section class="kg-main" id="dle-content" aria-label="{% trans 'Каталог фильмов' %}">
+
+                <h2 class="visually-hidden">{% trans "Каталог фильмов" %}</h2>
+
+                {# ---------- Лента карточек ---------- #}
+                {% for title in home_titles %}
+                    {% include "includes/story_card.html" %}
                 {% endfor %}
-            </div>
-        </section>
-    {% endif %}
 
-    {# ---------- Value proposition ---------- #}
-    <section class="value-section section" aria-labelledby="value-heading">
-        <h2 id="value-heading" class="value-section__heading">{% trans "Смотреть кино — просто" %}</h2>
-        <p class="value-section__sub">{% trans "Тысячи фильмов и сериалов. Без подписок." %}</p>
-        <div class="value-grid">
-            <article class="value-card">
-                <div class="value-card__icon">{% icon "search" size=18 %}</div>
-                <h3 class="value-card__title">{% trans "Умный поиск" %}</h3>
-                <p class="value-card__desc">{% trans "Ищите по названию, жанру, году, стране, рейтингу и актёрам. Мгновенные подсказки при вводе." %}</p>
-            </article>
-            <article class="value-card">
-                <div class="value-card__icon">{% icon "heart" size=18 %}</div>
-                <h3 class="value-card__title">{% trans "Персональные подборки" %}</h3>
-                <p class="value-card__desc">{% trans "Рекомендации на основе ваших предпочтений. Избранное, история, продолжение просмотра — всё под рукой." %}</p>
-            </article>
-            <article class="value-card">
-                <div class="value-card__icon">{% icon "star" size=18 %}</div>
-                <h3 class="value-card__title">{% trans "Всегда бесплатно" %}</h3>
-                <p class="value-card__desc">{% trans "Никаких подписок и скрытых платежей. HD-качество, адаптивный плеер, тёмная тема." %}</p>
-            </article>
-        </div>
-        <a class="value-cta" href="{% url 'catalog:title_list' %}">
-            {% trans "Весь каталог" %} <span aria-hidden="true">→</span>
-        </a>
-    </section>
+                {# ---------- Пагинация (pagiNation) ---------- #}
+                {% if kg_pages > 1 %}
+                    <nav class="kg-pagination" aria-label="{% trans "Страницы" %}">
+                        <span class="kg-pagination__prev">{% trans "Раньше" %}</span>
+                        {% for placeholder in ""|rjust:kg_pages %}
+                            {% if forloop.counter == 1 %}
+                                <span class="kg-pagination__current">1</span>
+                            {% else %}
+                                <a class="kg-pagination__link" href="{% url 'catalog:title_list' %}?page={{ forloop.counter }}">{{ forloop.counter }}</a>
+                            {% endif %}
+                        {% endfor %}
+                        <a class="kg-pagination__next" href="{% url 'catalog:title_list' %}?page=2">{% trans "Позже" %}</a>
+                    </nav>
+                {% endif %}
+
+            </section>
+
+            {# ---------- Горизонтальное рекламное место (между лентой и SEO) ---------- #}
+            {% include "includes/ad_slot.html" %}
+
+            <aside class="kg-sidebar">
+
+                <div class="kg-aheader">{% trans "Панель навигации" %}</div>
+                <nav class="kg-mainnav" aria-label="{% trans "Навигация по каталогу" %}">
+                    <div class="kg-categories">
+                        <i class="kg-accent kg-accent--star">{% trans "Категории" %}</i>
+                        <ul>
+                            {% for genre in genres|slice:":22" %}
+                                <li>
+                                    <a href="{% url 'catalog:genre_titles' genre.slug %}" title="{{ genre.name }}">{{ genre.name }}</a>
+                                    <span class="kg-count">({{ genre.titles_count }})</span>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    <div class="kg-navsort">
+                        <div class="kg-byyear">
+                            <i class="kg-accent kg-accent--star">{% trans "По году" %}</i>
+                            <ul>
+                                {% for year in kg_years|slice:":9" %}
+                                    <li><a href="{% url 'catalog:title_list' %}?year={{ year }}" title="{% blocktranslate %}Фильмы и сериалы {{ year }} года{% endblocktranslate %}">{{ year }} {% trans "года" %}</a></li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        <div class="kg-bycountry">
+                            <i class="kg-accent">{% trans "По странам" %}</i>
+                            <ul>
+                                {% for url, label in kg_country_links %}
+                                    <li><a href="{{ url }}">{{ label }}</a></li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        <div class="kg-byseries">
+                            <i class="kg-accent">{% trans "Сериалы" %}</i>
+                            <ul>
+                                {% for label, url in kg_series_links %}
+                                    <li><a href="{{ url }}">{{ label }}</a></li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </nav>
+
+                {# ---------- Рекомендуемое (только для вошедших) ---------- #}
+                {% if user.is_authenticated and recommendations %}
+                    <div class="kg-aheader">{% trans "Вам может понравиться" %}</div>
+                    <div class="kg-soon">
+                        {% for title in recommendations|slice:":4" %}
+                            <a class="kg-soon__item" href="{{ title.get_absolute_url }}">
+                                {% if title.poster %}
+                                    <img src="{{ title.poster.url }}" width="83" height="123" alt="" loading="lazy">
+                                {% endif %}
+                                <span class="kg-soon__title">{{ title.name }}</span>
+                            </a>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                {# ---------- Подборки ---------- #}
+                {% if collections %}
+                    <div class="kg-aheader kg-aheader--row">
+                        {% trans "Подборки" %}
+                        <a href="{% url 'catalog:collection_list' %}">{% trans "Все" %}</a>
+                    </div>
+                    <div class="kg-franchises">
+                        {% for collection in collections %}
+                            <a class="kg-franchise" href="{{ collection.get_absolute_url }}">
+                                {% if collection.cover %}
+                                    <img class="kg-franchise__img" src="{{ collection.cover.url }}" width="60" height="40" alt="" loading="lazy">
+                                {% endif %}
+                                <span class="kg-franchise__title">{{ collection.name }}</span>
+                            </a>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                {# ---------- Обновления сериалов ---------- #}
+                {% if series_updates %}
+                    <div class="kg-aheader kg-aheader--row">
+                        {% trans "Обновления сериалов" %}
+                        <a href="{% url 'catalog:title_list' %}?type=series">{% trans "Все" %}</a>
+                    </div>
+                    <div class="kg-lastupdates">
+                        <div class="kg-lastupdates__title">{% trans "Последние обновления" %}</div>
+                        {% for title in series_updates %}
+                            <a class="kg-lastupdates__item" href="{{ title.get_absolute_url }}">
+                                {% if title.poster %}
+                                    <img class="kg-lastupdates__poster" src="{{ title.poster.url }}" width="54" height="64" alt="" loading="lazy">
+                                {% endif %}
+                                <span class="kg-lastupdates__main">
+                                    <span class="kg-lastupdates__name">{{ title.name }}<span class="kg-lastupdates__year">{{ title.release_year }}</span></span>
+                                    <span class="kg-lastupdates__meta">{{ title.get_type_display }}</span>
+                                </span>
+                            </a>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                {# ---------- Обновления аниме ---------- #}
+                {% if anime_updates %}
+                    <div class="kg-aheader kg-aheader--row">
+                        {% trans "Обновления аниме" %}
+                        <a href="{% url 'catalog:genre_titles' 'animaciya' %}">{% trans "Все" %}</a>
+                    </div>
+                    <div class="kg-lastupdates">
+                        <div class="kg-lastupdates__title">{% trans "Последние обновления" %}</div>
+                        {% for title in anime_updates %}
+                            <a class="kg-lastupdates__item" href="{{ title.get_absolute_url }}">
+                                {% if title.poster %}
+                                    <img class="kg-lastupdates__poster" src="{{ title.poster.url }}" width="54" height="64" alt="" loading="lazy">
+                                {% endif %}
+                                <span class="kg-lastupdates__main">
+                                    <span class="kg-lastupdates__name">{{ title.name }}<span class="kg-lastupdates__year">{{ title.release_year }}</span></span>
+                                    <span class="kg-lastupdates__meta">{{ title.get_type_display }}</span>
+                                </span>
+                            </a>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                {# ---------- Последние комментарии ---------- #}
+                {% if latest_reviews %}
+                    <div class="kg-aheader">{% trans "Последние комментарии" %}</div>
+                    <div class="kg-lastcomments">
+                        {% for review in latest_reviews %}
+                            <div class="kg-lastcomment">
+                                <a class="kg-lastcomment__title" href="{{ review.title.get_absolute_url }}">
+                                    <span class="kg-lastcomment__avatar" aria-hidden="true">{{ review.user.initial }}</span>
+                                    {{ review.title.name }}
+                                </a>
+                                <div class="kg-lastcomment__text">
+                                    <span>{{ review.user.display_name }}</span>
+                                    {{ review.text|truncatewords:14 }}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+            </aside>
         </div>
 
-        {% include "includes/sidebar.html" %}
+        {# ---------- SEO-текст (footerText) ---------- #}
+        <div class="kg-seo">
+            <h2>{% trans "LumiBox — фильмы и сериалы онлайн" %}</h2>
+            <p>{% blocktranslate %}Рады приветствовать на LumiBox всех любителей интересного и качественного кино!
+                У нас более {{ statistics.movies_count }} фильмов и {{ statistics.series_count }} сериалов онлайн.
+                Вы любите кинематограф так же, как мы? Постоянно следите за выходом новинок?
+                Тогда заходите к нам чаще — мы каждый день пополняем каталог свежими премьерами.
+                Удобный поиск, фильтры по жанрам, годам и странам, персональные рекомендации и избранное —
+                всё это LumiBox.{% endblocktranslate %}</p>
+            <p>{% blocktranslate %}Смотрите любимые фильмы в любое время и на любом устройстве: компьютер, планшет
+                или смартфон. Новинки появляются на сайте сразу после релиза, а классика советского и зарубежного
+                кино всегда в каталоге. Никакой регистрации и подписок — всё бесплатно.{% endblocktranslate %}</p>
+        </div>
+
     </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+    // Выпадающие списки xSort: открываются по клику, закрываются по клику
+    // мимо или по Escape.
+    var root = document.querySelector('.kg-xsort-area');
+    if (root) {
+        root.addEventListener('click', function (event) {
+            var div = event.target.closest('.kg-xsort-div');
+            if (!div) return;
+            var wasOpen = div.classList.contains('kg-xsort-div--open');
+            root.querySelectorAll('.kg-xsort-div--open').forEach(function (el) {
+                el.classList.remove('kg-xsort-div--open');
+            });
+            if (!wasOpen) div.classList.add('kg-xsort-div--open');
+        });
+        document.addEventListener('click', function (event) {
+            if (!root.contains(event.target)) {
+                root.querySelectorAll('.kg-xsort-div--open').forEach(function (el) {
+                    el.classList.remove('kg-xsort-div--open');
+                });
+            }
+        });
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape') {
+                root.querySelectorAll('.kg-xsort-div--open').forEach(function (el) {
+                    el.classList.remove('kg-xsort-div--open');
+                });
+            }
+        });
+    }
+})();
+</script>
 {% endblock %}

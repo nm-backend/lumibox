@@ -1,4 +1,7 @@
 from django.db import models
+from django.db.models import Prefetch
+
+from apps.catalog.models.person import Participation
 
 
 class UserTitleRelationQuerySet(models.QuerySet):
@@ -27,4 +30,12 @@ class UserTitleRelationQuerySet(models.QuerySet):
         Без этого список из 24 карточек лезет в базу за каждой записью
         и за жанрами каждой из них.
         """
-        return self.select_related("title").prefetch_related("title__genres")
+        return self.select_related("title").prefetch_related(
+            "title__genres",
+            "title__countries",
+            "title__studios",
+            Prefetch(
+                "title__participations",
+                queryset=Participation.objects.select_related("person"),
+            ),
+        )

@@ -27,6 +27,7 @@
         <p class="page-subtitle">{% trans "Введите имя актёра — и найдите все фильмы и сериалы с его участием." %}</p>
     </div>
 
+    <div class="kg-contentwrap">
     {# Search form #}
     <div class="actor-search">
         <div class="actor-search__form-wrapper">
@@ -75,9 +76,9 @@
                             </div>
 
                             {% if item.participations %}
-                                <div class="title-grid">
+                                <div class="kg-main" id="dle-content">
                                     {% for participation in item.participations %}
-                                        {% include "includes/title_card.html" with title=participation.title %}
+                                        {% include "includes/story_card.html" with title=participation.title %}
                                     {% endfor %}
                                 </div>
                             {% else %}
@@ -104,6 +105,11 @@
                 {% endif %}
             </div>
         {% endif %}
+    </div>
+
+    {% include "includes/ad_slot.html" %}
+
+    {% include "includes/sidebar.html" %}
     </div>
 {% endblock %}
 

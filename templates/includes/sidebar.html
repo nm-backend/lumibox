@@ -11,7 +11,7 @@
 
         {% if sidebar_popular %}
             <section class="sidebar-widget">
-                <h2 class="sidebar-widget__title">{% trans "Популярное" %}</h2>
+                <h3 class="sidebar-widget__title">{% trans "Популярное" %}</h3>
                 <div class="sidebar-film-list">
                     {% for item in sidebar_popular %}
                         <a class="sidebar-film" href="{{ item.get_absolute_url }}">
@@ -35,7 +35,7 @@
 
         {% if sidebar_new %}
             <section class="sidebar-widget">
-                <h2 class="sidebar-widget__title">{% trans "Новинки" %}</h2>
+                <h3 class="sidebar-widget__title">{% trans "Новинки" %}</h3>
                 <div class="sidebar-film-list">
                     {% for item in sidebar_new %}
                         <a class="sidebar-film" href="{{ item.get_absolute_url }}">
@@ -58,7 +58,7 @@
         {% endif %}
 
         <section class="sidebar-widget sidebar-widget--soon">
-            <h2 class="sidebar-widget__title">{% trans "Топ недели" %}</h2>
+            <h3 class="sidebar-widget__title">{% trans "Топ недели" %}</h3>
             <p class="sidebar-widget__soon-text">
                 {% trans "Раздел появится совсем скоро — следите за обновлениями." %}
             </p>
@@ -66,7 +66,7 @@
 
         {% if sidebar_genres %}
             <section class="sidebar-widget">
-                <h2 class="sidebar-widget__title">{% trans "Жанры" %}</h2>
+                <h3 class="sidebar-widget__title">{% trans "Жанры" %}</h3>
                 <div class="sidebar-tags">
                     {% for genre in sidebar_genres %}
                         <a class="sidebar-tag" href="{% url 'catalog:genre_titles' genre.slug %}">{{ genre.name }}</a>

@@ -35,6 +35,18 @@ PUBLISHED_TITLES = Q(titles__status=Title.Status.PUBLISHED)
 GENRE_CHIPS_CACHE_KEY = "catalog:genre_chips:v2"
 
 
+def _dedup_titles(*groups):
+    """Объединяет списки записей без повторов, сохраняя порядок."""
+    seen = set()
+    result = []
+    for group in groups:
+        for title in group:
+            if title.pk not in seen:
+                seen.add(title.pk)
+                result.append(title)
+    return result
+
+
 def _get_cached_genre_chip_list(limit=50):
     """
     Кэшированный список жанров с количеством фильмов.
@@ -89,16 +101,84 @@ class HomeView(TemplateView):
 
         context["collections"] = get_featured_collections()
 
-        context["genres"] = _get_cached_genre_chip_list(12)
-        from apps.catalog.services import get_home_statistics, get_trending_titles
+        # Жанры для панели навигации в сайдбаре — все, с количеством фильмов.
+        context["genres"] = _get_cached_genre_chip_list(50)
+        from apps.catalog.services import (
+            get_home_sidebar,
+            get_home_statistics,
+            get_trending_titles,
+        )
         context["statistics"] = get_home_statistics()
         context["trending"] = get_trending_titles()
 
-        # Боковая панель: берём те же данные, что и секции — отдельных
-        # запросов не делаем, slice() на уже полученном списке бесплатен.
-        context["sidebar_popular"] = context.get("top_rated", [])[:6]
-        context["sidebar_new"] = context.get("new_titles", [])[:6]
-        context["sidebar_genres"] = context["genres"]
+        # Сайдбар и панель навигации главной в стиле Kinogo.
+        context.update(get_home_sidebar())
+        from apps.catalog.forms import get_year_choices
+        context["kg_years"] = [int(year) for year, _ in get_year_choices() if year]
+
+        # Курированные ссылки «По странам» — как в Kinogo: не полный список,
+        # а пара десятков самых ходовых с прилагательным в подписи.
+        countries_by_name = {c.name: c for c in context.get("countries", [])}
+        curated_countries = [
+            ("США", "Американские"),
+            ("Россия", "Российские"),
+            ("Индия", "Индийские"),
+            ("Южная Корея", "Корейские"),
+            ("Великобритания", "Английские"),
+        ]
+        kg_country_links = []
+        for name, label in curated_countries:
+            country = countries_by_name.get(name)
+            if country:
+                kg_country_links.append(
+                    (reverse("catalog:country_titles", args=[country.slug]), label)
+                )
+        context["kg_country_links"] = kg_country_links
+
+        # Ссылки блока «Сериалы» сайдбара: проверяем по слагу жанра, чтобы
+        # не вести на 404, если «Аниме» ещё не завели.
+        genres_by_slug = {genre.slug: genre for genre in context.get("genres", [])}
+        kg_series_links = [
+            ("Все сериалы", f"{catalog_url}?type=series"),
+            ("Аниме", reverse("catalog:genre_titles", args=["animaciya"])),
+            ("Фильмы", f"{catalog_url}?type=movie"),
+            ("Подборки", reverse("catalog:collection_list")),
+        ]
+        if "animaciya" not in genres_by_slug:
+            kg_series_links = [
+                (label, url) for label, url in kg_series_links if label != "Аниме"
+            ]
+        context["kg_series_links"] = kg_series_links
+
+        # Выпадающий список «Сортировать» панели xSort.
+        context["kg_sort_links"] = [
+            ("по дате", f"{catalog_url}?sort=-published_at"),
+            ("по рейтингу", f"{catalog_url}?sort=-rating_average"),
+            ("топ за неделю", catalog_url),
+            ("по комментариям", f"{catalog_url}?sort=-rating_count"),
+            ("по году", f"{catalog_url}?sort=-release_year"),
+        ]
+
+        # Лента главной: популярное за неделю, затем топ по рейтингу,
+        # добитый новинками — как у Kinogo, где лента по умолчанию «топ за 3 дня».
+        # Карусель: популярное за неделю, добитое новинками.
+        # 8 карточек: высота страницы подогнана под оригинал Kinogo (036).
+        context["home_titles"] = _dedup_titles(
+            context.get("trending", []),
+            context.get("top_rated", []),
+            context.get("new_titles", []),
+        )[:8]
+        context["kg_carousel"] = _dedup_titles(
+            context.get("trending", []), context.get("new_titles", [])
+        )[:14]
+
+        # Пагинация как в каталоге: 24 записи на страницу, ссылки ведут
+        # на страницы каталога, поэтому номера совпадают.
+        from math import ceil
+
+        context["kg_pages"] = max(
+            1, ceil(context.get("statistics", {}).get("published_count", 0) / 24)
+        )
         return context
 
 

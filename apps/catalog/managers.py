@@ -31,7 +31,25 @@ class TitleQuerySet(models.QuerySet):
         Без этого список из 24 карточек делает 48 лишних запросов
         к базе — по одному на жанры и страны каждой карточки.
         """
-        return self.prefetch_related("genres", "countries", "studios")
+        return self.prefetch_related("genres", "countries", "studios", self._crew_prefetch())
+
+    @staticmethod
+    def _crew_prefetch():
+        """
+        Prefetch участий с персонами — общий для with_related и with_crew.
+
+        Список карточек показывает режиссёра и актёров в «коротких историях»,
+        поэтому участия нужны и там. Без select_related("person") Django
+        сходил бы в базу за каждым именем отдельно.
+        """
+        from django.db.models import Prefetch
+
+        from apps.catalog.models.person import Participation
+
+        return Prefetch(
+            "participations",
+            queryset=Participation.objects.select_related("person"),
+        )
 
     def with_crew(self):
         """
@@ -40,16 +58,16 @@ class TitleQuerySet(models.QuerySet):
         Prefetch с явным queryset обязателен: без него Django достанет
         участия без самих персон и на каждое имя сходит в базу отдельно.
         """
-        from django.db.models import Prefetch
-
-        from apps.catalog.models.person import Participation
-
-        return self.prefetch_related(
-            Prefetch(
-                "participations",
-                queryset=Participation.objects.select_related("person"),
-            )
-        )
+        # with_related уже тянет участия; prefetch того же атрибута вторым
+        # queryset'ом Django считает ошибкой. В _prefetch_related_lookups
+        # лежат объекты Prefetch (lookup в атрибуте prefetch_to), а не строки.
+        already = [
+            p for p in self._prefetch_related_lookups
+            if getattr(p, "prefetch_to", p) == "participations"
+        ]
+        if already:
+            return self
+        return self.prefetch_related(self._crew_prefetch())
 
     def in_collection(self, collection):
         """

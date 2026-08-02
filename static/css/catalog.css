@@ -130,7 +130,7 @@
 .filters__field select:hover,
 .filters__field input[type="text"]:hover {
     border-color: var(--color-accent-dim);
-    box-shadow: 0 0 0 2px rgba(255, 184, 48, 0.08);
+    box-shadow: 0 0 0 2px rgba(232, 163, 61, 0.08);
     transform: scale(1.01);
 }
 
@@ -148,7 +148,7 @@
 .filters__field input[type="text"]:focus {
     outline: none;
     border-color: var(--color-accent);
-    box-shadow: 0 0 0 3px rgba(255, 184, 48, 0.15);
+    box-shadow: 0 0 0 3px rgba(232, 163, 61, 0.15);
 }
 
 .filters__count {
@@ -204,33 +204,6 @@
     color: var(--color-text-muted);
     font-size: var(--text-sm);
     margin-right: auto;
-}
-
-.catalog__view-toggle {
-    display: flex;
-    gap: 2px;
-    margin-left: var(--space-2);
-}
-
-.catalog__view-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-    border-radius: var(--radius-sm);
-    color: var(--color-text-dim);
-    transition: color var(--transition-fast), background-color var(--transition-fast);
-}
-
-.catalog__view-btn:hover {
-    color: var(--color-text);
-    background-color: var(--color-surface-hover);
-}
-
-.catalog__view-btn--active {
-    color: var(--color-accent);
-    background-color: var(--color-surface-hover);
 }
 
 /* .chip и .chip__remove переехали в components.css: их использует и подвал,
@@ -352,8 +325,30 @@
     .filters[open] .filters__body > *:nth-child(5) { transition-delay: 0.25s; }
 }
 
-/* На большом экране details всегда раскрыт, заголовок не кликабелен */
+/* Явное размещение в сетке каталога: слева сайдбар с категориями и sticky-фильтрами,
+   справа — чипсы и результаты. Без этого авто-размещение путает колонки. */
 @media (min-width: 901px) {
+    .catalog-sidebar {
+        grid-column: 1;
+        grid-row: 1;
+    }
+
+    .genre-chips {
+        grid-column: 2;
+        grid-row: 1;
+    }
+
+    .filters {
+        grid-column: 1;
+        grid-row: 2 / 3;
+        align-self: start;
+    }
+
+    .catalog__content {
+        grid-column: 2;
+        grid-row: 2;
+    }
+
     .filters__summary {
         list-style: none;
         pointer-events: none;
@@ -584,3 +579,9 @@
         gap: var(--space-3);
     }
 }
+
+/* Активная категория в светлой теме: глубже янтарь для контраста 4.5+ */
+[data-theme="light"] .sidebar-category__link--active {
+    color: var(--color-accent-deep);
+}
+

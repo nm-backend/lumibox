@@ -12,6 +12,7 @@ from apps.catalog.tasks import refresh_title_ratings
 from apps.core.test_factories import (
     create_genre,
     create_participation,
+    create_person,
     create_review,
     create_title,
     create_user,
@@ -214,6 +215,29 @@ class CrewTests(TestCase):
 
     def test_empty_crew(self):
         self.assertEqual(get_crew_by_role(create_title()), [])
+
+    def test_kg_crew_filter_names_and_limit(self):
+        from django.template import Context, Template
+
+        from apps.catalog.models import Participation
+        from apps.catalog.templatetags.catalog_filters import kg_crew
+
+        title = create_title()
+        director = create_person(name="Кристофер Нолан")
+        for i in range(6):
+            create_participation(
+                title=title, person=create_person(name=f"Актёр {i}"), role=Participation.Role.ACTOR
+            )
+        create_participation(title=title, person=director, role=Participation.Role.DIRECTOR)
+
+        self.assertEqual(kg_crew(title, "director"), "Кристофер Нолан")
+        self.assertEqual(len(kg_crew(title, "actor").split(" / ")), 5)
+        self.assertEqual(kg_crew(title, "writer"), "")
+
+        rendered = Template("{% load catalog_filters %}{{ t|kg_crew:'actor' }}").render(
+            Context({"t": title})
+        )
+        self.assertTrue(rendered.startswith("Актёр 0 / "))
 
 
 class HomeCacheTests(TestCase):

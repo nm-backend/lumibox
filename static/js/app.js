@@ -249,7 +249,7 @@
     });
 
     /* -----------------------------------------------
-       8. Trailer autoplay on hover (hero)
+       7. Trailer autoplay on hover (hero)
     ----------------------------------------------- */
     const heroVideo = document.querySelector('[data-hero-video]');
     if (heroVideo) {
@@ -262,92 +262,7 @@
     }
 
     /* -----------------------------------------------
-        9. Hero auto-rotation with smooth crossfade
-    ----------------------------------------------- */
-    const heroRotation = document.querySelector('[data-hero-rotation]');
-    if (heroRotation) {
-        const slides = heroRotation.querySelectorAll('[data-hero-slide]');
-        const videos = heroRotation.querySelectorAll('[data-hero-video]');
-        const dots = heroRotation.querySelectorAll('[data-hero-dot]');
-        let current = 0;
-        let interval = null;
-
-        const playVideo = (index) => {
-            const video = videos[index];
-            if (video) {
-                video.currentTime = 0;
-                video.play().catch(() => {});
-            }
-        };
-
-        const pauseAllVideos = (exceptIndex) => {
-            videos.forEach((v, i) => {
-                if (i !== exceptIndex) {
-                    v.pause();
-                }
-            });
-        };
-
-        const showSlide = (index) => {
-            slides.forEach((s, i) => {
-                if (i === index) {
-                    s.classList.remove('showcase__slide--prev');
-                    s.classList.add('showcase__slide--active');
-                    s.classList.add('showcase__slide--animating');
-                } else if (i === current) {
-                    s.classList.remove('showcase__slide--active');
-                    s.classList.add('showcase__slide--prev');
-                    // Remove animation class after transition
-                    setTimeout(() => s.classList.remove('showcase__slide--animating'), 800);
-                } else {
-                    s.classList.remove('showcase__slide--active', 'showcase__slide--prev', 'showcase__slide--animating');
-                }
-            });
-            dots.forEach((d, i) => {
-                d.classList.toggle('showcase__dot-btn--active', i === index);
-            });
-            current = index;
-
-            // Autoplay trailer for active slide
-            playVideo(current);
-            pauseAllVideos(current);
-        };
-
-        const startRotation = () => {
-            if (slides.length <= 1) return;
-            stopRotation();
-            interval = setInterval(() => {
-                showSlide((current + 1) % slides.length);
-            }, 9000);
-        };
-
-        const stopRotation = () => {
-            if (interval) {
-                clearInterval(interval);
-                interval = null;
-            }
-        };
-
-        // Autoplay first video
-        playVideo(0);
-
-        // Dot click handlers
-        dots.forEach((dot, i) => {
-            dot.addEventListener('click', () => {
-                showSlide(i);
-                startRotation(); // reset timer
-            });
-        });
-
-        // Pause on hover
-        heroRotation.addEventListener('mouseenter', stopRotation);
-        heroRotation.addEventListener('mouseleave', startRotation);
-
-        startRotation();
-    }
-
-    /* -----------------------------------------------
-       10. Toast notifications
+        8. Toast notifications
     ----------------------------------------------- */
     const toastContainer = document.querySelector('[data-toast-container]');
     if (!toastContainer) {
@@ -396,18 +311,10 @@
     };
 
     /* -----------------------------------------------
-        11. Unified scroll handler
+        9. Unified scroll handler
     ----------------------------------------------- */
     const header = document.querySelector('.site-header');
     let isScrolled = false;
-
-    const scrollBar = (function () {
-        const c = document.createElement('div');
-        c.className = 'scroll-progress';
-        c.innerHTML = '<div class="scroll-progress__bar" data-scroll-bar></div>';
-        document.body.prepend(c);
-        return c.querySelector('[data-scroll-bar]');
-    })();
 
     const scrollBtn = document.querySelector('[data-scroll-top]');
     if (!scrollBtn) {
@@ -425,10 +332,6 @@
     let scrollVisible = false;
     window.addEventListener('scroll', () => {
         const y = window.scrollY;
-        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-
-        // Scroll progress bar
-        scrollBar.style.transform = 'scaleX(' + (docHeight > 0 ? (y / docHeight) : 0) + ')';
 
         // Header shadow
         if (header) {
@@ -449,7 +352,7 @@
     }, { passive: true });
 
     /* -----------------------------------------------
-       12. Touch swipe for carousels
+       10. Touch swipe for carousels
     ----------------------------------------------- */
     document.querySelectorAll('.carousel__track').forEach(function (track) {
         let startX = 0;
@@ -474,7 +377,7 @@
     });
 
     /* -----------------------------------------------
-       13. Keyboard shortcuts (global)
+       11. Keyboard shortcuts (global)
     ----------------------------------------------- */
     document.addEventListener('keydown', function (e) {
         if (e.target.matches('input, select, textarea, [contenteditable]')) return;
@@ -487,7 +390,7 @@
     });
 
     /* -----------------------------------------------
-       14. Card placeholder deterministic gradients
+       12. Card placeholder deterministic gradients
     ----------------------------------------------- */
     document.querySelectorAll('.card__placeholder').forEach(function(el) {
         var card = el.closest('.card');
@@ -514,7 +417,7 @@
     });
 
     /* -----------------------------------------------
-       15. Bottom-nav active link
+       13. Bottom-nav active link
     ----------------------------------------------- */
     {
         const nav = document.querySelector('.bottom-nav');
@@ -530,3 +433,8 @@
     }
 
 })();
+
+
+
+
+

@@ -8,10 +8,7 @@
     <title>{% block page_title %}{% trans "LumiBox — каталог фильмов и сериалов" %}{% endblock %}</title>
     <meta name="description" content="{% block page_description %}{% trans "Каталог фильмов и сериалов: поиск, фильтры, подборки." %}{% endblock %}">
 
-    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&display=swap">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&display=swap" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="{% static 'css/fonts.css' %}?v={{ static_version }}">
 
     <link rel="stylesheet" href="{% static 'css/variables.css' %}?v={{ static_version }}">
     <link rel="stylesheet" href="{% static 'css/base.css' %}?v={{ static_version }}">
@@ -19,6 +16,7 @@
     <link rel="stylesheet" href="{% static 'css/components.css' %}?v={{ static_version }}">
     <link rel="stylesheet" href="{% static 'css/footer.css' %}?v={{ static_version }}">
     <link rel="stylesheet" href="{% static 'css/ads.css' %}?v={{ static_version }}">
+    <link rel="stylesheet" href="{% static 'css/kinogo.css' %}?v={{ static_version }}">
 
     <link rel="icon" type="image/svg+xml" href="{% static 'img/favicon.svg' %}">
     <link rel="alternate icon" href="{% static 'img/favicon.svg' %}">
@@ -111,9 +109,7 @@
     </script>
     {% endif %}
 </head>
-<body>
-    <div class="cinema-glow" aria-hidden="true"></div>
-
+<body class="{% block body_class %}{% endblock %}">
     {% comment %} Боковые рекламные рельсы. Видны только на широких экранах
        (≥1640px) — там, где контейнер не занимает всю ширину окна. Сейчас
        это плейсхолдеры: вёрстка и размеры (160×600) финальные, подставить
@@ -128,6 +124,13 @@
     {% endcomment %}
     <a class="skip-link" href="#main-content">{% trans "К содержанию" %}</a>
 
+    <div class="kg-topbar" role="region" aria-label="{% trans 'Верхняя панель' %}">
+        <div class="kg-topbar__inner">
+            <span class="kg-topbar__text">{% trans "Онлайн-кинотеатр LumiBox — фильмы и сериалы бесплатно" %}</span>
+            <a class="kg-topbar__link" href="{% url 'catalog:title_list' %}?sort=-published_at">{% trans "Новинки" %}</a>
+        </div>
+    </div>
+
     <header class="site-header">
         <div class="container site-header__inner">
             <a class="logo" href="{% url 'catalog:home' %}">
@@ -136,25 +139,10 @@
             </a>
 
             {% comment %}
-               Кэшировать это меню нельзя: в нём есть переводимые подписи и
-               подсветка активного пункта по ?type. Ключ фрагмента учитывал
-               только путь, поэтому английская версия отдавалась русской, а
-               «Фильмы» и «Сериалы» подсвечивались одинаково. Запросов к базе
-               здесь нет — кэш не экономил ничего, только портил вывод.
+               Старая десктопная навигация (site-nav__desktop) удалена:
+               её полностью заменяет глобальный топ-нав kg-topnav,
+               который строится context processor'ом kg_topnav.
             {% endcomment %}
-            <nav class="site-nav site-nav__desktop" aria-label="{% trans "Основная навигация" %}">
-                <a class="site-nav__link {% if request.resolver_match.url_name == 'title_list' and not request.GET.type %}site-nav__link--active{% endif %}"
-                   href="{% url 'catalog:title_list' %}">{% trans "Всё" %}</a>
-                <a class="site-nav__link {% if request.GET.type == 'movie' %}site-nav__link--active{% endif %}"
-                   href="{% url 'catalog:title_list' %}?type=movie">{% trans "Фильмы" %}</a>
-                <a class="site-nav__link {% if request.GET.type == 'series' %}site-nav__link--active{% endif %}"
-                   href="{% url 'catalog:title_list' %}?type=series">{% trans "Сериалы" %}</a>
-                <a class="site-nav__link {% if request.resolver_match.url_name == 'genre_list' %}site-nav__link--active{% endif %}"
-                   href="{% url 'catalog:genre_list' %}"{% if request.resolver_match.url_name == 'genre_list' %} aria-current="page"{% endif %}>{% trans "Жанры" %}</a>
-                <a class="site-nav__link {% if request.resolver_match.url_name == 'collection_list' %}site-nav__link--active{% endif %}"
-                   href="{% url 'catalog:collection_list' %}"{% if request.resolver_match.url_name == 'collection_list' %} aria-current="page"{% endif %}>{% trans "Подборки" %}</a>
-                <a class="site-nav__link" href="{% url 'catalog:random_title' %}">{% trans "Случайный" %}</a>
-            </nav>
 
             <div class="search-wrapper site-header__search">
                 <form class="search" action="{% url 'catalog:title_list' %}" method="get" role="search" data-search-form>
@@ -217,6 +205,13 @@
             {% endif %}
         </div>
     </header>
+
+    <nav class="kg-topnav" aria-label="{% trans "Основная навигация" %}">
+        {% for label, url, is_active in kg_topnav %}
+            <a class="kg-topnav__link{% if is_active %} kg-topnav__link--active{% endif %}"
+               href="{{ url }}">{{ label }}</a>
+        {% endfor %}
+    </nav>
 
     {# Mobile drawer nav #}
     <nav id="mobile-nav" class="mobile-nav" data-mobile-nav aria-label="{% trans 'Мобильная навигация' %}">

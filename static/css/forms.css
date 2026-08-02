@@ -42,7 +42,7 @@
 .form__field textarea:focus {
     outline: none;
     border-color: var(--color-accent);
-    box-shadow: 0 0 0 3px rgba(255, 184, 48, 0.08), 0 0 20px rgba(255, 184, 48, 0.04);
+    box-shadow: 0 0 0 3px rgba(232, 163, 61, 0.08), 0 0 20px rgba(232, 163, 61, 0.04);
 }
 
 .form__field input[type="file"] {
@@ -58,16 +58,16 @@
 
 .form__error {
     margin-top: var(--space-2);
-    color: #ff7a6b;
+    color: var(--color-error);
     font-size: var(--text-xs);
 }
 
 .form__errors {
     margin-bottom: var(--space-4);
     padding: var(--space-3);
-    background-color: rgba(255, 122, 107, 0.1);
+    background-color: rgba(255, 107, 90, 0.1);
     border-radius: var(--radius-sm);
-    color: #ff7a6b;
+    color: var(--color-error);
     font-size: var(--text-sm);
 }
 
@@ -85,18 +85,6 @@
     box-shadow: 0 8px 40px rgba(0, 0, 0, 0.3);
     position: relative;
     overflow: hidden;
-    animation: cardEntrance 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-@keyframes cardEntrance {
-    from {
-        opacity: 0;
-        transform: translateY(20px) scale(0.97);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
 }
 
 .auth-card::before {
@@ -106,12 +94,12 @@
     right: -50%;
     width: 100%;
     height: 100%;
-    background: radial-gradient(circle at 70% 20%, rgba(255, 184, 48, 0.03), transparent 60%);
+    background: radial-gradient(circle at 70% 20%, rgba(232, 163, 61, 0.03), transparent 60%);
     pointer-events: none;
 }
 
 .auth-card__title {
-    font-size: var(--text-xl);
+    font-size: 1.625rem;
 }
 
 .auth-card__subtitle {
@@ -178,11 +166,11 @@
 }
 
 .message--success {
-    border-left-color: #4ade80;
+    border-left-color: var(--color-success);
 }
 
 .message--error {
-    border-left-color: #ff7a6b;
+    border-left-color: var(--color-error);
 }
 
 /* ---------- Юридические страницы ---------- */
@@ -325,4 +313,27 @@
         min-width: auto;
         white-space: normal;
     }
+}
+
+/* ---------- Светлая тема ----------
+   Карточка входа — тёмная стеклянная панель «кинозала» при любой теме,
+   поэтому текст внутри неё всегда светлый. */
+
+[data-theme="light"] .auth-card {
+    background: rgba(18, 22, 32, 0.62);
+    border-color: rgba(255, 255, 255, 0.1);
+    color: #e8ecf4;
+}
+
+[data-theme="light"] .auth-card__subtitle,
+[data-theme="light"] .auth-card__footer,
+[data-theme="light"] .auth-card__note,
+[data-theme="light"] .auth-card .form__label {
+    color: #8891a8;
+}
+
+[data-theme="light"] .auth-card .form__required,
+[data-theme="light"] .auth-card__footer a,
+[data-theme="light"] .auth-card__forgot {
+    color: #f2b75c;
 }

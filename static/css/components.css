@@ -1,53 +1,5 @@
 /* Повторно используемые элементы интерфейса. */
 
-/* ---------- Сетка карточек ---------- */
-
-.title-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(165px, 1fr));
-    gap: var(--space-5) var(--space-4);
-}
-
-.title-grid--dense {
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: var(--space-3);
-}
-
-@media (min-width: 1200px) {
-    .title-grid {
-        grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
-    }
-    .title-grid--dense {
-        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-    }
-}
-
-@media (min-width: 1600px) {
-    .title-grid {
-        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-        gap: var(--space-6) var(--space-5);
-    }
-    .title-grid--dense {
-        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-        gap: var(--space-3);
-    }
-}
-
-.title-grid > .card {
-    animation: cardEntrance 0.4s cubic-bezier(0.4, 0, 0.2, 1) both;
-}
-
-@keyframes cardEntrance {
-    from {
-        opacity: 0;
-        transform: translateY(12px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
 /* ---------- Карусель (горизонтальный скролл) ---------- */
 
 .carousel {
@@ -127,49 +79,6 @@
     .carousel__track > * {
         width: 140px;
     }
-}
-
-/* ---------- Skeleton / Placeholder ---------- */
-
-@keyframes shimmer {
-    0% { background-position: -200% 0; }
-    100% { background-position: 200% 0; }
-}
-
-.skeleton {
-    background: linear-gradient(90deg, var(--skeleton-base) 25%, var(--skeleton-shine) 50%, var(--skeleton-base) 75%);
-    background-size: 200% 100%;
-    animation: shimmer 1.5s ease-in-out infinite;
-    border-radius: var(--radius-md);
-}
-
-.skeleton--poster {
-    aspect-ratio: 2 / 3;
-    width: 100%;
-}
-
-.skeleton--text {
-    height: 1rem;
-    width: 80%;
-    margin-top: var(--space-2);
-}
-
-.skeleton--text-short {
-    height: 0.75rem;
-    width: 50%;
-    margin-top: var(--space-1);
-}
-
-.skeleton--hero {
-    width: 100%;
-    height: 460px;
-    border-radius: 0;
-}
-
-.skeleton--avatar {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
 }
 
 /* ---------- Glass card ---------- */
@@ -350,17 +259,6 @@
 }
 
 /* ---------- Lightbox ---------- */
-
-@keyframes fadeUp {
-    from {
-        opacity: 0;
-        transform: translateY(24px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
 
 .lightbox {
     position: fixed;
@@ -617,9 +515,6 @@
     .hamburger {
         display: flex;
     }
-    .site-nav__desktop {
-        display: none;
-    }
 }
 
 /* ---------- Mobile drawer nav ---------- */
@@ -639,13 +534,16 @@
     opacity: 0;
     transform: translateY(-8px);
     pointer-events: none;
-    transition: opacity var(--transition), transform var(--transition);
+    visibility: hidden;
+    transition: opacity var(--transition), transform var(--transition), visibility 0s linear 250ms;
 }
 
 .mobile-nav--open {
     opacity: 1;
     transform: translateY(0);
     pointer-events: auto;
+    visibility: visible;
+    transition: opacity var(--transition), transform var(--transition), visibility 0s;
 }
 
 .mobile-nav__link {
@@ -809,7 +707,7 @@
 
 .card:hover .card__overlay-action {
     transform: scale(1.05);
-    box-shadow: 0 6px 20px rgba(255, 184, 48, 0.3);
+    box-shadow: 0 6px 20px rgba(232, 163, 61, 0.3);
 }
 
 /* Заглушка вместо постера: пока изображения не загружены,
@@ -845,12 +743,6 @@
     position: absolute;
     inset: 0;
     background: linear-gradient(135deg, transparent 40%, rgba(255, 255, 255, 0.015) 50%, transparent 60%);
-    animation: placeholderShimmer 2.5s ease-in-out infinite;
-}
-
-@keyframes placeholderShimmer {
-    0% { transform: translateX(-100%); }
-    100% { transform: translateX(100%); }
 }
 
 .card__badge {
@@ -1168,76 +1060,8 @@
     color: var(--color-text);
 }
 
-/* ---------- Пагинация ---------- */
-
-.pagination {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: var(--space-2);
-    margin-top: var(--space-8);
-}
-
-.pagination__link {
-    min-width: 40px;
-    height: 40px;
-    display: grid;
-    place-items: center;
-    padding: 0 var(--space-3);
-
-    background-color: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-
-    font-size: var(--text-sm);
-    font-weight: 500;
-    transition: border-color var(--transition-fast), color var(--transition-fast),
-                background-color var(--transition-fast), transform var(--transition-fast),
-                box-shadow var(--transition-fast);
-    text-decoration: none;
-}
-
-.pagination__link:hover {
-    background-color: var(--color-surface-hover);
-    border-color: var(--color-accent);
-    color: var(--color-accent);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-.pagination__link--nav {
-    padding: 0;
-    width: 40px;
-}
-
-.pagination__link--disabled {
-    opacity: 0.3;
-    pointer-events: none;
-    cursor: default;
-}
-
-.pagination__link--current {
-    background-color: var(--color-accent);
-    border-color: var(--color-accent);
-    color: var(--color-on-accent);
-    font-weight: 700;
-    box-shadow: 0 4px 12px rgba(255, 184, 48, 0.2);
-    pointer-events: none;
-}
-
-.pagination__link--current:hover {
-    color: var(--color-on-accent);
-    transform: none;
-    box-shadow: 0 4px 12px rgba(255, 184, 48, 0.2);
-}
-
-.pagination__gap {
-    color: var(--color-text-dim);
-    display: grid;
-    place-items: center;
-    min-width: 40px;
-    height: 40px;
-}
+/* Пагинация в стиле Kinogo (kg-pagination) определена в kinogo.css —
+   старый компонент удалён вместе с includes/pagination.html. */
 
 /* ---------- Пустой результат ---------- */
 
@@ -1245,7 +1069,6 @@
     padding: var(--space-10) var(--space-4);
     text-align: center;
     color: var(--color-text-muted);
-    animation: fadeUp 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .empty-state__icon {
@@ -1464,7 +1287,7 @@
 
 .review-form:focus-within {
     border-color: var(--color-accent-dim);
-    box-shadow: 0 0 0 3px rgba(255, 184, 48, 0.08);
+    box-shadow: 0 0 0 3px rgba(232, 163, 61, 0.08);
 }
 
 .review-form__title {
@@ -1780,18 +1603,6 @@
     color: var(--color-accent);
     font-size: var(--text-xs);
     font-weight: 500;
-    animation: chipEntrance 0.3s cubic-bezier(0.4, 0, 0.2, 1) both;
-}
-
-@keyframes chipEntrance {
-    from {
-        opacity: 0;
-        transform: scale(0.85);
-    }
-    to {
-        opacity: 1;
-        transform: scale(1);
-    }
 }
 
 /* Приглушённый вариант — для справочной информации вроде стека технологий,
@@ -1840,61 +1651,6 @@
     height: 13px;
 }
 
-/* ---------- Scroll progress indicator ---------- */
-
-.scroll-progress {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 3px;
-    z-index: 100;
-    pointer-events: none;
-    background: transparent;
-}
-
-.scroll-progress__bar {
-    width: 100%;
-    height: 100%;
-    transform: scaleX(0);
-    transform-origin: left;
-    background: linear-gradient(90deg, var(--color-accent), var(--color-play));
-    border-radius: 0 2px 2px 0;
-    transition: transform 50ms linear;
-    box-shadow: 0 0 8px var(--color-accent-glow);
-}
-
-/* ---------- Loading skeleton for sections ---------- */
-
-@keyframes sectionPulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.6; }
-}
-
-.section--loading {
-    animation: sectionPulse 1.5s ease-in-out infinite;
-    pointer-events: none;
-}
-
-.section--loading .carousel__track > * {
-    opacity: 0;
-}
-
-.section--loading .carousel__track {
-    min-height: 280px;
-    position: relative;
-}
-
-.section--loading .carousel__track::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(90deg, var(--skeleton-base) 25%, var(--skeleton-shine) 50%, var(--skeleton-base) 75%);
-    background-size: 200% 100%;
-    animation: shimmer 1.5s ease-in-out infinite;
-    border-radius: var(--radius-md);
-}
-
 /* ---------- Layout с боковой панелью (главная, каталог) ---------- */
 
 .layout-sidebar {
@@ -1906,16 +1662,30 @@
 
 @media (min-width: 1024px) {
     .layout-sidebar {
-        grid-template-columns: minmax(0, 1fr) 300px;
+        grid-template-columns: 300px minmax(0, 1fr);
     }
+}
+
+.layout-sidebar__main {
+    min-width: 0;
+    grid-column: 1;
+    grid-row: 1;
 }
 
 .layout-sidebar__aside {
     min-width: 0;
+    grid-column: 1;
+    grid-row: 2;
 }
 
 @media (min-width: 1024px) {
+    .layout-sidebar__main {
+        grid-column: 2;
+    }
+
     .layout-sidebar__aside {
+        grid-column: 1;
+        grid-row: 1;
         position: sticky;
         top: calc(var(--header-height) + var(--space-4));
         max-height: calc(100vh - var(--header-height) - var(--space-8));
@@ -2103,4 +1873,10 @@
     color: var(--color-accent);
 }
 
+
+
+/* Активный чип в светлой теме: глубже янтарь для контраста 4.5+ */
+[data-theme="light"] .genre-chip--active {
+    color: var(--color-accent-deep);
+}
 

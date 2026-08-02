@@ -71,7 +71,7 @@
 
 .logo:hover .logo__mark {
     transform: scale(1.1);
-    box-shadow: 0 0 20px var(--color-accent-glow, rgba(255, 184, 48, 0.3));
+    box-shadow: 0 0 20px var(--color-accent-glow, rgba(232, 163, 61, 0.3));
 }
 
 .logo__mark {
@@ -104,50 +104,8 @@
     color: var(--color-accent);
 }
 
-.site-nav {
-    display: flex;
-    gap: var(--space-4);
-}
-
-.site-nav__link {
-    padding: var(--space-2) 0;
-    min-height: var(--touch-target);
-    display: flex;
-    align-items: center;
-    color: var(--color-text-muted);
-    font-size: var(--text-sm);
-    font-weight: 500;
-    position: relative;
-    transition: color var(--transition-fast);
-}
-
-.site-nav__link::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background: var(--color-accent);
-    transform: scaleX(0);
-    transition: transform var(--transition);
-}
-
-.site-nav__link:hover {
-    color: var(--color-text);
-}
-
-.site-nav__link:hover::after {
-    transform: scaleX(0.5);
-}
-
-.site-nav__link--active {
-    color: var(--color-text);
-}
-
-.site-nav__link--active::after {
-    transform: scaleX(1);
-}
+/* Старая десктопная навигация удалена из base.html — навигация теперь
+   в глобальном топ-наве kg-topnav (kinogo.css). */
 
 /* Поиск занимает всё свободное место между навигацией и краем */
 .site-header__search {
@@ -184,15 +142,15 @@
     border: 1px solid var(--color-border);
     border-radius: 50%;
     background: var(--color-surface);
-    color: #279fd9;
+    color: var(--color-accent);
     flex-shrink: 0;
     text-decoration: none;
     transition: border-color var(--transition-fast), color var(--transition-fast), background var(--transition-fast), box-shadow var(--transition-fast);
 }
 
 .telegram-header-link:hover {
-    border-color: #279fd9;
-    color: #279fd9;
+    border-color: var(--color-accent);
+    color: var(--color-accent);
     background: rgba(39, 159, 217, 0.08);
     box-shadow: 0 0 12px rgba(39, 159, 217, 0.2);
 }
@@ -289,8 +247,8 @@
 }
 
 .page-title {
-    font-size: var(--text-2xl);
-    letter-spacing: -0.02em;
+    font-size: 1.625rem;
+    letter-spacing: normal;
 }
 
 .page-subtitle {
@@ -335,9 +293,5 @@
         flex: 1;
         min-width: 0;
         margin-left: 0;
-    }
-
-    .site-nav {
-        display: none;
     }
 }

@@ -12,12 +12,13 @@ from django.conf import settings
 from django.core.cache import cache
 from django.db.models import Avg, Count, Q
 
-from apps.catalog.models import Collection, Title
+from apps.catalog.models import Collection, Country, Title
 from apps.catalog.models.person import Participation
 
 # Ключ кэша главной. Константа, а не строка по месту: сбрасывать кэш
 # нужно из другого модуля, и опечатка там осталась бы незамеченной.
 HOME_CACHE_KEY = "home:sections:v1"
+HOME_SIDEBAR_CACHE_KEY = "home:sidebar:v1"
 
 
 def update_title_rating(title):
@@ -203,6 +204,45 @@ def get_featured_collections(limit=4):
     return results[:limit]
 
 
+def get_home_sidebar():
+    """
+    Данные сайдбара главной (в стиле Kinogo): страны, обновления сериалов,
+    обновления аниме, последние отзывы.
+
+    Кэшируются одним куском вместе с get_home_sections: меняются редко,
+    а отдельными запросами на каждый заход стоили бы четыре запроса.
+    """
+    from apps.reviews.models import Review
+
+    cached = cache.get(HOME_SIDEBAR_CACHE_KEY)
+    if cached is not None:
+        return cached
+
+    published = Title.objects.published()
+    sidebar = {
+        "countries": list(
+            Country.objects.annotate(
+                titles_count=Count("titles", filter=Q(titles__status=Title.Status.PUBLISHED))
+            )
+            .filter(titles_count__gt=0)
+            .order_by("name")
+        ),
+        "series_updates": list(
+            published.series().with_related().order_by("-published_at")[:6]
+        ),
+        "anime_updates": list(
+            published.with_related().filter(genres__slug="animaciya").distinct().order_by("-published_at")[:6]
+        ),
+        "latest_reviews": list(
+            Review.objects.filter(status=Review.Status.PUBLISHED)
+            .select_related("user", "title")
+            .order_by("-created_at")[:4]
+        ),
+    }
+    cache.set(HOME_SIDEBAR_CACHE_KEY, sidebar, settings.CACHE_TTL_HOME)
+    return sidebar
+
+
 def get_home_sections():
     """
     Подборки главной страницы одним куском, с кэшем.
@@ -218,7 +258,7 @@ def get_home_sections():
     if cached is not None:
         return cached
 
-    published = Title.objects.published().with_related()
+    published = Title.objects.published().with_related().with_crew()
 
     sections = {
         # list() обязателен: QuerySet ленивый, в кэш попал бы не результат,
@@ -259,6 +299,9 @@ def clear_home_cache():
 
     cache.delete_many([
         HOME_CACHE_KEY,
+        HOME_SIDEBAR_CACHE_KEY,
+        HOME_TRENDING_CACHE_KEY,
+        HOME_STATS_CACHE_KEY,
         YEAR_CHOICES_CACHE_KEY,
         COLLECTIONS_CACHE_KEY,
         GENRE_CHIPS_CACHE_KEY,
@@ -277,6 +320,7 @@ def get_home_statistics():
     stats = {
         "movies_count": Title.objects.published().movies().count(),
         "series_count": Title.objects.published().series().count(),
+        "published_count": Title.objects.published().count(),
         "users_count": get_user_model().objects.count(),
         "reviews_count": Review.objects.count(),
     }
@@ -308,10 +352,10 @@ def get_trending_titles():
     )
     ids = [t["title_id"] for t in trending_ids]
     if ids:
-        titles = list(Title.objects.published().with_related().filter(id__in=ids))
+        titles = list(Title.objects.published().with_related().with_crew().filter(id__in=ids))
         titles.sort(key=lambda t: ids.index(t.id))
     else:
-        titles = list(Title.objects.published().with_related().order_by("-rating_average")[:6])
+        titles = list(Title.objects.published().with_related().with_crew().order_by("-rating_average")[:6])
     cache.set(HOME_TRENDING_CACHE_KEY, titles, settings.CACHE_TTL_HOME)
     return titles
 

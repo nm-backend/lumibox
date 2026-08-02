@@ -61,6 +61,7 @@
         </section>
     {% endif %}
 
+    <div class="kg-contentwrap">
     <section class="section">
         <h2 class="section__title">{% trans "Фильмография" %}</h2>
 
@@ -69,18 +70,9 @@
             {% for role_group in role_groups %}
                 <div class="crew-group">
                     <p class="crew-group__role">{{ role_group.grouper }} — {{ role_group.list|length }}</p>
-                    <div class="title-grid">
-                        {% for participation in role_group.list %}
-                            <div>
-                                {% include "includes/title_card.html" with title=participation.title %}
-                                {% if participation.character %}
-                                    <p class="card__meta" style="margin-top: var(--space-1); color: var(--color-accent);">
-                                        {{ participation.character }}
-                                    </p>
-                                {% endif %}
-                            </div>
-                        {% endfor %}
-                    </div>
+                    {% for participation in role_group.list %}
+                        {% include "includes/story_card.html" with title=participation.title character=participation.character %}
+                    {% endfor %}
                 </div>
             {% endfor %}
         {% else %}
@@ -90,4 +82,9 @@
             </div>
         {% endif %}
     </section>
+
+    {% include "includes/ad_slot.html" %}
+
+    {% include "includes/sidebar.html" %}
+    </div>
 {% endblock %}

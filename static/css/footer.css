@@ -1,234 +1,220 @@
-/* Подвал сайта. Вынесен из layout.css: разметки и правил стало заметно больше. */
+/* Полноценный подвал: бренд, навигация, инфо, реквизиты, ©. */
 
 .site-footer {
-    margin-top: var(--space-6);
-    padding: var(--space-6) 0 var(--space-4);
+    position: relative;
+    margin-top: var(--space-8);
+    padding-top: var(--space-8);
     border-top: 1px solid var(--color-border);
-
-    /* Подвал чуть темнее страницы, а не светлее: так он читается как
-       основание, а не как ещё один блок контента. */
-    background: linear-gradient(180deg, var(--color-surface), var(--color-bg));
+    background:
+        radial-gradient(900px 260px at 15% 0%, var(--color-accent-glow), transparent 60%),
+        linear-gradient(180deg, rgba(18, 21, 30, 0.6), rgba(7, 8, 13, 0.9));
 }
+
+.site-footer::before {
+    content: "";
+    position: absolute;
+    inset: -1px 0 auto;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(232, 163, 61, 0.35), transparent);
+}
+
+.site-footer .container {
+    padding-bottom: var(--space-6);
+}
+
+/* ---------- Сетка: бренд + 3 колонки навигации ---------- */
 
 .footer-grid {
     display: grid;
-    /* Колонка бренда шире остальных: в ней абзац текста, а не список ссылок. */
-    grid-template-columns: 1.6fr 1fr 1fr;
-    gap: var(--space-5) var(--space-4);
-    padding-bottom: var(--space-5);
+    grid-template-columns: minmax(220px, 1.4fr) repeat(3, minmax(150px, 1fr));
+    gap: var(--space-6) var(--space-8);
 }
 
-/* ---------- Колонка бренда ---------- */
-
 .footer-brand__text {
-    margin-top: var(--space-3);
-    max-width: 44ch;
+    margin: var(--space-3) 0 0;
     color: var(--color-text-muted);
-    font-size: var(--text-xs);
-    line-height: 1.6;
+    font-size: var(--text-sm);
+    line-height: 1.7;
+    max-width: 34ch;
 }
 
 .footer-brand__stack {
-    margin-top: var(--space-3);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin: var(--space-4) 0 0;
+    padding: 4px 10px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-full);
     color: var(--color-text-dim);
-    font-size: var(--text-xs);
-    opacity: 0.6;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.04em;
 }
 
-/* ---------- Колонки ссылок ---------- */
+.footer-brand__stack::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--color-success);
+    box-shadow: 0 0 8px rgba(74, 222, 128, 0.6);
+}
 
 .footer-nav__title {
-    margin-bottom: var(--space-3);
-    color: var(--color-text);
-    font-size: 10px;
+    margin: 0 0 var(--space-3);
+    font-size: var(--text-sm);
     font-weight: 700;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
-    letter-spacing: 0.1em;
+    color: var(--color-text);
+}
+
+.footer-nav__title::after {
+    content: "";
+    display: block;
+    width: 24px;
+    height: 2px;
+    margin-top: var(--space-2);
+    border-radius: 2px;
+    background: linear-gradient(90deg, var(--color-accent), transparent);
 }
 
 .footer-nav__list {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
 }
 
 .footer-nav__link {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-1);
-
+    display: inline-block;
+    padding: 4px 0;
     color: var(--color-text-muted);
-    font-size: 12px;
-    transition: color var(--transition-fast), transform var(--transition-fast);
+    font-size: var(--text-sm);
+    text-decoration: none;
+    transition: color var(--transition-fast), transform var(--transition-fast), text-shadow var(--transition-fast);
 }
 
 .footer-nav__link:hover {
     color: var(--color-accent);
-    /* Микросдвиг вместо подчёркивания: подчёркивание в подвале
-       превращает список ссылок в кашу из линий. */
-    transform: translateX(2px);
+    text-shadow: 0 0 14px rgba(232, 163, 61, 0.45);
+    transform: translateX(3px);
 }
 
-/* Стрелка внешней ссылки проявляется только на наведении:
-   четыре постоянные стрелки в колонке выглядят шумно. */
-.footer-nav__link .icon {
-    opacity: 0;
-    transition: opacity var(--transition-fast);
+/* ---------- Реквизиты: разработка и руководитель проекта ---------- */
+
+.footer-credits {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2) var(--space-4);
+    margin-top: var(--space-6);
+    padding: var(--space-4) 0;
+    border-top: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-border);
 }
 
-.footer-nav__link:hover .icon {
-    opacity: 1;
+.footer-credits__item {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin: 0;
 }
 
-/* ---------- Trust bar ---------- */
+.footer-credits__label {
+    color: var(--color-text-dim);
+    font-size: var(--text-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.footer-credits__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--color-text);
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    text-decoration: none;
+    transition: color var(--transition-fast), text-shadow var(--transition-fast);
+}
+
+.footer-credits__link:hover {
+    color: var(--color-accent);
+    text-shadow: 0 0 14px rgba(232, 163, 61, 0.45);
+}
+
+.footer-credits__sep {
+    color: var(--color-text-muted);
+}
+
+/* ---------- Trust-блок ---------- */
 
 .footer-trust {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--space-2) var(--space-4);
     align-items: center;
-    padding: var(--space-3) 0;
-    border-top: 1px solid var(--color-border);
-    margin-top: var(--space-2);
+    gap: var(--space-3) var(--space-5);
+    padding: var(--space-4) 0 var(--space-2);
 }
 
 .footer-trust__item {
+    font-size: var(--text-xs);
     color: var(--color-text-dim);
-    font-size: 11px;
-    line-height: 1;
-}
-
-.footer-trust__item--link {
-    color: var(--color-text-muted);
     text-decoration: none;
     transition: color var(--transition-fast);
+}
+
+.footer-trust__item--highlight {
+    font-weight: 700;
+    color: var(--color-accent);
 }
 
 .footer-trust__item--link:hover {
     color: var(--color-accent);
 }
 
-.footer-trust__item--highlight {
-    color: var(--color-text-muted);
-    font-weight: 600;
-}
-
-/* ---------- Credits (Разработка / Руководитель проекта) ---------- */
-
-.footer-credits {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-2) var(--space-4);
-    align-items: center;
-    margin: var(--space-3) 0;
-    padding: var(--space-3) 0;
-    border-top: 1px solid var(--color-border);
-}
-
-.footer-credits__item {
-    display: inline-flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: var(--space-2);
-    color: var(--color-text-dim);
-    font-size: 12px;
-}
-
-.footer-credits__label {
-    color: var(--color-text-muted);
-    font-weight: 600;
-}
-
-.footer-credits__link {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-1);
-    color: var(--color-text);
-    text-decoration: none;
-    transition: color var(--transition-fast);
-}
-
-.footer-credits__link:hover {
-    color: var(--color-accent);
-}
-
-.footer-credits__sep {
-    color: var(--color-text-dim);
-    font-size: 12px;
-}
+/* ---------- Нижняя строка: © и Telegram ---------- */
 
 .footer-bottom {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--space-2) var(--space-4);
     align-items: center;
     justify-content: space-between;
-
+    gap: var(--space-3);
     padding-top: var(--space-3);
-    border-top: 1px solid var(--color-border);
 }
 
 .footer-bottom__copy {
-    color: var(--color-text-muted);
-    font-size: 12px;
-}
-
-.footer-bottom__note {
+    margin: 0;
     color: var(--color-text-dim);
-    font-size: 11px;
+    font-size: var(--text-xs);
 }
 
 .footer-bottom__links {
     display: flex;
-    flex-wrap: wrap;
     align-items: center;
-    gap: var(--space-2);
-}
-
-.footer-bottom__sep {
-    color: var(--color-text-dim);
-    font-size: 11px;
+    gap: var(--space-4);
 }
 
 .footer-bottom__telegram-link {
     display: inline-flex;
     align-items: center;
-    gap: var(--space-1);
-    padding: 3px 10px;
-    border-radius: var(--radius-full);
-    background: linear-gradient(135deg, #1e96c8, #279fd9);
-    color: #fff;
-    font-size: 11px;
-    font-weight: 600;
+    gap: 6px;
+    color: var(--color-text-muted);
+    font-size: var(--text-xs);
     text-decoration: none;
-    transition: transform var(--transition-fast), box-shadow var(--transition-fast);
-    line-height: 1;
+    transition: color var(--transition-fast), text-shadow var(--transition-fast);
 }
 
 .footer-bottom__telegram-link:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 3px 10px rgba(30, 150, 200, 0.4);
+    color: var(--color-accent);
+    text-shadow: 0 0 14px rgba(232, 163, 61, 0.45);
 }
 
-.footer-bottom__telegram-icon {
-    flex-shrink: 0;
-}
+/* ---------- Адаптив ---------- */
 
-@media (max-width: 560px) {
-    .footer-credits {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: var(--space-2);
-    }
-
-    .footer-credits__sep {
-        display: none;
-    }
-}
-
-/* ---------- Планшет и телефон ---------- */
-
-@media (max-width: 900px) {
+@media (max-width: 1023px) {
     .footer-grid {
         grid-template-columns: 1fr 1fr;
     }
@@ -239,14 +225,32 @@
 }
 
 @media (max-width: 560px) {
+    .site-footer {
+        margin-top: var(--space-6);
+        padding-top: var(--space-6);
+    }
+
     .footer-grid {
         grid-template-columns: 1fr;
         gap: var(--space-5);
     }
 
+    .footer-brand {
+        grid-column: auto;
+    }
+
+    .footer-credits {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--space-2);
+    }
+
+    .footer-credits__sep {
+        display: none;
+    }
+
     .footer-bottom {
         flex-direction: column;
-        align-items: center;
-        text-align: center;
+        align-items: flex-start;
     }
 }

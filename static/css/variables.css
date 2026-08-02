@@ -15,19 +15,29 @@
     --color-bg: #07080d;
     --color-surface: #12151e;
     --color-surface-hover: #1a1f2b;
-    --color-border: #222838;
 
     /* Текст: серебро киноплёнки */
     --color-text: #e8ecf4;
     --color-text-muted: #8891a8;
-    --color-text-dim: #5c6478;
+    --color-text-dim: #7c8599;
+    --color-text-soft: #c9d1e4;
+    --color-text-bright: #e6e6e6;
+    --color-text-strong: #f3f3f3;
+    --color-text-faint: #686868;
+    --color-text-shadow: rgba(0, 0, 0, 0.6);
 
-    /* Акцент — свет кинопроектора: тёплый янтарь */
-    --color-accent: #ffb830;
-    --color-accent-hover: #ffc95e;
-    --color-accent-dim: rgba(255, 184, 48, 0.10);
-    --color-accent-glow: rgba(255, 184, 48, 0.08);
-    --color-on-accent: #150f02;
+    /*
+      Акцент — свет кинопроектора: премиальный янтарно-оранжевый.
+      Между янтарным и оранжевым: не жёлтый, не красный, не кислотный.
+      Тёплый золотистый оттенок уровня IMAX / Dolby Cinema.
+    */
+    --color-accent: #e8a33d;
+    --color-accent-hover: #f2b75c;
+    --color-accent-soft: #f9ce93;
+    --color-accent-deep: #c9831f;
+    --color-accent-dim: rgba(232, 163, 61, 0.12);
+    --color-accent-glow: rgba(232, 163, 61, 0.10);
+    --color-on-accent: #211703;
 
     /* Акцент действия — «play red»: кнопка воспроизведения, CTA */
     --color-play: #e11d48;
@@ -40,6 +50,18 @@
     --color-success: #4ade80;
     --color-error: #ff6b5a;
     --color-info: #5b9cf5;
+
+    /* Карточки и поверхности — градации кинозала */
+    --color-card: #0b0d12;
+    --color-card-hover: #0d1017;
+    --color-surface-2: #161a26;
+    --color-surface-3: #141826;
+    --color-surface-deep: #0a0c11;
+
+    /* Границы */
+    --color-border: #222838;
+    --color-border-soft: #2a2f3d;
+    --color-border-strong: #3a4154;
 
     /* Glass — чуть теплее, чем фон */
     --glass-bg: rgba(18, 21, 30, 0.78);
@@ -79,7 +101,7 @@
     --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4);
     --shadow-md: 0 3px 8px rgba(0, 0, 0, 0.4), 0 8px 20px rgba(0, 0, 0, 0.3);
     --shadow-card: 0 4px 12px rgba(0, 0, 0, 0.5), 0 16px 40px rgba(0, 0, 0, 0.35);
-    --shadow-accent: 0 8px 28px rgba(255, 184, 48, 0.15);
+    --shadow-accent: 0 8px 28px rgba(232, 163, 61, 0.15);
     --shadow-glass: 0 8px 32px rgba(0, 0, 0, 0.55);
     --shadow-play: 0 4px 20px rgba(225, 29, 72, 0.35);
 
@@ -97,12 +119,12 @@
     --transition-exit: 200ms cubic-bezier(0.4, 0, 1, 1);
 
     /* --- Макет --- */
-    --container-width: 1280px;
-    --header-height: 68px;
+    --container-width: 1211px;
+    --header-height: 82px;
     --touch-target: 44px;
 
     /* Выделение текста — цвет кинопроектора */
-    --color-selection-bg: rgba(255, 184, 48, 0.25);
+    --color-selection-bg: rgba(232, 163, 61, 0.28);
     --color-selection-text: inherit;
 
     /* --- Скелетон --- */
@@ -119,11 +141,25 @@
     --color-border: #d4d9e3;
     --color-text: #12141c;
     --color-text-muted: #5a6278;
-    --color-text-dim: #8a93aa;
-    --color-accent: #d49001;
-    --color-accent-hover: #b87a00;
-    --color-accent-dim: rgba(212, 144, 1, 0.08);
+    --color-text-dim: #5f677c;
+    --color-text-soft: #3d4657;
+    --color-text-bright: #232630;
+    --color-text-strong: #0b0d12;
+    --color-text-faint: #9aa3b8;
+    --color-text-shadow: rgba(255, 255, 255, 0.55);
+    --color-accent: #966612;
+    --color-accent-hover: #7e540e;
+    --color-accent-soft: #b57e1f;
+    --color-accent-deep: #6b470c;
+    --color-accent-dim: rgba(150, 102, 18, 0.08);
     --color-on-accent: #ffffff;
+    --color-card: #ffffff;
+    --color-card-hover: #f2f4f8;
+    --color-surface-2: #eef1f6;
+    --color-surface-3: #e8ebf2;
+    --color-surface-deep: #dfe3ec;
+    --color-border-soft: #dfe3ec;
+    --color-border-strong: #c3cad6;
     --color-play: #c51a44;
     --color-play-hover: #d91f4d;
     --color-play-dim: rgba(197, 26, 68, 0.10);
@@ -134,24 +170,25 @@
     --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.06);
     --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.06), 0 4px 18px rgba(0, 0, 0, 0.04);
     --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.06), 0 8px 28px rgba(0, 0, 0, 0.04);
-    --shadow-accent: 0 8px 24px rgba(212, 144, 1, 0.12);
+    --shadow-accent: 0 8px 24px rgba(150, 102, 18, 0.12);
     --shadow-play: 0 4px 16px rgba(197, 26, 68, 0.30);
 }
 
 /* ---------- Typography base layer ---------- */
 
-/* Display typography: Bebas Neue for large headings (cinema poster feel) */
+/* Заголовки сайта — как в Kinogo: рабочий шрифт Inter, без декора.
+   Bebas Neue остаётся только в промо-зоне главной (стиль афиши). */
 h1, h2, h3.section__title, .showcase__name, .film-hero__name {
-    font-family: var(--font-display);
-    font-weight: 400;
-    letter-spacing: 0.02em;
-    line-height: 1.1;
-    text-transform: uppercase;
+    font-family: var(--font-base);
+    font-weight: 600;
+    letter-spacing: normal;
+    line-height: 1.2;
+    text-transform: none;
     text-wrap: balance;
 }
 
-h1 { font-size: var(--text-3xl); }
-h2 { font-size: var(--text-2xl); }
+h1 { font-size: 1.625rem; }
+h2 { font-size: 1.25rem; }
 
 /* Card and meta titles use body font for readability at small sizes */
 h3:not(.section__title) {

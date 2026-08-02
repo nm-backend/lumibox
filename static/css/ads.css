@@ -49,31 +49,6 @@
     font-weight: 600;
 }
 
-.ad-rail__link {
-    display: block;
-    line-height: 0;
-    border-radius: var(--radius-md);
-    overflow: hidden;
-    transition: box-shadow var(--transition-fast);
-}
-
-.ad-rail__link:hover {
-    box-shadow: 0 0 0 2px var(--color-accent), 0 4px 16px rgba(0, 0, 0, 0.3);
-}
-
-.ad-rail__banner {
-    display: block;
-    width: 160px;
-    height: 600px;
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    transition: opacity var(--transition-fast);
-}
-
-.ad-rail__banner:hover {
-    opacity: 0.9;
-}
-
 .ad-rail__disclaimer {
     font-size: 10px;
     color: var(--color-text-dim);
@@ -110,98 +85,7 @@
 
 /* ===== Горизонтальный блок между секциями ===== */
 
-.ad-block {
-    display: flex;
-    justify-content: center;
-    padding: var(--space-5) 0;
-    margin: var(--space-6) 0;
-}
-
-.ad-block__inner {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--space-3);
-    padding: var(--space-4);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-lg);
-    background: var(--color-surface);
-    width: 100%;
-    max-width: 760px;
-    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
-}
-
-.ad-block__inner:hover {
-    border-color: var(--color-accent-dim);
-    box-shadow: var(--shadow-accent);
-}
-
-.ad-block__badge {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-1);
-    padding: 2px var(--space-2);
-    border-radius: var(--radius-full);
-    background: var(--color-play-dim);
-    color: var(--color-play);
-    font-size: 10px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-}
-
-.ad-block__link {
-    display: block;
-    line-height: 0;
-    border-radius: var(--radius-md);
-    overflow: hidden;
-    transition: box-shadow var(--transition-fast);
-}
-
-.ad-block__link:hover {
-    box-shadow: 0 0 0 2px var(--color-play), 0 4px 16px rgba(0, 0, 0, 0.2);
-}
-
-.ad-block__banner {
-    display: block;
-    border-radius: var(--radius-md);
-    border: 1px solid var(--color-border);
-    transition: opacity var(--transition-fast);
-}
-
-.ad-block__banner:hover {
-    opacity: 0.9;
-}
-
-.ad-block__banner--leaderboard {
-    width: 100%;
-    max-width: 728px;
-    height: 90px;
-}
-
-.ad-block__caption {
-    color: var(--color-text-dim);
-    font-size: var(--text-xs);
-    text-align: center;
-}
-
-.ad-block__cta {
-    color: var(--color-accent);
-    font-weight: 600;
-    text-decoration: underline;
-    text-underline-offset: 2px;
-}
-
-.ad-block__cta:hover {
-    color: var(--color-accent-hover);
-}
-
-/* Широкие экраны — контейнер расширяется, заполняя пространство между рекламой */
-@media (min-width: 1640px) {
-    .container {
-        max-width: 1480px;
-    }
-}
+/* Широкие экраны — колонка фиксированная, реклама по бокам */
 
 /* На печати реклама не нужна */
 @media print {

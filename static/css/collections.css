@@ -45,7 +45,7 @@
         hsl(var(--card-hue, 30), 30%, 10%),
         hsl(calc(var(--card-hue, 30) + 40), 20%, 6%)
     );
-    color: hsla(var(--card-hue, 30), 40%, 60%, 0.5);
+    color: hsla(var(--card-hue, 30), 50%, 74%, 0.95);
     transition: opacity var(--transition-fast), transform var(--transition-slow);
     position: relative;
     overflow: hidden;
@@ -66,7 +66,7 @@
 }
 
 .collection-card__fallback-icon {
-    opacity: 0.5;
+    opacity: 0.75;
     position: relative;
     z-index: 1;
 }
@@ -77,7 +77,7 @@
     font-family: var(--font-display);
     text-transform: uppercase;
     letter-spacing: 0.04em;
-    opacity: 0.5;
+    opacity: 0.9;
     position: relative;
     z-index: 1;
 }
@@ -112,33 +112,6 @@
 }
 
 .collection-card__count {
-    color: var(--color-text-dim);
-    font-size: var(--text-xs);
-}
-
-/* Collection detail: header */
-.collection-header {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-2);
-    margin-bottom: var(--space-6);
-    padding-bottom: var(--space-5);
-    border-bottom: 1px solid var(--color-border);
-}
-
-.collection-header__title {
-    font-size: var(--text-2xl);
-    letter-spacing: -0.02em;
-}
-
-.collection-header__desc {
-    color: var(--color-text-muted);
-    font-size: var(--text-sm);
-    max-width: 62ch;
-    line-height: 1.7;
-}
-
-.collection-header__meta {
     color: var(--color-text-dim);
     font-size: var(--text-xs);
 }

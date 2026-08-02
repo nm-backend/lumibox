@@ -51,34 +51,6 @@
     grid-template-columns: 260px 1fr;
     gap: var(--space-6);
     align-items: start;
-    animation: fadeUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) both;
-}
-
-.film-hero__poster {
-    animation: heroPosterEntrance 0.7s cubic-bezier(0.4, 0, 0.2, 1) both;
-}
-
-.film-hero__body > * {
-    animation: fadeUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) both;
-}
-
-.film-hero__body > :nth-child(1) { animation-delay: 0.10s; }
-.film-hero__body > :nth-child(2) { animation-delay: 0.15s; }
-.film-hero__body > :nth-child(3) { animation-delay: 0.20s; }
-.film-hero__body > :nth-child(4) { animation-delay: 0.25s; }
-.film-hero__body > :nth-child(5) { animation-delay: 0.30s; }
-.film-hero__body > :nth-child(6) { animation-delay: 0.35s; }
-.film-hero__body > :nth-child(7) { animation-delay: 0.40s; }
-
-@keyframes heroPosterEntrance {
-    from {
-        opacity: 0;
-        transform: translateX(-20px) scale(0.95);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(0) scale(1);
-    }
 }
 
 .film-hero__poster {
@@ -93,7 +65,7 @@
 }
 
 .film-hero__poster:hover {
-    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 184, 48, 0.15);
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(232, 163, 61, 0.15);
     transform: translateY(-2px);
 }
 
@@ -226,7 +198,7 @@
 }
 
 .score:hover {
-    box-shadow: 0 0 16px rgba(255, 184, 48, 0.15);
+    box-shadow: 0 0 16px rgba(232, 163, 61, 0.15);
 }
 
 .score__value {
@@ -309,19 +281,6 @@
     grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
     gap: var(--space-3);
 }
-
-.crew-list > .crew {
-    animation: cardEntrance 0.4s cubic-bezier(0.4, 0, 0.2, 1) both;
-}
-
-.crew-list > .crew:nth-child(1) { animation-delay: 0.00s; }
-.crew-list > .crew:nth-child(2) { animation-delay: 0.03s; }
-.crew-list > .crew:nth-child(3) { animation-delay: 0.06s; }
-.crew-list > .crew:nth-child(4) { animation-delay: 0.09s; }
-.crew-list > .crew:nth-child(5) { animation-delay: 0.12s; }
-.crew-list > .crew:nth-child(6) { animation-delay: 0.15s; }
-.crew-list > .crew:nth-child(7) { animation-delay: 0.18s; }
-.crew-list > .crew:nth-child(8) { animation-delay: 0.21s; }
 
 .crew {
     display: flex;

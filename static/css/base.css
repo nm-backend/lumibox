@@ -10,6 +10,7 @@
 
 html {
     scroll-behavior: smooth;
+    font-family: var(--font-base);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -28,6 +29,7 @@ body {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+    font-family: var(--font-base);
 }
 
 /* Custom scrollbar */
@@ -175,24 +177,6 @@ button {
     white-space: nowrap;
 }
 
-/* ---------- Cinema projector glow (signature) ---------- */
-
-.cinema-glow {
-    position: fixed;
-    bottom: -40%;
-    right: -20%;
-    width: 80vmax;
-    height: 80vmax;
-    pointer-events: none;
-    z-index: -1;
-    background: radial-gradient(
-        ellipse at 50% 100%,
-        var(--color-accent-glow) 0%,
-        transparent 60%
-    );
-    opacity: 0.5;
-}
-
 /* ---------- Blur-up image loading (progressive enhancement) ---------- */
 
 @keyframes fadeInLoaded {
@@ -255,7 +239,6 @@ img[data-loaded] {
     padding: var(--space-10) var(--space-4);
     max-width: 540px;
     margin: 0 auto;
-    animation: fadeUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
 }
 
@@ -275,14 +258,6 @@ img[data-loaded] {
     opacity: 0.035;
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
     background-repeat: repeat;
-    animation: grainShift 8s steps(4) infinite;
-}
-
-@keyframes grainShift {
-    0% { transform: translate(0, 0); }
-    25% { transform: translate(-5%, -3%); }
-    50% { transform: translate(3%, 5%); }
-    75% { transform: translate(-3%, -3%); }
 }
 
 .error-page__beam {
@@ -291,7 +266,7 @@ img[data-loaded] {
     left: 50%;
     width: 2px;
     height: 100%;
-    background: linear-gradient(180deg, transparent 0%, rgba(255, 184, 48, 0.06) 30%, rgba(255, 184, 48, 0.10) 50%, rgba(255, 184, 48, 0.06) 70%, transparent 100%);
+    background: linear-gradient(180deg, transparent 0%, rgba(232, 163, 61, 0.06) 30%, rgba(232, 163, 61, 0.10) 50%, rgba(232, 163, 61, 0.06) 70%, transparent 100%);
     transform: translateX(-50%);
 }
 
@@ -309,7 +284,7 @@ img[data-loaded] {
 .error-page__code {
     font-size: 7rem;
     font-weight: 800;
-    background: linear-gradient(135deg, var(--color-accent), rgba(255, 184, 48, 0.3));
+    background: linear-gradient(135deg, var(--color-accent), rgba(232, 163, 61, 0.3));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -378,7 +353,7 @@ img[data-loaded] {
     border-radius: var(--radius-sm);
     font-size: var(--text-xs);
     color: var(--color-text-muted);
-    transition: all var(--transition-fast);
+    transition: border-color var(--transition-fast), color var(--transition-fast), background-color var(--transition-fast);
     text-align: center;
 }
 
@@ -434,8 +409,5 @@ img[data-loaded] {
 
 /* ---------- Ultra-wide ---------- */
 
-@media (min-width: 1600px) {
-    .container {
-        max-width: 1440px;
-    }
-}
+/* Колонка фиксированная, как в Kinogo: на ультра-широких экранах
+   контент остаётся по центру, поля по бокам расширяются. */
