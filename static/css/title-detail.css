@@ -491,6 +491,17 @@
     background-color: var(--color-surface-hover);
 }
 
+.sidebar-share__btn--copied {
+    width: auto;
+    padding: 0 var(--space-2);
+    border-radius: var(--radius-full);
+    color: var(--color-accent);
+    border-color: var(--color-accent);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    white-space: nowrap;
+}
+
 /* ---------- Star rating (clickable) ---------- */
 
 .film-hero__rating-section {
@@ -532,10 +543,6 @@
 
 .star-rating__star svg {
     display: block;
-}
-
-.star-rating__input {
-    display: none;
 }
 
 /* ---------- Планшет и телефон ---------- */

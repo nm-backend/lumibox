@@ -6,7 +6,7 @@
 
 .kg-home {
     font-family: var(--font-base);
-    font-size: 14px;
+    font-size: 16px;
     line-height: 1.45;
     color: var(--color-text-muted);
     background: var(--color-bg);
@@ -285,7 +285,7 @@
     line-height: 24px;
     padding: 0 10px;
     border: 1px solid var(--color-border-strong);
-    border-radius: 3px;
+    border-radius: var(--radius-sm);
     background: var(--color-card);
     box-sizing: content-box;
     cursor: pointer;
@@ -326,7 +326,7 @@
     left: 0;
     background: rgba(13, 15, 21, 0.97);
     border: 1px solid var(--color-border-soft);
-    border-radius: 0 0 5px 5px;
+    border-radius: 0 0 var(--radius-sm) var(--radius-sm);
     margin: 0;
     padding: 0;
     list-style: none;
@@ -374,7 +374,7 @@
     width: 32px;
     padding: 0;
     border: 1px solid var(--color-border-strong);
-    border-radius: 3px;
+    border-radius: var(--radius-sm);
     background: var(--color-card);
     color: var(--color-text-dim);
     font-size: 13px;
@@ -439,21 +439,6 @@
 
 /* ---------- Карточка фильма (shortStory) ---------- */
 
-.kg-shortstory {
-    position: relative;
-    background: var(--color-surface);
-    border-top: 1px solid var(--color-border);
-    box-shadow: 0 -1px 0 rgba(17, 17, 17, 1);
-    padding: 0 15px 15px;
-    border-radius: 0;
-    transition: background 0.15s ease, box-shadow 0.2s ease;
-}
-
-.kg-shortstory:hover {
-    background: var(--color-surface-hover);
-    box-shadow: 0 -1px 0 rgba(17, 17, 17, 1), 0 14px 40px rgba(0, 0, 0, 0.45), inset 0 0 0 1px rgba(232, 163, 61, 0.12);
-}
-
 .kg-shortstory__header {
     display: flex;
     align-items: center;
@@ -467,12 +452,12 @@
     min-width: 0;
 }
 
-.kg-shortstory__title h2 {
+.kg-shortstory__title h2,
+.kg-shortstory__title h3 {
     margin: 0;
     color: var(--color-text-strong);
-    font-size: 20px;
+    font-size: 1.125rem;
     font-weight: 700;
-    text-shadow: 1px 1px #000;
 }
 
 .kg-shortstory__title a {
@@ -547,7 +532,8 @@
 .kg-shortstory__poster img {
     display: block;
     width: 100%;
-    height: 396px;
+    height: auto;
+    aspect-ratio: 2 / 3;
     object-fit: cover;
     object-position: center top;
     background: var(--color-card);
@@ -604,7 +590,7 @@
     position: absolute;
     z-index: 2;
     padding: 2px 8px;
-    border-radius: 3px;
+    border-radius: var(--radius-sm);
     font-size: 10px;
     font-weight: 700;
     letter-spacing: 0.05em;
@@ -637,12 +623,13 @@
     justify-content: center;
     gap: 10px;
     width: 100%;
-    height: 396px;
+    height: auto;
+    aspect-ratio: 2 / 3;
     color: var(--color-text-dim);
     background:
         radial-gradient(120% 60% at 50% 0%, rgba(232, 163, 61, 0.08), transparent 65%),
         linear-gradient(160deg, var(--color-surface-3) 0%, var(--color-card-hover) 60%, var(--color-surface-deep) 100%);
-    border-radius: 4px;
+    border-radius: var(--radius-sm);
     transition: color 0.15s ease, box-shadow 0.15s ease;
 }
 
@@ -739,7 +726,7 @@
     background: linear-gradient(90deg, var(--color-accent), var(--color-accent-hover));
     border: 0;
     color: var(--color-on-accent);
-    border-radius: 4px;
+    border-radius: var(--radius-sm);
     padding: 8px 18px;
     text-decoration: none;
     display: block;
@@ -808,11 +795,13 @@
     color: var(--color-text-strong);
     font-size: 15px;
     font-weight: 700;
-    text-shadow: 1px 1px #000;
 }
 
 .kg-aheader--row a {
     margin-left: auto;
+    padding: 8px 10px;
+    margin-top: -8px;
+    margin-bottom: -8px;
     font-size: 13px;
     font-weight: 400;
     text-shadow: none;
@@ -848,7 +837,6 @@
     font-weight: 700;
     font-style: normal;
     line-height: 17px;
-    text-shadow: 1px 1px #000;
 }
 
 .kg-accent--star {
@@ -899,7 +887,7 @@
     align-items: center;
     background: var(--color-surface);
     border: 1px solid var(--color-border);
-    border-radius: 6px;
+    border-radius: var(--radius-sm);
     padding: 8px 10px;
     margin-top: 5px;
     color: var(--color-text-soft);
@@ -919,7 +907,7 @@
     width: 60px;
     height: 40px;
     margin-right: 10px;
-    border-radius: 2px;
+    border-radius: var(--radius-sm);
     background: #000;
     object-fit: cover;
 }
@@ -945,7 +933,7 @@
     width: 83px;
     height: 123px;
     margin-right: 10px;
-    border-radius: 3px;
+    border-radius: var(--radius-sm);
     background: var(--color-surface);
     border: 1px solid var(--color-border-strong);
     object-fit: cover;
@@ -975,7 +963,7 @@
 /* Обновления сериалов / аниме (lastUpdates) */
 
 .kg-lastupdates {
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.24);
     overflow: hidden;
 }
@@ -1009,7 +997,7 @@
     width: 54px;
     height: 64px;
     flex-shrink: 0;
-    border-radius: 4px;
+    border-radius: var(--radius-sm);
     object-fit: cover;
     background: #000;
 }
@@ -1055,7 +1043,7 @@
 .kg-lastcomment {
     background: var(--color-surface);
     border: 1px solid var(--color-border);
-    border-radius: 7px;
+    border-radius: var(--radius-sm);
     margin-top: 5px;
     padding: 6px 10px;
 }
@@ -1117,7 +1105,7 @@
     gap: 8px;
     min-height: 110px;
     border: 1px dashed var(--color-border-strong);
-    border-radius: 12px;
+    border-radius: var(--radius-md);
     background: linear-gradient(180deg, rgba(18, 21, 30, 0.7), rgba(13, 15, 22, 0.9));
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
 }
@@ -1470,6 +1458,8 @@
 /* Карточки: объёмный градиент, янтарный ореол при наведении */
 
 .kg-shortstory {
+    position: relative;
+    padding: 0 15px 15px;
     background: linear-gradient(180deg, var(--color-surface-2) 0%, var(--color-surface) 100%);
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
     transition: background 0.15s ease, box-shadow 0.2s ease;

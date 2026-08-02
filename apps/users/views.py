@@ -2,6 +2,7 @@ from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView, LogoutView
+from django.http import HttpResponseForbidden
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, UpdateView
@@ -32,25 +33,26 @@ class RegisterView(CreateView):
 
         # Rate limiting: 10 регистраций в час с одного IP.
         # Ключ — IP адрес. Используем cache.get/set для совместимости
-        # с любым бэкендом (не только Redis).
-        from django.core.cache import cache
-        from django.http import HttpResponse
+        # с любым бэкендом (не только Redis). Считаются только успешные
+        # регистрации — простое открытие страницы лимит не тратит.
+        if request.method == "POST":
+            from django.core.cache import cache
 
-        ip = request.META.get("REMOTE_ADDR", "unknown")
-        cache_key = f"register:rate:{ip}"
+            ip = request.META.get("REMOTE_ADDR", "unknown")
+            cache_key = f"register:rate:{ip}"
 
-        count = cache.get(cache_key, 0)
-        if count >= 10:
-            return HttpResponse(
-                "Слишком много попыток регистрации. Повторите позже.",
-                status=429,
-            )
-        cache.set(cache_key, count + 1, 3600)
+            if cache.get(cache_key, 0) >= 10:
+                return HttpResponseForbidden(render(request, "429.html", status=429))
 
         return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
         response = super().form_valid(form)
+        from django.core.cache import cache
+
+        ip = self.request.META.get("REMOTE_ADDR", "unknown")
+        cache_key = f"register:rate:{ip}"
+        cache.incr(cache_key) if cache.get(cache_key) else cache.set(cache_key, 1, 3600)
         login(self.request, self.object, backend="django.contrib.auth.backends.ModelBackend")
         messages.success(self.request, f"Добро пожаловать, {self.object.display_name}!")
         return response

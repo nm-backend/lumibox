@@ -131,6 +131,10 @@
 }
 
 .search__submit {
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
     color: var(--color-text-muted);
     font-size: var(--text-sm);
 }
@@ -562,6 +566,12 @@
     transform: translateX(4px);
 }
 
+.mobile-nav__divider {
+    border: none;
+    border-top: 1px solid var(--color-border);
+    margin: var(--space-2) 0;
+}
+
 /* ---------- Карточка фильма ---------- */
 
 .card {
@@ -571,10 +581,6 @@
     gap: var(--space-1);
     min-width: 0;
     contain: layout style;
-}
-
-.card--compact {
-    gap: var(--space-1);
 }
 
 .card__poster {
@@ -1020,35 +1026,6 @@
 }
 
 /* Play button — красный акцент для воспроизведения */
-.button--play {
-    background-color: var(--color-play);
-    color: var(--color-on-play);
-    box-shadow: 0 2px 12px rgba(225, 29, 72, 0.3);
-}
-
-.button--play:hover {
-    background-color: var(--color-play-hover);
-    color: var(--color-on-play);
-    transform: translateY(-1px) scale(1.02);
-    box-shadow: var(--shadow-play);
-}
-
-.button--play:active {
-    transform: translateY(1px) scale(0.98);
-}
-
-/* Ghost button with play accent */
-.button--ghost-play {
-    border: 1.5px solid var(--color-play);
-    color: var(--color-play);
-}
-
-.button--ghost-play:hover {
-    background-color: var(--color-play-dim);
-    color: var(--color-play-hover);
-    border-color: var(--color-play-hover);
-}
-
 .button--ghost {
     border: 1px solid var(--color-border);
     color: var(--color-text-muted);
@@ -1628,14 +1605,21 @@
 }
 
 .chip__remove {
+    display: inline-grid;
+    place-items: center;
+    width: 24px;
+    height: 24px;
+    margin: -6px -8px -6px 2px;
+    border-radius: 50%;
     color: inherit;
     font-size: var(--text-sm);
     line-height: 1;
     opacity: 0.7;
-    transition: opacity var(--transition-fast);
+    transition: opacity var(--transition-fast), background var(--transition-fast);
 }
 
 .chip__remove:hover {
+    background: var(--color-accent-dim);
     color: inherit;
     opacity: 1;
 }
@@ -1644,59 +1628,6 @@
     width: 18px;
     height: 18px;
     flex-shrink: 0;
-}
-
-.icon--sm {
-    width: 13px;
-    height: 13px;
-}
-
-/* ---------- Layout с боковой панелью (главная, каталог) ---------- */
-
-.layout-sidebar {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    gap: var(--space-6);
-    align-items: start;
-}
-
-@media (min-width: 1024px) {
-    .layout-sidebar {
-        grid-template-columns: 300px minmax(0, 1fr);
-    }
-}
-
-.layout-sidebar__main {
-    min-width: 0;
-    grid-column: 1;
-    grid-row: 1;
-}
-
-.layout-sidebar__aside {
-    min-width: 0;
-    grid-column: 1;
-    grid-row: 2;
-}
-
-@media (min-width: 1024px) {
-    .layout-sidebar__main {
-        grid-column: 2;
-    }
-
-    .layout-sidebar__aside {
-        grid-column: 1;
-        grid-row: 1;
-        position: sticky;
-        top: calc(var(--header-height) + var(--space-4));
-        max-height: calc(100vh - var(--header-height) - var(--space-8));
-        overflow-y: auto;
-        overscroll-behavior: contain;
-        scrollbar-width: none;
-    }
-
-    .layout-sidebar__aside::-webkit-scrollbar {
-        display: none;
-    }
 }
 
 /* ---------- Боковая панель ---------- */

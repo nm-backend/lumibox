@@ -129,6 +129,10 @@
     line-height: 1.7;
 }
 
+.profile-header__chips {
+    margin-top: var(--space-2);
+}
+
 /* ---------- Awards ---------- */
 
 .award-list {
@@ -192,12 +196,12 @@
     white-space: nowrap;
 }
 
-.award-item__result--won {
+.award-item__result--winner {
     background: var(--color-accent-dim);
     color: var(--color-accent);
 }
 
-.award-item__result--nominated {
+.award-item__result--nominee {
     background: var(--color-surface-hover);
     color: var(--color-text-muted);
 }

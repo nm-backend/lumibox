@@ -214,7 +214,7 @@
         const closeLightbox = function () {
             lightbox.classList.remove('lightbox--open');
             document.body.style.overflow = '';
-            lightboxImg.src = '';
+            lightboxImg.removeAttribute('src');
         };
 
         lightboxClose.addEventListener('click', closeLightbox);
@@ -425,8 +425,11 @@
             const current = window.location.pathname;
             nav.querySelectorAll('.bottom-nav__link').forEach(function (link) {
                 const href = link.getAttribute('href');
-                if (href && href !== '#' && current.startsWith(href)) {
-                    link.setAttribute('data-current', '');
+                if (href && href !== '#') {
+                    const isHome = href === '/';
+                    if ((isHome && current === '/') || (!isHome && current.startsWith(href))) {
+                        link.classList.add('bottom-nav__link--active');
+                    }
                 }
             });
         }

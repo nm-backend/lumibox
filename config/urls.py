@@ -8,8 +8,9 @@
 from django.conf import settings
 from django.contrib import admin
 from django.contrib.sitemaps.views import sitemap
+from django.templatetags.static import static
 from django.urls import include, path, re_path
-from django.views.generic import TemplateView
+from django.views.generic import RedirectView, TemplateView
 
 from apps.catalog.sitemaps import sitemaps
 from apps.core.views import health_check, serve_public_media
@@ -18,6 +19,13 @@ urlpatterns = [
     # Проба живости для хостинга и мониторинга. Первой в списке и без
     # завершающего редиректа: платформа должна получать ответ мгновенно.
     path("healthz/", health_check, name="health"),
+
+    # Браузеры и поисковые роботы по умолчанию запрашивают /favicon.ico,
+    # хотя сайт отдаёт иконку в SVG. Редирект убирает лишний 404.
+    path(
+        "favicon.ico",
+        RedirectView.as_view(url=static("img/favicon.svg"), permanent=True),
+    ),
 
     path("admin/", admin.site.urls),
 

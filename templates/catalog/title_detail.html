@@ -111,13 +111,13 @@ function getCookie(name) {
     if (parts.length === 2) return parts.pop().split(';').shift();
 }
 
-    var shareBtn = document.querySelector('[data-share]');
-    if (shareBtn) {
-        shareBtn.addEventListener('click', function() {
+    var shareBtns = document.querySelectorAll('[data-share]');
+    shareBtns.forEach(function (shareBtn) {
+        shareBtn.addEventListener('click', function () {
             var url = window.location.href;
             var title = document.title;
             if (navigator.share) {
-                navigator.share({ title: title, url: url }).catch(function() {});
+                navigator.share({ title: title, url: url }).catch(function () {});
             } else {
                 var input = document.createElement('input');
                 input.value = url;
@@ -126,11 +126,15 @@ function getCookie(name) {
                 document.execCommand('copy');
                 document.body.removeChild(input);
                 var original = shareBtn.innerHTML;
-                shareBtn.innerHTML = '{% trans "Скопировано" %}';
-                setTimeout(function() { shareBtn.innerHTML = original; }, 2000);
+                shareBtn.innerHTML = '<span>{% trans "Скопировано" %}</span>';
+                shareBtn.classList.add('sidebar-share__btn--copied');
+                setTimeout(function () {
+                    shareBtn.innerHTML = original;
+                    shareBtn.classList.remove('sidebar-share__btn--copied');
+                }, 2000);
             }
         });
-    }
+    });
 
     /* ---------- Модальный плеер трейлера ---------- */
     var modal = document.querySelector('[data-trailer-modal]');

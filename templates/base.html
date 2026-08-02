@@ -225,7 +225,7 @@
         <a class="mobile-nav__link" href="{% url 'catalog:title_list' %}?sort=-published_at">{% trans "Новинки" %}</a>
         <a class="mobile-nav__link" href="{% url 'catalog:random_title' %}">{% trans "Случайный фильм" %}</a>
         {% if user.is_authenticated %}
-            <hr style="border-color: var(--color-border); margin: var(--space-2) 0;">
+            <hr class="mobile-nav__divider">
             <a class="mobile-nav__link" href="{% url 'users:profile' %}">{% trans "Профиль" %}</a>
             <a class="mobile-nav__link" href="{% url 'library:favorites' %}">{% trans "Избранное" %}</a>
             <a class="mobile-nav__link" href="{% url 'library:watchlist' %}">{% trans "Смотреть позже" %}</a>
@@ -257,7 +257,7 @@
     {# Lightbox #}
     <div class="lightbox" data-lightbox role="dialog" aria-modal="true" aria-label="{% trans 'Просмотр изображения' %}">
         <button class="lightbox__close" type="button" data-lightbox-close aria-label="{% trans 'Закрыть' %}">{% icon "close" size=24 %}</button>
-        <img class="lightbox__img" src="" alt="" data-lightbox-img>
+        <img class="lightbox__img" alt="" data-lightbox-img>
     </div>
 
     {% comment %}

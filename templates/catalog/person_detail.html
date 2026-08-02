@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static i18n %}
+{% load static i18n icons %}
 
 {% block page_title %}{% blocktranslate with name=person.name %}{{ name }} — фильмография — LumiBox{% endblocktranslate %}{% endblock %}
 {% block page_description %}{% blocktranslate with name=person.name %}{{ name }}: фильмография, роли, биография на LumiBox.{% endblocktranslate %}{% endblock %}
@@ -30,7 +30,7 @@
             {% if person.biography %}
                 <p class="profile-header__bio">{{ person.biography }}</p>
             {% endif %}
-            <p class="profile-header__bio" style="margin-top: var(--space-2);">
+            <p class="profile-header__chips">
                 {% blocktranslate with count=participations|length %}<span class="chip chip--muted">{{ count }} проектов</span>{% endblocktranslate %}
                 {% if awards %}<span class="chip chip--muted">{% blocktranslate with count=awards|length %}{{ count }} наград{% endblocktranslate %}</span>{% endif %}
             </p>
@@ -43,7 +43,7 @@
             <div class="award-list">
                 {% for award_entry in awards %}
                     <div class="award-item">
-                        <span class="award-item__icon">🏆</span>
+                        <span class="award-item__icon">{% icon "star" size=14 class_name="award-item__icon-svg" %}</span>
                         <span class="award-item__body">
                             <span class="award-item__name">{{ award_entry.award.name }}</span>
                             {% if award_entry.category %}
