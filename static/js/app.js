@@ -377,7 +377,40 @@
     });
 
     /* -----------------------------------------------
-       11. Keyboard shortcuts (global)
+       14. Page entrance animation on load
+    ----------------------------------------------- */
+    document.querySelector('.site-main').classList.add('page-enter');
+
+    /* -----------------------------------------------
+       14b. Header scroll effect — add shadow when scrolled
+    ----------------------------------------------- */
+    const header = document.querySelector('.site-header');
+    if (header) {
+        let headerScrolled = false;
+        const updateHeader = () => {
+            const isScrolled = window.scrollY > 10;
+            if (isScrolled !== headerScrolled) {
+                header.classList.toggle('site-header--scrolled', isScrolled);
+                headerScrolled = isScrolled;
+            }
+        };
+        window.addEventListener('scroll', updateHeader, { passive: true });
+        updateHeader();
+    }
+
+    /* -----------------------------------------------
+       15. Button ripple effect
+    ----------------------------------------------- */
+    document.querySelectorAll('.button').forEach(function (btn) {
+        btn.addEventListener('pointerdown', function (e) {
+            const rect = this.getBoundingClientRect();
+            this.style.setProperty('--ripple-x', ((e.clientX - rect.left) / rect.width * 100) + '%');
+            this.style.setProperty('--ripple-y', ((e.clientY - rect.top) / rect.height * 100) + '%');
+        });
+    });
+
+    /* -----------------------------------------------
+       16. Keyboard shortcuts (global)
     ----------------------------------------------- */
     document.addEventListener('keydown', function (e) {
         if (e.target.matches('input, select, textarea, [contenteditable]')) return;
@@ -432,7 +465,54 @@
                     }
                 }
             });
+
+            // Fallback: reveal section after 3s even if not all images loaded
+            setTimeout(function () {
+                revealSection(section);
+            }, 3000);
+        });
+
+        function revealSection(section) {
+            if (!section.classList.contains('section--loading')) return;
+            section.classList.remove('section--loading');
+            section.classList.add('section--revealed');
         }
+    })();
+
+    /* -----------------------------------------------
+       18. Blur-up image loading — mark images as loaded
+       Triggers the CSS blurUp animation for progressive enhancement.
+    ----------------------------------------------- */
+    function markImageLoaded(img) {
+        if (img.complete && img.naturalWidth > 0) {
+            img.dataset.loaded = '';
+        } else {
+            img.addEventListener('load', function () {
+                this.dataset.loaded = '';
+            }, { once: true });
+            img.addEventListener('error', function () {
+                this.dataset.loaded = '';
+                this.style.opacity = '0.3';
+            }, { once: true });
+        }
+    }
+
+    document.querySelectorAll('img').forEach(markImageLoaded);
+
+    // Also observe dynamically added images (e.g. search suggestions)
+    if ('MutationObserver' in window) {
+        const imgObserver = new MutationObserver(function (mutations) {
+            mutations.forEach(function (mutation) {
+                mutation.addedNodes.forEach(function (node) {
+                    if (node.nodeName === 'IMG') {
+                        markImageLoaded(node);
+                    } else if (node.querySelectorAll) {
+                        node.querySelectorAll('img').forEach(markImageLoaded);
+                    }
+                });
+            });
+        });
+        imgObserver.observe(document.body, { childList: true, subtree: true });
     }
 
 })();

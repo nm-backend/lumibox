@@ -13,7 +13,7 @@
     <div class="profile-header">
         <div class="avatar avatar--large">
             {% if person.photo %}
-                <img class="avatar__image" src="{{ person.photo.url }}" alt="{% blocktranslate with name=person.name %}Фото: {{ name }}{% endblocktranslate %}">
+                <img class="avatar__image" src="{{ person.photo.url }}" alt="{% blocktranslate with name=person.name %}Фото: {{ name }}{% endblocktranslate %}" loading="lazy" decoding="async">
             {% else %}
                 <span aria-hidden="true">{{ person.initial }}</span>
             {% endif %}

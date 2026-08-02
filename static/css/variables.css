@@ -8,6 +8,9 @@
   Шрифты: Bebas Neue для заголовков (афиша), Inter для текста (программа).
 */
 
+/* Шрифты подключаются в base.html с display=swap, чтобы их загрузка
+   не задерживала первую отрисовку страницы. */
+
 :root {
     /* --- Цвета --- */
 
@@ -147,11 +150,14 @@
     --color-text-strong: #0b0d12;
     --color-text-faint: #9aa3b8;
     --color-text-shadow: rgba(255, 255, 255, 0.55);
+    /* На белом фоне яркий акцент не проходит по контрасту, поэтому в светлой
+       теме берём затемнённый вариант того же тона. */
     --color-accent: #966612;
     --color-accent-hover: #7e540e;
     --color-accent-soft: #b57e1f;
     --color-accent-deep: #6b470c;
     --color-accent-dim: rgba(150, 102, 18, 0.08);
+    --color-accent-glow: rgba(150, 102, 18, 0.06);
     --color-on-accent: #ffffff;
     --color-card: #ffffff;
     --color-card-hover: #f2f4f8;
@@ -171,6 +177,7 @@
     --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.06), 0 4px 18px rgba(0, 0, 0, 0.04);
     --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.06), 0 8px 28px rgba(0, 0, 0, 0.04);
     --shadow-accent: 0 8px 24px rgba(150, 102, 18, 0.12);
+    --shadow-glass: 0 4px 16px rgba(0, 0, 0, 0.06);
     --shadow-play: 0 4px 16px rgba(197, 26, 68, 0.30);
 }
 

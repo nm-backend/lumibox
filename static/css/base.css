@@ -13,6 +13,19 @@ html {
     font-family: var(--font-base);
 }
 
+/* Мягкое появление страницы. Класс навешивает app.js после загрузки.
+   Анимируем ТОЛЬКО прозрачность: любой сдвиг или масштаб здесь дал бы
+   скачок вёрстки при первой отрисовке (CLS). Общее правило
+   prefers-reduced-motion ниже гасит эту анимацию у тех, кто её отключил. */
+.page-enter {
+    animation: page-enter var(--transition-slow) ease-out both;
+}
+
+@keyframes page-enter {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
 @media (prefers-reduced-motion: reduce) {
     html {
         scroll-behavior: auto;
@@ -65,7 +78,6 @@ body {
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    transition: background-color 0.25s ease, color 0.25s ease;
 }
 
 img {
@@ -159,6 +171,8 @@ button {
     color: var(--color-on-accent);
     font-weight: 600;
     text-decoration: none;
+    border-radius: 0 0 var(--radius-md) 0;
+    box-shadow: var(--shadow-accent);
     transform: translateY(-100%);
     transition: transform var(--transition-fast);
 }
@@ -177,6 +191,53 @@ button {
     white-space: nowrap;
 }
 
+/* ---------- Cinema projector glow (signature) ---------- */
+
+.cinema-glow {
+    position: fixed;
+    bottom: -40%;
+    right: -20%;
+    width: 80vmax;
+    height: 80vmax;
+    pointer-events: none;
+    z-index: -1;
+    will-change: opacity, transform;
+    transform: translateZ(0);
+    background: radial-gradient(
+        ellipse at 50% 100%,
+        var(--color-accent-glow) 0%,
+        transparent 60%
+    );
+    opacity: 0.6;
+    animation: glowPulse 6s ease-in-out infinite alternate;
+}
+
+/* ---------- Film-grain texture overlay (premium cinema feel) ---------- */
+
+.grain-overlay {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.025;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+    background-size: 128px 128px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .grain-overlay {
+        display: none;
+    }
+}
+
+@keyframes glowPulse {
+    0% { opacity: 0.35; transform: scale(0.95) translateZ(0); }
+    50% { opacity: 0.55; }
+    100% { opacity: 0.7; transform: scale(1.05) translateZ(0); }
+}
+
 /* ---------- Blur-up image loading (progressive enhancement) ---------- */
 
 @keyframes fadeInLoaded {
@@ -192,6 +253,26 @@ img[data-loaded] {
     animation: fadeInLoaded 0.4s ease both;
 }
 
+/* Prevent FOUC: hide content until JS removes data-loading */
+body[data-loading] .site-main {
+    opacity: 0;
+}
+
+body:not([data-loading]) .site-main {
+    opacity: 1;
+    transition: opacity 0.3s ease;
+}
+
+/* Prevent layout shift: images with known aspect ratio */
+.card__image,
+.showcase__backdrop,
+.film-hero__backdrop,
+.film-hero__poster-image,
+.collection-card__image,
+.continue-card__image {
+    background-color: var(--color-surface);
+}
+
 /* ---------- Пустое состояние ---------- */
 
 .empty-state {
@@ -200,13 +281,15 @@ img[data-loaded] {
     text-wrap: balance;
     max-width: 480px;
     margin: 0 auto;
+    animation: fadeUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) both;
 }
 
 .empty-state__icon {
     display: flex;
     justify-content: center;
     margin-bottom: var(--space-5);
-    opacity: 0.6;
+    opacity: 0.5;
+    color: var(--color-accent);
 }
 
 .empty-state__title {

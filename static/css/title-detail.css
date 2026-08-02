@@ -41,8 +41,10 @@
     position: absolute;
     inset: 0;
     background:
-        linear-gradient(180deg, rgba(11, 13, 18, 0.55) 0%, var(--color-bg) 100%),
-        linear-gradient(90deg, rgba(11, 13, 18, 0.9) 0%, rgba(11, 13, 18, 0.25) 70%);
+        linear-gradient(180deg, rgba(7, 8, 13, 0.35) 0%, var(--color-bg) 100%),
+        linear-gradient(90deg, rgba(7, 8, 13, 0.93) 0%, rgba(7, 8, 13, 0.18) 65%);
+    /* Subtle vignette effect — darker at corners */
+    box-shadow: inset 0 0 120px rgba(7, 8, 13, 0.3);
 }
 
 .film-hero__inner {
@@ -85,6 +87,22 @@
     line-height: 1.1;
     letter-spacing: -0.03em;
     text-wrap: balance;
+    /* Text reveal animation — clip from bottom to top */
+    animation: textReveal 0.7s 0.2s cubic-bezier(0.4, 0, 0.2, 1) both;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+@keyframes textReveal {
+    from {
+        opacity: 0;
+        transform: translateY(16px);
+        filter: blur(4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+        filter: blur(0);
+    }
 }
 
 .film-hero__name--logo {
@@ -105,6 +123,8 @@
     font-weight: 500;
     line-height: 1.4;
     text-wrap: balance;
+    animation: fadeUp 0.6s 0.3s cubic-bezier(0.4, 0, 0.2, 1) both;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
 }
 
 .film-hero__original {
@@ -121,6 +141,8 @@
     margin-top: var(--space-4);
     color: var(--color-text-muted);
     font-size: var(--text-sm);
+    animation: fadeUp 0.6s 0.35s cubic-bezier(0.4, 0, 0.2, 1) both;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .film-hero__dot {
@@ -143,6 +165,8 @@
     max-width: 62ch;
     color: var(--color-text-muted);
     line-height: 1.7;
+    animation: fadeUp 0.6s 0.45s cubic-bezier(0.4, 0, 0.2, 1) both;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
 .film-hero__actions {
@@ -150,6 +174,7 @@
     flex-wrap: wrap;
     gap: var(--space-3);
     margin-top: var(--space-5);
+    animation: fadeUp 0.6s 0.55s cubic-bezier(0.4, 0, 0.2, 1) both;
 }
 
 .film-hero__specs {
@@ -191,8 +216,9 @@
     display: inline-flex;
     align-items: baseline;
     gap: 2px;
-    padding: var(--space-1) var(--space-3);
+    padding: var(--space-2) var(--space-3);
     background-color: var(--color-accent-dim);
+    border: 1px solid rgba(255, 184, 48, 0.15);
     border-radius: var(--radius-sm);
     transition: box-shadow var(--transition);
 }
@@ -248,6 +274,11 @@
     grid-template-columns: max-content 1fr;
     gap: var(--space-3) var(--space-5);
     align-items: baseline;
+    padding: var(--space-4);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
 }
 
 .spec-list__label {
@@ -286,16 +317,19 @@
     display: flex;
     align-items: center;
     gap: var(--space-3);
-    padding: var(--space-2) var(--space-3);
+    padding: var(--space-3) var(--space-4);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
-    transition: border-color var(--transition-fast), background-color var(--transition-fast);
+    transition: border-color var(--transition-fast), background-color var(--transition-fast),
+                transform var(--transition-fast), box-shadow var(--transition-fast);
 }
 
 .crew:hover {
     background-color: var(--color-surface-hover);
     border-color: var(--color-accent);
     color: var(--color-text);
+    transform: translateX(4px);
+    box-shadow: 0 0 12px var(--color-accent-glow);
 }
 
 .crew__body {
@@ -344,7 +378,24 @@
 .frames__item:hover {
     transform: translateY(-4px) scale(1.02);
     border-color: var(--color-accent);
-    box-shadow: var(--shadow-card);
+    box-shadow: var(--shadow-card), 0 0 0 1px var(--color-accent-dim), 0 0 20px var(--color-accent-glow);
+}
+
+/* Subtle light reflection sweep on frame hover */
+.frames__item::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+    transition: left 0.5s ease;
+    pointer-events: none;
+}
+
+.frames__item:hover::after {
+    left: 150%;
 }
 
 /* ---------- Detail layout: main + sidebar ---------- */

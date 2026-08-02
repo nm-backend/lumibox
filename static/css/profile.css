@@ -69,6 +69,9 @@
     overflow: hidden;
     padding: var(--space-4);
     text-align: center;
+    box-shadow: var(--shadow-sm);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border);
 }
 
 .profile-stat {
@@ -115,10 +118,25 @@
     gap: var(--space-5);
     align-items: flex-start;
     margin-bottom: var(--space-6);
-    padding: var(--space-5);
+    padding: var(--space-6);
     background: var(--color-surface);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm), 0 0 20px var(--color-accent-glow);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Subtle gradient accent at the top of the profile header */
+.profile-header::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 15%;
+    right: 15%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--color-accent), transparent);
+    opacity: 0.3;
 }
 
 .profile-header__bio {
@@ -149,11 +167,14 @@
     background: var(--color-surface);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
-    transition: border-color var(--transition-fast);
+    transition: border-color var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast);
+    box-shadow: var(--shadow-sm);
 }
 
 .award-item:hover {
     border-color: var(--color-accent);
+    transform: translateX(4px);
+    box-shadow: 0 0 12px var(--color-accent-glow);
 }
 
 .award-item__icon {

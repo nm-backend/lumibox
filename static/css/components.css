@@ -12,7 +12,6 @@
     overflow-x: auto;
     scroll-snap-type: x mandatory;
     scrollbar-width: none;
-    -webkit-overflow-scrolling: touch;
     padding: var(--space-2) 0;
     margin: calc(var(--space-2) * -1) 0;
 }
@@ -31,8 +30,8 @@
     position: absolute;
     top: 50%;
     z-index: 3;
-    width: 40px;
-    height: 40px;
+    width: 44px;
+    height: 44px;
     display: grid;
     place-items: center;
     border: 1px solid var(--color-border);
@@ -43,9 +42,10 @@
     font-size: var(--text-lg);
     cursor: pointer;
     transform: translateY(-50%);
-    transition: background var(--transition-fast), border-color var(--transition-fast), opacity var(--transition-fast);
+    transition: background var(--transition-fast), border-color var(--transition-fast),
+                opacity var(--transition-fast), transform var(--transition-fast);
     opacity: 0;
-    box-shadow: var(--shadow-glass);
+    box-shadow: var(--shadow-glass), 0 0 16px rgba(0, 0, 0, 0.3);
 }
 
 .carousel:hover .carousel__btn {
@@ -55,6 +55,11 @@
 .carousel__btn:hover {
     background: var(--color-surface-hover);
     border-color: var(--color-accent);
+    transform: translateY(-50%) scale(1.08);
+}
+
+.carousel__btn:active {
+    transform: translateY(-50%) scale(0.95);
 }
 
 .carousel__btn--prev {
@@ -81,6 +86,76 @@
     }
 }
 
+/* ---------- Skeleton / Placeholder ---------- */
+
+@keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+.skeleton {
+    background: linear-gradient(90deg, var(--skeleton-base) 25%, var(--skeleton-shine) 50%, var(--skeleton-base) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s ease-in-out infinite;
+    border-radius: var(--radius-md);
+}
+
+.skeleton--poster {
+    aspect-ratio: 2 / 3;
+    width: 100%;
+}
+
+.skeleton--text {
+    height: 1rem;
+    width: 80%;
+    margin-top: var(--space-2);
+}
+
+.skeleton--text-short {
+    height: 0.75rem;
+    width: 50%;
+    margin-top: var(--space-1);
+}
+
+.skeleton--hero {
+    width: 100%;
+    height: 460px;
+    border-radius: 0;
+}
+
+.skeleton--avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+}
+
+/* Card skeleton — instant placeholder while card loads */
+.card--skeleton .card__poster {
+    background: linear-gradient(90deg, var(--skeleton-base) 25%, var(--skeleton-shine) 50%, var(--skeleton-base) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s ease-in-out infinite;
+}
+
+.card--skeleton .card__name {
+    background: linear-gradient(90deg, var(--skeleton-base) 25%, var(--skeleton-shine) 50%, var(--skeleton-base) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s ease-in-out infinite;
+    border-radius: var(--radius-sm);
+    height: 1rem;
+    width: 70%;
+    color: transparent;
+}
+
+.card--skeleton .card__meta {
+    background: linear-gradient(90deg, var(--skeleton-base) 25%, var(--skeleton-shine) 50%, var(--skeleton-base) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s ease-in-out infinite;
+    border-radius: var(--radius-sm);
+    height: 0.75rem;
+    width: 45%;
+    color: transparent;
+}
+
 /* ---------- Glass card ---------- */
 
 .glass {
@@ -92,12 +167,6 @@
 
 /* ---------- Поиск с автодополнением ---------- */
 
-.search-wrapper {
-    position: relative;
-    flex: 0 1 360px;
-    margin-left: auto;
-}
-
 .search {
     display: flex;
     align-items: center;
@@ -106,11 +175,12 @@
     background-color: var(--color-surface);
     border: 1px solid var(--color-border);
     border-radius: 999px;
-    transition: border-color var(--transition);
+    transition: border-color var(--transition), box-shadow var(--transition);
 }
 
 .search:focus-within {
     border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px var(--color-accent-dim);
 }
 
 .search__input {
@@ -120,6 +190,8 @@
     background: none;
     border: none;
     color: var(--color-text);
+    font-size: var(--text-sm);
+    min-height: var(--touch-target);
 }
 
 .search__input::placeholder {
@@ -158,6 +230,7 @@
     box-shadow: var(--shadow-glass);
     max-height: 70vh;
     overflow-y: auto;
+    animation: fadeUp 0.2s cubic-bezier(0.4, 0, 0.2, 1) both;
 }
 
 .search__dropdown--open {
@@ -262,6 +335,29 @@
     font-size: var(--text-sm);
 }
 
+/* ---------- Scroll Reveal ---------- */
+
+@keyframes fadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(24px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.reveal {
+    opacity: 0;
+    will-change: opacity, transform;
+}
+
+.reveal--visible {
+    animation: fadeUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    will-change: auto;
+}
+
 /* ---------- Lightbox ---------- */
 
 .lightbox {
@@ -273,6 +369,8 @@
     background: rgba(0, 0, 0, 0.88);
     backdrop-filter: blur(8px);
     cursor: zoom-out;
+    /* Vignette effect */
+    box-shadow: inset 0 0 80px rgba(0, 0, 0, 0.4);
 }
 
 .lightbox--open {
@@ -351,6 +449,7 @@
 
 .tab:hover {
     color: var(--color-text);
+    border-bottom-color: var(--color-text-dim);
 }
 
 .tab--active {
@@ -421,13 +520,14 @@
     gap: 2px;
     position: relative;
     color: var(--color-text-dim);
-    font-size: 0.6rem;
+    font-size: 0.65rem;
     font-weight: 600;
     transition: color var(--transition-fast), transform var(--transition-fast);
     text-decoration: none;
     padding: var(--space-2) var(--space-3);
     min-height: var(--touch-target);
     min-width: var(--touch-target);
+    position: relative;
 }
 
 .bottom-nav__link::after {
@@ -448,6 +548,15 @@
     transform: translateY(-2px);
 }
 
+/* Active state for bottom nav — filled icon */
+.bottom-nav__link--active {
+    color: var(--color-accent);
+}
+
+.bottom-nav__link--active::after {
+    transform: translateX(-50%) scaleX(1);
+}
+
 .bottom-nav__link:active {
     transform: translateY(0);
 }
@@ -461,11 +570,11 @@
 }
 
 .bottom-nav__icon {
-    width: 22px;
-    height: 22px;
+    width: 24px;
+    height: 24px;
     display: grid;
     place-items: center;
-    font-size: 1.1rem;
+    font-size: 1.2rem;
 }
 
 @media (max-width: 720px) {
@@ -687,6 +796,24 @@
     opacity: 1;
 }
 
+/* Light reflection sweep on card poster hover */
+.card__poster::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.04), transparent);
+    transition: left 0.5s ease;
+    pointer-events: none;
+    z-index: 2;
+}
+
+.card:hover .card__poster::before {
+    left: 150%;
+}
+
 /*
   :has(), а не соседний селектор: ссылка лежит после постера, и «~» до
   оверлея внутри постера не дотягивается. Оверлей показываем и при фокусе
@@ -704,7 +831,7 @@
     background-color: var(--color-accent);
     border-radius: var(--radius-full);
     color: var(--color-on-accent);
-    font-size: var(--text-xs);
+    font-size: var(--text-sm);
     font-weight: 700;
     letter-spacing: 0.04em;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
@@ -756,7 +883,7 @@
     top: var(--space-2);
     left: var(--space-2);
 
-    padding: 2px var(--space-2);
+    padding: 3px var(--space-3);
     background-color: rgba(11, 13, 18, 0.85);
     border-radius: var(--radius-sm);
 
@@ -765,6 +892,12 @@
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.04em;
+    transition: transform var(--transition-fast), background-color var(--transition-fast);
+}
+
+.card:hover .card__badge {
+    transform: translateX(4px);
+    background-color: rgba(11, 13, 18, 0.95);
 }
 
 .card__age {
@@ -772,8 +905,10 @@
     top: var(--space-2);
     right: var(--space-2);
 
-    padding: 2px var(--space-2);
+    padding: 3px var(--space-3);
     background-color: rgba(11, 13, 18, 0.85);
+    backdrop-filter: blur(6px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: var(--radius-sm);
 
     color: var(--color-text-muted);
@@ -821,6 +956,7 @@
     gap: var(--space-2);
     color: var(--color-text-dim);
     font-size: var(--text-xs);
+    line-height: 1.4;
 }
 
 .card--compact .card__meta {
@@ -955,6 +1091,7 @@
 .badge:hover {
     border-color: var(--color-accent);
     color: var(--color-accent);
+    background-color: var(--color-accent-dim);
     transform: translateY(-1px);
 }
 
@@ -974,9 +1111,11 @@
     align-items: center;
     justify-content: center;
     gap: var(--space-2);
-    padding: var(--space-3) var(--space-5);
+    padding: var(--space-3) var(--space-6);
+    position: relative;
+    overflow: hidden;
 
-    border-radius: var(--radius-sm);
+    border-radius: var(--radius-md);
     font-size: var(--text-sm);
     font-weight: 600;
     white-space: nowrap;
@@ -985,6 +1124,21 @@
     transition: background-color var(--transition-fast), border-color var(--transition-fast),
                 color var(--transition-fast), transform var(--transition-fast),
                 box-shadow var(--transition);
+}
+
+/* Ripple effect on active — radial gradient follows pointer position */
+.button::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at var(--ripple-x, 50%) var(--ripple-y, 50%), rgba(255, 255, 255, 0.15) 0%, transparent 60%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.button:active::after {
+    opacity: 1;
 }
 
 /* Нажатие должно ощущаться. Без этого кнопка выглядит картинкой,
@@ -1010,14 +1164,14 @@
 .button--primary {
     background-color: var(--color-accent);
     color: var(--color-on-accent);
-    box-shadow: var(--shadow-sm);
+    box-shadow: var(--shadow-sm), 0 0 0 1px rgba(255, 184, 48, 0.1);
 }
 
 .button--primary:hover {
     background-color: var(--color-accent-hover);
     color: var(--color-on-accent);
     transform: translateY(-1px);
-    box-shadow: var(--shadow-accent);
+    box-shadow: var(--shadow-accent), 0 0 0 1px rgba(255, 184, 48, 0.2), 0 0 24px var(--color-accent-glow);
 }
 
 .button--primary:active {
@@ -1029,12 +1183,18 @@
 .button--ghost {
     border: 1px solid var(--color-border);
     color: var(--color-text-muted);
+    background: transparent;
 }
 
 .button--ghost:hover {
     background-color: var(--color-surface-hover);
     border-color: var(--color-text-dim);
     color: var(--color-text);
+    transform: translateY(-1px);
+}
+
+.button--ghost:active {
+    transform: translateY(0);
 }
 
 /* Пагинация в стиле Kinogo (kg-pagination) определена в kinogo.css —
@@ -1123,11 +1283,12 @@
     top: calc(100% + var(--space-2));
     right: 0;
     z-index: 20;
-    min-width: 190px;
+    min-width: 200px;
     padding: var(--space-2);
 
-    background-color: var(--color-surface);
-    border: 1px solid var(--color-border);
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-card);
 }
@@ -1176,6 +1337,11 @@
     color: var(--color-accent);
     font-size: var(--text-xs);
     font-weight: 700;
+    transition: transform var(--transition-fast);
+}
+
+.card:hover .card__rating {
+    transform: scale(1.05);
 }
 
 /* ---------- Секция ---------- */
@@ -1202,7 +1368,7 @@
     left: 10%;
     right: 10%;
     height: 1px;
-    background: linear-gradient(90deg, transparent, var(--color-border), transparent);
+    background: linear-gradient(90deg, transparent, var(--color-border), var(--color-accent-dim), var(--color-border), transparent);
     pointer-events: none;
 }
 
@@ -1395,7 +1561,7 @@
     display: flex;
     align-items: center;
     gap: var(--space-3);
-    padding: var(--space-3) var(--space-4);
+    padding: var(--space-4) var(--space-5);
     min-width: 280px;
     max-width: 420px;
     background: var(--color-surface);
@@ -1410,14 +1576,17 @@
 
 .toast--success {
     border-color: var(--color-success);
+    box-shadow: var(--shadow-glass), 0 0 12px rgba(74, 222, 128, 0.15);
 }
 
 .toast--error {
     border-color: var(--color-error);
+    box-shadow: var(--shadow-glass), 0 0 12px rgba(255, 107, 90, 0.15);
 }
 
 .toast--info {
     border-color: var(--color-info);
+    box-shadow: var(--shadow-glass), 0 0 12px rgba(91, 156, 245, 0.15);
 }
 
 .toast__icon {
@@ -1456,8 +1625,8 @@
     bottom: calc(80px + env(safe-area-inset-bottom));
     right: var(--space-5);
     z-index: 45;
-    width: 44px;
-    height: 44px;
+    width: 48px;
+    height: 48px;
     display: grid;
     place-items: center;
     border: 1px solid var(--color-border);
@@ -1481,6 +1650,12 @@
 
 .scroll-top:hover {
     color: var(--color-accent);
+    border-color: var(--color-accent);
+    transform: translateY(-2px);
+}
+
+.scroll-top:active {
+    transform: translateY(0);
 }
 
 @media (max-width: 720px) {
@@ -1499,19 +1674,26 @@
     flex-wrap: wrap;
     align-items: center;
     gap: var(--space-2);
-    margin-bottom: var(--space-4);
+    margin-bottom: var(--space-5);
     font-size: var(--text-xs);
     color: var(--color-text-dim);
+    padding: var(--space-3) var(--space-4);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-sm);
 }
 
 .breadcrumbs a {
     color: var(--color-text-muted);
     text-decoration: none;
-    transition: color var(--transition-fast);
+    transition: color var(--transition-fast), transform var(--transition-fast);
+    display: inline-block;
 }
 
 .breadcrumbs a:hover {
     color: var(--color-accent);
+    transform: translateX(2px);
 }
 
 .breadcrumbs__sep {
@@ -1526,7 +1708,6 @@
     gap: var(--space-2);
     overflow-x: auto;
     scrollbar-width: none;
-    -webkit-overflow-scrolling: touch;
     padding: var(--space-2) 0;
     margin-bottom: var(--space-5);
 }
@@ -1546,19 +1727,24 @@
     font-weight: 500;
     white-space: nowrap;
     text-decoration: none;
-    transition: border-color var(--transition-fast), color var(--transition-fast), background var(--transition-fast);
+    transition: border-color var(--transition-fast), color var(--transition-fast),
+                background var(--transition-fast), transform var(--transition-fast),
+                box-shadow var(--transition-fast);
 }
 
 .genre-chip:hover {
     border-color: var(--color-accent);
     color: var(--color-accent);
     background: var(--color-accent-dim);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(255, 184, 48, 0.1), 0 0 12px var(--color-accent-glow);
 }
 
 .genre-chip--active {
     border-color: var(--color-accent);
     color: var(--color-accent);
     background: var(--color-accent-dim);
+    box-shadow: 0 0 0 1px var(--color-accent-dim);
 }
 
 /* ---------- Чипсы ---------- */
@@ -1580,6 +1766,11 @@
     color: var(--color-accent);
     font-size: var(--text-xs);
     font-weight: 500;
+    transition: background-color var(--transition-fast), transform var(--transition-fast);
+}
+
+.chip:hover {
+    transform: translateY(-1px);
 }
 
 /* Приглушённый вариант — для справочной информации вроде стека технологий,
@@ -1623,6 +1814,18 @@
     color: inherit;
     opacity: 1;
 }
+
+/* ---------- Иконки ---------- */
+
+/*
+  Собственные inline-SVG. currentColor означает, что иконка красится
+  цветом текста рядом — не нужно дублировать правила наведения.
+
+  Иконки fadeIn с небольшой задержкой, заданной через CSS-переменную
+  --icon-delay. JS в app.js проставляет каждой иконке свой индекс для
+  каскадного появления — последняя иконка на странице появляется
+  примерно на 1.5 секунды позже первой.
+*/
 
 .icon {
     width: 18px;

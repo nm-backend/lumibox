@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="dark light">
 
     <title>{% block page_title %}{% trans "LumiBox — каталог фильмов и сериалов" %}{% endblock %}</title>
     <meta name="description" content="{% block page_description %}{% trans "Каталог фильмов и сериалов: поиск, фильтры, подборки." %}{% endblock %}">
@@ -20,6 +21,8 @@
 
     <link rel="icon" type="image/svg+xml" href="{% static 'img/favicon.svg' %}">
     <link rel="alternate icon" href="{% static 'img/favicon.svg' %}">
+
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 
     {% comment %}
        Канонический адрес — без строки запроса: /catalog/?page=2&sort=name и
@@ -181,7 +184,7 @@
                     <summary class="user-menu__trigger" aria-label="{% trans 'Меню пользователя' %}">
                         <span class="avatar">
                             {% if user.avatar %}
-                                <img class="avatar__image" src="{{ user.avatar.url }}" alt="">
+                                <img class="avatar__image" src="{{ user.avatar.url }}" alt="" loading="lazy" decoding="async">
                             {% else %}
                                 <span aria-hidden="true">{{ user.initial }}</span>
                             {% endif %}

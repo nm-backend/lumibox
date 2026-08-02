@@ -15,7 +15,7 @@
                 <div class="profile-card__avatar">
                     <span class="avatar avatar--large">
                         {% if user.avatar %}
-                            <img class="avatar__image" src="{{ user.avatar.url }}" alt="{% blocktranslate with name=user.display_name %}Аватар: {{ name }}{% endblocktranslate %}">
+                            <img class="avatar__image" src="{{ user.avatar.url }}" alt="{% blocktranslate with name=user.display_name %}Аватар: {{ name }}{% endblocktranslate %}" loading="lazy" decoding="async">
                         {% else %}
                             <span aria-hidden="true">{{ user.initial }}</span>
                         {% endif %}

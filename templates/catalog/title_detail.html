@@ -191,7 +191,7 @@ function getCookie(name) {
     <div class="container film-hero__inner">
         <div class="film-hero__poster">
             {% if title.poster %}
-                <img class="film-hero__poster-image" src="{{ title.poster.url }}" alt="{% blocktranslate with name=title.name %}Постер: {{ name }}{% endblocktranslate %}">
+                <img class="film-hero__poster-image" src="{{ title.poster.url }}" alt="{% blocktranslate with name=title.name %}Постер: {{ name }}{% endblocktranslate %}" decoding="async">
             {% else %}
                 <span class="card__placeholder" aria-hidden="true">{{ title.name|first }}</span>
             {% endif %}
@@ -200,7 +200,7 @@ function getCookie(name) {
         <div class="film-hero__body">
             {% if title.logo %}
                 <h1 class="film-hero__name film-hero__name--logo">
-                    <img class="film-hero__logo" src="{{ title.logo.url }}" alt="{{ title.name }}">
+                    <img class="film-hero__logo" src="{{ title.logo.url }}" alt="{{ title.name }}" loading="lazy" decoding="async">
                 </h1>
             {% else %}
                 <h1 class="film-hero__name">{{ title.name }}</h1>

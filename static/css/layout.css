@@ -25,6 +25,17 @@
     border-bottom-color: transparent;
 }
 
+/* Светлая тема: без этих двух правил шапка оставалась бы тёмной
+   на светлой странице — в main их не было вовсе. */
+[data-theme="light"] .site-header {
+    background-color: rgba(242, 244, 248, 0.85);
+}
+
+[data-theme="light"] .site-header--scrolled {
+    background-color: rgba(242, 244, 248, 0.97);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+}
+
 /* Accent border line: gradient across bottom of the header.
    We use ::after on the inner container so the site-header keeps
    position: sticky without being overridden by position: relative. */
@@ -88,6 +99,11 @@
 
     background-color: var(--color-accent);
     border-radius: var(--radius-sm);
+    transition: transform var(--transition-fast);
+}
+
+.logo:hover .logo__mark {
+    transform: scale(1.08);
 }
 
 .logo__mark::before {
@@ -105,7 +121,9 @@
 }
 
 /* Старая десктопная навигация удалена из base.html — навигация теперь
-   в глобальном топ-наве kg-topnav (kinogo.css). */
+   в глобальном топ-наве kg-topnav (kinogo.css). Правила .site-nav из ветки
+   arena сюда не переносим: разметки с этим классом в проекте больше нет,
+   они стали бы мёртвым CSS. */
 
 /* Поиск занимает всё свободное место между навигацией и краем */
 .site-header__search {
@@ -152,7 +170,7 @@
     border-color: var(--color-accent);
     color: var(--color-accent);
     background: rgba(39, 159, 217, 0.08);
-    box-shadow: 0 0 12px rgba(39, 159, 217, 0.2);
+    box-shadow: 0 0 12px rgba(39, 159, 217, 0.2), 0 0 20px rgba(39, 159, 217, 0.1);
 }
 
 /* Language switcher */
@@ -244,6 +262,7 @@
 
 .page-header {
     margin-bottom: var(--space-5);
+    position: relative;
 }
 
 .page-title {
@@ -251,10 +270,22 @@
     letter-spacing: normal;
 }
 
+/* Subtle accent underline for page titles */
+.page-header .page-title::after {
+    content: "";
+    display: block;
+    width: 48px;
+    height: 3px;
+    margin-top: var(--space-3);
+    background: linear-gradient(90deg, var(--color-accent), var(--color-accent-dim), transparent);
+    border-radius: 2px;
+}
+
 .page-subtitle {
-    margin-top: var(--space-1);
+    margin-top: var(--space-2);
     color: var(--color-text-muted);
     font-size: var(--text-sm);
+    line-height: 1.5;
 }
 
 /* Подвал целиком живёт в footer.css — там же, где его разметка.
@@ -293,5 +324,19 @@
         flex: 1;
         min-width: 0;
         margin-left: 0;
+    }
+}
+
+/* ---------- Большие мониторы ---------- */
+
+@media (min-width: 1440px) {
+    .container {
+        max-width: 1360px;
+    }
+}
+
+@media (min-width: 1920px) {
+    :root {
+        --container-width: 1440px;
     }
 }
