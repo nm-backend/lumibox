@@ -683,12 +683,21 @@
     backdrop-filter: blur(4px);
 }
 
+/*
+  Оба бейджа на постере — одна система: тёмное стекло с тонкой рамкой.
+  Тип раньше был сплошной оранжевой плашкой со свечением, и на восьми
+  карточках подряд это давало восемь ярких пятен, спорящих с кнопкой
+  «Смотреть онлайн» — единственным местом, где акцент действительно нужен.
+  Здесь оранжевый остаётся только в тексте и рамке: тип по-прежнему
+  считывается мгновенно, но не кричит.
+*/
 .kg-badge--type {
     top: var(--space-2);
     right: var(--space-2);
-    color: var(--color-on-accent);
-    background: linear-gradient(90deg, var(--color-accent), var(--color-accent-hover));
-    box-shadow: 0 2px 12px rgba(var(--color-accent-rgb), 0.4);
+    color: var(--color-accent);
+    background: rgba(7, 8, 13, 0.78);
+    border: 1px solid rgba(var(--color-accent-rgb), 0.45);
+    backdrop-filter: blur(4px);
 }
 
 .kg-shortstory__poster-fallback {
@@ -814,7 +823,10 @@
     width: fit-content;
     font-size: var(--text-sm);
     font-weight: 700;
-    box-shadow: 0 4px 16px rgba(var(--color-accent-rgb), 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    /* Свечение убавлено с 0.35 до 0.18: кнопка остаётся единственным
+       по-настоящему акцентным элементом карточки, но восемь таких кнопок
+       в ленте больше не «горят» и не размывают фон вокруг себя. */
+    box-shadow: 0 4px 14px rgba(var(--color-accent-rgb), 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.35);
     transition: background var(--transition-fast), box-shadow var(--transition-fast), transform var(--transition-fast);
 }
 
@@ -1479,18 +1491,20 @@
     border-bottom-color: rgba(var(--color-accent-rgb), 0.16);
 }
 
+/*
+  Заголовок промо-зоны — обычный плотный текст, без заливки градиентом.
+  Раньше здесь был background-clip: text с переходом из белого в оранжевый
+  и свечением снизу. Такой приём мгновенно читается как шаблон: он тянет
+  внимание на себя сильнее, чем сам смысл заголовка, и спорит с кнопкой,
+  которая рядом и тоже оранжевая. Крупный шрифт афиши даёт вес и без него.
+*/
 .kg-promo__title {
     font-family: var(--font-display);
     font-size: 30px;
     font-weight: 400;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    background: linear-gradient(90deg, #fff 15%, var(--color-accent-soft) 55%, var(--color-accent) 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    color: transparent;
-    filter: drop-shadow(0 2px 12px rgba(var(--color-accent-rgb), 0.25));
+    color: var(--color-text-strong);
 }
 
 .kg-promo__text {
