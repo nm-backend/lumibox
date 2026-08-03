@@ -336,16 +336,12 @@ function getCookie(name) {
 {% endblock %}
 
 {% block content %}
-    {# Breadcrumbs #}
-    <nav class="breadcrumbs" aria-label="{% trans 'Вы здесь' %}">
-        <a href="{% url 'catalog:home' %}">{% trans "Главная" %}</a>
-        <span class="breadcrumbs__sep" aria-hidden="true">›</span>
-        <a href="{% url 'catalog:title_list' %}?type={% if title.is_series %}series{% else %}movie{% endif %}">
-            {% if title.is_series %}{% trans "Сериалы" %}{% else %}{% trans "Фильмы" %}{% endif %}
-        </a>
-        <span class="breadcrumbs__sep" aria-hidden="true">›</span>
-        <span aria-current="page">{{ title.name }}</span>
-    </nav>
+    {# Breadcrumbs — единый компонент, как на всём сайте #}
+    {% if title.is_series %}
+        {% include "includes/breadcrumbs.html" with parent_label=_("Сериалы") parent_url="{% url 'catalog:title_list' %}?type=series" current=title.name %}
+    {% else %}
+        {% include "includes/breadcrumbs.html" with parent_label=_("Фильмы") parent_url="{% url 'catalog:title_list' %}?type=movie" current=title.name %}
+    {% endif %}
 
     <div class="detail-layout">
         <div class="detail-layout__main">

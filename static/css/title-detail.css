@@ -292,67 +292,9 @@
     padding: var(--space-1) 0;
 }
 
-/* ---------- Съёмочная группа ---------- */
-
-.crew-group {
-    margin-bottom: var(--space-5);
-}
-
-.crew-group__role {
-    margin-bottom: var(--space-3);
-    color: var(--color-text-dim);
-    font-size: var(--text-xs);
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-}
-
-.crew-list {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
-    gap: var(--space-3);
-}
-
-.crew {
-    display: flex;
-    align-items: center;
-    gap: var(--space-3);
-    padding: var(--space-3) var(--space-4);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    transition: border-color var(--transition-fast), background-color var(--transition-fast),
-                transform var(--transition-fast), box-shadow var(--transition-fast);
-}
-
-.crew:hover {
-    background-color: var(--color-surface-hover);
-    border-color: var(--color-accent);
-    color: var(--color-text);
-    transform: translateX(4px);
-    box-shadow: 0 0 12px var(--color-accent-glow);
-}
-
-.crew__body {
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-}
-
-.crew__name {
-    font-size: var(--text-sm);
-    font-weight: 500;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.crew__character {
-    color: var(--color-text-dim);
-    font-size: var(--text-xs);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
+/* ---------- Съёмочная группа ----------
+   Карточки персон живут в components.css: их используют и title_detail,
+   и person_list, а вторая страница не грузит title-detail.css. */
 
 /* ---------- Галерея кадров ---------- */
 

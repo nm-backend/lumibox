@@ -78,11 +78,13 @@
     margin: var(--space-6) auto;
     padding: var(--space-7);
 
-    background: rgba(18, 22, 32, 0.6);
+    /* Тёмное стекло «кинозала» в обеих темах — поэтому dark-токены,
+       а не обычные surface/glass, которые в светлой теме светлеют. */
+    background: var(--color-dark-surface);
     backdrop-filter: blur(20px);
-    border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.08));
+    border: 1px solid var(--color-dark-border);
     border-radius: var(--radius-lg);
-    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.3);
+    box-shadow: var(--shadow-glass);
     position: relative;
     overflow: hidden;
 }
@@ -323,16 +325,16 @@
    поэтому текст внутри неё всегда светлый. */
 
 [data-theme="light"] .auth-card {
-    background: rgba(18, 22, 32, 0.62);
-    border-color: rgba(255, 255, 255, 0.1);
-    color: #e8ecf4;
+    background: var(--color-dark-surface);
+    border-color: var(--color-dark-border);
+    color: var(--color-dark-text-bright);
 }
 
 [data-theme="light"] .auth-card__subtitle,
 [data-theme="light"] .auth-card__footer,
 [data-theme="light"] .auth-card__note,
 [data-theme="light"] .auth-card .form__label {
-    color: #8891a8;
+    color: var(--color-dark-text);
 }
 
 [data-theme="light"] .auth-card .form__required,

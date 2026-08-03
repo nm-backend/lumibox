@@ -1,20 +1,27 @@
-/* Страница каталога: боковая панель фильтров и результаты. */
+/* Страница каталога: единая колонка результатов и горизонтальная панель фильтров.
+   Сетка «220px + контент» снята: левую колонку занимает общий сайдбар
+   kg_sidebar (как на главной), а разделы, сортировка и фильтры уложены
+   горизонтальными панелями над результатами. */
 
-.catalog {
-    display: grid;
-    grid-template-columns: 220px 1fr;
-    gap: var(--space-6);
-    align-items: start;
-}
-
-/* ---------- Боковая навигация ---------- */
+/* ---------- Разделы и сортировка — горизонтальные чипы ---------- */
 
 .catalog-sidebar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2) var(--space-6);
     margin-bottom: var(--space-4);
+    padding: var(--space-3) var(--space-4);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
 }
 
 .sidebar-category {
-    margin-bottom: var(--space-3);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
 }
 
 .sidebar-category__title {
@@ -23,31 +30,33 @@
     text-transform: uppercase;
     letter-spacing: 0.08em;
     color: var(--color-text-dim);
-    margin-bottom: var(--space-2);
-    padding-bottom: var(--space-1);
-    border-bottom: 1px solid var(--color-border);
+    margin-right: var(--space-1);
 }
 
 .sidebar-category__link {
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    justify-content: space-between;
-    padding: var(--space-1) var(--space-2);
-    border-radius: var(--radius-sm);
-    color: var(--color-text);
-    font-size: var(--text-sm);
+    gap: var(--space-1);
+    padding: var(--space-1) var(--space-3);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-full);
+    color: var(--color-text-muted);
+    font-size: var(--text-xs);
     text-decoration: none;
-    transition: background var(--transition-fast), color var(--transition-fast);
+    transition: background var(--transition-fast), color var(--transition-fast),
+                border-color var(--transition-fast);
 }
 
 .sidebar-category__link:hover {
     background: var(--color-surface-hover);
     color: var(--color-accent);
+    border-color: var(--color-accent-dim);
 }
 
 .sidebar-category__link--active {
     background: var(--color-accent-dim);
     color: var(--color-accent);
+    border-color: var(--color-accent);
     font-weight: 600;
 }
 
@@ -62,46 +71,66 @@
     line-height: 1.6;
 }
 
-.sidebar-category__link:hover .sidebar-category__count,
-.sidebar-category__link--active .sidebar-category__count {
-    color: var(--color-accent);
-}
-
-/* ---------- Панель фильтров ---------- */
+/* ---------- Панель фильтров — горизонтальная, раскрывается как details ---------- */
 
 .filters {
-    position: sticky;
-    top: calc(var(--header-height) + var(--space-3));
-
-    padding: var(--space-4);
-    padding-top: var(--space-3);
+    margin-bottom: var(--space-4);
+    padding: var(--space-3) var(--space-4);
     background: var(--color-surface);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
-    box-shadow: var(--shadow-card);
-    transition: box-shadow var(--transition);
+}
+
+.filters__summary {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--color-text);
+    list-style: none;
+}
+
+.filters__summary::-webkit-details-marker {
+    display: none;
+}
+
+.filters__summary::after {
+    content: "▾";
+    color: var(--color-text-dim);
+    margin-left: auto;
+    transition: transform var(--transition);
+}
+
+.filters[open] .filters__summary::after {
+    transform: rotate(180deg);
 }
 
 .filters__active {
     display: flex;
     flex-wrap: wrap;
     gap: var(--space-1);
-    margin-bottom: var(--space-3);
-    padding-bottom: var(--space-3);
-    border-bottom: 1px solid var(--color-border);
+    margin-top: var(--space-3);
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--color-border);
+}
+
+.filters__body {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: var(--space-3);
+    margin-top: var(--space-3);
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--color-border);
 }
 
 .filters__field {
-    margin-bottom: var(--space-3);
-}
-
-.filters__field:hover .filters__label {
-    color: var(--color-text);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
 }
 
 .filters__label {
-    display: block;
-    margin-bottom: var(--space-1);
     color: var(--color-text-dim);
     font-size: 11px;
     font-weight: 600;
@@ -110,21 +139,21 @@
     transition: color var(--transition-fast);
 }
 
+.filters__field:hover .filters__label {
+    color: var(--color-text);
+}
+
 /* Оформляем select сами: браузерный вид ломает тёмную тему */
 .filters__field select,
 .filters__field input[type="text"] {
     width: 100%;
-    padding: var(--space-1) var(--space-2);
+    padding: var(--space-2) var(--space-3);
 
     background-color: var(--color-bg);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-sm);
     color: var(--color-text);
-    font-size: 12px;
-    transition: border-color var(--transition-fast), box-shadow var(--transition-fast), transform var(--transition-fast);
-
-    /* Убираем родную стрелку и рисуем свою фоном */
-    appearance: none;
+    font-size: var(--text-sm);
     transition: border-color var(--transition), box-shadow var(--transition);
 }
 
@@ -132,7 +161,6 @@
 .filters__field input[type="text"]:hover {
     border-color: var(--color-accent-dim);
     box-shadow: 0 0 0 2px rgba(var(--color-accent-rgb), 0.08);
-    transform: scale(1.01);
 }
 
 .filters__field select {
@@ -143,6 +171,7 @@
     background-size: 5px 5px, 5px 5px;
     background-repeat: no-repeat;
     cursor: pointer;
+    appearance: none;
 }
 
 .filters__field select:focus,
@@ -166,24 +195,18 @@
     font-size: 11px;
     font-weight: 700;
     line-height: 1;
-    vertical-align: middle;
 }
 
 .filters__actions {
     display: flex;
-    flex-direction: column;
+    flex-wrap: wrap;
+    align-items: center;
     gap: var(--space-2);
-    margin-top: var(--space-4);
+    grid-column: 1 / -1;
 }
 
 .filters__actions .button {
     justify-content: center;
-    transition: transform var(--transition-fast), box-shadow var(--transition-fast);
-}
-
-.filters__actions .button:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 /* ---------- Результаты ---------- */
@@ -253,119 +276,25 @@
 /* ---------- Планшет и телефон ---------- */
 
 @media (max-width: 900px) {
-    .catalog {
-        grid-template-columns: 1fr;
-    }
-
     .catalog-sidebar {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: var(--space-3);
+    }
+
+    .sidebar-category {
+        width: 100%;
+        overflow-x: auto;
+        scrollbar-width: none;
+        padding-bottom: var(--space-1);
+    }
+
+    .sidebar-category::-webkit-scrollbar {
         display: none;
-    }
-
-    .filters {
-        position: static;
-    }
-
-    /* На узком экране панель фильтров сворачивается в <details>.
-       Раскрытие делает браузер — свой JavaScript не нужен. */
-    .filters__summary {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        cursor: pointer;
-        font-weight: 600;
-        list-style: none;
-        gap: var(--space-2);
-    }
-
-    .filters__summary .icon {
-        flex-shrink: 0;
-    }
-
-    .filters__summary::-webkit-details-marker {
-        display: none;
-    }
-
-    .filters__summary::after {
-        content: "▾";
-        color: var(--color-text-dim);
-        transition: transform var(--transition);
-    }
-
-    .filters[open] .filters__summary::after {
-        transform: rotate(180deg);
     }
 
     .filters__body {
-        max-height: 0;
-        opacity: 0;
-        overflow: hidden;
-        margin-top: 0;
-        transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1),
-                    opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1),
-                    margin-top 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    .filters[open] .filters__body {
-        max-height: 600px;
-        opacity: 1;
-        margin-top: var(--space-4);
-    }
-
-    .filters__body > * {
-        transition: transform 0.2s ease, opacity 0.2s ease;
-        transform: translateY(-4px);
-        opacity: 0;
-    }
-
-    .filters[open] .filters__body > * {
-        transform: translateY(0);
-        opacity: 1;
-    }
-
-    .filters[open] .filters__body > *:nth-child(1) { transition-delay: 0.05s; }
-    .filters[open] .filters__body > *:nth-child(2) { transition-delay: 0.1s; }
-    .filters[open] .filters__body > *:nth-child(3) { transition-delay: 0.15s; }
-    .filters[open] .filters__body > *:nth-child(4) { transition-delay: 0.2s; }
-    .filters[open] .filters__body > *:nth-child(5) { transition-delay: 0.25s; }
-}
-
-/* Явное размещение в сетке каталога: слева сайдбар с категориями и sticky-фильтрами,
-   справа — чипсы и результаты. Без этого авто-размещение путает колонки. */
-@media (min-width: 901px) {
-    .catalog-sidebar {
-        grid-column: 1;
-        grid-row: 1;
-    }
-
-    .genre-chips {
-        grid-column: 2;
-        grid-row: 1;
-    }
-
-    .filters {
-        grid-column: 1;
-        grid-row: 2 / 3;
-        align-self: start;
-    }
-
-    .catalog__content {
-        grid-column: 2;
-        grid-row: 2;
-    }
-
-    .filters__summary {
-        list-style: none;
-        pointer-events: none;
-        font-size: var(--text-sm);
-        font-weight: 600;
-        margin-bottom: var(--space-3);
-        display: flex;
-        align-items: center;
-        gap: var(--space-2);
-    }
-
-    .filters__summary::-webkit-details-marker {
-        display: none;
+        grid-template-columns: 1fr;
     }
 }
 
@@ -591,4 +520,3 @@
 [data-theme="light"] .sidebar-category__link--active {
     color: var(--color-accent-deep);
 }
-

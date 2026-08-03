@@ -18,22 +18,21 @@
     </div>
 
     <div class="kg-contentwrap">
-        <div class="kg-main">
-    <div class="catalog">
-        {# Quick filter genre chips #}
-        {% if genres %}
-            <nav class="genre-chips" aria-label="{% trans 'Быстрая фильтрация по жанрам' %}">
-                <a class="genre-chip {% if not request.GET.genres__slug %}genre-chip--active{% endif %}" href="{% url 'catalog:title_list' %}">{% trans "Все" %}</a>
-                {% for genre in genres %}
-                    <a class="genre-chip {% if request.GET.genres__slug == genre.slug %}genre-chip--active{% endif %}"
-                       href="{% url 'catalog:title_list' %}?genres__slug={{ genre.slug }}">{{ genre.name }}</a>
-                {% endfor %}
-            </nav>
-        {% endif %}
+        <div class="kg-main" id="dle-content">
 
-        {% include "includes/catalog_filters.html" %}
+            {# Quick filter genre chips #}
+            {% if genres %}
+                <nav class="genre-chips" aria-label="{% trans 'Быстрая фильтрация по жанрам' %}">
+                    <a class="genre-chip {% if not request.GET.genres__slug %}genre-chip--active{% endif %}" href="{% url 'catalog:title_list' %}">{% trans "Все" %}</a>
+                    {% for genre in genres %}
+                        <a class="genre-chip {% if request.GET.genres__slug == genre.slug %}genre-chip--active{% endif %}"
+                           href="{% url 'catalog:title_list' %}?genres__slug={{ genre.slug }}">{{ genre.name }}</a>
+                    {% endfor %}
+                </nav>
+            {% endif %}
 
-        <div class="catalog__content">
+            {% include "includes/catalog_filters.html" %}
+
             <div class="catalog__toolbar">
                 <p class="catalog__count">
                     {% if request.GET.q %}
@@ -52,14 +51,12 @@
             </div>
 
             {% if titles %}
-                <div class="kg-main" id="dle-content">
-                    <h2 class="visually-hidden">{% trans "Найденные фильмы и сериалы" %}</h2>
-                    {% for title in titles %}
-                        {% include "includes/story_card.html" %}
-                    {% endfor %}
+                <h2 class="visually-hidden">{% trans "Найденные фильмы и сериалы" %}</h2>
+                {% for title in titles %}
+                    {% include "includes/story_card.html" %}
+                {% endfor %}
 
-                    {% include "includes/pagination.html" %}
-                </div>
+                {% include "includes/pagination.html" %}
             {% else %}
                 <div class="empty-state">
                     <div class="empty-state__icon" aria-hidden="true">
@@ -83,14 +80,12 @@
                 </div>
             {% endif %}
         </div>
-        </div>
-    </div>
 
-    {% include "includes/ad_slot.html" %}
+        {% include "includes/ad_slot.html" %}
 
-    {% comment %} Тот же сайдбар, что и на главной. Раньше здесь стоял другой
-       (includes/sidebar.html) — с иным набором виджетов и иной вёрсткой,
-       из-за чего каталог выглядел страницей другого сайта. {% endcomment %}
-    {% include "includes/kg_sidebar.html" %}
+        {% comment %} Тот же сайдбар, что и на главной. Раньше здесь стоял другой
+           (includes/sidebar.html) — с иным набором виджетов и иной вёрсткой,
+           из-за чего каталог выглядел страницей другого сайта. {% endcomment %}
+        {% include "includes/kg_sidebar.html" %}
     </div>
 {% endblock %}

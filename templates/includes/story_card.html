@@ -1,19 +1,6 @@
-{% load i18n catalog_filters %}
+{% load i18n icons catalog_filters %}
 
 <article class="kg-shortstory">
-    <div class="kg-shortstory__header">
-        <div class="kg-shortstory__title">
-            <h3><a href="{{ title.get_absolute_url }}" title="{{ title.name }}">{{ title.name }}{% if title.release_year %} ({{ title.release_year }}){% endif %}</a></h3>
-        </div>
-        <div class="kg-shortstory__rating">
-            <span class="kg-stars" aria-hidden="true">
-                <span class="kg-stars__track">★★★★★</span>
-                <span class="kg-stars__fill" style="width: {% widthratio title.rating_average|default:0 10 100 %}%">★★★★★</span>
-            </span>
-            <span class="kg-shortstory__stats">{% if title.rating_average %}{{ title.rating_average|floatformat:1 }}{% else %}—{% endif %}/10 (<span>{{ title.rating_count|default:0 }}</span> {% trans "гол." %})</span>
-        </div>
-    </div>
-
     <div class="kg-shortstory__body">
         <div class="kg-shortstory__poster">
             <a href="{{ title.get_absolute_url }}" title="{{ title.name }}">
@@ -40,57 +27,50 @@
         </div>
 
         <div class="kg-shortstory__info">
+            <h3 class="kg-shortstory__title">
+                <a href="{{ title.get_absolute_url }}" title="{{ title.name }}">{{ title.name }}</a>
+            </h3>
             {% if title.original_name %}
-                <span><b>{% trans "Оригинальное название:" %}</b>{{ title.original_name }}</span>
+                <p class="kg-shortstory__original">{{ title.original_name }}</p>
             {% endif %}
-            <span><b>{% trans "Год выпуска:" %}</b><a href="{% url 'catalog:title_list' %}?year={{ title.release_year }}">{{ title.release_year }}</a></span>
-            {% if title.countries.all %}
-                <span class="kg-shortstory__row"><b>{% trans "Страна:" %}</b>
-                    {% for country in title.countries.all %}
-                        <a href="{% url 'catalog:country_titles' country.slug %}">{{ country.name }}</a>{% if not forloop.last %} / {% endif %}
-                    {% endfor %}
-                </span>
-            {% endif %}
-            {% if title.genres.all %}
-                <span class="kg-shortstory__row"><b>{% trans "Жанр:" %}</b>
-                    {% for genre in title.genres.all %}
-                        <a href="{% url 'catalog:genre_titles' genre.slug %}">{{ genre.name }}</a>{% if not forloop.last %} / {% endif %}
-                    {% endfor %}
-                </span>
-            {% endif %}
-            {% if title.duration_minutes %}
-                <span><b>{% trans "Продолжительность:" %}</b>{{ title.duration_minutes }} {% trans "мин" %}</span>
-            {% endif %}
-            {% if title.age_rating %}
-                <span><b>{% trans "Возрастное ограничение:" %}</b>{{ title.age_rating }}</span>
-            {% endif %}
-            {% if title|kg_crew:"director" %}
-                <span class="kg-shortstory__row"><b>{% trans "Режиссёр:" %}</b>{{ title|kg_crew:"director" }}</span>
-            {% endif %}
-            {% if title|kg_crew:"actor" %}
-                <span class="kg-shortstory__row"><b>{% trans "В ролях:" %}</b>{{ title|kg_crew:"actor" }}</span>
-            {% endif %}
-            {% if title.short_description or title.description %}
-                <p class="kg-shortstory__excerpt">{{ title.short_description|default:title.description|truncatewords:55 }}</p>
-            {% endif %}
-            {% comment %}
-                Блок «Оценка: N» убран: тот же самый рейтинг уже показан в
-                шапке карточки звёздами и числом «8,7/10 (7 гол.)». Две
-                одинаковые оценки в одной карточке — лишний узел в разметке
-                и визуальный шум, из-за которого карточка выглядит дешевле.
-            {% endcomment %}
-        </div>
-    </div>
 
-    <div class="kg-shortstory__footer">
-        <a class="kg-watch" href="{{ title.get_absolute_url }}" title="{% blocktranslate %}Смотреть {{ title.name }} онлайн{% endblocktranslate %}">{% trans "Смотреть онлайн" %}</a>
-        {% if character %}
-            <div class="kg-shortstory__character" aria-label="{% blocktranslate %}Роль: {{ character }}{% endblocktranslate %}">{{ character }}</div>
-        {% endif %}
-        {% if title.published_at %}
-            <div class="kg-shortstory__time">
-                <time datetime="{{ title.published_at|date:'c' }}">{{ title.published_at|kg_posted }}</time>
+            <div class="kg-shortstory__meta">
+                {% if title.rating_average %}
+                    <span class="kg-shortstory__rating">
+                        {% icon "star" size=12 %} {{ title.rating_average|floatformat:1 }}
+                        <span class="kg-shortstory__rating-count">/10 · {{ title.rating_count|default:0 }} {% trans "гол." %}</span>
+                    </span>
+                {% endif %}
+                {% if title.release_year %}
+                    <span class="kg-shortstory__year"><a href="{% url 'catalog:title_list' %}?year={{ title.release_year }}">{{ title.release_year }}</a></span>
+                {% endif %}
+                {% if title.genres.all %}
+                    <span class="kg-shortstory__genres">
+                        {% for genre in title.genres.all|slice:":3" %}
+                            <a href="{% url 'catalog:genre_titles' genre.slug %}">{{ genre.name }}</a>{% if not forloop.last %}, {% endif %}
+                        {% endfor %}
+                    </span>
+                {% endif %}
+                {% if title.duration_minutes %}
+                    <span class="kg-shortstory__duration">{% icon "clock" size=12 %} {{ title.duration_minutes }} {% trans "мин" %}</span>
+                {% endif %}
             </div>
-        {% endif %}
+
+            {% if title.short_description or title.description %}
+                <p class="kg-shortstory__excerpt">{{ title.short_description|default:title.description|truncatewords:40 }}</p>
+            {% endif %}
+
+            <div class="kg-shortstory__footer">
+                <a class="kg-watch" href="{{ title.get_absolute_url }}" title="{% blocktranslate %}Смотреть {{ title.name }} онлайн{% endblocktranslate %}">
+                    {% icon "play" size=14 %} {% trans "Смотреть онлайн" %}
+                </a>
+                {% if character %}
+                    <span class="kg-shortstory__character" aria-label="{% blocktranslate %}Роль: {{ character }}{% endblocktranslate %}">{{ character }}</span>
+                {% endif %}
+                {% if title.published_at %}
+                    <time class="kg-shortstory__time" datetime="{{ title.published_at|date:'c' }}">{{ title.published_at|kg_posted }}</time>
+                {% endif %}
+            </div>
+        </div>
     </div>
 </article>

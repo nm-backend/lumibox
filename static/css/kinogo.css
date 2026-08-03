@@ -440,23 +440,6 @@
     min-width: 0;
 }
 
-/* Боковая панель внутренних страниц (includes/sidebar.html) —
-   та же колонка слева, прилипает при прокрутке. */
-.kg-contentwrap > .layout-sidebar__aside {
-    grid-column: 1;
-    grid-row: 1 / span 2;
-    min-width: 0;
-    position: sticky;
-    top: calc(var(--header-height) + var(--space-4));
-    max-height: calc(100vh - var(--header-height) - var(--space-8));
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    scrollbar-width: none;
-}
-
-.kg-contentwrap > .layout-sidebar__aside::-webkit-scrollbar {
-    display: none;
-}
 
 /* ---------- Карточка фильма (shortStory) ----------
 
@@ -494,25 +477,18 @@
                 inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
-.kg-shortstory__header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 0 var(--space-3);
-    line-height: 1;
-}
+/* Шапка карточки снята: название и мета-данные теперь живут в правой
+   колонке (см. .kg-shortstory__title ниже), иерархия читается сверху вниз:
+   постер → название → рейтинг → год → жанры → длительность → кнопка. */
 
 .kg-shortstory__title {
-    padding-right: var(--space-4);
-    min-width: 0;
-}
-
-.kg-shortstory__title h2,
-.kg-shortstory__title h3 {
     margin: 0;
+    min-width: 0;
     color: var(--color-text-strong);
-    font-size: 1.125rem;
+    font-size: 1.25rem;
     font-weight: 700;
+    line-height: 1.25;
+    letter-spacing: -0.01em;
 }
 
 .kg-shortstory__title a {
@@ -526,45 +502,59 @@
     text-shadow: 0 0 16px rgba(var(--color-accent-rgb), 0.5);
 }
 
-.kg-shortstory__rating {
-    flex-shrink: 0;
-    text-align: center;
-    margin-right: var(--space-4);
-}
-
-.kg-stars {
-    position: relative;
-    display: inline-block;
-    height: 17px;
-    font-size: 17px;
-    line-height: 17px;
-    white-space: nowrap;
-    overflow: hidden;
-    letter-spacing: 1px;
-}
-
-.kg-stars__track {
-    color: var(--color-text-dim);
-}
-
-.kg-stars__fill {
-    position: absolute;
-    top: 0;
-    left: 0;
-    overflow: hidden;
-    white-space: nowrap;
-    color: var(--color-accent);
-    letter-spacing: 1px;
-    text-shadow: 0 0 10px rgba(var(--color-accent-rgb), 0.65);
-}
-
-.kg-shortstory__stats {
+.kg-shortstory__original {
     margin-top: var(--space-1);
-    /* Было 9px — ниже порога читаемости. Счётчик оценок должен быть
-       второстепенным, но всё-таки читаемым. */
-    font-size: var(--text-xs);
+    color: var(--color-text-dim);
+    font-size: var(--text-sm);
+}
+
+/* Мета-строка: рейтинг · год · жанры · длительность в одну линию. */
+.kg-shortstory__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2) var(--space-4);
+    margin-top: var(--space-3);
+}
+
+.kg-shortstory__rating {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    padding: var(--space-1) var(--space-2);
+    border-radius: var(--radius-sm);
+    background: var(--color-accent-dim);
+    border: 1px solid rgba(var(--color-accent-rgb), 0.2);
+    color: var(--color-accent);
+    font-size: var(--text-sm);
+    font-weight: 700;
+}
+
+.kg-shortstory__rating-count {
     color: var(--color-text-muted);
-    text-align: center;
+    font-weight: 400;
+    font-size: var(--text-xs);
+}
+
+.kg-shortstory__year a,
+.kg-shortstory__genres a {
+    color: var(--color-text-soft);
+    font-size: var(--text-sm);
+    text-decoration: none;
+    transition: color 0.12s ease;
+}
+
+.kg-shortstory__year a:hover,
+.kg-shortstory__genres a:hover {
+    color: var(--color-accent);
+}
+
+.kg-shortstory__duration {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
 }
 
 .kg-shortstory__body {
@@ -758,30 +748,9 @@
     line-height: 1.45;
 }
 
-.kg-shortstory__info span {
-    display: block;
-    margin-bottom: 7px;
-}
-
-.kg-shortstory__info .kg-shortstory__row {
-    max-width: 70%;
-}
-
-.kg-shortstory__info b {
-    margin-right: 5px;
-    font-weight: 700;
-    color: var(--color-text-dim);
-}
-
-.kg-shortstory__info a {
-    color: var(--color-text-soft);
-    text-decoration: underline;
-    transition: color 0.12s ease;
-}
-
-.kg-shortstory__info a:hover {
-    color: var(--color-accent);
-}
+/* Строки «Оригинальное название», «Страна», «Режиссёр» сняты: всё это
+   есть на странице фильма. В карточке остаётся только иерархия из
+   брифа: название, рейтинг, год, жанры, длительность, описание, CTA. */
 
 .kg-shortstory__excerpt {
     margin: var(--space-3) 0 0;
@@ -794,8 +763,9 @@
 
 .kg-shortstory__footer {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
-    gap: 2.5em;
+    gap: var(--space-4);
     margin-top: var(--space-4);
 }
 
@@ -1262,8 +1232,7 @@
 
     .kg-main,
     .kg-sidebar,
-    .kg-contentwrap > .ad-slot,
-    .kg-contentwrap > .layout-sidebar__aside {
+    .kg-contentwrap > .ad-slot {
         grid-column: 1;
         grid-row: auto;
         width: 100%;
@@ -1287,12 +1256,8 @@
         height: 180px;
     }
 
-    .kg-shortstory__header {
-        align-items: flex-start;
-    }
-
     .kg-shortstory__title {
-        padding-right: var(--space-2);
+        font-size: 1.125rem;
     }
 
     .kg-promo__inner {
@@ -1328,7 +1293,7 @@
 }
 
 @media (max-width: 420px) {
-    .kg-shortstory__rating {
+    .kg-shortstory__rating-count {
         display: none;
     }
 
