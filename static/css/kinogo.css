@@ -526,7 +526,7 @@
 .kg-shortstory__rating {
     flex-shrink: 0;
     text-align: center;
-    margin-right: 1em;
+    margin-right: var(--space-4);
 }
 
 .kg-stars {
@@ -675,8 +675,8 @@
 }
 
 .kg-badge--age {
-    top: 8px;
-    left: 8px;
+    top: var(--space-2);
+    left: var(--space-2);
     color: #fff;
     background: rgba(7, 8, 13, 0.78);
     border: 1px solid rgba(255, 255, 255, 0.18);
@@ -684,8 +684,8 @@
 }
 
 .kg-badge--type {
-    top: 8px;
-    right: 8px;
+    top: var(--space-2);
+    right: var(--space-2);
     color: var(--color-on-accent);
     background: linear-gradient(90deg, var(--color-accent), var(--color-accent-hover));
     box-shadow: 0 2px 12px rgba(var(--color-accent-rgb), 0.4);
@@ -715,7 +715,7 @@
 
 .kg-shortstory__poster-fallback-name {
     max-width: 80%;
-    font-size: 11px;
+    font-size: var(--text-2xs);
     font-weight: 600;
     text-align: center;
     overflow: hidden;
@@ -726,7 +726,7 @@
 
 .kg-shortstory__character {
     color: var(--color-text);
-    font-size: 12px;
+    font-size: var(--text-xs);
     line-height: 1.4;
     max-height: 38px;
     overflow: hidden;
@@ -741,7 +741,7 @@
 }
 
 .kg-shortstory__info {
-    font-size: 14px;
+    font-size: var(--text-sm);
     min-width: 0;
     line-height: 1.45;
 }
@@ -797,7 +797,7 @@
     display: flex;
     align-items: center;
     gap: 2.5em;
-    margin-top: 1em;
+    margin-top: var(--space-4);
 }
 
 .kg-watch {
