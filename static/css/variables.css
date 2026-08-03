@@ -99,6 +99,30 @@
     --color-overlay: rgba(11, 13, 18, 0.85);
     --color-overlay-strong: rgba(11, 13, 18, 0.97);
 
+    /*
+      --- Поверхность карточки ---
+
+      Один язык для всех карточных поверхностей проекта. Раньше их было
+      пять и они расходились: .kg-shortstory — радиус lg и тень card,
+      .card — радиус md без тени, .reference-card — md и shadow-sm,
+      .collection-card — lg и shadow-sm, .sidebar-film — sm без тени.
+      Четыре радиуса и три тени на одну сущность — это и создавало
+      ощущение, что страницы делали разные люди.
+    */
+    --card-radius: var(--radius-lg);
+    --card-radius-sm: var(--radius-md);
+    --card-border: 1px solid var(--color-border);
+    --card-bg: linear-gradient(180deg, var(--color-surface-2) 0%, var(--color-surface) 100%);
+    /* Внутренняя светлая кромка отделяет карточку от фона мягче, чем
+       вторая рамка: край читается, но композиция не утяжеляется. */
+    --card-shadow: var(--shadow-card), inset 0 1px 0 rgba(255, 255, 255, 0.03);
+    --card-shadow-hover: var(--shadow-card), 0 12px 28px rgba(0, 0, 0, 0.5),
+                         inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    --card-border-hover: rgba(var(--color-accent-rgb), 0.35);
+    /* Подъём при наведении одинаковый у всех карточек: разные величины
+       читаются как разное поведение и ломают ощущение одного продукта. */
+    --card-lift: translateY(-2px);
+
     /* --- Типографика --- */
     --font-display: "Bebas Neue", "Impact", sans-serif;
     --font-base: "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;

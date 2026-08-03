@@ -474,10 +474,10 @@
 .kg-shortstory {
     position: relative;
     padding: var(--space-4);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-lg);
-    background: linear-gradient(180deg, var(--color-surface-2) 0%, var(--color-surface) 100%);
-    box-shadow: var(--shadow-card), inset 0 1px 0 rgba(255, 255, 255, 0.03);
+    border: var(--card-border);
+    border-radius: var(--card-radius);
+    background: var(--card-bg);
+    box-shadow: var(--card-shadow);
     /* Анимируем только тень, границу и сдвиг. background в переходе не
        участвует намеренно: анимация градиента заставляет браузер
        перерисовывать всю площадь карточки на каждом кадре. */
@@ -487,11 +487,9 @@
 }
 
 .kg-shortstory:hover {
-    transform: translateY(-2px);
-    border-color: rgba(var(--color-accent-rgb), 0.35);
-    box-shadow: var(--shadow-card),
-                0 12px 28px rgba(0, 0, 0, 0.5),
-                inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    transform: var(--card-lift);
+    border-color: var(--card-border-hover);
+    box-shadow: var(--card-shadow-hover);
 }
 
 .kg-shortstory__header {
