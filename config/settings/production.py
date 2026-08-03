@@ -13,12 +13,15 @@ DEBUG = False
 # Домены задаются переменной окружения — в коде их нет.
 ALLOWED_HOSTS = env("DJANGO_ALLOWED_HOSTS")  # noqa: F405
 
-# Render (и другие PaaS) сообщают собственный домен *.onrender.com отдельной
-# переменной. Добавляем его сами, чтобы сайт открылся сразу после деплоя,
-# ещё до того как владелец подключит свой домен.
-RENDER_HOST = env("RENDER_EXTERNAL_HOSTNAME", default="")  # noqa: F405
-if RENDER_HOST:
-    ALLOWED_HOSTS = [*ALLOWED_HOSTS, RENDER_HOST]
+# Платформы сообщают выданный домен собственной переменной, и у каждой она
+# своя. Подхватываем обе, чтобы сайт открылся сразу после деплоя — ещё до
+# того как владелец подключит свой домен. Раньше учитывался только Render,
+# и на Railway первый же запрос упал бы с DisallowedHost.
+PLATFORM_HOSTS = [
+    env("RENDER_EXTERNAL_HOSTNAME", default=""),  # noqa: F405
+    env("RAILWAY_PUBLIC_DOMAIN", default=""),  # noqa: F405
+]
+ALLOWED_HOSTS = [*ALLOWED_HOSTS, *[host for host in PLATFORM_HOSTS if host]]
 
 # CSRF за HTTPS-прокси: Django сверяет Origin входящего POST с этим списком.
 # Без схемы https:// вход в админку на боевом домене падал бы с ошибкой CSRF.
