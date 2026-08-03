@@ -530,30 +530,55 @@
     margin-right: var(--space-4);
 }
 
+/*
+  Рейтинг звёздами.
+
+  Раньше звёзды были текстовыми глифами «★», а заполнение — обрезкой строки
+  по ширине. Такой рейтинг зависит от системного шрифта: на Windows, macOS
+  и Android глиф разной ширины, насыщенности и вертикального выравнивания,
+  поэтому ряд получался неровным и читался как самоделка.
+
+  Теперь звезда нарисована собственной фигурой и повторяется маской.
+  Глифы в разметке остались (их читает скринридер), но визуально скрыты
+  нулевым кеглем — фигуру рисует маска, а не шрифт. Ширина заполнения
+  по-прежнему приходит процентом из шаблона, поэтому логика не изменилась.
+*/
 .kg-stars {
+    --star-size: 16px;
     position: relative;
     display: inline-block;
-    height: 17px;
-    font-size: 17px;
-    line-height: 17px;
+    width: calc(var(--star-size) * 5);
+    height: var(--star-size);
+    /* Глиф не должен участвовать в отрисовке: фигуру задаёт маска. */
+    font-size: 0;
+    line-height: 0;
     white-space: nowrap;
     overflow: hidden;
-    letter-spacing: 1px;
+}
+
+.kg-stars__track,
+.kg-stars__fill {
+    display: block;
+    height: var(--star-size);
+    background-color: currentColor;
+    -webkit-mask-image: var(--star-mask);
+    mask-image: var(--star-mask);
+    -webkit-mask-size: var(--star-size) var(--star-size);
+    mask-size: var(--star-size) var(--star-size);
+    -webkit-mask-repeat: repeat-x;
+    mask-repeat: repeat-x;
 }
 
 .kg-stars__track {
-    color: var(--color-text-dim);
+    width: 100%;
+    color: var(--color-border-strong);
 }
 
 .kg-stars__fill {
     position: absolute;
     top: 0;
     left: 0;
-    overflow: hidden;
-    white-space: nowrap;
     color: var(--color-accent);
-    letter-spacing: 1px;
-    text-shadow: 0 0 10px rgba(var(--color-accent-rgb), 0.65);
 }
 
 .kg-shortstory__stats {
@@ -758,7 +783,7 @@
 
 .kg-shortstory__info span {
     display: block;
-    margin-bottom: 7px;
+    margin-bottom: var(--space-2);
 }
 
 .kg-shortstory__info .kg-shortstory__row {
@@ -766,7 +791,7 @@
 }
 
 .kg-shortstory__info b {
-    margin-right: 5px;
+    margin-right: var(--space-1);
     font-weight: 700;
     color: var(--color-text-dim);
 }
