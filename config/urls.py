@@ -10,10 +10,22 @@ from django.contrib import admin
 from django.contrib.sitemaps.views import sitemap
 from django.templatetags.static import static
 from django.urls import include, path, re_path
+from django.utils.functional import lazy
 from django.views.generic import RedirectView, TemplateView
 
 from apps.catalog.sitemaps import sitemaps
 from apps.core.views import health_check, serve_public_media
+
+# Отложенный static(): адрес вычисляется при первом обращении, а не при
+# импорте этого модуля.
+#
+# Прямой вызов static() в urlpatterns заставлял Django поднимать хранилище
+# статики прямо на загрузке маршрутов. В бою это ManifestStaticFilesStorage,
+# который читает staticfiles.json — файл, появляющийся только после
+# collectstatic. Любая команда, импортирующая urls.py до сборки статики
+# (миграции, check, любая management-команда), падала бы с ошибкой,
+# и это же уронило проверку боевых настроек в CI.
+static_lazy = lazy(static, str)
 
 urlpatterns = [
     # Проба живости для хостинга и мониторинга. Первой в списке и без
@@ -24,7 +36,7 @@ urlpatterns = [
     # хотя сайт отдаёт иконку в SVG. Редирект убирает лишний 404.
     path(
         "favicon.ico",
-        RedirectView.as_view(url=static("img/favicon.svg"), permanent=True),
+        RedirectView.as_view(url=static_lazy("img/favicon.svg"), permanent=True),
     ),
 
     path("admin/", admin.site.urls),

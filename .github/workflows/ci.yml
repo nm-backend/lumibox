@@ -63,7 +63,12 @@ jobs:
         run: python manage.py makemigrations --check --dry-run
 
       - name: Боевые проверки безопасности
-        run: python manage.py check --deploy --settings=config.settings.production
+        # Ставим боевые зависимости: проверка идёт по production-настройкам,
+        # а они поднимают whitenoise и django-storages. Без них шаг падал
+        # не на реальной проблеме, а на отсутствующем модуле.
+        run: |
+          pip install -r requirements/production.txt
+          python manage.py check --deploy --settings=config.settings.production
 
       - name: Тесты
         run: python manage.py test apps
