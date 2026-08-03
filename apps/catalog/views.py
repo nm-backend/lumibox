@@ -2,7 +2,7 @@ from random import randrange
 
 from django.conf import settings
 from django.core.cache import cache
-from django.db.models import Count, Q
+from django.db.models import Count, F, Q
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
@@ -226,8 +226,8 @@ class TitleListView(ElidedPaginationMixin, ListView):
         # Боковая панель каталога: лёгкие запросы без with_related —
         # для списка достаточно названия, года и постера.
         base = Title.objects.published()
-        context["sidebar_popular"] = list(base.order_by("-rating_average")[:6])
-        context["sidebar_new"] = list(base.order_by("-published_at", "-id")[:6])
+        context["sidebar_popular"] = list(base.order_by(F("rating_average").desc(nulls_last=True))[:6])
+        context["sidebar_new"] = list(base.order_by(F("published_at").desc(nulls_last=True), "-id")[:6])
         context["sidebar_genres"] = context["genres"]
         return context
 

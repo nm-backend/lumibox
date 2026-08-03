@@ -2,6 +2,7 @@ import time
 
 from django.conf import settings
 from django.core.cache import cache
+from django.db.models import F
 from django.urls import reverse
 from django.utils.translation import gettext as _
 
@@ -72,8 +73,8 @@ def kg_sidebar(request):
     if data is None:
         published = Title.objects.published()
         data = {
-            "sidebar_popular": list(published.order_by("-rating_average")[:6]),
-            "sidebar_new": list(published.order_by("-published_at", "-id")[:6]),
+            "sidebar_popular": list(published.order_by(F("rating_average").desc(nulls_last=True))[:6]),
+            "sidebar_new": list(published.order_by(F("published_at").desc(nulls_last=True), "-id")[:6]),
             "sidebar_genres": list(Genre.objects.all()[:24]),
         }
         cache.set("kg_sidebar_data", data, 5 * 60)

@@ -10,7 +10,7 @@ from decimal import Decimal
 
 from django.conf import settings
 from django.core.cache import cache
-from django.db.models import Avg, Count, Q
+from django.db.models import Avg, Count, F, Q
 
 from apps.catalog.models import Collection, Country, Title
 from apps.catalog.models.person import Participation
@@ -129,7 +129,7 @@ def get_recommendations(user, limit=12):
 
     Кэшируются на 5 минут: избранное пользователя меняется нечасто.
     """
-    popular = Title.objects.published().with_related().order_by("-published_at")
+    popular = Title.objects.published().with_related().order_by(F("published_at").desc(nulls_last=True))
 
     if not user.is_authenticated:
         return list(popular[:limit])
@@ -158,7 +158,7 @@ def get_recommendations(user, limit=12):
         .filter(genres__in=favorite_genre_ids)
         .exclude(pk__in=seen_ids + favorite_ids)
         .annotate(matched_genres=Count("genres", filter=Q(genres__in=favorite_genre_ids)))
-        .order_by("-matched_genres", "-published_at")[:limit]
+        .order_by("-matched_genres", F("published_at").desc(nulls_last=True))[:limit]
     )
     cache.set(key, results, settings.CACHE_TTL_RECOMMENDATIONS)
     return results
@@ -228,10 +228,10 @@ def get_home_sidebar():
             .order_by("name")
         ),
         "series_updates": list(
-            published.series().with_related().order_by("-published_at")[:6]
+            published.series().with_related().order_by(F("published_at").desc(nulls_last=True))[:6]
         ),
         "anime_updates": list(
-            published.with_related().filter(genres__slug="animaciya").distinct().order_by("-published_at")[:6]
+            published.with_related().filter(genres__slug="animaciya").distinct().order_by(F("published_at").desc(nulls_last=True))[:6]
         ),
         "latest_reviews": list(
             Review.objects.filter(status=Review.Status.PUBLISHED)
@@ -271,10 +271,10 @@ def get_home_sections():
     raw = {
         # list() обязателен: QuerySet ленивый, в кэш попал бы объект запроса,
         # и каждый читатель кэша ходил бы в базу заново.
-        "featured": list(base.exclude(description="").order_by("-published_at")[:1]),
+        "featured": list(base.exclude(description="").order_by(F("published_at").desc(nulls_last=True))[:1]),
         # Герои для авто-ротации: топ-6 по рейтингу с описанием
-        "hero_titles": list(base.exclude(description="").order_by("-rating_average")[:6]),
-        "new_titles": list(base.order_by("-published_at")[:12]),
+        "hero_titles": list(base.exclude(description="").order_by(F("rating_average").desc(nulls_last=True))[:6]),
+        "new_titles": list(base.order_by(F("published_at").desc(nulls_last=True))[:12]),
         "movies": list(base.movies()[:6]),
         "series": list(base.series()[:6]),
         "top_rated": list(base.top_rated()[:6]),
@@ -374,7 +374,8 @@ def get_trending_titles():
         titles = list(Title.objects.published().with_related().with_crew().filter(id__in=ids))
         titles.sort(key=lambda t: ids.index(t.id))
     else:
-        titles = list(Title.objects.published().with_related().with_crew().order_by("-rating_average")[:6])
+        titles = list(Title.objects.published().with_related().with_crew()
+                  .order_by(F("rating_average").desc(nulls_last=True))[:6])
     cache.set(HOME_TRENDING_CACHE_KEY, titles, settings.CACHE_TTL_HOME)
     return titles
 

@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import F
 
 
 def story_card_prefetches(prefix=""):
@@ -120,4 +121,4 @@ class TitleQuerySet(models.QuerySet):
         Поле обновляют apps.catalog.services.update_title_rating
         и часовая задача Celery.
         """
-        return self.rated().order_by("-rating_average", "-rating_count")
+        return self.rated().order_by(F("rating_average").desc(nulls_last=True), "-rating_count")
