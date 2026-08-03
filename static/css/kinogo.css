@@ -789,19 +789,6 @@
     line-height: 1.65;
 }
 
-.kg-shortstory__mrating {
-    margin-top: var(--space-2);
-    text-align: right;
-}
-
-.kg-shortstory__kp {
-    display: inline-block;
-    color: var(--color-accent);
-    font-size: var(--text-xs);
-    font-weight: 700;
-    text-shadow: 0 0 12px rgba(var(--color-accent-rgb), 0.4);
-}
-
 .kg-shortstory__footer {
     display: flex;
     align-items: center;

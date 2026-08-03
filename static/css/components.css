@@ -93,42 +93,6 @@
     100% { background-position: 200% 0; }
 }
 
-.skeleton {
-    background: linear-gradient(90deg, var(--skeleton-base) 25%, var(--skeleton-shine) 50%, var(--skeleton-base) 75%);
-    background-size: 200% 100%;
-    animation: shimmer 1.5s ease-in-out infinite;
-    border-radius: var(--radius-md);
-}
-
-.skeleton--poster {
-    aspect-ratio: 2 / 3;
-    width: 100%;
-}
-
-.skeleton--text {
-    height: 1rem;
-    width: 80%;
-    margin-top: var(--space-2);
-}
-
-.skeleton--text-short {
-    height: 0.75rem;
-    width: 50%;
-    margin-top: var(--space-1);
-}
-
-.skeleton--hero {
-    width: 100%;
-    height: 460px;
-    border-radius: 0;
-}
-
-.skeleton--avatar {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-}
-
 /* Card skeleton — instant placeholder while card loads */
 .card--skeleton .card__poster {
     background: linear-gradient(90deg, var(--skeleton-base) 25%, var(--skeleton-shine) 50%, var(--skeleton-base) 75%);
@@ -346,16 +310,6 @@
         opacity: 1;
         transform: translateY(0);
     }
-}
-
-.reveal {
-    opacity: 0;
-    will-change: opacity, transform;
-}
-
-.reveal--visible {
-    animation: fadeUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-    will-change: auto;
 }
 
 /* ---------- Lightbox ---------- */

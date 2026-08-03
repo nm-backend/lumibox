@@ -89,8 +89,4 @@
 
 /* На печати реклама не нужна */
 @media print {
-    .ad-rail,
-    .ad-block {
-        display: none !important;
-    }
 }

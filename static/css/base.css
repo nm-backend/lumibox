@@ -263,16 +263,6 @@ body:not([data-loading]) .site-main {
     transition: opacity 0.3s ease;
 }
 
-/* Prevent layout shift: images with known aspect ratio */
-.card__image,
-.showcase__backdrop,
-.film-hero__backdrop,
-.film-hero__poster-image,
-.collection-card__image,
-.continue-card__image {
-    background-color: var(--color-surface);
-}
-
 /* ---------- Пустое состояние ---------- */
 
 .empty-state {
