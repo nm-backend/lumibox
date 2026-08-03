@@ -79,7 +79,7 @@
             {% endfor %}
         {% else %}
             {% trans "Пока нет опубликованных проектов" as empty_title %}
-            {% blocktranslate with name=person.name %}Когда {{ name }} появится в фильмах каталога, они отобразятся здесь.{% endblocktranslate as empty_desc %}
+            {% blocktranslate with name=person.name asvar empty_desc %}Когда {{ name }} появится в фильмах каталога, они отобразятся здесь.{% endblocktranslate %}
             {% include "includes/empty_state.html" with empty_title=empty_title empty_desc=empty_desc %}
         {% endif %}
     </section>
