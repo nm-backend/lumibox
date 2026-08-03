@@ -67,7 +67,7 @@
 }
 
 .film-hero__poster:hover {
-    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(232, 163, 61, 0.15);
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(var(--color-accent-rgb), 0.15);
     transform: translateY(-2px);
 }
 
@@ -224,7 +224,7 @@
 }
 
 .score:hover {
-    box-shadow: 0 0 16px rgba(232, 163, 61, 0.15);
+    box-shadow: 0 0 16px rgba(var(--color-accent-rgb), 0.15);
 }
 
 .score__value {

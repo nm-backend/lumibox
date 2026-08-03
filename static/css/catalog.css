@@ -131,7 +131,7 @@
 .filters__field select:hover,
 .filters__field input[type="text"]:hover {
     border-color: var(--color-accent-dim);
-    box-shadow: 0 0 0 2px rgba(232, 163, 61, 0.08);
+    box-shadow: 0 0 0 2px rgba(var(--color-accent-rgb), 0.08);
     transform: scale(1.01);
 }
 
@@ -149,7 +149,7 @@
 .filters__field input[type="text"]:focus {
     outline: none;
     border-color: var(--color-accent);
-    box-shadow: 0 0 0 3px rgba(232, 163, 61, 0.15);
+    box-shadow: 0 0 0 3px rgba(var(--color-accent-rgb), 0.15);
 }
 
 .filters__count {

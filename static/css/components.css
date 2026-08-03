@@ -840,7 +840,7 @@
 
 .card:hover .card__overlay-action {
     transform: scale(1.05);
-    box-shadow: 0 6px 20px rgba(232, 163, 61, 0.3);
+    box-shadow: 0 6px 20px rgba(var(--color-accent-rgb), 0.3);
 }
 
 /* Заглушка вместо постера: пока изображения не загружены,
@@ -1430,7 +1430,7 @@
 
 .review-form:focus-within {
     border-color: var(--color-accent-dim);
-    box-shadow: 0 0 0 3px rgba(232, 163, 61, 0.08);
+    box-shadow: 0 0 0 3px rgba(var(--color-accent-rgb), 0.08);
 }
 
 .review-form__title {

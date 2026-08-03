@@ -15,7 +15,7 @@
     position: absolute;
     inset: -1px 0 auto;
     height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(232, 163, 61, 0.35), transparent);
+    background: linear-gradient(90deg, transparent, rgba(var(--color-accent-rgb), 0.35), transparent);
 }
 
 .site-footer .container {
@@ -97,7 +97,7 @@
 
 .footer-nav__link:hover {
     color: var(--color-accent);
-    text-shadow: 0 0 14px rgba(232, 163, 61, 0.45);
+    text-shadow: 0 0 14px rgba(var(--color-accent-rgb), 0.45);
     transform: translateX(3px);
 }
 
@@ -141,7 +141,7 @@
 
 .footer-credits__link:hover {
     color: var(--color-accent);
-    text-shadow: 0 0 14px rgba(232, 163, 61, 0.45);
+    text-shadow: 0 0 14px rgba(var(--color-accent-rgb), 0.45);
 }
 
 .footer-credits__sep {
@@ -225,7 +225,7 @@
 
 .footer-bottom__link-item:hover {
     color: var(--color-accent);
-    text-shadow: 0 0 14px rgba(232, 163, 61, 0.45);
+    text-shadow: 0 0 14px rgba(var(--color-accent-rgb), 0.45);
 }
 
 /* ---------- Адаптив ---------- */

@@ -109,7 +109,7 @@
 
 .profile-form:focus-within {
     border-color: var(--color-accent-dim);
-    box-shadow: 0 0 0 3px rgba(232, 163, 61, 0.08);
+    box-shadow: 0 0 0 3px rgba(var(--color-accent-rgb), 0.08);
 }
 
 /* Profile header (person page) */

@@ -82,7 +82,7 @@
 
 .logo:hover .logo__mark {
     transform: scale(1.1);
-    box-shadow: 0 0 20px var(--color-accent-glow, rgba(232, 163, 61, 0.3));
+    box-shadow: 0 0 20px var(--color-accent-glow, rgba(var(--color-accent-rgb), 0.3));
 }
 
 .logo__mark {

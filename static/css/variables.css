@@ -30,17 +30,24 @@
     --color-text-shadow: rgba(0, 0, 0, 0.6);
 
     /*
-      Акцент — свет кинопроектора: премиальный янтарно-оранжевый.
-      Между янтарным и оранжевым: не жёлтый, не красный, не кислотный.
-      Тёплый золотистый оттенок уровня IMAX / Dolby Cinema.
+      Акцент — свет кинопроектора: яркий насыщенный оранжевый.
+      Между классическим orange и amber: не жёлтый, не красный, не кислотный.
+
+      --color-accent-rgb хранит те же три канала без обёртки rgb(), чтобы
+      полупрозрачные варианты писались как rgba(var(--color-accent-rgb), .25).
+      Раньше такие значения были вписаны числами в 65 местах по девяти файлам,
+      и смена акцента требовала правки каждого. Теперь цвет живёт в одной
+      строке, а все свечения, подсветки и границы следуют за ним сами.
     */
-    --color-accent: #e8a33d;
-    --color-accent-hover: #f2b75c;
-    --color-accent-soft: #f9ce93;
-    --color-accent-deep: #c9831f;
-    --color-accent-dim: rgba(232, 163, 61, 0.12);
-    --color-accent-glow: rgba(232, 163, 61, 0.10);
-    --color-on-accent: #211703;
+    --color-accent: #ff8a1f;
+    --color-accent-rgb: 255, 138, 31;
+    --color-accent-hover: #ffa04a;
+    --color-accent-soft: #ffc28a;
+    --color-accent-deep: #d96a00;
+    --color-accent-dim: rgba(var(--color-accent-rgb), 0.12);
+    --color-accent-glow: rgba(var(--color-accent-rgb), 0.10);
+    /* Текст поверх оранжевой заливки: почти чёрный даёт контраст 9.2:1 */
+    --color-on-accent: #1a0e00;
 
     /* Акцент действия — «play red»: кнопка воспроизведения, CTA */
     --color-play: #e11d48;
@@ -104,7 +111,7 @@
     --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4);
     --shadow-md: 0 3px 8px rgba(0, 0, 0, 0.4), 0 8px 20px rgba(0, 0, 0, 0.3);
     --shadow-card: 0 4px 12px rgba(0, 0, 0, 0.5), 0 16px 40px rgba(0, 0, 0, 0.35);
-    --shadow-accent: 0 8px 28px rgba(232, 163, 61, 0.15);
+    --shadow-accent: 0 8px 28px rgba(var(--color-accent-rgb), 0.15);
     --shadow-glass: 0 8px 32px rgba(0, 0, 0, 0.55);
     --shadow-play: 0 4px 20px rgba(225, 29, 72, 0.35);
 
@@ -127,7 +134,7 @@
     --touch-target: 44px;
 
     /* Выделение текста — цвет кинопроектора */
-    --color-selection-bg: rgba(232, 163, 61, 0.28);
+    --color-selection-bg: rgba(var(--color-accent-rgb), 0.28);
     --color-selection-text: inherit;
 
     /* --- Скелетон --- */
@@ -150,14 +157,16 @@
     --color-text-strong: #0b0d12;
     --color-text-faint: #9aa3b8;
     --color-text-shadow: rgba(255, 255, 255, 0.55);
-    /* На белом фоне яркий акцент не проходит по контрасту, поэтому в светлой
-       теме берём затемнённый вариант того же тона. */
-    --color-accent: #966612;
-    --color-accent-hover: #7e540e;
-    --color-accent-soft: #b57e1f;
-    --color-accent-deep: #6b470c;
-    --color-accent-dim: rgba(150, 102, 18, 0.08);
-    --color-accent-glow: rgba(150, 102, 18, 0.06);
+    /* Тот же оранжевый тон, но затемнённый: #ff8a1f на белом даёт контраст
+       около 2:1 и не читается как текст. Затемнённый вариант проходит AA,
+       оставаясь узнаваемо тем же цветом бренда. */
+    --color-accent: #a34f00;
+    --color-accent-rgb: 163, 79, 0;
+    --color-accent-hover: #8a4200;
+    --color-accent-soft: #c46414;
+    --color-accent-deep: #6f3600;
+    --color-accent-dim: rgba(var(--color-accent-rgb), 0.08);
+    --color-accent-glow: rgba(var(--color-accent-rgb), 0.06);
     --color-on-accent: #ffffff;
     --color-card: #ffffff;
     --color-card-hover: #f2f4f8;
