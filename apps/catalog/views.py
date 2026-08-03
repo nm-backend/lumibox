@@ -2,7 +2,7 @@ from random import randrange
 
 from django.conf import settings
 from django.core.cache import cache
-from django.db.models import Count, F, Q
+from django.db.models import Count, F, Max, Q
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
@@ -532,17 +532,20 @@ class AwardDetailView(ElidedPaginationMixin, ListView):
 
     def get_queryset(self):
         self.award = get_object_or_404(Award, slug=self.kwargs["slug"])
-        award_pks = (
-            Title.objects.published()
-            .filter(award_entries__award=self.award)
-            .values_list("pk", flat=True)
-            .distinct()
-        )
+        # Сортировка по award_entries__year соединяет таблицу наград и тем самым
+        # размножает строки: фильм с тремя записями о наградах попадал в список
+        # трижды, причём учитывались награды всех премий, а не только текущей.
+        # Дубликаты уходили и в счётчик пагинации.
+        #
+        # annotate после filter агрегирует по уже отфильтрованному соединению,
+        # то есть Max берёт год только этой премии, а GROUP BY схлопывает строки
+        # обратно в один фильм.
         return (
             Title.objects.published()
             .with_related()
-            .filter(pk__in=award_pks)
-            .order_by("-award_entries__year", "name")
+            .filter(award_entries__award=self.award)
+            .annotate(award_year=Max("award_entries__year"))
+            .order_by(F("award_year").desc(nulls_last=True), "name")
         )
 
     def get_context_data(self, **kwargs):
@@ -570,28 +573,34 @@ class ActorSearchView(TemplateView):
         context["results"] = None
 
         if q:
-            persons = (
+            persons = list(
                 Person.objects.filter(name__icontains=q)
                 .order_by("name")[:20]
             )
 
-            data = []
-            for person in persons:
-                participations = (
-                    Participation.objects.filter(
-                        person=person,
-                        title__status=Title.Status.PUBLISHED,
-                    )
-                    .select_related("title")
-                    .prefetch_related("title__genres")
-                    .order_by("-title__release_year")
+            # Раньше запрос строился внутри цикла по персонам, а prefetch
+            # покрывал только жанры — карточке же нужны ещё страны, студии и
+            # участники, и она добирала их по одному. На выдаче из 12 человек
+            # страница стоила 252 запроса. Забираем все участия разом и
+            # раскладываем по людям в памяти.
+            participations = (
+                Participation.objects.filter(
+                    person__in=persons,
+                    title__status=Title.Status.PUBLISHED,
                 )
-                data.append({
-                    "person": person,
-                    "participations": participations,
-                })
+                .select_related("title")
+                .prefetch_related(*story_card_prefetches("title__"))
+                .order_by("-title__release_year")
+            )
 
-            context["results"] = data
+            grouped = {}
+            for participation in participations:
+                grouped.setdefault(participation.person_id, []).append(participation)
+
+            context["results"] = [
+                {"person": person, "participations": grouped.get(person.pk, [])}
+                for person in persons
+            ]
 
         return context
 

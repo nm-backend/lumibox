@@ -4,7 +4,7 @@ from django.test import TestCase
 from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
 
-from apps.catalog.models import Title
+from apps.catalog.models import Award, Title, TitleAward
 from apps.core.test_factories import (
     create_collection,
     create_country,
@@ -245,3 +245,57 @@ class CollectionViewTests(TestCase):
         collection = create_collection(is_published=False)
         response = self.client.get(collection.get_absolute_url())
         self.assertEqual(response.status_code, 404)
+
+
+class AwardDetailViewTests(TestCase):
+    """
+    Страница премии сортировалась по году из присоединённой таблицы наград.
+    Соединение размножало строки: фильм с тремя записями попадал в список
+    трижды, а в счётчик пагинации — тоже трижды.
+    """
+
+    def setUp(self):
+        self.award = Award.objects.create(name="Главная премия", slug="main-award")
+        self.other = Award.objects.create(name="Другая премия", slug="other-award")
+
+    def _entry(self, title, award, year):
+        return TitleAward.objects.create(
+            title=title,
+            award=award,
+            year=year,
+            category="Лучший фильм",
+            result=TitleAward.Result.WINNER,
+        )
+
+    def test_title_with_several_entries_listed_once(self):
+        title = create_title(name="Многократный лауреат")
+        self._entry(title, self.award, 2021)
+        self._entry(title, self.award, 2022)
+        self._entry(title, self.other, 2023)
+
+        response = self.client.get(self.award.get_absolute_url())
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(list(response.context["titles"]), [title])
+
+    def test_ordered_by_year_of_this_award_only(self):
+        older = create_title(name="Ранний")
+        newer = create_title(name="Поздний")
+        self._entry(older, self.award, 2015)
+        self._entry(newer, self.award, 2020)
+        # Чужая премия с более поздним годом не должна поднимать фильм выше.
+        self._entry(older, self.other, 2030)
+
+        response = self.client.get(self.award.get_absolute_url())
+
+        self.assertEqual(list(response.context["titles"]), [newer, older])
+
+    def test_titles_of_other_awards_excluded(self):
+        mine = create_title(name="Наш лауреат")
+        foreign = create_title(name="Чужой лауреат")
+        self._entry(mine, self.award, 2020)
+        self._entry(foreign, self.other, 2020)
+
+        response = self.client.get(self.award.get_absolute_url())
+
+        self.assertEqual(list(response.context["titles"]), [mine])

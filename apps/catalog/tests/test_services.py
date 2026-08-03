@@ -199,6 +199,43 @@ class RecommendationTests(TestCase):
 
         self.assertEqual(len(get_recommendations(user)), 1)
 
+    def test_favorite_without_genres_falls_back_to_popular(self):
+        """
+        У фильма может не быть жанров. Левое соединение возвращало для него
+        NULL, список любимых жанров становился [None] — непустым по проверке,
+        но ничего не находящим. Пользователь видел пустые рекомендации вместо
+        отката к популярному.
+        """
+        user = create_user()
+        Favorite.objects.create(user=user, title=create_title())
+        create_title(genres=[create_genre()])
+
+        self.assertTrue(get_recommendations(user))
+
+    def test_favorite_genres_collected_without_duplicates(self):
+        """
+        Сортировка из Meta модели дописывала release_year и name в SELECT
+        DISTINCT, поэтому один жанр возвращался столько раз, сколько у
+        пользователя разных пар «год + название».
+        """
+        user = create_user()
+        genre = create_genre()
+        Favorite.objects.create(
+            user=user, title=create_title(genres=[genre], release_year=2001, name="А")
+        )
+        Favorite.objects.create(
+            user=user, title=create_title(genres=[genre], release_year=2002, name="Б")
+        )
+
+        genre_ids = list(
+            Title.objects.filter(favorite__user=user, genres__isnull=False)
+            .values_list("genres__id", flat=True)
+            .order_by()
+            .distinct()
+        )
+
+        self.assertEqual(genre_ids, [genre.pk])
+
 
 class CrewTests(TestCase):
     def test_grouped_by_role_director_first(self):

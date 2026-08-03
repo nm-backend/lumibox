@@ -141,8 +141,18 @@ def get_recommendations(user, limit=12):
     if cached is not None:
         return cached
 
+    # order_by() снимает сортировку из Meta модели. Без него Django дописывает
+    # release_year и name в SELECT DISTINCT, уникальность считается по тройке,
+    # и один жанр возвращается столько раз, сколько у пользователя разных пар
+    # «год + название». genres__isnull=False убирает NULL от левого соединения:
+    # у фильма без жанров он давал список [None], который проходит проверку
+    # ниже как непустой, но не находит ничего — вместо подборки пользователь
+    # видел пустые рекомендации.
     favorite_genre_ids = list(
-        Title.objects.filter(favorite__user=user).values_list("genres__id", flat=True).distinct()
+        Title.objects.filter(favorite__user=user, genres__isnull=False)
+        .values_list("genres__id", flat=True)
+        .order_by()
+        .distinct()
     )
     if not favorite_genre_ids:
         results = list(popular[:limit])
