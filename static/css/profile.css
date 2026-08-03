@@ -229,7 +229,7 @@
 
 /* ---------- Телефон ---------- */
 
-@media (max-width: 860px) {
+@media (max-width: 900px) {
     .profile-layout {
         grid-template-columns: 1fr;
     }

@@ -22,11 +22,11 @@ class ContentSecurityPolicyMiddleware:
 
     CSP_TEMPLATE = (
         "default-src 'self'; "
-        "script-src 'self' 'unsafe-inline' 'unsafe-eval'; "
+        "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com; "
         "style-src 'self' 'unsafe-inline'; "
         "img-src 'self' data: https:; "
         "font-src 'self' data:; "
-        "connect-src 'self'; "
+        "connect-src 'self' https://www.google-analytics.com https://www.googletagmanager.com; "
         "frame-src 'self' https://www.youtube.com https://player.vimeo.com; "
         "media-src 'self' https:; "
         "object-src 'none'; "

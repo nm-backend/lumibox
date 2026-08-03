@@ -26,7 +26,8 @@
                         <span class="reference-card__count">{{ reference.titles_count }}</span>
                     </a>
                 {% empty %}
-                    <p class="empty-state">{% trans "Пока пусто." %}</p>
+                    {% trans "Пока пусто." as empty_title %}
+                    {% include "includes/empty_state.html" with empty_inline=True empty_title=empty_title %}
                 {% endfor %}
             </div>
         </div>

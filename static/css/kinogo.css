@@ -10,7 +10,7 @@
     line-height: 1.45;
     color: var(--color-text-muted);
     background: var(--color-bg);
-    padding-bottom: 20px;
+    padding-bottom: var(--space-5);
 }
 
 /* ---------- Главная: тёмная шапка в теме LumiBox ---------- */
@@ -69,22 +69,22 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 12px;
+    gap: var(--space-3);
     min-height: 40px;
     padding: 0 var(--space-4);
 }
 
 .kg-topbar__text {
-    font-size: 12px;
-    color: #8891a8;
+    font-size: var(--text-xs);
+    color: var(--color-dark-text);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
 .kg-topbar__link {
-    font-size: 12px;
-    color: #c9d1e4;
+    font-size: var(--text-xs);
+    color: var(--color-dark-text-soft);
     text-decoration: none;
     white-space: nowrap;
     transition: color var(--transition-fast);
@@ -177,7 +177,7 @@
 .kg-topnav {
     display: flex;
     flex-wrap: wrap;
-    margin-bottom: 8px;
+    margin-bottom: var(--space-2);
     background: var(--color-card);
     border-bottom: 1px solid var(--color-border);
     border-radius: 0;
@@ -185,8 +185,8 @@
 
 .kg-topnav__link {
     display: block;
-    padding: 0 18px;
-    font-size: 14px;
+    padding: 0 var(--space-4);
+    font-size: var(--text-sm);
     font-weight: 600;
     line-height: 36px;
     color: var(--color-text);
@@ -217,9 +217,9 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 24px;
+    gap: var(--space-5);
     min-height: 169px;
-    padding: 16px;
+    padding: var(--space-4);
 }
 
 .kg-promo__copy {
@@ -228,16 +228,16 @@
 }
 
 .kg-promo__title {
-    margin: 0 0 8px;
+    margin: 0 0 var(--space-2);
     font-size: 26px;
     font-weight: 700;
-    color: #fff;
+    color: var(--color-dark-text-bright);
     line-height: 1.2;
 }
 
 .kg-promo__text {
-    margin: 0 0 16px;
-    font-size: 13px;
+    margin: 0 0 var(--space-4);
+    font-size: var(--text-sm);
     color: var(--color-text-muted);
     line-height: 1.5;
 }
@@ -245,7 +245,7 @@
 .kg-promo__posters {
     flex: 0 0 auto;
     display: flex;
-    gap: 10px;
+    gap: var(--space-2);
 }
 
 .kg-promo__poster img {
@@ -285,17 +285,17 @@
 .kg-xsort-area {
     display: flex;
     align-items: stretch;
-    gap: 4px;
-    margin-top: 2px;
-    padding: 4px 8px 6px;
+    gap: var(--space-1);
+    margin-top: var(--space-1);
+    padding: var(--space-1) var(--space-2) var(--space-1);
     background: var(--color-surface);
     border-bottom: 1px solid var(--color-border);
 }
 
 .kg-xsort-label {
     align-self: center;
-    padding-right: 4px;
-    font-size: 12px;
+    padding-right: var(--space-1);
+    font-size: var(--text-xs);
     color: var(--color-text-dim);
     white-space: nowrap;
 }
@@ -304,13 +304,13 @@
     position: relative;
     height: 24px;
     line-height: 24px;
-    padding: 0 10px;
+    padding: 0 var(--space-2);
     border: 1px solid var(--color-border-strong);
     border-radius: var(--radius-sm);
     background: var(--color-card);
     box-sizing: content-box;
     cursor: pointer;
-    transition: border-color 0.15s ease;
+    transition: border-color var(--transition-fast);
 }
 
 .kg-xsort-div:hover {
@@ -345,7 +345,7 @@
     position: absolute;
     top: 113%;
     left: 0;
-    background: rgba(13, 15, 21, 0.97);
+    background: var(--color-overlay-strong);
     border: 1px solid var(--color-border-soft);
     border-radius: 0 0 var(--radius-sm) var(--radius-sm);
     margin: 0;
@@ -364,12 +364,12 @@
 .kg-xsort-option {
     display: block;
     color: var(--color-text-bright);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-    padding: 0 13px 0 18px;
+    border-bottom: 1px solid var(--color-dark-border);
+    padding: 0 var(--space-3) 0 var(--space-4);
     line-height: 30px;
     white-space: nowrap;
     cursor: pointer;
-    transition: background 0.12s ease;
+    transition: background var(--transition-fast);
 }
 
 .kg-xsort-option:last-child {
@@ -388,7 +388,7 @@
 
 .kg-xsort-option--current {
     color: var(--color-accent);
-    background: rgba(var(--color-accent-rgb), 0.1);
+    background: var(--color-accent-dim);
 }
 
 .kg-xsort-clearall {
@@ -398,13 +398,13 @@
     border-radius: var(--radius-sm);
     background: var(--color-card);
     color: var(--color-text-dim);
-    font-size: 13px;
+    font-size: var(--text-sm);
     display: flex;
     align-items: center;
     justify-content: center;
     text-decoration: none;
     box-sizing: content-box;
-    transition: color 0.15s ease, border-color 0.15s ease;
+    transition: color var(--transition-fast), border-color var(--transition-fast);
 }
 
 .kg-xsort-clearall:hover {
@@ -419,7 +419,7 @@
     grid-template-columns: 280px minmax(0, 1fr);
     align-items: start;
     gap: var(--space-5);
-    margin-top: 12px;
+    margin-top: var(--space-3);
 }
 
 .kg-main {
@@ -717,7 +717,7 @@
         radial-gradient(120% 60% at 50% 0%, rgba(var(--color-accent-rgb), 0.08), transparent 65%),
         linear-gradient(160deg, var(--color-surface-3) 0%, var(--color-card-hover) 60%, var(--color-surface-deep) 100%);
     border-radius: var(--radius-sm);
-    transition: color 0.15s ease, box-shadow 0.15s ease;
+    transition: color var(--transition-fast), box-shadow var(--transition-fast);
 }
 
 .kg-shortstory__poster a:hover .kg-shortstory__poster-fallback {
@@ -837,8 +837,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    padding: 14px 10px 18px;
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-2) var(--space-4);
     border-top: 1px solid var(--color-border);
     background: var(--color-surface);
 }
@@ -849,12 +849,12 @@
 .kg-pagination__next {
     color: var(--color-text-muted);
     text-decoration: none;
-    font-size: 13px;
+    font-size: var(--text-sm);
 }
 
 .kg-pagination__gap {
     color: var(--color-text-dim);
-    font-size: 13px;
+    font-size: var(--text-sm);
 }
 
 .kg-pagination__current {
@@ -872,9 +872,9 @@
 .kg-aheader {
     display: flex;
     align-items: center;
-    padding: 7px 20px;
+    padding: var(--space-2) var(--space-5);
     color: var(--color-text-strong);
-    font-size: 15px;
+    font-size: var(--text-md);
     font-weight: 700;
 }
 
@@ -883,12 +883,12 @@
     padding: 8px 10px;
     margin-top: -8px;
     margin-bottom: -8px;
-    font-size: 13px;
+    font-size: var(--text-sm);
     font-weight: 400;
     text-shadow: none;
     text-decoration: none;
     color: var(--color-text-soft);
-    transition: color 0.12s ease;
+    transition: color var(--transition-fast);
 }
 
 .kg-aheader--row a:hover {
@@ -896,25 +896,25 @@
 }
 
 .kg-mainnav {
-    padding: 15px 10px 5px;
+    padding: var(--space-4) var(--space-2) 5px;
 }
 
 .kg-categories,
 .kg-navsort > div {
-    padding-bottom: 14px;
+    padding-bottom: var(--space-3);
 }
 
 .kg-navsort > div + div {
     border-top: 1px solid var(--color-border);
     box-shadow: 0 -1px 0 rgba(0, 0, 0, 0.3);
-    padding-top: 12px;
+    padding-top: var(--space-3);
 }
 
 .kg-accent {
     display: block;
-    margin-bottom: 8px;
+    margin-bottom: var(--space-2);
     color: var(--color-text);
-    font-size: 14px;
+    font-size: var(--text-sm);
     font-weight: 700;
     font-style: normal;
     line-height: 17px;
@@ -931,20 +931,20 @@
 }
 
 .kg-categories li:first-child {
-    margin-bottom: 10px;
+    margin-bottom: var(--space-2);
 }
 
 .kg-categories li {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 2px;
+    margin-bottom: var(--space-0);
 }
 
 .kg-mainnav li a {
     color: var(--color-text-soft);
     text-decoration: none;
-    transition: color 0.12s ease;
+    transition: color var(--transition-fast);
 }
 
 .kg-mainnav li a:hover {
@@ -952,15 +952,15 @@
 }
 
 .kg-count {
-    font-size: 11px;
+    font-size: var(--text-xs);
     color: var(--color-text-dim);
-    margin-left: 6px;
+    margin-left: var(--space-1);
 }
 
 /* Подборки (franchise) */
 
 .kg-franchises {
-    padding: 0 15px 10px;
+    padding: 0 var(--space-4) var(--space-2);
 }
 
 .kg-franchise {
@@ -969,57 +969,51 @@
     background: var(--color-surface);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-sm);
-    padding: 8px 10px;
+    padding: var(--space-2) var(--space-2);
     margin-top: 5px;
     color: var(--color-text-soft);
     text-decoration: none;
-    transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
-}
-
-.kg-franchise:hover {
-    background: var(--color-surface-hover);
-    border-color: var(--color-accent-dim);
-    color: var(--color-text-strong);
-    transform: translateX(2px);
+    transition: background var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast);
 }
 
 .kg-franchise__img {
     flex: 0 0 60px;
     width: 60px;
     height: 40px;
-    margin-right: 10px;
+    margin-right: var(--space-2);
     border-radius: var(--radius-sm);
-    background: #000;
+    background: var(--color-dark-bg);
     object-fit: cover;
 }
 
 .kg-franchise__title {
-    font-size: 13px;
+    font-size: var(--text-sm);
+    line-height: var(--space-3);
 }
 
 /* Рекомендуемое (soonBlock) */
 
 .kg-soon {
-    padding: 5px 15px 10px;
+    padding: var(--space-1) var(--space-4) var(--space-2);
 }
 
 .kg-soon__item {
     display: flex;
     align-items: center;
     text-decoration: none;
-    margin-top: 8px;
+    margin-top: var(--space-2);
 }
 
 .kg-soon__item img {
     width: 83px;
     height: 123px;
-    margin-right: 10px;
+    margin-right: var(--space-2);
     border-radius: var(--radius-sm);
     background: var(--color-surface);
     border: 1px solid var(--color-border-strong);
     object-fit: cover;
     flex-shrink: 0;
-    transition: border-color 0.15s ease;
+    transition: border-color var(--transition-fast);
 }
 
 .kg-soon__item:hover img {
@@ -1028,13 +1022,12 @@
 
 .kg-soon__title {
     color: var(--color-text);
-    font-size: 13px;
-    line-height: 16px;
+    font-size: var(--text-sm);
+    line-height: var(--line-height-sm);
     font-weight: 700;
     max-height: 48px;
     overflow: hidden;
-    text-shadow: 1px 1px var(--color-text-shadow);
-    transition: color 0.12s ease;
+    transition: color var(--transition-fast);
 }
 
 .kg-soon__item:hover .kg-soon__title {
@@ -1052,8 +1045,8 @@
 .kg-lastupdates__title {
     background: var(--color-surface-hover);
     color: var(--color-text-strong);
-    font-size: 13px;
-    padding: 7px 10px;
+    font-size: var(--text-sm);
+    padding: var(--space-2) var(--space-2);
 }
 
 .kg-lastupdates__item {
@@ -1080,11 +1073,11 @@
     flex-shrink: 0;
     border-radius: var(--radius-sm);
     object-fit: cover;
-    background: #000;
+    background: var(--color-dark-bg);
 }
 
 .kg-lastupdates__main {
-    padding: 0 8px;
+    padding: 0 var(--space-2);
     flex-grow: 1;
     min-width: 0;
 }
@@ -1105,7 +1098,7 @@
     color: var(--color-text-bright);
     overflow: hidden;
     line-height: 1.25;
-    transition: color 0.12s ease;
+    transition: color var(--transition-fast);
 }
 
 .kg-lastupdates__item:hover .kg-lastupdates__name {
@@ -1115,19 +1108,20 @@
 .kg-lastupdates__year {
     color: var(--color-text-dim);
     font-weight: 400;
-    margin-left: 4px;
+    margin-left: var(--space-0);
 }
 
 .kg-lastupdates__meta {
     color: var(--color-text-dim);
-    font-size: 11px;
-    margin-top: 2px;
+    font-size: var(--text-xs);
+    margin-top: var(--space-0);
 }
 
 /* Последние отзывы (lastComments) */
 
 .kg-lastcomments {
-    padding: 5px 15px 10px;
+    padding: var(--space-1) var(--space-4) var(--space-2);
+    margin-top: var(--space-1);
 }
 
 .kg-lastcomment {
@@ -1135,16 +1129,16 @@
     border: 1px solid var(--color-border);
     border-radius: var(--radius-sm);
     margin-top: 5px;
-    padding: 6px 10px;
+    padding: var(--space-1) var(--space-2);
 }
 
 .kg-lastcomment__title {
     display: flex;
     align-items: center;
     color: var(--color-text-soft);
-    font-size: 11px;
+    font-size: var(--text-xs);
     text-decoration: none;
-    transition: color 0.12s ease;
+    transition: color var(--transition-fast);
 }
 
 .kg-lastcomment__title:hover {
@@ -1160,15 +1154,15 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 10px;
+    font-size: var(--text-2xs);
     font-weight: 700;
-    margin-right: 8px;
+    margin-right: var(--space-2);
     flex-shrink: 0;
 }
 
 .kg-lastcomment__text {
     color: var(--color-text-muted);
-    font-size: 12px;
+    font-size: var(--text-xs);
     line-height: 1.4;
     margin-top: 3px;
     overflow: hidden;
@@ -1177,14 +1171,14 @@
 .kg-lastcomment__text span {
     color: var(--color-text-bright);
     font-weight: 700;
-    margin-right: 6px;
+    margin-right: var(--space-1);
 }
 
 /* ---------- Горизонтальное рекламное место (между секциями) ---------- */
 
 .ad-slot {
-    margin: 14px 0 6px;
-    padding: 0 12px;
+    margin: var(--space-3) 0 var(--space-1);
+    padding: 0 var(--space-3);
 }
 
 .ad-slot__inner {
@@ -1192,7 +1186,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    gap: var(--space-2);
     min-height: 110px;
     border: 1px dashed var(--color-border-strong);
     border-radius: var(--radius-md);
@@ -1201,7 +1195,7 @@
 }
 
 .ad-slot__label {
-    font-size: 10px;
+    font-size: var(--text-2xs);
     font-weight: 700;
     letter-spacing: 0.14em;
     text-transform: uppercase;
@@ -1211,43 +1205,43 @@
 .ad-slot__placeholder {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: var(--space-2);
     color: var(--color-text-muted);
 }
 
 .ad-slot__placeholder-title {
-    font-size: 13px;
+    font-size: var(--text-sm);
     font-weight: 600;
 }
 
 .ad-slot__placeholder-size {
-    font-size: 11px;
+    font-size: var(--text-xs);
     color: var(--color-text-dim);
     border: 1px solid var(--color-border-soft);
     border-radius: var(--radius-full);
-    padding: 2px 10px;
+    padding: var(--space-0) var(--space-2);
 }
 
 /* ---------- SEO-текст (footerText) ---------- */
 
 .kg-seo {
-    padding: 20px 0 5px;
+    padding: var(--space-5) 0 5px;
 }
 
 .kg-seo h2 {
     color: var(--color-text-bright);
     font-size: 18px;
     font-weight: 500;
-    margin-bottom: 16px;
+    margin-bottom: var(--space-4);
 }
 
 .kg-seo p {
     color: var(--color-text-muted);
-    padding-bottom: 16px;
+    padding-bottom: var(--space-4);
     text-align: justify;
     line-height: 1.6;
     margin: 0;
-    font-size: 12px;
+    font-size: var(--text-xs);
 }
 
 /* ---------- Мобильная версия ---------- */
@@ -1279,7 +1273,7 @@
     }
     .kg-shortstory__body {
         grid-template-columns: 120px auto;
-        gap: 12px;
+        gap: var(--space-3);
         min-height: 0;
     }
 
@@ -1298,7 +1292,7 @@
     }
 
     .kg-shortstory__title {
-        padding-right: 8px;
+        padding-right: var(--space-2);
     }
 
     .kg-promo__inner {
@@ -1329,7 +1323,7 @@
         overflow-x: auto;
         max-width: 100%;
         scrollbar-width: thin;
-        padding-bottom: 4px;
+        padding-bottom: var(--space-1);
     }
 }
 
@@ -1371,7 +1365,7 @@
 
 .kg-topbar {
     border-bottom-color: rgba(var(--color-accent-rgb), 0.22);
-    background: linear-gradient(180deg, var(--color-surface-deep) 0%, #000 100%);
+    background: linear-gradient(180deg, var(--color-dark-surface) 0%, var(--color-dark-bg) 100%);
 }
 
 .kg-topbar__link {
@@ -1413,7 +1407,7 @@
 
 .logo,
 .logo:hover {
-    background: linear-gradient(90deg, #fff 10%, var(--color-accent-soft) 45%, var(--color-accent) 85%);
+    background: linear-gradient(90deg, var(--color-dark-text-bright) 10%, var(--color-accent-soft) 45%, var(--color-accent) 85%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -1475,7 +1469,7 @@
     background:
         radial-gradient(600px 220px at 12% 0%, rgba(var(--color-accent-rgb), 0.13), transparent 70%),
         radial-gradient(520px 280px at 92% 100%, rgba(var(--color-accent-rgb), 0.08), transparent 70%),
-        linear-gradient(180deg, var(--color-surface-3) 0%, var(--color-surface-deep) 100%);
+        linear-gradient(180deg, var(--color-dark-surface) 0%, var(--color-dark-surface-deep) 100%);
     border-bottom-color: rgba(var(--color-accent-rgb), 0.16);
 }
 
@@ -1492,11 +1486,11 @@
     font-weight: 400;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    color: var(--color-text-strong);
+    color: var(--color-dark-text-bright);
 }
 
 .kg-promo__text {
-    color: var(--color-text-muted);
+    color: var(--color-dark-text-soft);
 }
 
 .kg-promo__poster img {
@@ -1605,36 +1599,16 @@
 
 /* ---------- Светлая тема ----------
    Кинозал тёмный даже днём: тонкая полоса сверху и промо-зона
-   остаются чёрными, а текст на них — светлым. */
+   остаются чёрными, а текст на них — светлым. Цвета заданы
+   токенами --color-dark-* из variables.css, здесь — только
+   поправки для светлой шапки, в которой логотип нуждается
+   в тёмном начале, иначе белый участок теряется на белом фоне. */
 
-[data-theme="light"] .kg-topbar {
-    background: #000;
-}
-
-[data-theme="light"] .kg-topbar__text {
-    color: #8891a8;
-}
-
-[data-theme="light"] .kg-topbar__link {
-    color: #c9d1e4;
-}
-
-[data-theme="light"] .kg-topbar__link:hover {
-    color: var(--color-accent-hover);
-}
-
-[data-theme="light"] .kg-promo {
-    background:
-        radial-gradient(600px 220px at 12% 0%, rgba(var(--color-accent-rgb), 0.13), transparent 70%),
-        radial-gradient(520px 280px at 92% 100%, rgba(var(--color-accent-rgb), 0.08), transparent 70%),
-        linear-gradient(180deg, #141826 0%, #0a0c11 100%);
-    border-bottom-color: rgba(var(--color-accent-rgb), 0.16);
-}
-
-[data-theme="light"] .kg-promo__text {
-    color: #c9d1e4;
-}
-
-[data-theme="light"] .kg-promo__poster img {
-    border-color: rgba(var(--color-accent-rgb), 0.3);
+[data-theme="light"] .logo,
+[data-theme="light"] .logo:hover {
+    background: linear-gradient(90deg, var(--color-text-strong) 10%, var(--color-accent) 45%, var(--color-accent-deep) 85%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
 }

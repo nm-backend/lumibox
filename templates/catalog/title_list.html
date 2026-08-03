@@ -58,25 +58,7 @@
                         {% include "includes/story_card.html" %}
                     {% endfor %}
 
-                    {% if page_obj.has_other_pages %}
-                        <nav class="kg-pagination" aria-label="{% trans 'Навигация по страницам' %}">
-                            {% if page_obj.has_previous %}
-                                <a class="kg-pagination__prev" href="{% querystring page=page_obj.previous_page_number %}" rel="prev">{% trans "Раньше" %}</a>
-                            {% endif %}
-                            {% for page_number in elided_page_range %}
-                                {% if page_number == ellipsis %}
-                                    <span class="kg-pagination__gap" aria-hidden="true">…</span>
-                                {% elif page_number == page_obj.number %}
-                                    <span class="kg-pagination__current" aria-current="page">{{ page_number }}</span>
-                                {% else %}
-                                    <a class="kg-pagination__link" href="{% querystring page=page_number %}">{{ page_number }}</a>
-                                {% endif %}
-                            {% endfor %}
-                            {% if page_obj.has_next %}
-                                <a class="kg-pagination__next" href="{% querystring page=page_obj.next_page_number %}" rel="next">{% trans "Позже" %}</a>
-                            {% endif %}
-                        </nav>
-                    {% endif %}
+                    {% include "includes/pagination.html" %}
                 </div>
             {% else %}
                 <div class="empty-state">

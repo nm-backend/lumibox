@@ -95,19 +95,7 @@
                 {% endfor %}
 
                 {# ---------- Пагинация (pagiNation) ---------- #}
-                {% if kg_pages > 1 %}
-                    <nav class="kg-pagination" aria-label="{% trans "Страницы" %}">
-                        <span class="kg-pagination__prev">{% trans "Раньше" %}</span>
-                        {% for placeholder in ""|rjust:kg_pages %}
-                            {% if forloop.counter == 1 %}
-                                <span class="kg-pagination__current">1</span>
-                            {% else %}
-                                <a class="kg-pagination__link" href="{% url 'catalog:title_list' %}?page={{ forloop.counter }}">{{ forloop.counter }}</a>
-                            {% endif %}
-                        {% endfor %}
-                        <a class="kg-pagination__next" href="{% url 'catalog:title_list' %}?page=2">{% trans "Позже" %}</a>
-                    </nav>
-                {% endif %}
+                {% include "includes/pagination.html" %}
 
             </section>
 

@@ -78,6 +78,27 @@
     --glass-border: rgba(34, 40, 56, 0.5);
     --glass-blur: 18px;
 
+    /*
+      Зоны «кинозала» — верхняя полоса и промо-зона. Они остаются чёрными
+      даже в светлой теме (эффект тёмного зала при дневном свете), поэтому
+      их цвета определены здесь и не переопределяются в [data-theme="light"].
+    */
+    --color-dark-bg: #000;
+    --color-dark-surface: #141826;
+    --color-dark-surface-deep: #0a0c11;
+    --color-dark-text: #8891a8;
+    --color-dark-text-soft: #c9d1e4;
+    --color-dark-text-bright: #f3f3f3;
+    --color-dark-border: rgba(255, 255, 255, 0.12);
+
+    /*
+      Плашки поверх изображений (бейджи, возраст, оверлей карточки) —
+      тёмные в обеих темах, как плёнка поверх постера. Не переопределяются
+      в [data-theme="light"].
+    */
+    --color-overlay: rgba(11, 13, 18, 0.85);
+    --color-overlay-strong: rgba(11, 13, 18, 0.97);
+
     /* --- Типографика --- */
     --font-display: "Bebas Neue", "Impact", sans-serif;
     --font-base: "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
@@ -95,17 +116,24 @@
     --text-2xl: 2.5rem;
     --text-3xl: 3.5rem;
 
+    /* Компактный интерлиньяж — плотные списки и заголовки в сайдбаре */
+    --line-height-sm: 1.25;
+
     /* --- Отступы (4px шаг) --- */
+    /* Микро-шаг 2px — только для точечных подгонок в плотных списках */
+    --space-0: 0.125rem;
     --space-1: 0.25rem;
     --space-2: 0.5rem;
     --space-3: 0.75rem;
     --space-4: 1rem;
     --space-5: 1.5rem;
     --space-6: 2rem;
+    --space-7: 2.5rem;
     --space-8: 3rem;
     --space-10: 4rem;
 
     /* --- Скругления --- */
+    --radius-xs: 4px;
     --radius-sm: 6px;
     --radius-md: 10px;
     --radius-lg: 16px;
@@ -140,10 +168,6 @@
     /* Выделение текста — цвет кинопроектора */
     --color-selection-bg: rgba(var(--color-accent-rgb), 0.28);
     --color-selection-text: inherit;
-
-    /* --- Скелетон --- */
-    --skeleton-base: var(--color-surface);
-    --skeleton-shine: var(--color-surface-hover);
 }
 
 /* ---------- Светлая тема: кинозал днём ---------- */
@@ -198,7 +222,7 @@
 
 /* Заголовки сайта — как в Kinogo: рабочий шрифт Inter, без декора.
    Bebas Neue остаётся только в промо-зоне главной (стиль афиши). */
-h1, h2, h3.section__title, .showcase__name, .film-hero__name {
+h1, h2, h3.section__title, .film-hero__name {
     font-family: var(--font-base);
     font-weight: 600;
     letter-spacing: normal;

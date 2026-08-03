@@ -25,7 +25,8 @@
                         <span class="crew__body"><strong class="crew__name">{{ person.name }}</strong><span class="crew__character">{% blocktranslate with count=person.titles_count %}{{ count }} произведений{% endblocktranslate %}</span></span>
                     </a>
                 {% empty %}
-                    <p class="empty-state">{% trans "Пока нет персон." %}</p>
+                    {% trans "Пока нет персон." as empty_title %}
+                    {% include "includes/empty_state.html" with empty_inline=True empty_title=empty_title %}
                 {% endfor %}
             </div>
         </div>
