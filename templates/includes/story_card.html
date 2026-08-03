@@ -73,11 +73,12 @@
             {% if title.short_description or title.description %}
                 <p class="kg-shortstory__excerpt">{{ title.short_description|default:title.description|truncatewords:55 }}</p>
             {% endif %}
-            {% if title.rating_average %}
-                <div class="kg-shortstory__mrating">
-                    <span class="kg-shortstory__kp">{% trans "Оценка:" %} {{ title.rating_average|floatformat:1 }}</span>
-                </div>
-            {% endif %}
+            {% comment %}
+                Блок «Оценка: N» убран: тот же самый рейтинг уже показан в
+                шапке карточки звёздами и числом «8,7/10 (7 гол.)». Две
+                одинаковые оценки в одной карточке — лишний узел в разметке
+                и визуальный шум, из-за которого карточка выглядит дешевле.
+            {% endcomment %}
         </div>
     </div>
 

@@ -1089,11 +1089,20 @@
     min-width: 0;
 }
 
+/*
+  Обрезаем по целому числу строк, а не по высоте в пикселях.
+  Раньше стояло max-height: 28px при line-height 1.25 — это 1.4 строки.
+  Длинное название резалось посередине второй строки, и в сайдбаре была
+  видна её верхняя половина: буквы выглядели обрубленными.
+  line-clamp останавливает текст ровно на границе строки.
+*/
 .kg-lastupdates__name {
-    display: block;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
     font-weight: 700;
     color: var(--color-text-bright);
-    max-height: 28px;
     overflow: hidden;
     line-height: 1.25;
     transition: color 0.12s ease;

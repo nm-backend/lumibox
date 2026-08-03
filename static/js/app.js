@@ -381,22 +381,11 @@
     ----------------------------------------------- */
     document.querySelector('.site-main').classList.add('page-enter');
 
-    /* -----------------------------------------------
-       14b. Header scroll effect — add shadow when scrolled
-    ----------------------------------------------- */
-    const header = document.querySelector('.site-header');
-    if (header) {
-        let headerScrolled = false;
-        const updateHeader = () => {
-            const isScrolled = window.scrollY > 10;
-            if (isScrolled !== headerScrolled) {
-                header.classList.toggle('site-header--scrolled', isScrolled);
-                headerScrolled = isScrolled;
-            }
-        };
-        window.addEventListener('scroll', updateHeader, { passive: true });
-        updateHeader();
-    }
+    /* Уплотнение шапки при прокрутке живёт в пункте 9 — там один общий
+       обработчик scroll на всю страницу. Здесь раньше стоял его дубликат,
+       принесённый слиянием: он повторно объявлял const header, из-за чего
+       весь файл падал с SyntaxError и на сайте не работал ни один скрипт,
+       и вешал второй слушатель прокрутки на то же самое действие. */
 
     /* -----------------------------------------------
        15. Button ripple effect
@@ -465,19 +454,8 @@
                     }
                 }
             });
-
-            // Fallback: reveal section after 3s even if not all images loaded
-            setTimeout(function () {
-                revealSection(section);
-            }, 3000);
-        });
-
-        function revealSection(section) {
-            if (!section.classList.contains('section--loading')) return;
-            section.classList.remove('section--loading');
-            section.classList.add('section--revealed');
         }
-    })();
+    }
 
     /* -----------------------------------------------
        18. Blur-up image loading — mark images as loaded
