@@ -8,6 +8,8 @@
 {% endblock %}
 
 {% block content %}
+    {% include "includes/breadcrumbs.html" with current=page_heading %}
+
     <div class="page-header">
         <h1 class="page-title">{{ page_heading }}</h1>
         <p class="page-subtitle">{% blocktranslate with count=references|length %}Всего: {{ count }}{% endblocktranslate %}</p>

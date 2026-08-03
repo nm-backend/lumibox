@@ -9,6 +9,8 @@
 {% endblock %}
 
 {% block content %}
+    {% include "includes/breadcrumbs.html" with parent_label=entity_label current=entity.name %}
+
     <section class="collection-hero">
         {% if entity.logo %}
             <img class="collection-hero__image" src="{{ entity.logo.url }}" alt="" loading="lazy" decoding="async">

@@ -9,6 +9,8 @@
 {% endblock %}
 
 {% block content %}
+    {% include "includes/breadcrumbs.html" with current=_("Подборки") %}
+
     <div class="page-header">
         <h1 class="page-title">{% trans "Подборки" %}</h1>
         <p class="page-subtitle">{% blocktranslate with count=paginator.count %}Всего: {{ count }}{% endblocktranslate %}</p>

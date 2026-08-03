@@ -10,6 +10,8 @@
 {% endblock %}
 
 {% block content %}
+    {% include "includes/breadcrumbs.html" with parent_label=_("Актёры") parent_url="/actors/" current=person.name %}
+
     <div class="profile-header">
         <div class="avatar avatar--large">
             {% if person.photo %}

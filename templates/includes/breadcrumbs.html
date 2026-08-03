@@ -1,0 +1,33 @@
+{% load i18n %}
+
+{% comment %}
+    Хлебные крошки — один блок на весь сайт.
+
+    Раньше разметка была вписана отдельно в title_list и title_detail, а на
+    остальных страницах каталога крошек не было вовсе. Копировать её ещё
+    шесть раз значило бы закрепить дублирование: любая правка разделителя
+    или aria-подписи потребовала бы обойти восемь файлов.
+
+    Параметры:
+      current      — подпись текущей страницы, обязательна;
+      parent_label — необязательный промежуточный уровень;
+      parent_url   — адрес этого уровня.
+
+    Пример:
+      {% include "includes/breadcrumbs.html" with current=page_heading %}
+      {% include "includes/breadcrumbs.html" with parent_label=_("Жанры") parent_url="/genres/" current=genre.name %}
+{% endcomment %}
+
+<nav class="breadcrumbs" aria-label="{% trans 'Вы здесь' %}">
+    <a href="{% url 'catalog:home' %}">{% trans "Главная" %}</a>
+    {% if parent_label %}
+        <span class="breadcrumbs__sep" aria-hidden="true">›</span>
+        {% if parent_url %}
+            <a href="{{ parent_url }}">{{ parent_label }}</a>
+        {% else %}
+            <span>{{ parent_label }}</span>
+        {% endif %}
+    {% endif %}
+    <span class="breadcrumbs__sep" aria-hidden="true">›</span>
+    <span aria-current="page">{{ current }}</span>
+</nav>

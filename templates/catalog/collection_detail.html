@@ -9,6 +9,8 @@
 {% endblock %}
 
 {% block content %}
+    {% include "includes/breadcrumbs.html" with parent_label=_("Подборки") parent_url="/collections/" current=collection.name %}
+
     <div class="collection-hero">
         {% if collection.cover %}
             <img class="collection-hero__image" src="{{ collection.cover.url }}" alt="" loading="lazy" decoding="async">

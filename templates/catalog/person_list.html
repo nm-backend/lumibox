@@ -9,6 +9,8 @@
 {% endblock %}
 
 {% block content %}
+    {% include "includes/breadcrumbs.html" with current=page_heading %}
+
     <div class="page-header"><h1 class="page-title">{{ page_heading }}</h1></div>
 
     {# Каркас «контент + боковая панель» — как на каталоге и в жанрах. #}

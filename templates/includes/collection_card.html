@@ -23,7 +23,14 @@
     <span class="collection-card__body">
         <span class="collection-card__name">{{ collection.name }}</span>
         {% if collection.titles_count %}
-            <span class="collection-card__count">{% blocktranslate count count=collection.titles_count trimmed %}{{ count }} title{% plural %}{{ count }} titles{% endblocktranslate %}</span>
+            {% comment %}
+                «Фильмов: 4», а не «4 фильма»: русское числительное требует
+                трёх форм (1 фильм, 2 фильма, 5 фильмов), а исходник здесь
+                английский и до перевода не доходил — на странице подборок
+                выводилось «4 titles». Конструкция с двоеточием верна при
+                любом числе и не зависит от компиляции переводов.
+            {% endcomment %}
+            <span class="collection-card__count">{% blocktranslate with count=collection.titles_count %}Фильмов: {{ count }}{% endblocktranslate %}</span>
         {% endif %}
     </span>
 </a>

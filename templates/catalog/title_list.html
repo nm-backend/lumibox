@@ -8,12 +8,7 @@
 {% endblock %}
 
 {% block content %}
-    {# Breadcrumbs #}
-    <nav class="breadcrumbs" aria-label="{% trans 'Вы здесь' %}">
-        <a href="{% url 'catalog:home' %}">{% trans "Главная" %}</a>
-        <span class="breadcrumbs__sep" aria-hidden="true">›</span>
-        <span aria-current="page">{{ page_heading }}</span>
-    </nav>
+    {% include "includes/breadcrumbs.html" with current=page_heading %}
 
     <div class="page-header">
         {% if page_subtitle %}
