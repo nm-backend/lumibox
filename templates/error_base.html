@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% load static i18n icons lumibox_urls %}
+
+{% comment %}
+    Общий каркас страниц ошибок: 403, 404, 429, 500.
+
+    Раньше каждая из четырёх повторяла одну и ту же разметку целиком —
+    атмосферный слой, иллюстрацию, блок кода и кнопки. Отличались только
+    тексты. Правка оформления требовала обойти четыре файла, и они уже
+    начали расходиться: у 404 и 500 разметка успела отрасти относительно
+    403 и 429.
+
+    Страница-наследник задаёт только смысловые блоки:
+      error_code     — число, крупно;
+      error_subtitle — короткая подпись под ним;
+      error_title    — заголовок в одну фразу;
+      error_text     — объяснение;
+      error_actions  — кнопки (по умолчанию «На главную» и «В каталог»);
+      error_meta_*   — заголовок и описание для вкладки и соцсетей.
+{% endcomment %}
+
+{% block page_title %}{% block error_meta_title %}{% endblock %}{% endblock %}
+{% block page_description %}{% block error_meta_description %}{% endblock %}{% endblock %}
+{% block og_title %}{{ block.super }}{% endblock %}
+{% block og_description %}{{ block.super }}{% endblock %}
+{% block twitter_title %}{{ block.super }}{% endblock %}
+{% block twitter_description %}{{ block.super }}{% endblock %}
+{% block twitter_image %}{% absolute_static 'img/og-default.png' %}{% endblock %}
+
+{% block content %}
+<div class="error-page">
+    {# Зерно плёнки и луч проектора: та же атмосфера, что и на остальных
+       страницах, чтобы ошибка не выпадала из продукта. #}
+    <div class="error-page__atmosphere" aria-hidden="true">
+        <div class="error-page__grain"></div>
+        <div class="error-page__beam"></div>
+    </div>
+
+    <div class="error-page__illustration" aria-hidden="true">
+        {% block error_illustration %}
+        <svg viewBox="0 0 200 140" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="10" y="10" width="180" height="120" rx="6" stroke-opacity="0.25"/>
+            <rect x="80" y="30" width="40" height="60" rx="4" stroke-opacity="0.2"/>
+            <circle cx="100" cy="76" r="10" stroke-opacity="0.18"/>
+            <line x1="40" y1="30" x2="60" y2="30" stroke-opacity="0.12"/>
+            <line x1="40" y1="40" x2="60" y2="40" stroke-opacity="0.12"/>
+            <line x1="140" y1="30" x2="160" y2="30" stroke-opacity="0.12"/>
+            <line x1="140" y1="40" x2="160" y2="40" stroke-opacity="0.12"/>
+            <line x1="90" y1="110" x2="110" y2="110" stroke-opacity="0.12"/>
+            <line x1="80" y1="118" x2="120" y2="118" stroke-opacity="0.1"/>
+        </svg>
+        {% endblock %}
+    </div>
+
+    <h1 class="error-page__code" aria-hidden="true">{% block error_code %}{% endblock %}</h1>
+    <p class="error-page__subtitle">{% block error_subtitle %}{% endblock %}</p>
+    <p class="error-page__title">{% block error_title %}{% endblock %}</p>
+    <p class="error-page__text">{% block error_text %}{% endblock %}</p>
+
+    <div class="error-page__actions">
+        {% block error_actions %}
+            <a class="button button--primary" href="{% url 'catalog:home' %}">{% icon "home" size=14 %} {% trans "На главную" %}</a>
+            <a class="button button--ghost" href="{% url 'catalog:title_list' %}">{% icon "movie" size=14 %} {% trans "В каталог" %}</a>
+        {% endblock %}
+    </div>
+
+    {# Место для того, что есть не у каждой ошибки: поиск и подсказки
+       разделов на 404, обращение в поддержку на 500. #}
+    {% block error_extra %}{% endblock %}
+</div>
+{% endblock %}
