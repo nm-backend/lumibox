@@ -138,21 +138,22 @@
 }
 
 .site-header__login {
-    background: linear-gradient(135deg, var(--color-accent-hover) 0%, var(--color-accent) 55%, var(--color-accent-deep) 100%);
+    background: var(--btn-fill);
     color: var(--color-on-accent);
-    border-radius: var(--radius-full);
+    border-radius: var(--btn-radius-pill);
     padding: var(--space-2) var(--space-5);
     font-weight: 600;
     /* Кнопка не должна сжиматься до нечитаемости, но и растягивать ряд
        шапки ей нельзя — на 360px именно она давала горизонтальную
        прокрутку всей странице. */
     white-space: nowrap;
-    box-shadow: 0 4px 18px rgba(var(--color-accent-rgb), 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+    box-shadow: var(--btn-shadow);
     transition: box-shadow var(--transition-fast), transform var(--transition-fast);
 }
 
 .site-header__login:hover {
-    box-shadow: 0 6px 26px rgba(var(--color-accent-rgb), 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+    background: var(--btn-fill-hover);
+    box-shadow: var(--btn-shadow-hover);
     transform: translateY(-1px);
 }
 
@@ -262,19 +263,21 @@
 
 .kg-promo__btn {
     flex: 0 0 auto;
-    background: var(--color-accent);
+    background: var(--btn-fill);
     color: var(--color-on-accent);
-    font-size: 14px;
+    font-size: var(--text-sm);
     font-weight: 700;
     text-decoration: none;
-    border-radius: var(--radius-full);
-    padding: 10px 26px;
-    box-shadow: var(--shadow-accent);
-    transition: background var(--transition-fast);
+    border-radius: var(--btn-radius-pill);
+    padding: var(--space-3) var(--space-6);
+    box-shadow: var(--btn-shadow);
+    transition: background var(--transition-fast), box-shadow var(--transition-fast), transform var(--transition-fast);
 }
 
 .kg-promo__btn:hover {
-    background: var(--color-accent-hover);
+    background: var(--btn-fill-hover);
+    box-shadow: var(--btn-shadow-hover);
+    transform: translateY(-1px);
 }
 
 /* ---------- Панель сортировки (xSort) ---------- */
@@ -796,32 +799,30 @@
     margin-top: var(--space-4);
 }
 
+/* Заливка и тень — из общих значений кнопки (components.css).
+   Своих числовых значений здесь больше нет: раньше эта кнопка,
+   кнопка входа и кнопка промо-зоны задавали один и тот же градиент
+   тремя разными наборами чисел, и правка одного не касалась двух других. */
 .kg-watch {
-    /* Диагональный градиент с тремя опорами даёт объём, которого не даёт
-       заливка в один тон: светлая кромка сверху, насыщенная середина,
-       затемнение снизу — кнопка читается как физическая, а не как плашка. */
-    background: linear-gradient(135deg, var(--color-accent-hover) 0%, var(--color-accent) 55%, var(--color-accent-deep) 100%);
+    background: var(--btn-fill);
     border: 0;
     color: var(--color-on-accent);
-    border-radius: var(--radius-full);
+    border-radius: var(--btn-radius-pill);
     padding: var(--space-2) var(--space-5);
     text-decoration: none;
     display: block;
     width: fit-content;
     font-size: var(--text-sm);
     font-weight: 700;
-    /* Свечение убавлено с 0.35 до 0.18: кнопка остаётся единственным
-       по-настоящему акцентным элементом карточки, но восемь таких кнопок
-       в ленте больше не «горят» и не размывают фон вокруг себя. */
-    box-shadow: 0 4px 14px rgba(var(--color-accent-rgb), 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+    box-shadow: var(--btn-shadow);
     transition: background var(--transition-fast), box-shadow var(--transition-fast), transform var(--transition-fast);
 }
 
 .kg-watch:hover {
-    background: linear-gradient(135deg, var(--color-accent-soft) 0%, var(--color-accent-hover) 60%, var(--color-accent) 100%);
+    background: var(--btn-fill-hover);
     color: var(--color-on-accent);
     transform: translateY(-1px);
-    box-shadow: 0 8px 26px rgba(var(--color-accent-rgb), 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.45);
+    box-shadow: var(--btn-shadow-hover);
 }
 
 .kg-shortstory__time {

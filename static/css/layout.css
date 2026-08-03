@@ -169,8 +169,8 @@
 .telegram-header-link:hover {
     border-color: var(--color-accent);
     color: var(--color-accent);
-    background: rgba(39, 159, 217, 0.08);
-    box-shadow: 0 0 12px rgba(39, 159, 217, 0.2), 0 0 20px rgba(39, 159, 217, 0.1);
+    background: rgba(var(--color-accent-rgb), 0.08);
+    box-shadow: 0 0 12px rgba(var(--color-accent-rgb), 0.2), 0 0 20px rgba(var(--color-accent-rgb), 0.1);
 }
 
 /* Language switcher */

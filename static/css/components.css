@@ -1060,6 +1060,33 @@
 
 /* ---------- Кнопки ---------- */
 
+/*
+  Общие значения кнопки — один источник для всех пяти реализаций.
+
+  В проекте пять независимых кнопок: .button, .kg-watch, .kg-promo__btn,
+  .site-header__login и .genre-chip. Они расходились во всём — радиусе,
+  кегле, отступах, тени, наличии градиента, — и это одна из причин, по
+  которой страницы выглядели собранными разными людьми. Переменные ниже
+  дают им общий язык, не требуя переписывать разметку на всех страницах.
+*/
+:root {
+    --btn-radius-pill: var(--radius-full);
+    /* Заливка главного действия: диагональ с тремя опорами даёт объём —
+       светлая кромка сверху, насыщенная середина, затемнение снизу. */
+    --btn-fill: linear-gradient(135deg, var(--color-accent-hover) 0%,
+                                        var(--color-accent) 55%,
+                                        var(--color-accent-deep) 100%);
+    --btn-fill-hover: linear-gradient(135deg, var(--color-accent-soft) 0%,
+                                             var(--color-accent-hover) 60%,
+                                             var(--color-accent) 100%);
+    /* Одна тень на все главные кнопки. Свечение — только у наведения:
+       иначе восемь кнопок в ленте горят разом и спорят друг с другом. */
+    --btn-shadow: 0 4px 14px rgba(var(--color-accent-rgb), 0.18),
+                  inset 0 1px 0 rgba(255, 255, 255, 0.35);
+    --btn-shadow-hover: 0 6px 22px rgba(var(--color-accent-rgb), 0.3),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+
 .button {
     display: inline-flex;
     align-items: center;
@@ -1073,30 +1100,14 @@
     font-size: var(--text-sm);
     font-weight: 600;
     white-space: nowrap;
-    position: relative;
-    overflow: hidden;
     transition: background-color var(--transition-fast), border-color var(--transition-fast),
                 color var(--transition-fast), transform var(--transition-fast),
                 box-shadow var(--transition);
 }
 
-/* Ripple effect on active — radial gradient follows pointer position */
-.button::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(circle at var(--ripple-x, 50%) var(--ripple-y, 50%), rgba(255, 255, 255, 0.15) 0%, transparent 60%);
-    opacity: 0;
-    transition: opacity 0.3s ease;
-    pointer-events: none;
-}
-
-.button:active::after {
-    opacity: 1;
-}
-
-/* Нажатие должно ощущаться. Без этого кнопка выглядит картинкой,
-   а не элементом управления. */
+/* Нажатие должно ощущаться: круг подсветки идёт от точки касания,
+   координаты подставляет app.js через --ripple-x / --ripple-y.
+   Правило было объявлено здесь дважды подряд — дубль убран. */
 .button::after {
     content: "";
     position: absolute;
@@ -1115,22 +1126,35 @@
     transform: translateY(1px);
 }
 
+/* Модификатор «таблетка» — для главных действий и чипов фильтров. */
+.button--pill {
+    border-radius: var(--btn-radius-pill);
+}
+
+/* Компактный размер — шапка и плотные ряды управления. */
+.button--sm {
+    padding: var(--space-2) var(--space-4);
+    font-size: var(--text-xs);
+}
+
+/* Главное действие. Заливка и тень берутся из общих значений — те же,
+   что у «Смотреть онлайн», кнопки входа и кнопки промо-зоны. */
 .button--primary {
-    background-color: var(--color-accent);
+    background: var(--btn-fill);
     color: var(--color-on-accent);
-    box-shadow: var(--shadow-sm), 0 0 0 1px rgba(255, 184, 48, 0.1);
+    box-shadow: var(--btn-shadow);
 }
 
 .button--primary:hover {
-    background-color: var(--color-accent-hover);
+    background: var(--btn-fill-hover);
     color: var(--color-on-accent);
     transform: translateY(-1px);
-    box-shadow: var(--shadow-accent), 0 0 0 1px rgba(255, 184, 48, 0.2), 0 0 24px var(--color-accent-glow);
+    box-shadow: var(--btn-shadow-hover);
 }
 
 .button--primary:active {
     transform: translateY(1px);
-    box-shadow: var(--shadow-sm);
+    box-shadow: var(--btn-shadow);
 }
 
 /* Play button — красный акцент для воспроизведения */
@@ -1691,7 +1715,7 @@
     color: var(--color-accent);
     background: var(--color-accent-dim);
     transform: translateY(-1px);
-    box-shadow: 0 2px 8px rgba(255, 184, 48, 0.1), 0 0 12px var(--color-accent-glow);
+    box-shadow: 0 2px 8px rgba(var(--color-accent-rgb), 0.1), 0 0 12px var(--color-accent-glow);
 }
 
 .genre-chip--active {
