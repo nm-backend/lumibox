@@ -14,6 +14,9 @@
         <p class="page-subtitle">{% blocktranslate with count=paginator.count %}Всего: {{ count }}{% endblocktranslate %}</p>
     </div>
 
+    {# Каркас «контент + боковая панель» — как на каталоге, в жанрах и персонах. #}
+    <div class="kg-contentwrap">
+    <div class="kg-main">
     {% if collections %}
         <div class="collection-grid">
             {% for collection in collections %}
@@ -49,4 +52,8 @@
             </p>
         </div>
     {% endif %}
+    </div>
+
+    {% include "includes/kg_sidebar.html" %}
+    </div>
 {% endblock %}

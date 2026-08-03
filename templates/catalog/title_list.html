@@ -111,6 +111,9 @@
 
     {% include "includes/ad_slot.html" %}
 
-    {% include "includes/sidebar.html" %}
+    {% comment %} Тот же сайдбар, что и на главной. Раньше здесь стоял другой
+       (includes/sidebar.html) — с иным набором виджетов и иной вёрсткой,
+       из-за чего каталог выглядел страницей другого сайта. {% endcomment %}
+    {% include "includes/kg_sidebar.html" %}
     </div>
 {% endblock %}

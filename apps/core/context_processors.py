@@ -47,13 +47,26 @@ def kg_topnav(request):
 
 
 def kg_sidebar(request):
-    """Боковая панель внутренних страниц: популярное, новинки, жанры.
-
-    Данные общие для всех страниц и кэшируются на 5 минут.
-    Вьюхи каталога могут переопределить эти ключи — контекст вьюхи
-    имеет приоритет над контекст-процессором.
     """
+    Данные боковой панели каталога — для любой страницы сайта.
+
+    Раньше панель с категориями, годами, подборками и обновлениями была
+    свёрстана внутри home.html и получала данные из HomeView. Поэтому она
+    существовала только на главной: на каталоге показывалась другая панель,
+    а на подборках и персонах не было никакой. Здесь собраны ключи для обеих,
+    чтобы одна и та же разметка работала везде.
+
+    Все источники ниже уже кэшируются сами (get_home_sidebar,
+    get_featured_collections, список жанров и годов), поэтому отдельного
+    кэша здесь нет — иначе получился бы кэш поверх кэша с двумя разными
+    сроками жизни, и сброс одного не сбрасывал бы другой.
+
+    Вьюха может переопределить любой из этих ключей: её контекст важнее.
+    """
+    from apps.catalog.forms import get_year_choices
     from apps.catalog.models import Genre, Title
+    from apps.catalog.services import get_featured_collections, get_home_sidebar
+    from apps.catalog.views import _get_cached_genre_chip_list
 
     data = cache.get("kg_sidebar_data")
     if data is None:
@@ -64,4 +77,14 @@ def kg_sidebar(request):
             "sidebar_genres": list(Genre.objects.all()[:24]),
         }
         cache.set("kg_sidebar_data", data, 5 * 60)
+
+    # Ключи панели каталога. Пустой год отбрасываем: в списке выбора он
+    # означает «любой» и в навигации по годам смысла не имеет.
+    data = {
+        **data,
+        **get_home_sidebar(),
+        "genres": _get_cached_genre_chip_list(50),
+        "collections": get_featured_collections(),
+        "kg_years": [int(year) for year, _ in get_year_choices() if year],
+    }
     return data

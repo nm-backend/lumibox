@@ -10,16 +10,24 @@
 
 {% block content %}
     <div class="page-header"><h1 class="page-title">{{ page_heading }}</h1></div>
-    <div class="crew-list">
-        {% for person in persons %}
-            <a class="crew" href="{{ person.get_absolute_url }}">
-                <span class="avatar">
-                    {% if person.photo %}<img class="avatar__image" src="{{ person.photo.url }}" alt="" loading="lazy" decoding="async">{% else %}<span aria-hidden="true">{{ person.initial }}</span>{% endif %}
-                </span>
-                <span class="crew__body"><strong class="crew__name">{{ person.name }}</strong><span class="crew__character">{% blocktranslate with count=person.titles_count %}{{ count }} произведений{% endblocktranslate %}</span></span>
-            </a>
-        {% empty %}
-            <p class="empty-state">{% trans "Пока нет персон." %}</p>
-        {% endfor %}
+
+    {# Каркас «контент + боковая панель» — как на каталоге и в жанрах. #}
+    <div class="kg-contentwrap">
+        <div class="kg-main">
+            <div class="crew-list">
+                {% for person in persons %}
+                    <a class="crew" href="{{ person.get_absolute_url }}">
+                        <span class="avatar">
+                            {% if person.photo %}<img class="avatar__image" src="{{ person.photo.url }}" alt="" loading="lazy" decoding="async">{% else %}<span aria-hidden="true">{{ person.initial }}</span>{% endif %}
+                        </span>
+                        <span class="crew__body"><strong class="crew__name">{{ person.name }}</strong><span class="crew__character">{% blocktranslate with count=person.titles_count %}{{ count }} произведений{% endblocktranslate %}</span></span>
+                    </a>
+                {% empty %}
+                    <p class="empty-state">{% trans "Пока нет персон." %}</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        {% include "includes/kg_sidebar.html" %}
     </div>
 {% endblock %}

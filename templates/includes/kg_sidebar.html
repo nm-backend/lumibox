@@ -1,0 +1,154 @@
+{% load i18n %}
+
+{% comment %}
+   Боковая панель каталога — одна на весь сайт.
+
+   Раньше эта разметка лежала прямо внутри home.html, поэтому существовала
+   только на главной. На каталоге и страницах жанров показывался другой
+   сайдбар (includes/sidebar.html), а на подборках и персонах не было
+   никакого. Три разных состояния на пяти страницах — отсюда и ощущение,
+   что страницы делали разные люди.
+
+   Данные приходят из apps.catalog.context_processors.sidebar, поэтому
+   блок работает на любой странице и не зависит от контекста конкретной вьюхи.
+{% endcomment %}
+            <aside class="kg-sidebar">
+
+                <div class="kg-aheader">{% trans "Панель навигации" %}</div>
+                <nav class="kg-mainnav" aria-label="{% trans "Навигация по каталогу" %}">
+                    <div class="kg-categories">
+                        <i class="kg-accent kg-accent--star">{% trans "Категории" %}</i>
+                        <ul>
+                            {% for genre in genres|slice:":22" %}
+                                <li>
+                                    <a href="{% url 'catalog:genre_titles' genre.slug %}" title="{{ genre.name }}">{{ genre.name }}</a>
+                                    <span class="kg-count">({{ genre.titles_count }})</span>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    <div class="kg-navsort">
+                        <div class="kg-byyear">
+                            <i class="kg-accent kg-accent--star">{% trans "По году" %}</i>
+                            <ul>
+                                {% for year in kg_years|slice:":9" %}
+                                    <li><a href="{% url 'catalog:title_list' %}?year={{ year }}" title="{% blocktranslate %}Фильмы и сериалы {{ year }} года{% endblocktranslate %}">{{ year }} {% trans "года" %}</a></li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        <div class="kg-bycountry">
+                            <i class="kg-accent">{% trans "По странам" %}</i>
+                            <ul>
+                                {% for url, label in kg_country_links %}
+                                    <li><a href="{{ url }}">{{ label }}</a></li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        <div class="kg-byseries">
+                            <i class="kg-accent">{% trans "Сериалы" %}</i>
+                            <ul>
+                                {% for label, url in kg_series_links %}
+                                    <li><a href="{{ url }}">{{ label }}</a></li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </nav>
+
+                {# ---------- Рекомендуемое (только для вошедших) ---------- #}
+                {% if user.is_authenticated and recommendations %}
+                    <div class="kg-aheader">{% trans "Вам может понравиться" %}</div>
+                    <div class="kg-soon">
+                        {% for title in recommendations|slice:":4" %}
+                            <a class="kg-soon__item" href="{{ title.get_absolute_url }}">
+                                {% if title.poster %}
+                                    <img src="{{ title.poster.url }}" width="83" height="123" alt="" loading="lazy">
+                                {% endif %}
+                                <span class="kg-soon__title">{{ title.name }}</span>
+                            </a>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                {# ---------- Подборки ---------- #}
+                {% if collections %}
+                    <div class="kg-aheader kg-aheader--row">
+                        {% trans "Подборки" %}
+                        <a href="{% url 'catalog:collection_list' %}">{% trans "Все" %}</a>
+                    </div>
+                    <div class="kg-franchises">
+                        {% for collection in collections %}
+                            <a class="kg-franchise" href="{{ collection.get_absolute_url }}">
+                                {% if collection.cover %}
+                                    <img class="kg-franchise__img" src="{{ collection.cover.url }}" width="60" height="40" alt="" loading="lazy">
+                                {% endif %}
+                                <span class="kg-franchise__title">{{ collection.name }}</span>
+                            </a>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                {# ---------- Обновления сериалов ---------- #}
+                {% if series_updates %}
+                    <div class="kg-aheader kg-aheader--row">
+                        {% trans "Обновления сериалов" %}
+                        <a href="{% url 'catalog:title_list' %}?type=series">{% trans "Все" %}</a>
+                    </div>
+                    <div class="kg-lastupdates">
+                        <div class="kg-lastupdates__title">{% trans "Последние обновления" %}</div>
+                        {% for title in series_updates %}
+                            <a class="kg-lastupdates__item" href="{{ title.get_absolute_url }}">
+                                {% if title.poster %}
+                                    <img class="kg-lastupdates__poster" src="{{ title.poster.url }}" width="54" height="64" alt="" loading="lazy">
+                                {% endif %}
+                                <span class="kg-lastupdates__main">
+                                    <span class="kg-lastupdates__name">{{ title.name }}<span class="kg-lastupdates__year">{{ title.release_year }}</span></span>
+                                    <span class="kg-lastupdates__meta">{{ title.get_type_display }}</span>
+                                </span>
+                            </a>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                {# ---------- Обновления аниме ---------- #}
+                {% if anime_updates %}
+                    <div class="kg-aheader kg-aheader--row">
+                        {% trans "Обновления аниме" %}
+                        <a href="{% url 'catalog:genre_titles' 'animaciya' %}">{% trans "Все" %}</a>
+                    </div>
+                    <div class="kg-lastupdates">
+                        <div class="kg-lastupdates__title">{% trans "Последние обновления" %}</div>
+                        {% for title in anime_updates %}
+                            <a class="kg-lastupdates__item" href="{{ title.get_absolute_url }}">
+                                {% if title.poster %}
+                                    <img class="kg-lastupdates__poster" src="{{ title.poster.url }}" width="54" height="64" alt="" loading="lazy">
+                                {% endif %}
+                                <span class="kg-lastupdates__main">
+                                    <span class="kg-lastupdates__name">{{ title.name }}<span class="kg-lastupdates__year">{{ title.release_year }}</span></span>
+                                    <span class="kg-lastupdates__meta">{{ title.get_type_display }}</span>
+                                </span>
+                            </a>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                {# ---------- Последние комментарии ---------- #}
+                {% if latest_reviews %}
+                    <div class="kg-aheader">{% trans "Последние комментарии" %}</div>
+                    <div class="kg-lastcomments">
+                        {% for review in latest_reviews %}
+                            <div class="kg-lastcomment">
+                                <a class="kg-lastcomment__title" href="{{ review.title.get_absolute_url }}">
+                                    <span class="kg-lastcomment__avatar" aria-hidden="true">{{ review.user.initial }}</span>
+                                    {{ review.title.name }}
+                                </a>
+                                <div class="kg-lastcomment__text">
+                                    <span>{{ review.user.display_name }}</span>
+                                    {{ review.text|truncatewords:14 }}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+            </aside>
