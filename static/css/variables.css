@@ -83,6 +83,10 @@
     --font-base: "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
     --font-mono: "JetBrains Mono", "Cascadia Code", monospace;
 
+    /* Ступень ниже xs — только для бейджей на постере (возраст, тип).
+       Отдельный токен, а не число по месту: иначе размер расползается
+       по файлам и шкала перестаёт быть шкалой. */
+    --text-2xs: 0.6875rem;
     --text-xs: 0.75rem;
     --text-sm: 0.875rem;
     --text-md: 1rem;

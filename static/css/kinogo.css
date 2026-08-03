@@ -138,15 +138,33 @@
 }
 
 .site-header__login {
-    background: var(--color-accent);
+    background: linear-gradient(135deg, var(--color-accent-hover) 0%, var(--color-accent) 55%, var(--color-accent-deep) 100%);
     color: var(--color-on-accent);
     border-radius: var(--radius-full);
-    padding: 9px 22px;
+    padding: var(--space-2) var(--space-5);
     font-weight: 600;
+    /* Кнопка не должна сжиматься до нечитаемости, но и растягивать ряд
+       шапки ей нельзя — на 360px именно она давала горизонтальную
+       прокрутку всей странице. */
+    white-space: nowrap;
+    box-shadow: 0 4px 18px rgba(var(--color-accent-rgb), 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+    transition: box-shadow var(--transition-fast), transform var(--transition-fast);
 }
 
 .site-header__login:hover {
-    background: var(--color-accent-hover);
+    box-shadow: 0 6px 26px rgba(var(--color-accent-rgb), 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+    transform: translateY(-1px);
+}
+
+/* Узкие экраны: кнопка входа не помещалась в ряд шапки и растягивала всю
+   страницу — на 360px это давало горизонтальную прокрутку на каждой
+   странице сайта. Правило живёт здесь, а не в layout.css: kinogo.css
+   подключается последним и перебил бы медиазапрос оттуда. */
+@media (max-width: 720px) {
+    .site-header__login {
+        padding: var(--space-2) var(--space-3);
+        font-size: var(--text-sm);
+    }
 }
 
 .hamburger__line {
@@ -437,18 +455,52 @@
     display: none;
 }
 
-/* ---------- Карточка фильма (shortStory) ---------- */
+/* ---------- Карточка фильма (shortStory) ----------
+
+   Единственное место, где описывается карточка. Все её правила держим
+   здесь: раньше половина лежала на тысячу строк ниже, и правки отменяли
+   друг друга.
+
+   Поверхность собрана из токенов: своя подложка, граница и скругление
+   превращают карточку в отдельный объект. До этого у неё не было ни
+   рамки, ни скругления, а внутренний отступ шёл только по бокам и снизу —
+   заголовок прилипал к верхнему краю, и всё вместе читалось как текст на
+   фоне страницы, а не как карточка.
+*/
+
+.kg-shortstory {
+    position: relative;
+    padding: var(--space-4);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: linear-gradient(180deg, var(--color-surface-2) 0%, var(--color-surface) 100%);
+    box-shadow: var(--shadow-card), inset 0 1px 0 rgba(255, 255, 255, 0.03);
+    /* Анимируем только тень, границу и сдвиг. background в переходе не
+       участвует намеренно: анимация градиента заставляет браузер
+       перерисовывать всю площадь карточки на каждом кадре. */
+    transition: transform var(--transition),
+                box-shadow var(--transition),
+                border-color var(--transition);
+}
+
+.kg-shortstory:hover {
+    transform: translateY(-2px);
+    border-color: rgba(var(--color-accent-rgb), 0.35);
+    box-shadow: var(--shadow-card),
+                0 12px 28px rgba(0, 0, 0, 0.5),
+                inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
 
 .kg-shortstory__header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 10px 0 12px;
+    padding: 0 0 var(--space-3);
     line-height: 1;
 }
 
 .kg-shortstory__title {
-    padding-right: 15px;
+    padding-right: var(--space-4);
     min-width: 0;
 }
 
@@ -463,11 +515,12 @@
 .kg-shortstory__title a {
     color: var(--color-text);
     text-decoration: none;
-    transition: color 0.12s ease;
+    transition: color var(--transition-fast), text-shadow var(--transition-fast);
 }
 
 .kg-shortstory__title a:hover {
     color: var(--color-accent);
+    text-shadow: 0 0 16px rgba(var(--color-accent-rgb), 0.5);
 }
 
 .kg-shortstory__rating {
@@ -499,24 +552,35 @@
     white-space: nowrap;
     color: var(--color-accent);
     letter-spacing: 1px;
+    text-shadow: 0 0 10px rgba(var(--color-accent-rgb), 0.65);
 }
 
 .kg-shortstory__stats {
-    margin-top: 2px;
-    font-size: 9px;
-    color: var(--color-text-dim);
+    margin-top: var(--space-1);
+    /* Было 9px — ниже порога читаемости. Счётчик оценок должен быть
+       второстепенным, но всё-таки читаемым. */
+    font-size: var(--text-xs);
+    color: var(--color-text-muted);
     text-align: center;
 }
 
 .kg-shortstory__body {
     display: grid;
-    grid-template-columns: 33% 1fr;
-    gap: 20px;
+    /* Ширина постера в процентах делала его разным в каталоге, избранном
+       и профиле — контейнеры там разной ширины, и карточка выглядела
+       по-разному на каждой странице. clamp даёт постоянный размер с
+       разумными границами: карточка одинакова везде. */
+    grid-template-columns: clamp(140px, 30%, 210px) 1fr;
+    gap: var(--space-5);
 }
 
 .kg-shortstory__poster {
     background: var(--color-card);
     overflow: hidden;
+    border-radius: var(--radius-md);
+    /* Внутренняя светлая кромка отделяет постер от фона карточки,
+       не добавляя внешней рамки — та утяжелила бы композицию. */
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
 }
 
 .kg-shortstory__poster > a {
@@ -524,9 +588,19 @@
     display: block;
 }
 
+/*
+  Одно намерение ховера вместо двух. Раньше это правило задавало
+  scale(1.05), а другое, на тысячу строк ниже, — translateY(-2px)
+  для того же селектора. Побеждало последнее, и задуманное увеличение
+  просто не работало. Оставлен подъём: масштабирование внутри
+  overflow: hidden даёт дрожание краёв во время анимации.
+*/
 .kg-shortstory__poster a:hover img {
     opacity: 1;
-    transform: scale(1.05);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.55),
+                0 0 0 2px rgba(var(--color-accent-rgb), 0.4),
+                0 0 22px rgba(var(--color-accent-rgb), 0.25);
 }
 
 .kg-shortstory__poster img {
@@ -537,7 +611,8 @@
     object-fit: cover;
     object-position: center top;
     background: var(--color-card);
-    transition: opacity 0.2s ease, transform 0.25s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45);
+    transition: opacity var(--transition), transform var(--transition), box-shadow var(--transition);
 }
 
 /* Затемнение снизу + кнопка воспроизведения при наведении */
@@ -589,12 +664,12 @@
 .kg-badge {
     position: absolute;
     z-index: 2;
-    padding: 2px 8px;
+    padding: var(--space-1) var(--space-2);
     border-radius: var(--radius-sm);
-    font-size: 10px;
+    font-size: var(--text-2xs);
     font-weight: 700;
     letter-spacing: 0.05em;
-    line-height: 1.7;
+    line-height: 1.6;
     text-transform: uppercase;
     pointer-events: none;
 }
@@ -697,22 +772,25 @@
 }
 
 .kg-shortstory__excerpt {
-    margin: 12px 0 0;
+    margin: var(--space-3) 0 0;
     color: var(--color-text-soft);
-    font-size: 11px;
-    line-height: 1.55;
+    font-size: var(--text-xs);
+    /* 1.65 вместо 1.55: описание — самый длинный текст в карточке,
+       более просторная строка заметно облегчает его чтение. */
+    line-height: 1.65;
 }
 
 .kg-shortstory__mrating {
-    margin-top: 8px;
+    margin-top: var(--space-2);
     text-align: right;
 }
 
 .kg-shortstory__kp {
     display: inline-block;
     color: var(--color-accent);
-    font-size: 12px;
+    font-size: var(--text-xs);
     font-weight: 700;
+    text-shadow: 0 0 12px rgba(var(--color-accent-rgb), 0.4);
 }
 
 .kg-shortstory__footer {
@@ -723,31 +801,34 @@
 }
 
 .kg-watch {
-    background: linear-gradient(90deg, var(--color-accent), var(--color-accent-hover));
+    /* Диагональный градиент с тремя опорами даёт объём, которого не даёт
+       заливка в один тон: светлая кромка сверху, насыщенная середина,
+       затемнение снизу — кнопка читается как физическая, а не как плашка. */
+    background: linear-gradient(135deg, var(--color-accent-hover) 0%, var(--color-accent) 55%, var(--color-accent-deep) 100%);
     border: 0;
     color: var(--color-on-accent);
-    border-radius: var(--radius-sm);
-    padding: 8px 18px;
+    border-radius: var(--radius-full);
+    padding: var(--space-2) var(--space-5);
     text-decoration: none;
     display: block;
     width: fit-content;
-    font-size: 13px;
+    font-size: var(--text-sm);
     font-weight: 700;
-    box-shadow: 0 4px 16px rgba(var(--color-accent-rgb), 0.25);
-    transition: background 0.12s ease, box-shadow 0.12s ease, transform 0.12s ease;
+    box-shadow: 0 4px 16px rgba(var(--color-accent-rgb), 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    transition: background var(--transition-fast), box-shadow var(--transition-fast), transform var(--transition-fast);
 }
 
 .kg-watch:hover {
-    background-color: var(--color-accent-hover);
+    background: linear-gradient(135deg, var(--color-accent-soft) 0%, var(--color-accent-hover) 60%, var(--color-accent) 100%);
     color: var(--color-on-accent);
     transform: translateY(-1px);
-    box-shadow: 0 6px 22px rgba(var(--color-accent-rgb), 0.4);
+    box-shadow: 0 8px 26px rgba(var(--color-accent-rgb), 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.45);
 }
 
 .kg-shortstory__time {
     margin-left: auto;
-    color: var(--color-text-dim);
-    font-size: 12px;
+    color: var(--color-text-muted);
+    font-size: var(--text-xs);
 }
 
 /* ---------- Пагинация (pagiNation) ---------- */
@@ -1353,15 +1434,8 @@
     box-shadow: 0 0 0 3px var(--color-accent-dim), 0 0 20px rgba(var(--color-accent-rgb), 0.22);
 }
 
-.site-header__login {
-    background: linear-gradient(135deg, var(--color-accent-hover) 0%, var(--color-accent) 55%, var(--color-accent-deep) 100%);
-    box-shadow: 0 4px 18px rgba(var(--color-accent-rgb), 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.35);
-}
-
-.site-header__login:hover {
-    box-shadow: 0 6px 26px rgba(var(--color-accent-rgb), 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.35);
-    transform: translateY(-1px);
-}
+/* Правила кнопки входа сведены к её основному описанию выше — она была
+   описана дважды в разных концах файла, как и карточка. */
 
 /* Навигация: активный пункт — янтарная пилюля */
 
@@ -1455,65 +1529,10 @@
     box-shadow: inset 2px 0 0 var(--color-accent);
 }
 
-/* Карточки: объёмный градиент, янтарный ореол при наведении */
-
-.kg-shortstory {
-    position: relative;
-    padding: 0 15px 15px;
-    background: linear-gradient(180deg, var(--color-surface-2) 0%, var(--color-surface) 100%);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
-    transition: background 0.15s ease, box-shadow 0.2s ease;
-}
-
-.kg-shortstory:hover {
-    background: linear-gradient(180deg, var(--color-surface-hover) 0%, var(--color-surface-2) 100%);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05),
-        0 10px 24px rgba(0, 0, 0, 0.45),
-        0 0 0 1px rgba(var(--color-accent-rgb), 0.14);
-}
-
-.kg-shortstory__title a:hover {
-    color: var(--color-accent);
-    text-shadow: 0 0 16px rgba(var(--color-accent-rgb), 0.5);
-}
-
-.kg-shortstory__poster {
-    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
-}
-
-.kg-shortstory__poster img {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45);
-}
-
-.kg-shortstory__poster a:hover img {
-    opacity: 1;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.55), 0 0 0 2px rgba(var(--color-accent-rgb), 0.4), 0 0 22px rgba(var(--color-accent-rgb), 0.25);
-}
-
-.kg-stars__fill {
-    text-shadow: 0 0 10px rgba(var(--color-accent-rgb), 0.65);
-}
-
-.kg-shortstory__kp {
-    text-shadow: 0 0 12px rgba(var(--color-accent-rgb), 0.4);
-}
-
-.kg-watch {
-    background: linear-gradient(135deg, var(--color-accent-hover) 0%, var(--color-accent) 55%, var(--color-accent-deep) 100%);
-    box-shadow: 0 4px 16px rgba(var(--color-accent-rgb), 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.4);
-    border-radius: var(--radius-full);
-}
-
-.kg-watch:hover {
-    background: linear-gradient(135deg, var(--color-accent-soft) 0%, var(--color-accent-hover) 60%, var(--color-accent) 100%);
-    transform: translateY(-1px);
-    box-shadow: 0 8px 26px rgba(var(--color-accent-rgb), 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.45);
-}
-
-.kg-shortstory__time {
-    color: var(--color-text-muted);
-}
+/* Правила карточки, лежавшие здесь, сведены к её основному описанию выше.
+   Раньше один и тот же селектор описывался в двух местах файла, и правки
+   молча отменяли друг друга: постеру задавался scale(1.05) наверху и
+   translateY(-2px) здесь — увеличение не работало вовсе. */
 
 /* Пагинация: текущая страница — светящаяся янтарная пилюля */
 
