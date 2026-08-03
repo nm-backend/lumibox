@@ -9,6 +9,7 @@ from django.urls import reverse
 from django.views.generic import DetailView, ListView, TemplateView
 
 from apps.catalog.forms import CatalogFilterForm
+from apps.catalog.managers import story_card_prefetches
 from apps.catalog.models import Award, Collection, Country, Genre, Person, Studio, Title
 from apps.catalog.models.person import Participation
 from apps.catalog.services import (
@@ -414,13 +415,17 @@ class PersonDetailView(DetailView):
         context = super().get_context_data(**kwargs)
 
         # Фильмография: только опубликованное, с ролью человека в каждом проекте.
+        # Фильмография рендерится тем же шаблоном карточки, что и каталог,
+        # поэтому и связи ей нужны те же. Раньше здесь прегружались только
+        # жанры, и карточка добирала персон по одному: восемь лишних
+        # запросов на четыре карточки, причём кэш их не снимал.
         context["participations"] = (
             Participation.objects.filter(
                 person=self.object,
                 title__status=Title.Status.PUBLISHED,
             )
             .select_related("title")
-            .prefetch_related("title__genres")
+            .prefetch_related(*story_card_prefetches("title__"))
             .order_by("-title__release_year")
         )
         context["awards"] = self.object.award_entries.select_related("award", "title")[:12]

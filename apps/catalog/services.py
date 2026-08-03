@@ -258,22 +258,41 @@ def get_home_sections():
     if cached is not None:
         return cached
 
-    published = Title.objects.published().with_related().with_crew()
+    # Раньше здесь на каждую секцию шёл свой запрос СО ВСЕМИ prefetch:
+    # шесть секций тянули жанры, страны, студии и участия по шесть раз,
+    # и главная на холодном кэше делала около шестидесяти запросов.
+    #
+    # Теперь в два шага. Сначала шесть дешёвых запросов решают, ЧТО войдёт
+    # в каждую секцию и в каком порядке. Затем один запрос со связями
+    # поднимает объединение — секции пересекаются, и один и тот же фильм
+    # больше не грузится несколько раз.
+    base = Title.objects.published()
 
-    sections = {
-        # list() обязателен: QuerySet ленивый, в кэш попал бы не результат,
-        # а объект запроса, и каждый читатель кэша ходил бы в базу заново.
-        "featured": published.exclude(description="").order_by("-published_at").first(),
+    raw = {
+        # list() обязателен: QuerySet ленивый, в кэш попал бы объект запроса,
+        # и каждый читатель кэша ходил бы в базу заново.
+        "featured": list(base.exclude(description="").order_by("-published_at")[:1]),
         # Герои для авто-ротации: топ-6 по рейтингу с описанием
-        "hero_titles": list(
-            published.exclude(description="")
-            .order_by("-rating_average")[:6]
-        ),
-        "new_titles": list(published.order_by("-published_at")[:12]),
-        "movies": list(published.movies()[:6]),
-        "series": list(published.series()[:6]),
-        "top_rated": list(published.top_rated()[:6]),
+        "hero_titles": list(base.exclude(description="").order_by("-rating_average")[:6]),
+        "new_titles": list(base.order_by("-published_at")[:12]),
+        "movies": list(base.movies()[:6]),
+        "series": list(base.series()[:6]),
+        "top_rated": list(base.top_rated()[:6]),
     }
+
+    identifiers = {item.pk for group in raw.values() for item in group}
+    loaded = {
+        item.pk: item
+        for item in Title.objects.filter(pk__in=identifiers).with_related().with_crew()
+    }
+
+    # Порядок берём из первого шага: filter(pk__in=...) его не сохраняет.
+    sections = {
+        name: [loaded[item.pk] for item in group if item.pk in loaded]
+        for name, group in raw.items()
+    }
+    # Баннер — одна запись, а не список: шаблон ждёт объект.
+    sections["featured"] = sections["featured"][0] if sections["featured"] else None
 
     cache.set(HOME_CACHE_KEY, sections, settings.CACHE_TTL_HOME)
     return sections

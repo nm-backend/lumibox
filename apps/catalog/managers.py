@@ -1,6 +1,38 @@
 from django.db import models
 
 
+def story_card_prefetches(prefix=""):
+    """
+    Связи, без которых шаблон includes/story_card.html идёт в базу сам.
+
+    Карточка показывает жанры, страны, студии, режиссёра и актёров. Пока
+    список нужных связей был вписан только в TitleQuerySet.with_related(),
+    любая вьюха, строившая запрос не от Title, про него не знала. Так и
+    вышло на странице персоны: она отбирала Participation и прегружала
+    только жанры, а карточка добирала персон по одному — восемь лишних
+    запросов на четыре карточки, и кэш это не лечил.
+
+    Принимает: prefix — путь до Title из текущей модели. Пусто для самого
+    Title, "title__" — когда запрос строится от Participation.
+    Возвращает: список аргументов для prefetch_related.
+    """
+    from django.db.models import Prefetch
+
+    from apps.catalog.models.person import Participation
+
+    return [
+        f"{prefix}genres",
+        f"{prefix}countries",
+        f"{prefix}studios",
+        Prefetch(
+            f"{prefix}participations",
+            # select_related("person") обязателен: без него Django достанет
+            # участия без самих персон и сходит в базу за каждым именем.
+            queryset=Participation.objects.select_related("person"),
+        ),
+    ]
+
+
 class TitleQuerySet(models.QuerySet):
     """
     Готовые запросы к каталогу.
@@ -26,30 +58,19 @@ class TitleQuerySet(models.QuerySet):
 
     def with_related(self):
         """
-        Подтягивает жанры и страны заранее, одним запросом на всё.
+        Подтягивает всё, что нужно карточке каталога, одним набором запросов.
 
-        Без этого список из 24 карточек делает 48 лишних запросов
-        к базе — по одному на жанры и страны каждой карточки.
+        Без этого список из 24 карточек делает десятки лишних обращений
+        к базе — по одному на жанры, страны и каждое имя из съёмочной группы.
+        Состав связей описан в story_card_prefetches: он общий с вьюхами,
+        которые строят запрос не от Title.
         """
-        return self.prefetch_related("genres", "countries", "studios", self._crew_prefetch())
+        return self.prefetch_related(*story_card_prefetches())
 
     @staticmethod
     def _crew_prefetch():
-        """
-        Prefetch участий с персонами — общий для with_related и with_crew.
-
-        Список карточек показывает режиссёра и актёров в «коротких историях»,
-        поэтому участия нужны и там. Без select_related("person") Django
-        сходил бы в базу за каждым именем отдельно.
-        """
-        from django.db.models import Prefetch
-
-        from apps.catalog.models.person import Participation
-
-        return Prefetch(
-            "participations",
-            queryset=Participation.objects.select_related("person"),
-        )
+        """Prefetch участий с персонами — общий для with_related и with_crew."""
+        return story_card_prefetches()[-1]
 
     def with_crew(self):
         """
