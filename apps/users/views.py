@@ -2,8 +2,7 @@ from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView, LogoutView
-from django.http import HttpResponseForbidden
-from django.shortcuts import redirect
+from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, UpdateView
 
@@ -42,7 +41,13 @@ class RegisterView(CreateView):
             cache_key = f"register:rate:{ip}"
 
             if cache.get(cache_key, 0) >= 10:
-                return HttpResponseForbidden(render(request, "429.html", status=429))
+                # Именно 429 «слишком много запросов», а не 403: причина во
+                # временном превышении лимита, и через час попытка пройдёт.
+                # Раньше здесь ответ оборачивался в HttpResponseForbidden —
+                # страница уходила бы телом чужого ответа с кодом 403, но до
+                # этого не доходило: render не был импортирован и вьюха падала
+                # с NameError, отдавая посетителю 500.
+                return render(request, "429.html", status=429)
 
         return super().dispatch(request, *args, **kwargs)
 
