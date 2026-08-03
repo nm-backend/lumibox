@@ -33,7 +33,11 @@ jobs:
     env:
       DATABASE_URL: postgres://lumibox:postgres@localhost:5432/lumibox
       REDIS_URL: redis://localhost:6379/0
-      DJANGO_SECRET_KEY: ci-secret-key-not-used-in-production-0123456789
+      # Длина не меньше 50 символов — иначе check --deploy отдаёт W009 на каждом
+      # прогоне. Постоянное предупреждение обесценивает шаг: на его фоне не
+      # видно нового, настоящего. Ключ боевым не является, в бою он приходит
+      # из переменной окружения и в репозитории не хранится.
+      DJANGO_SECRET_KEY: ci-only-not-a-production-key-7f3a9d2e5b8c1046af93de27bc5081
       DJANGO_ALLOWED_HOSTS: localhost,127.0.0.1
 
     steps:
@@ -66,9 +70,13 @@ jobs:
         # Ставим боевые зависимости: проверка идёт по production-настройкам,
         # а они поднимают whitenoise и django-storages. Без них шаг падал
         # не на реальной проблеме, а на отсутствующем модуле.
+        #
+        # --fail-level WARNING: без него шаг зелёный даже когда проверка нашла
+        # проблему — check возвращает ненулевой код только на ERROR. Именно так
+        # мимо гейта проходило предупреждение о SECRET_KEY.
         run: |
           pip install -r requirements/production.txt
-          python manage.py check --deploy --settings=config.settings.production
+          python manage.py check --deploy --fail-level WARNING --settings=config.settings.production
 
       - name: Тесты
         run: python manage.py test apps
