@@ -1012,6 +1012,47 @@
     transform: translateY(0);
 }
 
+/* Вторичное действие: спокойная заливка поверхности вместо акцента.
+   Используется, когда рядом уже есть primary и не должно быть двух
+   спорящих кнопок одного веса. */
+.button--secondary {
+    background: var(--color-surface-hover);
+    border: 1px solid var(--color-border);
+    color: var(--color-text);
+}
+
+.button--secondary:hover {
+    background: var(--color-surface-2);
+    border-color: var(--color-text-dim);
+    color: var(--color-text-strong);
+    transform: translateY(-1px);
+}
+
+.button--secondary:active {
+    transform: translateY(0);
+}
+
+/* Отключённое состояние — единое для всех вариантов: ни нажатий,
+   ни свечения, только приглушённая поверхность. */
+.button:disabled,
+.button[aria-disabled="true"],
+.button.is-disabled {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-dim);
+    box-shadow: none;
+    cursor: not-allowed;
+    opacity: 0.65;
+    transform: none !important;
+    pointer-events: none;
+}
+
+/* Фокус с клавиатуры виден на всех кнопках — единое кольцо акцента. */
+.button:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
+}
+
 /* РџР°РіРёРЅР°С†РёСЏ РІ СЃС‚РёР»Рµ Kinogo (kg-pagination) РѕРїСЂРµРґРµР»РµРЅР° РІ kinogo.css вЂ”
    СЃС‚Р°СЂС‹Р№ РєРѕРјРїРѕРЅРµРЅС‚ СѓРґР°Р»С‘РЅ РІРјРµСЃС‚Рµ СЃ includes/pagination.html. */
 

@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static i18n %}
+{% load static i18n catalog_filters %}
 
 {% block page_title %}{% blocktranslate with heading=page_heading %}{{ heading }} — LumiBox{% endblocktranslate %}{% endblock %}
 {% block page_description %}{% blocktranslate with heading=page_heading %}Список {{ heading|lower }} на LumiBox: фильмография, роли и биографии.{% endblocktranslate %}{% endblock %}
@@ -23,7 +23,7 @@
                         <span class="avatar">
                             {% if person.photo %}<img class="avatar__image" src="{{ person.photo.url }}" alt="" loading="lazy" decoding="async">{% else %}<span aria-hidden="true">{{ person.initial }}</span>{% endif %}
                         </span>
-                        <span class="crew__body"><strong class="crew__name">{{ person.name }}</strong><span class="crew__character">{% blocktranslate with count=person.titles_count %}{{ count }} произведений{% endblocktranslate %}</span></span>
+                        <span class="crew__body"><strong class="crew__name">{{ person.name }}</strong><span class="crew__character">{{ person.titles_count }} {{ person.titles_count|ru_plural:"произведение,произведения,произведений" }}</span></span>
                     </a>
                 {% empty %}
                     {% trans "Пока нет персон." as empty_title %}

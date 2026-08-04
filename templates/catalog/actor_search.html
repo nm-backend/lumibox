@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static i18n icons %}
+{% load static i18n icons catalog_filters %}
 
 {% block page_title %}{% trans "Поиск по актёру — LumiBox" %}{% endblock %}
 {% block page_description %}{% trans "Найдите фильмы и сериалы с участием любимого актёра. Поиск по имени актёра с фильмографией и постерами." %}{% endblock %}
@@ -14,7 +14,8 @@
 
 {% block content %}
     {# Breadcrumbs — единый компонент, как на всём сайте #}
-    {% include "includes/breadcrumbs.html" with parent_label=_("Актёры") parent_url="{% url 'catalog:actor_list' %}" current=_("Поиск по актёру") %}
+    {% url 'catalog:actor_list' as actors_url %}
+    {% include "includes/breadcrumbs.html" with parent_label=_("Актёры") parent_url=actors_url current=_("Поиск по актёру") %}
 
     <div class="page-header">
         <h1 class="page-title">{% trans "Поиск фильмов по актёру" %}</h1>
@@ -64,7 +65,7 @@
                                         {% if item.person.original_name %}
                                             <p class="actor-group__original">{{ item.person.original_name }}</p>
                                         {% endif %}
-                                        <p class="actor-group__count">{% blocktranslate with count=item.participations|length %}{{ count }} проектов{% endblocktranslate %}</p>
+                                        <p class="actor-group__count">{{ item.participations|length }} {{ item.participations|length|ru_plural:"проект,проекта,проектов" }}</p>
                                     </div>
                                 </div>
                             </div>

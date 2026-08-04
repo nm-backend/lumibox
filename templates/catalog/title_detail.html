@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static i18n lumibox_urls icons %}
+{% load static i18n lumibox_urls icons catalog_filters %}
 
 {% block page_title %}{% blocktranslate with name=title.name year=title.release_year %}{{ name }} ({{ year }}) — LumiBox{% endblocktranslate %}{% endblock %}
 {% block page_description %}{{ title.get_meta_description }}{% endblock %}
@@ -239,7 +239,7 @@ function getCookie(name) {
 
                 {% if title.rating_count %}
                     <span class="film-hero__dot" aria-hidden="true">·</span>
-                    <span>{% blocktranslate with count=title.rating_count %}{{ count }} оценок{% endblocktranslate %}</span>
+                    <span>{% blocktranslate with count=title.rating_count %}{{ count }} {{ count|ru_plural:"оценка,оценки,оценок" }}{% endblocktranslate %}</span>
                 {% endif %}
             </div>
 
@@ -338,10 +338,11 @@ function getCookie(name) {
 
 {% block content %}
     {# Breadcrumbs — единый компонент, как на всём сайте #}
+    {% url 'catalog:title_list' as titles_url %}
     {% if title.is_series %}
-        {% include "includes/breadcrumbs.html" with parent_label=_("Сериалы") parent_url="{% url 'catalog:title_list' %}?type=series" current=title.name %}
+        {% include "includes/breadcrumbs.html" with parent_label=_("Сериалы") parent_url=titles_url|add:"?type=series" current=title.name %}
     {% else %}
-        {% include "includes/breadcrumbs.html" with parent_label=_("Фильмы") parent_url="{% url 'catalog:title_list' %}?type=movie" current=title.name %}
+        {% include "includes/breadcrumbs.html" with parent_label=_("Фильмы") parent_url=titles_url|add:"?type=movie" current=title.name %}
     {% endif %}
 
     <div class="detail-layout">

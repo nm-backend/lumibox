@@ -1,6 +1,6 @@
 {% load i18n icons %}
 
-<article class="card" itemscope itemtype="https://schema.org/Movie">
+<article class="card" itemscope itemtype="{% if title.is_series %}https://schema.org/TVSeries{% else %}https://schema.org/Movie{% endif %}">
     <div class="card__poster">
         {% if title.poster %}
             <img class="card__image"
