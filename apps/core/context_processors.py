@@ -2,7 +2,6 @@ import time
 
 from django.conf import settings
 from django.core.cache import cache
-from django.db.models import F
 from django.urls import reverse
 from django.utils.translation import gettext as _
 
@@ -65,24 +64,12 @@ def kg_sidebar(request):
     Вьюха может переопределить любой из этих ключей: её контекст важнее.
     """
     from apps.catalog.forms import get_year_choices
-    from apps.catalog.models import Genre, Title
     from apps.catalog.services import get_featured_collections, get_home_sidebar
     from apps.catalog.views import _get_cached_genre_chip_list
-
-    data = cache.get("kg_sidebar_data")
-    if data is None:
-        published = Title.objects.published()
-        data = {
-            "sidebar_popular": list(published.order_by(F("rating_average").desc(nulls_last=True))[:6]),
-            "sidebar_new": list(published.order_by(F("published_at").desc(nulls_last=True), "-id")[:6]),
-            "sidebar_genres": list(Genre.objects.all()[:24]),
-        }
-        cache.set("kg_sidebar_data", data, 5 * 60)
 
     # Ключи панели каталога. Пустой год отбрасываем: в списке выбора он
     # означает «любой» и в навигации по годам смысла не имеет.
     data = {
-        **data,
         **get_home_sidebar(),
         "genres": _get_cached_genre_chip_list(50),
         "collections": get_featured_collections(),

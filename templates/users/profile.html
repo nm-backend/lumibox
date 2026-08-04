@@ -74,13 +74,11 @@
                             <button class="carousel__btn carousel__btn--next" type="button" aria-label="{% trans 'Вперёд' %}">{% icon "chevron-right" size=18 %}</button>
                         </div>
                     {% else %}
-                        <div class="empty-state">
-                            <p class="empty-state__title">{% trans "Здесь пока ничего нет" %}</p>
-                            <p>{% trans "Добавляйте фильмы и сериалы в избранное, чтобы они появились здесь." %}</p>
-                            <p class="empty-state__action">
-                                <a class="button button--primary" href="{% url 'catalog:title_list' %}">{% trans "Открыть каталог" %}</a>
-                            </p>
-                        </div>
+                        {% trans "Здесь пока ничего нет" as empty_title %}
+                        {% trans "Добавляйте фильмы и сериалы в избранное, чтобы они появились здесь." as empty_desc %}
+                        {% url 'catalog:title_list' as empty_href %}
+                        {% trans "Открыть каталог" as empty_label %}
+                        {% include "includes/empty_state.html" with empty_title=empty_title empty_desc=empty_desc empty_href=empty_href empty_label=empty_label %}
                     {% endif %}
                 </section>
             </div>

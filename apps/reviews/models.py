@@ -16,8 +16,10 @@ class ReviewQuerySet(models.QuerySet):
         return self.filter(status=self.model.Status.PUBLISHED)
 
     def with_author(self):
-        # Автор нужен в каждой строке списка — берём его тем же запросом
-        return self.select_related("user")
+        # Автор и фильм нужны в каждой строке списка — берём их тем же
+        # запросом. Без title здесь список отзывов в API дёргал бы по
+        # одному запросу на отзыв (SlugRelatedField читает review.title.slug).
+        return self.select_related("user", "title")
 
 
 class Review(TimeStampedModel):
@@ -73,8 +75,6 @@ class Review(TimeStampedModel):
         indexes = [
             # Каталог показывает отзывы только определённого статуса для конкретного фильма.
             models.Index(fields=["title", "status"], name="review_title_status_idx"),
-            # Профиль пользователя показывает его отзывы — нужен индекс по user.
-            models.Index(fields=["user"], name="review_user_idx"),
             # Подсчёт рейтинга: SELECT AVG(rating) WHERE title=%s AND status='published'.
             # Покрывающий индекс закрывает и фильтрацию, и агрегацию.
             models.Index(fields=["title", "status", "rating"], name="review_rating_idx"),

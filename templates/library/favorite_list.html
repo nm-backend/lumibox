@@ -19,21 +19,11 @@
             {% include "includes/pagination.html" %}
         </div>
     {% else %}
-        <div class="empty-state">
-            <div class="empty-state__icon" aria-hidden="true">
-                <svg viewBox="0 0 64 64" width="64" height="64" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M32 56l-8.5-7.7C12.6 38.7 6 32.6 6 25c0-6.5 5-11.5 11.5-11.5 4.2 0 8.2 2.3 10.5 6 1.3-2.2 3.6-3.8 6.4-4.2" stroke-opacity="0.3"/>
-                    <path d="M46 7c-5 0-9.5 2.8-11.7 7C32 9.8 27.5 7 22.5 7 16 7 11 12 11 18.5c0 7.6 6.6 13.7 17.5 23.3L32 45l3.5-3.2C46.4 32.2 53 26.1 53 18.5 53 12 48 7 46 7z" stroke-opacity="0.4"/>
-                    <line x1="40" y1="18" x2="54" y2="18" stroke-opacity="0.2"/>
-                    <line x1="47" y1="11" x2="47" y2="25" stroke-opacity="0.2"/>
-                </svg>
-            </div>
-            <p class="empty-state__title">{% trans "Здесь пока пусто" %}</p>
-            <p class="empty-state__desc">{% trans "Нажмите «В избранное» на странице фильма — и он появится тут. Собирайте коллекцию любимых фильмов и сериалов." %}</p>
-            <p class="empty-state__action">
-                <a class="button button--primary" href="{% url 'catalog:title_list' %}">{% icon "movie" size=14 %} {% trans "Открыть каталог" %}</a>
-            </p>
-        </div>
+        {% trans "Здесь пока пусто" as empty_title %}
+        {% trans "Нажмите «В избранное» на странице фильма — и он появится тут. Собирайте коллекцию любимых фильмов и сериалов." as empty_desc %}
+        {% url 'catalog:title_list' as empty_href %}
+        {% trans "Открыть каталог" as empty_label %}
+        {% include "includes/empty_state.html" with empty_icon="heart" empty_title=empty_title empty_desc=empty_desc empty_href=empty_href empty_label=empty_label %}
     {% endif %}
 
     {% include "includes/ad_slot.html" %}

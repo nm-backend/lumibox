@@ -1,8 +1,11 @@
 {% extends "base.html" %}
-{% load static i18n icons %}
+{% load static i18n lumibox_urls icons %}
 
 {% block page_title %}{% blocktranslate with name=person.name %}{{ name }} — фильмография — LumiBox{% endblocktranslate %}{% endblock %}
 {% block page_description %}{% blocktranslate with name=person.name %}{{ name }}: фильмография, роли, биография на LumiBox.{% endblocktranslate %}{% endblock %}
+
+{% block breadcrumb_2_name %}{% blocktranslate %}Актёры и команда{% endblocktranslate %}{% endblock %}
+{% block breadcrumb_2_url %}{% absolute_url request.path %}{% endblock %}
 
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'css/title-detail.css' %}">

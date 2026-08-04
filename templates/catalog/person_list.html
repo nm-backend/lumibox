@@ -2,6 +2,7 @@
 {% load static i18n %}
 
 {% block page_title %}{% blocktranslate with heading=page_heading %}{{ heading }} — LumiBox{% endblocktranslate %}{% endblock %}
+{% block page_description %}{% blocktranslate with heading=page_heading %}Список {{ heading|lower }} на LumiBox: фильмография, роли и биографии.{% endblocktranslate %}{% endblock %}
 
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'css/catalog.css' %}">

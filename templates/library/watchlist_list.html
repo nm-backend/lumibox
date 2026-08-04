@@ -19,21 +19,11 @@
             {% include "includes/pagination.html" %}
         </div>
     {% else %}
-        <div class="empty-state">
-            <div class="empty-state__icon" aria-hidden="true">
-                <svg viewBox="0 0 64 64" width="64" height="64" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="14" y="8" width="36" height="48" rx="4" stroke-opacity="0.4"/>
-                    <line x1="22" y1="16" x2="42" y2="16" stroke-opacity="0.2"/>
-                    <path d="M24 30l16 6-16 6z" stroke-opacity="0.3"/>
-                    <line x1="24" y1="34" x2="32" y2="37.5" stroke-opacity="0.25"/>
-                </svg>
-            </div>
-            <p class="empty-state__title">{% trans "Здесь пока пусто" %}</p>
-            <p class="empty-state__desc">{% trans "Нажмите «Смотреть позже» на странице фильма — и он появится тут. Откладывайте то, что хотите посмотреть, а не забываете." %}</p>
-            <p class="empty-state__action">
-                <a class="button button--primary" href="{% url 'catalog:title_list' %}">{% icon "movie" size=14 %} {% trans "Открыть каталог" %}</a>
-            </p>
-        </div>
+        {% trans "Здесь пока пусто" as empty_title %}
+        {% trans "Нажмите «Смотреть позже» на странице фильма — и он появится тут. Откладывайте то, что хотите посмотреть, а не забываете." as empty_desc %}
+        {% url 'catalog:title_list' as empty_href %}
+        {% trans "Открыть каталог" as empty_label %}
+        {% include "includes/empty_state.html" with empty_icon="play" empty_title=empty_title empty_desc=empty_desc empty_href=empty_href empty_label=empty_label %}
     {% endif %}
 
     {% include "includes/ad_slot.html" %}

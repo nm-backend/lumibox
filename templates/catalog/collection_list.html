@@ -28,13 +28,11 @@
 
         {% include "includes/pagination.html" %}
     {% else %}
-        <div class="empty-state">
-            <p class="empty-state__title">{% trans "Подборок пока нет" %}</p>
-            <p>{% trans "Загляните позже — они появятся." %}</p>
-            <p class="empty-state__action">
-                <a class="button button--primary" href="{% url 'catalog:title_list' %}">{% trans "Открыть каталог" %}</a>
-            </p>
-        </div>
+        {% trans "Подборок пока нет" as empty_title %}
+        {% trans "Загляните позже — они появятся." as empty_desc %}
+        {% url 'catalog:title_list' as empty_href %}
+        {% trans "Открыть каталог" as empty_label %}
+        {% include "includes/empty_state.html" with empty_title=empty_title empty_desc=empty_desc empty_href=empty_href empty_label=empty_label %}
     {% endif %}
     </div>
 

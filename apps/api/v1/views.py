@@ -126,7 +126,15 @@ class TitleViewSet(viewsets.ReadOnlyModelViewSet):
 
     def get_queryset(self):
         # published() обязателен: через API черновики утекли бы наружу.
-        queryset = Title.objects.published().with_related()
+        queryset = Title.objects.published()
+
+        # Список показывает только жанры из связанных данных (TitleListSerializer)
+        # — лёгкий префетч вместо полного with_related, который тянет ещё страны,
+        # студии и съёмочную группу ради карточки сайта.
+        if self.action == "list":
+            queryset = queryset.prefetch_related("genres")
+        else:
+            queryset = queryset.with_related()
 
         # Съёмочную группу тянем только для одной записи: в списке
         # она не нужна и стоила бы лишнего запроса.

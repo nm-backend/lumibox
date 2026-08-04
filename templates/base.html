@@ -36,7 +36,7 @@
     <meta property="og:type" content="website">
     <meta property="og:title" content="{% block og_title %}{% trans 'LumiBox — каталог фильмов и сериалов' %}{% endblock %}">
     <meta property="og:description" content="{% block og_description %}{% trans 'Каталог фильмов и сериалов: поиск, фильтры, подборки.' %}{% endblock %}">
-    <meta property="og:url" content="{% if request %}{{ request.build_absolute_uri }}{% endif %}">
+    <meta property="og:url" content="{% block og_url %}{% if request %}{% absolute_url request.path %}{% endif %}{% endblock %}">
     <meta property="og:image" content="{% block og_image %}{% absolute_static 'img/og-default.png' %}{% endblock %}">
     <meta property="og:locale" content="{{ LANGUAGE_CODE }}">
 
@@ -84,8 +84,8 @@
             {
                 "@type": "ListItem",
                 "position": 2,
-                "name": "{{ request.resolver_match.url_name|capfirst }}",
-                "item": "{{ request.build_absolute_uri }}"
+                "name": "{% block breadcrumb_2_name %}{% trans 'Каталог' %}{% endblock %}",
+                "item": "{% block breadcrumb_2_url %}{% absolute_url request.path %}{% endblock %}"
             }{% endif %}
         ]
     }

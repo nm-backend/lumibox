@@ -325,14 +325,14 @@
 [data-theme="light"] .auth-card {
     background: rgba(18, 22, 32, 0.62);
     border-color: rgba(255, 255, 255, 0.1);
-    color: #e8ecf4;
+    color: var(--color-dark-text-bright);
 }
 
 [data-theme="light"] .auth-card__subtitle,
 [data-theme="light"] .auth-card__footer,
 [data-theme="light"] .auth-card__note,
 [data-theme="light"] .auth-card .form__label {
-    color: #8891a8;
+    color: var(--color-dark-text);
 }
 
 [data-theme="light"] .auth-card .form__required,

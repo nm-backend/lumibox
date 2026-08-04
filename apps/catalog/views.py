@@ -222,13 +222,6 @@ class TitleListView(ElidedPaginationMixin, ListView):
         context["page_subtitle"] = self.page_subtitle
         # Genre chips for quick filter navigation
         context["genres"] = _get_cached_genre_chip_list()
-
-        # Боковая панель каталога: лёгкие запросы без with_related —
-        # для списка достаточно названия, года и постера.
-        base = Title.objects.published()
-        context["sidebar_popular"] = list(base.order_by(F("rating_average").desc(nulls_last=True))[:6])
-        context["sidebar_new"] = list(base.order_by(F("published_at").desc(nulls_last=True), "-id")[:6])
-        context["sidebar_genres"] = context["genres"]
         return context
 
     def build_active_filters(self, form):

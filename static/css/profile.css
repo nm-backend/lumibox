@@ -19,9 +19,9 @@
 .profile-card {
     padding: var(--space-6);
     text-align: center;
-    background: rgba(18, 22, 32, 0.5);
+    background: var(--glass-bg);
     backdrop-filter: blur(16px);
-    border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.06));
+    border: 1px solid var(--glass-border);
     border-radius: var(--radius-lg);
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
     transition: box-shadow var(--transition), transform var(--transition);

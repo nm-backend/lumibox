@@ -48,6 +48,7 @@ def reset_cache_on_title_change(sender, instance, **kwargs):
 @receiver(m2m_changed, sender=Title.countries.through)
 @receiver(m2m_changed, sender=Title.studios.through)
 @receiver(m2m_changed, sender=Title.persons.through)
+@receiver(m2m_changed, sender=Title.related_titles.through)
 def reset_cache_on_title_m2m_change(sender, instance, action, **kwargs):
     """
     Сбрасывает кэш при изменении M2M-связей Title.
@@ -55,6 +56,10 @@ def reset_cache_on_title_m2m_change(sender, instance, action, **kwargs):
     post_save не срабатывает, когда редактор добавляет/убирает жанр
     у уже существующего фильма — M2M сохраняется отдельным запросом.
     Без этого обработчика фильтр по новому жанру не работал бы до TTL.
+
+    related_titles включён отдельно: правка «Похожих вручную» должна
+    сразу обновить страницу фильма, а не жить до истечения TTL кэша
+    похожих (30 минут).
     """
     if action in ("post_add", "post_remove", "post_clear"):
         invalidate_for_model("catalog.title")

@@ -148,8 +148,3 @@ if _SENTRY_DSN:
         send_default_pii=False,
         environment="production",
     )
-
-
-MIDDLEWARE += [  # noqa: F405
-    "apps.core.middleware.ContentSecurityPolicyMiddleware",
-]
