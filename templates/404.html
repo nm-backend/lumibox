@@ -1,53 +1,25 @@
-{% extends "base.html" %}
-{% load static i18n icons lumibox_urls %}
+{% extends "error_base.html" %}
+{% load i18n icons %}
 
-{% block page_title %}{% trans "Страница не найдена (404) — LumiBox" %}{% endblock %}
-{% block page_description %}{% trans "Страница не найдена. Попробуйте поискать или вернитесь на главную." %}{% endblock %}
-{% block og_title %}{% trans "Страница не найдена (404) — LumiBox" %}{% endblock %}
-{% block og_description %}{% trans "Запрашиваемая страница не найдена. Вернитесь на главную." %}{% endblock %}
-{% block og_image %}{% absolute_static 'img/og-default.png' %}{% endblock %}
-{% block twitter_title %}{% trans "Страница не найдена (404) — LumiBox" %}{% endblock %}
-{% block twitter_description %}{% trans "Запрашиваемая страница не найдена. Вернитесь на главную." %}{% endblock %}
-{% block twitter_image %}{% absolute_static 'img/og-default.png' %}{% endblock %}
+{% block error_meta_title %}{% trans "Страница не найдена (404) — LumiBox" %}{% endblock %}
+{% block error_meta_description %}{% trans "Страница не найдена. Попробуйте поискать или вернитесь на главную." %}{% endblock %}
 
-{% block content %}
-<div class="error-page">
-    <div class="error-page__atmosphere" aria-hidden="true">
-        <div class="error-page__grain"></div>
-        <div class="error-page__beam"></div>
-    </div>
+{% block error_code %}404{% endblock %}
+{% block error_subtitle %}{% trans "Страница не найдена" %}{% endblock %}
+{% block error_title %}{% trans "Похоже, плёнка порвалась" %}{% endblock %}
+{% block error_text %}{% trans "Страница, которую вы ищете, не существует или была перемещена. Возможно, вы перешли по устаревшей ссылке или ошиблись в адресе." %}{% endblock %}
 
-    <div class="error-page__illustration" aria-hidden="true">
-        <svg viewBox="0 0 200 140" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="10" y="10" width="180" height="120" rx="6" stroke-opacity="0.25"/>
-            <rect x="20" y="20" width="160" height="90" rx="4" stroke-opacity="0.15"/>
-            <circle cx="100" cy="65" r="28" stroke-opacity="0.2"/>
-            <line x1="72" y1="50" x2="128" y2="50" stroke-opacity="0.12"/>
-            <line x1="72" y1="65" x2="128" y2="65" stroke-opacity="0.12"/>
-            <line x1="72" y1="80" x2="115" y2="80" stroke-opacity="0.12"/>
-            <path d="M155 50 l18 15 l-18 15" stroke-opacity="0.12"/>
-            <path d="M45 50 l-18 15 l18 15" stroke-opacity="0.12"/>
-            <rect x="10" y="118" width="12" height="4" rx="1" stroke-opacity="0.1"/>
-            <rect x="28" y="118" width="8" height="4" rx="1" stroke-opacity="0.1"/>
-            <rect x="42" y="118" width="10" height="4" rx="1" stroke-opacity="0.1"/>
-            <rect x="148" y="118" width="14" height="4" rx="1" stroke-opacity="0.1"/>
-            <rect x="168" y="118" width="10" height="4" rx="1" stroke-opacity="0.1"/>
-            <rect x="184" y="118" width="6" height="4" rx="1" stroke-opacity="0.1"/>
-        </svg>
-    </div>
+{% block error_actions %}
+    <a class="button button--primary" href="{% url 'catalog:home' %}">{% icon "home" size=14 %} {% trans "На главную" %}</a>
+    <a class="button button--ghost" href="{% url 'catalog:title_list' %}">{% icon "movie" size=14 %} {% trans "Весь каталог" %}</a>
+{% endblock %}
 
-    <h1 class="error-page__code" aria-hidden="true">404</h1>
-    <p class="error-page__subtitle">{% trans "Страница не найдена" %}</p>
-    <p class="error-page__title">{% trans "Похоже, плёнка порвалась" %}</p>
-    <p class="error-page__text">
-        {% trans "Страница, которую вы ищете, не существует или была перемещена. Возможно, вы перешли по устаревшей ссылке или ошиблись в адресе." %}
-    </p>
-
-    <div class="error-page__actions">
-        <a class="button button--primary" href="{% url 'catalog:home' %}">{% icon "home" size=14 %} {% trans "На главную" %}</a>
-        <a class="button button--ghost" href="{% url 'catalog:title_list' %}">{% trans "Весь каталог" %}</a>
-    </div>
-
+{% comment %}
+    На 404 посетитель чаще всего пришёл по битой ссылке и всё ещё ищет
+    конкретный фильм. Поэтому здесь, в отличие от других ошибок, сразу
+    даём поиск и переходы в основные разделы.
+{% endcomment %}
+{% block error_extra %}
     <div class="error-page__search">
         <form class="search" action="{% url 'catalog:title_list' %}" method="get" role="search">
             <label class="visually-hidden" for="search-404">{% trans "Поиск по каталогу" %}</label>
@@ -63,5 +35,4 @@
         <a class="error-page__suggestion" href="{% url 'catalog:genre_list' %}">{% trans "Жанры" %}</a>
         <a class="error-page__suggestion" href="{% url 'catalog:collection_list' %}">{% trans "Подборки" %}</a>
     </div>
-</div>
 {% endblock %}

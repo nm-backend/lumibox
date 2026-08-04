@@ -10,7 +10,7 @@ from decimal import Decimal
 
 from django.conf import settings
 from django.core.cache import cache
-from django.db.models import Avg, Count, Q
+from django.db.models import Avg, Count, F, Q
 
 from apps.catalog.models import Collection, Country, Title
 from apps.catalog.models.person import Participation
@@ -129,7 +129,7 @@ def get_recommendations(user, limit=12):
 
     Кэшируются на 5 минут: избранное пользователя меняется нечасто.
     """
-    popular = Title.objects.published().with_related().order_by("-published_at")
+    popular = Title.objects.published().with_related().order_by(F("published_at").desc(nulls_last=True))
 
     if not user.is_authenticated:
         return list(popular[:limit])
@@ -141,8 +141,18 @@ def get_recommendations(user, limit=12):
     if cached is not None:
         return cached
 
+    # order_by() снимает сортировку из Meta модели. Без него Django дописывает
+    # release_year и name в SELECT DISTINCT, уникальность считается по тройке,
+    # и один жанр возвращается столько раз, сколько у пользователя разных пар
+    # «год + название». genres__isnull=False убирает NULL от левого соединения:
+    # у фильма без жанров он давал список [None], который проходит проверку
+    # ниже как непустой, но не находит ничего — вместо подборки пользователь
+    # видел пустые рекомендации.
     favorite_genre_ids = list(
-        Title.objects.filter(favorite__user=user).values_list("genres__id", flat=True).distinct()
+        Title.objects.filter(favorite__user=user, genres__isnull=False)
+        .values_list("genres__id", flat=True)
+        .order_by()
+        .distinct()
     )
     if not favorite_genre_ids:
         results = list(popular[:limit])
@@ -158,7 +168,7 @@ def get_recommendations(user, limit=12):
         .filter(genres__in=favorite_genre_ids)
         .exclude(pk__in=seen_ids + favorite_ids)
         .annotate(matched_genres=Count("genres", filter=Q(genres__in=favorite_genre_ids)))
-        .order_by("-matched_genres", "-published_at")[:limit]
+        .order_by("-matched_genres", F("published_at").desc(nulls_last=True))[:limit]
     )
     cache.set(key, results, settings.CACHE_TTL_RECOMMENDATIONS)
     return results
@@ -228,10 +238,10 @@ def get_home_sidebar():
             .order_by("name")
         ),
         "series_updates": list(
-            published.series().with_related().order_by("-published_at")[:6]
+            published.series().with_related().order_by(F("published_at").desc(nulls_last=True))[:6]
         ),
         "anime_updates": list(
-            published.with_related().filter(genres__slug="animaciya").distinct().order_by("-published_at")[:6]
+            published.with_related().filter(genres__slug="animaciya").distinct().order_by(F("published_at").desc(nulls_last=True))[:6]
         ),
         "latest_reviews": list(
             Review.objects.filter(status=Review.Status.PUBLISHED)
@@ -258,22 +268,41 @@ def get_home_sections():
     if cached is not None:
         return cached
 
-    published = Title.objects.published().with_related().with_crew()
+    # Раньше здесь на каждую секцию шёл свой запрос СО ВСЕМИ prefetch:
+    # шесть секций тянули жанры, страны, студии и участия по шесть раз,
+    # и главная на холодном кэше делала около шестидесяти запросов.
+    #
+    # Теперь в два шага. Сначала шесть дешёвых запросов решают, ЧТО войдёт
+    # в каждую секцию и в каком порядке. Затем один запрос со связями
+    # поднимает объединение — секции пересекаются, и один и тот же фильм
+    # больше не грузится несколько раз.
+    base = Title.objects.published()
 
-    sections = {
-        # list() обязателен: QuerySet ленивый, в кэш попал бы не результат,
-        # а объект запроса, и каждый читатель кэша ходил бы в базу заново.
-        "featured": published.exclude(description="").order_by("-published_at").first(),
+    raw = {
+        # list() обязателен: QuerySet ленивый, в кэш попал бы объект запроса,
+        # и каждый читатель кэша ходил бы в базу заново.
+        "featured": list(base.exclude(description="").order_by(F("published_at").desc(nulls_last=True))[:1]),
         # Герои для авто-ротации: топ-6 по рейтингу с описанием
-        "hero_titles": list(
-            published.exclude(description="")
-            .order_by("-rating_average")[:6]
-        ),
-        "new_titles": list(published.order_by("-published_at")[:12]),
-        "movies": list(published.movies()[:6]),
-        "series": list(published.series()[:6]),
-        "top_rated": list(published.top_rated()[:6]),
+        "hero_titles": list(base.exclude(description="").order_by(F("rating_average").desc(nulls_last=True))[:6]),
+        "new_titles": list(base.order_by(F("published_at").desc(nulls_last=True))[:12]),
+        "movies": list(base.movies()[:6]),
+        "series": list(base.series()[:6]),
+        "top_rated": list(base.top_rated()[:6]),
     }
+
+    identifiers = {item.pk for group in raw.values() for item in group}
+    loaded = {
+        item.pk: item
+        for item in Title.objects.filter(pk__in=identifiers).with_related().with_crew()
+    }
+
+    # Порядок берём из первого шага: filter(pk__in=...) его не сохраняет.
+    sections = {
+        name: [loaded[item.pk] for item in group if item.pk in loaded]
+        for name, group in raw.items()
+    }
+    # Баннер — одна запись, а не список: шаблон ждёт объект.
+    sections["featured"] = sections["featured"][0] if sections["featured"] else None
 
     cache.set(HOME_CACHE_KEY, sections, settings.CACHE_TTL_HOME)
     return sections
@@ -355,7 +384,8 @@ def get_trending_titles():
         titles = list(Title.objects.published().with_related().with_crew().filter(id__in=ids))
         titles.sort(key=lambda t: ids.index(t.id))
     else:
-        titles = list(Title.objects.published().with_related().with_crew().order_by("-rating_average")[:6])
+        titles = list(Title.objects.published().with_related().with_crew()
+                  .order_by(F("rating_average").desc(nulls_last=True))[:6])
     cache.set(HOME_TRENDING_CACHE_KEY, titles, settings.CACHE_TTL_HOME)
     return titles
 

@@ -74,6 +74,10 @@ class WatchHistory(UserTitleRelation):
         ]
         indexes = [
             models.Index(fields=["user", "-watched_at"], name="history_user_date_idx"),
+            # Тренды главной фильтруют по времени без пользователя
+            # (get_trending_titles: watched_at__gte=неделя назад) — этот
+            # запрос должен идти по индексу, а не сканировать всю таблицу.
+            models.Index(fields=["-watched_at"], name="history_watched_at_idx"),
         ]
 
 

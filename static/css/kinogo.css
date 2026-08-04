@@ -58,7 +58,7 @@
 /* ---------- Тонкая тёмная полоса вверху ---------- */
 
 .kg-topbar {
-    background: #000;
+    background: var(--color-dark-bg);
     border-bottom: 1px solid var(--color-border);
 }
 
@@ -457,10 +457,10 @@
 .kg-shortstory {
     position: relative;
     padding: var(--space-4);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-lg);
-    background: linear-gradient(180deg, var(--color-surface-2) 0%, var(--color-surface) 100%);
-    box-shadow: var(--shadow-card), inset 0 1px 0 rgba(255, 255, 255, 0.03);
+    border: var(--card-border);
+    border-radius: var(--card-radius);
+    background: var(--card-bg);
+    box-shadow: var(--card-shadow);
     /* Анимируем только тень, границу и сдвиг. background в переходе не
        участвует намеренно: анимация градиента заставляет браузер
        перерисовывать всю площадь карточки на каждом кадре. */
@@ -470,11 +470,9 @@
 }
 
 .kg-shortstory:hover {
-    transform: translateY(-2px);
-    border-color: rgba(var(--color-accent-rgb), 0.35);
-    box-shadow: var(--shadow-card),
-                0 12px 28px rgba(0, 0, 0, 0.5),
-                inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    transform: var(--card-lift);
+    border-color: var(--card-border-hover);
+    box-shadow: var(--card-shadow-hover);
 }
 
 /* Шапка карточки снята: название и мета-данные теперь живут в правой
@@ -636,7 +634,7 @@
     background: rgba(7, 8, 13, 0.72);
     border: 1px solid rgba(255, 255, 255, 0.22);
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
-    color: #fff;
+    color: var(--color-dark-text-bright);
     opacity: 0;
     backdrop-filter: blur(6px);
     transition: opacity 0.15s ease, transform 0.15s ease;
@@ -670,7 +668,7 @@
 .kg-badge--age {
     top: var(--space-2);
     left: var(--space-2);
-    color: #fff;
+    color: var(--color-dark-text-bright);
     background: rgba(7, 8, 13, 0.78);
     border: 1px solid rgba(255, 255, 255, 0.18);
     backdrop-filter: blur(4px);
@@ -1169,14 +1167,14 @@
     font-weight: 700;
     letter-spacing: 0.14em;
     text-transform: uppercase;
-    color: var(--color-text-dim);
+    color: var(--color-dark-text);
 }
 
 .ad-slot__placeholder {
     display: flex;
     align-items: center;
     gap: var(--space-2);
-    color: var(--color-text-muted);
+    color: var(--color-dark-text-soft);
 }
 
 .ad-slot__placeholder-title {
@@ -1186,8 +1184,8 @@
 
 .ad-slot__placeholder-size {
     font-size: var(--text-xs);
-    color: var(--color-text-dim);
-    border: 1px solid var(--color-border-soft);
+    color: var(--color-dark-text);
+    border: 1px solid var(--color-dark-border);
     border-radius: var(--radius-full);
     padding: var(--space-0) var(--space-2);
 }

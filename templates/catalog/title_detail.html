@@ -16,8 +16,10 @@
 {% block og_image %}{% if title.poster %}{% absolute_url title.poster.url %}{% else %}{% absolute_static 'img/og-default.png' %}{% endif %}{% endblock %}
 {% block twitter_image %}{% if title.poster %}{% absolute_url title.poster.url %}{% else %}{% absolute_static 'img/og-default.png' %}{% endif %}{% endblock %}
 
+{% block breadcrumb_2_name %}{% blocktranslate with name=title.name %}{{ name }}{% endblocktranslate %}{% endblock %}
+{% block breadcrumb_2_url %}{% absolute_url title.get_absolute_url %}{% endblock %}
+
 {% block extra_meta %}
-{% if title.rating_average %}
 <script type="application/ld+json">
 {
     "@context": "https://schema.org",
@@ -25,7 +27,7 @@
     "name": "{{ title.name }}",
     "{% if title.is_series %}alternateName{% else %}alternativeHeadline{% endif %}": "{{ title.original_name }}",
     "description": "{{ title.short_description|default:title.get_meta_description }}",
-    "datePublished": "{{ title.release_year }}",
+    {% if title.release_date %}"datePublished": "{{ title.release_date|date:"Y-m-d" }}",{% else %}"datePublished": "{{ title.release_year }}",{% endif %}
     {% if title.duration_minutes %}"duration": "PT{{ title.duration_minutes }}M",{% endif %}
     {% if title.age_rating %}"contentRating": "{{ title.age_rating }}",{% endif %}
     {% if title.rating_average %}
@@ -42,7 +44,6 @@
     "@id": "{{ request.build_absolute_uri }}"
 }
 </script>
-{% endif %}
 {% endblock %}
 
 {% block extra_css %}

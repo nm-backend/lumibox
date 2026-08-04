@@ -50,6 +50,10 @@ def _clear_all_title_caches():
 def _clear_reference_caches():
     """Жанры и страны."""
     clear_reference_cache()
+    # Флаг «есть жанр Аниме» в верхней навигации живёт до TTL час —
+    # сбрасываем при изменении справочников, чтобы новый жанр
+    # появился в меню сразу, а не через час.
+    cache.delete("kg_topnav_has_anime")
 
 
 def _clear_similar_cache():

@@ -3,6 +3,7 @@ import time
 from django.conf import settings
 from django.core.cache import cache
 from django.urls import reverse
+from django.utils.functional import SimpleLazyObject
 from django.utils.translation import gettext as _
 
 
@@ -61,30 +62,35 @@ def kg_sidebar(request):
     кэша здесь нет — иначе получился бы кэш поверх кэша с двумя разными
     сроками жизни, и сброс одного не сбрасывал бы другой.
 
-    Вьюха может переопределить любой из этих ключей: её контекст важнее.
+    Значения ленивые. Context processor выполняется на каждый ответ, который
+    рендерит шаблон, — включая robots.txt, правовые страницы и админку, где
+    сайдбара нет вовсе. Раньше он безусловно строил страны, обновления
+    сериалов и аниме со всеми prefetch, отзывы, жанры, подборки и годы:
+    на холодном кэше robots.txt стоил 16 запросов. SimpleLazyObject
+    откладывает вычисление до первого обращения из шаблона, поэтому
+    страницы без сайдбара не платят ничего.
+
+    Вьюха может переопределить любой из этих ключей: её контекст важнее,
+    и тогда ленивое значение так и остаётся невычисленным.
     """
     from apps.catalog.forms import get_year_choices
-    from apps.catalog.models import Genre, Title
     from apps.catalog.services import get_featured_collections, get_home_sidebar
     from apps.catalog.views import _get_cached_genre_chip_list
 
-    data = cache.get("kg_sidebar_data")
-    if data is None:
-        published = Title.objects.published()
-        data = {
-            "sidebar_popular": list(published.order_by("-rating_average")[:6]),
-            "sidebar_new": list(published.order_by("-published_at", "-id")[:6]),
-            "sidebar_genres": list(Genre.objects.all()[:24]),
-        }
-        cache.set("kg_sidebar_data", data, 5 * 60)
+    def from_sidebar(key):
+        """Ключ общего блока сайдбара. Сам блок кэшируется одним куском."""
+        return SimpleLazyObject(lambda: get_home_sidebar()[key])
 
-    # Ключи панели каталога. Пустой год отбрасываем: в списке выбора он
-    # означает «любой» и в навигации по годам смысла не имеет.
-    data = {
-        **data,
-        **get_home_sidebar(),
-        "genres": _get_cached_genre_chip_list(50),
-        "collections": get_featured_collections(),
-        "kg_years": [int(year) for year, _ in get_year_choices() if year],
+    # Пустой год отбрасываем: в списке выбора он означает «любой»
+    # и в навигации по годам смысла не имеет.
+    return {
+        "countries": from_sidebar("countries"),
+        "series_updates": from_sidebar("series_updates"),
+        "anime_updates": from_sidebar("anime_updates"),
+        "latest_reviews": from_sidebar("latest_reviews"),
+        "genres": SimpleLazyObject(lambda: _get_cached_genre_chip_list(50)),
+        "collections": SimpleLazyObject(get_featured_collections),
+        "kg_years": SimpleLazyObject(
+            lambda: [int(year) for year, _ in get_year_choices() if year]
+        ),
     }
-    return data

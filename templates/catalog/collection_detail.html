@@ -4,6 +4,8 @@
 {% block page_title %}{{ collection.get_meta_title }} — LumiBox{% endblock %}
 {% block page_description %}{{ collection.get_meta_description }}{% endblock %}
 
+{% block breadcrumb_2_name %}{{ collection.name }}{% endblock %}
+
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'css/collections.css' %}">
 {% endblock %}

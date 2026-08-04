@@ -1,28 +1,30 @@
 {
-  "version": 1,
-  "startup": {},
-  "skills": {
-    "preloaded": [
-      "agent-browser",
-      "browser-testing-with-devtools",
-      "design-qa-checklist",
-      "agent-development",
-      "django-patterns",
-      "django-celery",
-      "find-skills",
-      "django-security",
-      "mcp-builder",
-      "frontend-design",
-      "postgresql-optimization",
-      "performance",
-      "python-performance-optimization",
-      "python-backend",
-      "qa",
-      "python-testing-patterns",
-      "render-deploy",
-      "redis-core",
-      "ui-ux-pro-max",
-      "skill-creator"
-    ]
-  }
+  "preloadedSkills": [
+    "agent-browser",
+    "browser-testing-with-devtools",
+    "design-qa-checklist",
+    "agent-development",
+    "django-patterns",
+    "django-celery",
+    "find-skills",
+    "django-security",
+    "mcp-builder",
+    "frontend-design",
+    "postgresql-optimization",
+    "performance",
+    "python-performance-optimization",
+    "python-backend",
+    "qa",
+    "python-testing-patterns",
+    "render-deploy",
+    "redis-core",
+    "ui-ux-pro-max",
+    "skill-creator",
+    "django-expert",
+    "dbs-goal",
+    "django-tdd",
+    "postgresql-code-review",
+    "django-verification",
+    "django-rest-api-development"
+  ]
 }

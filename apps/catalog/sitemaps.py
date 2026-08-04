@@ -1,7 +1,7 @@
 from django.contrib.sitemaps import Sitemap
 from django.urls import reverse
 
-from apps.catalog.models import Award, Country, Genre, Studio, Title
+from apps.catalog.models import Award, Collection, Country, Genre, Person, Studio, Title
 
 
 class TitleSitemap(Sitemap):
@@ -55,6 +55,33 @@ class AwardSitemap(ReferenceSitemap):
     url_name = "catalog:award_detail"
 
 
+class PersonSitemap(Sitemap):
+    """Персоны: актёры, режиссёры и прочая съёмочная группа."""
+
+    changefreq = "weekly"
+    priority = 0.6
+
+    def items(self):
+        return Person.objects.all()
+
+    def lastmod(self, person):
+        return person.updated_at
+
+
+class CollectionSitemap(Sitemap):
+    """Тематические подборки."""
+
+    changefreq = "weekly"
+    priority = 0.6
+
+    def items(self):
+        # Только опубликованные: черновик подборки отдаёт 404.
+        return Collection.objects.published()
+
+    def lastmod(self, collection):
+        return collection.updated_at
+
+
 class StaticSitemap(Sitemap):
     """Постоянные страницы: главная, каталог, списки жанров и стран."""
 
@@ -85,4 +112,6 @@ sitemaps = {
     "countries": CountrySitemap,
     "studios": StudioSitemap,
     "awards": AwardSitemap,
+    "persons": PersonSitemap,
+    "collections": CollectionSitemap,
 }
