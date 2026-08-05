@@ -9,7 +9,7 @@
    никакого. Три разных состояния на пяти страницах — отсюда и ощущение,
    что страницы делали разные люди.
 
-   Данные приходят из apps.catalog.context_processors.sidebar, поэтому
+   Данные приходят из apps.core.context_processors.kg_sidebar, поэтому
    блок работает на любой странице и не зависит от контекста конкретной вьюхи.
 {% endcomment %}
             <aside class="kg-sidebar">
@@ -97,28 +97,6 @@
                     <div class="kg-lastupdates">
                         <div class="kg-lastupdates__title">{% trans "Последние обновления" %}</div>
                         {% for title in series_updates %}
-                            <a class="kg-lastupdates__item" href="{{ title.get_absolute_url }}">
-                                {% if title.poster %}
-                                    <img class="kg-lastupdates__poster" src="{{ title.poster.url }}" width="54" height="64" alt="" loading="lazy">
-                                {% endif %}
-                                <span class="kg-lastupdates__main">
-                                    <span class="kg-lastupdates__name">{{ title.name }}<span class="kg-lastupdates__year">{{ title.release_year }}</span></span>
-                                    <span class="kg-lastupdates__meta">{{ title.get_type_display }}</span>
-                                </span>
-                            </a>
-                        {% endfor %}
-                    </div>
-                {% endif %}
-
-                {# ---------- Обновления аниме ---------- #}
-                {% if anime_updates %}
-                    <div class="kg-aheader kg-aheader--row">
-                        {% trans "Обновления аниме" %}
-                        <a href="{% url 'catalog:genre_titles' 'animaciya' %}">{% trans "Все" %}</a>
-                    </div>
-                    <div class="kg-lastupdates">
-                        <div class="kg-lastupdates__title">{% trans "Последние обновления" %}</div>
-                        {% for title in anime_updates %}
                             <a class="kg-lastupdates__item" href="{{ title.get_absolute_url }}">
                                 {% if title.poster %}
                                     <img class="kg-lastupdates__poster" src="{{ title.poster.url }}" width="54" height="64" alt="" loading="lazy">

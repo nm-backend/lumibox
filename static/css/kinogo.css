@@ -1002,7 +1002,7 @@
     color: var(--color-accent);
 }
 
-/* Обновления сериалов / аниме (lastUpdates) */
+/* Обновления сериалов (lastUpdates) */
 
 .kg-lastupdates {
     border-radius: var(--radius-md);

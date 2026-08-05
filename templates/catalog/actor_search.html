@@ -41,7 +41,9 @@
                         {% icon "search" size=14 %} {% trans "Найти" %}
                     </button>
                 </div>
-                <div class="actor-search__suggestions" data-actor-suggestions></div>
+                <div class="actor-search__suggestions" data-actor-suggestions
+                     data-empty-msg="{% trans 'Ничего не найдено' %}"
+                     data-projects-msg="{% trans 'проектов' %}"></div>
             </form>
         </div>
 
@@ -99,102 +101,5 @@
 {% endblock %}
 
 {% block extra_js %}
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    const input = document.querySelector('[data-actor-search-input]');
-    const suggestions = document.querySelector('[data-actor-suggestions]');
-    let timer = null;
-
-    if (!input || !suggestions) return;
-
-    input.addEventListener('input', function () {
-        const q = this.value.trim();
-        if (q.length < 2) {
-            suggestions.classList.remove('actor-search__suggestions--open');
-            return;
-        }
-        clearTimeout(timer);
-        timer = setTimeout(() => fetchActorSuggestions(q), 300);
-    });
-
-    document.addEventListener('click', function (e) {
-        if (!e.target.closest('.actor-search__form-wrapper')) {
-            suggestions.classList.remove('actor-search__suggestions--open');
-        }
-    });
-
-    input.addEventListener('focus', function () {
-        if (this.value.trim().length >= 2) {
-            suggestions.classList.add('actor-search__suggestions--open');
-        }
-    });
-
-    async function fetchActorSuggestions(q) {
-        try {
-            const response = await fetch('{% url "catalog:actor_search" %}?q=' + encodeURIComponent(q), {
-                headers: { 'X-Requested-With': 'XMLHttpRequest' }
-            });
-            if (!response.ok) throw new Error('Search failed');
-            const data = await response.json();
-            renderSuggestions(data.results || []);
-        } catch {
-            suggestions.classList.remove('actor-search__suggestions--open');
-        }
-    }
-
-    function renderSuggestions(items) {
-        suggestions.innerHTML = '';
-        if (!items || items.length === 0) {
-            const empty = document.createElement('p');
-            empty.className = 'actor-search__suggestions-empty';
-            empty.textContent = '{% trans "Ничего не найдено" %}';
-            suggestions.appendChild(empty);
-            suggestions.classList.add('actor-search__suggestions--open');
-            return;
-        }
-        items.forEach(item => {
-            const link = document.createElement('a');
-            link.className = 'actor-search__suggestion';
-            link.href = item.url;
-
-            if (item.photo) {
-                const img = document.createElement('img');
-                img.className = 'actor-search__suggestion-photo';
-                img.src = item.photo;
-                img.alt = '';
-                img.loading = 'lazy';
-                link.appendChild(img);
-            } else {
-                const placeholder = document.createElement('span');
-                placeholder.className = 'actor-search__suggestion-photo actor-search__suggestion-photo--placeholder';
-                placeholder.textContent = item.name[0];
-                link.appendChild(placeholder);
-            }
-
-            const body = document.createElement('span');
-            body.className = 'actor-search__suggestion-body';
-
-            const name = document.createElement('span');
-            name.className = 'actor-search__suggestion-name';
-            name.textContent = item.name;
-            body.appendChild(name);
-
-            const meta = document.createElement('span');
-            meta.className = 'actor-search__suggestion-meta';
-            meta.textContent = item.film_count + ' {% trans "проектов" %}' + (item.original_name ? ' · ' + item.original_name : '');
-            body.appendChild(meta);
-
-            link.appendChild(body);
-
-            const icon = document.createElement('span');
-            icon.className = 'actor-search__suggestion-arrow';
-            icon.innerHTML = '→';
-            link.appendChild(icon);
-
-            suggestions.appendChild(link);
-        });
-        suggestions.classList.add('actor-search__suggestions--open');
-    }
-});
-</script>
+    <script src="{% static 'js/actor-search.js' %}?v={{ static_version }}" defer></script>
 {% endblock %}

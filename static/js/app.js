@@ -402,6 +402,9 @@
        16. Keyboard shortcuts (global)
     ----------------------------------------------- */
     document.addEventListener('keydown', function (e) {
+        // Целью может быть сам document (клавиша нажата без фокуса на элементе) —
+        // у него нет .matches(), и вызов падал с TypeError. Проверяем заранее.
+        if (!(e.target instanceof Element)) return;
         if (e.target.matches('input, select, textarea, [contenteditable]')) return;
         // / to focus search
         if (e.key === '/' && !e.ctrlKey && !e.metaKey) {

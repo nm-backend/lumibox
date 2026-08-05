@@ -51,131 +51,7 @@
 {% endblock %}
 
 {% block extra_js %}
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    var ratingContainer = document.querySelector('[data-star-rating]');
-    if (!ratingContainer) return;
-
-    var stars = ratingContainer.querySelectorAll('[data-star]');
-    var statusEl = ratingContainer.querySelector('[data-star-status]');
-    var currentRating = {{ user_review.rating|default:"0" }};
-    var slug = '{{ title.slug }}';
-
-    function setStars(value) {
-        stars.forEach(function (s) {
-            s.classList.toggle('star-rating__star--active', parseInt(s.dataset.value) <= value);
-        });
-    }
-
-    setStars(currentRating);
-
-    stars.forEach(function (star) {
-        star.addEventListener('mouseenter', function () {
-            setStars(parseInt(this.dataset.value));
-        });
-
-        star.addEventListener('mouseleave', function () {
-            setStars(currentRating);
-        });
-
-        star.addEventListener('click', function () {
-            var value = parseInt(this.dataset.value);
-            if (value === currentRating) return;
-
-            var xhr = new XMLHttpRequest();
-            xhr.open('POST', '/api/v1/titles/' + slug + '/rate/');
-            xhr.setRequestHeader('Content-Type', 'application/json');
-            xhr.setRequestHeader('X-CSRFToken', getCookie('csrftoken'));
-            xhr.onload = function () {
-                if (xhr.status === 200) {
-                    currentRating = value;
-                    setStars(value);
-                    if (statusEl) {
-                        statusEl.textContent = '{% trans "Оценка сохранена" %}';
-                        setTimeout(function () { statusEl.textContent = ''; }, 3000);
-                    }
-                } else {
-                    if (statusEl) {
-                        statusEl.textContent = '{% trans "Ошибка" %}';
-                        setTimeout(function () { statusEl.textContent = ''; }, 3000);
-                    }
-                }
-            };
-            xhr.send(JSON.stringify({ rating: value }));
-        });
-    });
-});
-
-function getCookie(name) {
-    var value = '; ' + document.cookie;
-    var parts = value.split('; ' + name + '=');
-    if (parts.length === 2) return parts.pop().split(';').shift();
-}
-
-    var shareBtns = document.querySelectorAll('[data-share]');
-    shareBtns.forEach(function (shareBtn) {
-        shareBtn.addEventListener('click', function () {
-            var url = window.location.href;
-            var title = document.title;
-            if (navigator.share) {
-                navigator.share({ title: title, url: url }).catch(function () {});
-            } else {
-                var input = document.createElement('input');
-                input.value = url;
-                document.body.appendChild(input);
-                input.select();
-                document.execCommand('copy');
-                document.body.removeChild(input);
-                var original = shareBtn.innerHTML;
-                shareBtn.innerHTML = '<span>{% trans "Скопировано" %}</span>';
-                shareBtn.classList.add('sidebar-share__btn--copied');
-                setTimeout(function () {
-                    shareBtn.innerHTML = original;
-                    shareBtn.classList.remove('sidebar-share__btn--copied');
-                }, 2000);
-            }
-        });
-    });
-
-    /* ---------- Модальный плеер трейлера ---------- */
-    var modal = document.querySelector('[data-trailer-modal]');
-    var openBtn = document.querySelector('[data-trailer-open]');
-    if (modal && openBtn) {
-        var modalVideo = modal.querySelector('[data-trailer-video]');
-        var modalFrame = modal.querySelector('[data-trailer-iframe]');
-        var lastFocus = null;
-
-        function openModal() {
-            lastFocus = document.activeElement;
-            modal.hidden = false;
-            document.body.style.overflow = 'hidden';
-            if (modalVideo) modalVideo.play().catch(function() {});
-            if (modalFrame && !modalFrame.getAttribute('src')) modalFrame.src = modalFrame.dataset.src;
-            var close = modal.querySelector('[data-trailer-close]');
-            if (close) close.focus();
-        }
-
-        function closeModal() {
-            if (modal.hidden) return;
-            modal.hidden = true;
-            document.body.style.overflow = '';
-            if (modalVideo) {
-                modalVideo.pause();
-                modalVideo.currentTime = 0;
-            }
-            if (modalFrame) modalFrame.src = '';
-            if (lastFocus) lastFocus.focus();
-        }
-
-        openBtn.addEventListener('click', openModal);
-        modal.querySelectorAll('[data-trailer-close]').forEach(function (el) {
-            el.addEventListener('click', closeModal);
-        });
-        document.addEventListener('keydown', function (e) {
-            if (e.key === 'Escape' && !modal.hidden) closeModal();
-        });
-    }
-</script>
+    <script src="{% static 'js/title-detail.js' %}?v={{ static_version }}" defer></script>
 {% endblock %}
 
 {% block hero %}
@@ -256,16 +132,21 @@ function getCookie(name) {
             {% endif %}
 
             {% if user.is_authenticated %}
-                <div class="film-hero__rating-section" data-star-rating>
+                <div class="film-hero__rating-section" data-star-rating
+                     data-slug="{{ title.slug }}"
+                     data-current="{{ user_review.rating|default:'0' }}">
                     <p class="film-hero__rating-label">{% trans "Оценить" %}</p>
                     <div class="star-rating" data-star-rating-widget>
-                        {% for i in "123456789"|make_list %}
+                        {# Шкала 1–10: десять символов — десять звёзд, forloop.counter даёт номер 1..10 #}
+                        {% for i in "0123456789"|make_list %}
                             <label class="star-rating__star" data-value="{{ forloop.counter }}" data-star>
                                 <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path d="M10 1.5l2.47 5.01 5.53.8-4 3.9.95 5.49L10 13.5l-4.95 2.6.95-5.49-4-3.9 5.53-.8L10 1.5z"/></svg>
                             </label>
                         {% endfor %}
                     </div>
-                    <span class="star-rating__status" data-star-status></span>
+                    <span class="star-rating__status" data-star-status
+                          data-saved-msg="{% trans 'Оценка сохранена' %}"
+                          data-error-msg="{% trans 'Ошибка' %}"></span>
                 </div>
             {% endif %}
 
@@ -304,7 +185,9 @@ function getCookie(name) {
                     </a>
                 {% endif %}
 
-                <button class="button button--ghost" type="button" data-share title="{% trans 'Поделиться' %}">
+                <button class="button button--ghost" type="button" data-share
+                        data-copied-msg="{% trans 'Скопировано' %}"
+                        title="{% trans 'Поделиться' %}">
                     {% icon "share" size=16 %} <span class="button__label">{% trans "Поделиться" %}</span>
                 </button>
 
@@ -521,7 +404,9 @@ function getCookie(name) {
         <section class="sidebar-section">
             <h2 class="sidebar-section__title">{% trans "Поделиться" %}</h2>
             <div class="sidebar-share">
-                <button class="sidebar-share__btn" data-share title="{% trans 'Копировать ссылку' %}" aria-label="{% trans 'Копировать ссылку' %}">
+                <button class="sidebar-share__btn" data-share
+                        data-copied-msg="{% trans 'Скопировано' %}"
+                        title="{% trans 'Копировать ссылку' %}" aria-label="{% trans 'Копировать ссылку' %}">
                     <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
                 </button>
                 <a class="sidebar-share__btn" href="https://t.me/share/url?url={{ request.build_absolute_uri|urlencode }}&text={{ title.name|urlencode }}" target="_blank" rel="noopener noreferrer" title="Telegram" aria-label="Telegram">

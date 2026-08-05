@@ -27,7 +27,7 @@ class ContentSecurityPolicyMiddleware:
         "img-src 'self' data: https:; "
         "font-src 'self' data:; "
         "connect-src 'self' https://www.google-analytics.com https://www.googletagmanager.com; "
-        "frame-src 'self' https://www.youtube.com https://player.vimeo.com; "
+        "frame-src 'self' https://www.youtube.com https://player.vimeo.com https://rutube.ru; "
         "media-src 'self' https:; "
         "object-src 'none'; "
         "base-uri 'self'; "
