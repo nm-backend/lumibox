@@ -1,6 +1,6 @@
 {% load i18n icons %}
 
-<article class="card {% if compact %}card--compact{% endif %}" itemscope itemtype="{% if title.is_series %}https://schema.org/TVSeries{% else %}https://schema.org/Movie{% endif %}">
+<article class="card" itemscope itemtype="{% if title.is_series %}https://schema.org/TVSeries{% else %}https://schema.org/Movie{% endif %}">
     <div class="card__poster">
         {% if title.poster %}
             <img class="card__image"
@@ -22,10 +22,6 @@
             <span class="card__rating">{% icon "star" size=10 %} {{ title.rating_average }}</span>
         {% endif %}
 
-        {% if title.release_year %}
-            <span class="card__year">{{ title.release_year }}</span>
-        {% endif %}
-
         <div class="card__overlay" aria-hidden="true">
             <div class="card__overlay-content">
                 {% if title.duration_minutes %}
@@ -39,35 +35,13 @@
     <h3 class="card__name" itemprop="name">{{ title.name }}</h3>
 
     <div class="card__meta">
-        {% if title.rating_average %}
-            <span class="card__meta-rating">{% icon "star" size=10 %} {{ title.rating_average }}</span>
-        {% endif %}
         {% if title.release_year %}
             <span class="card__meta-year">{{ title.release_year }}</span>
         {% endif %}
         {% if title.duration_minutes %}
-            <span class="card__meta-duration">{% if not compact %}{{ title.duration_minutes }}{% trans "мин" %}{% else %}{{ title.duration_minutes }}{% trans "м" %}{% endif %}</span>
+            <span class="card__meta-duration">{{ title.duration_minutes }} {% trans "мин" %}</span>
         {% endif %}
     </div>
-
-    {% if title.genres.all|slice:":2" %}
-        <div class="card__genres">
-            {% for genre in title.genres.all|slice:":2" %}
-                <span class="card__genre">{{ genre.name }}</span>
-            {% endfor %}
-        </div>
-    {% endif %}
-
-    {% if title.description %}
-    <div class="card__preview" aria-hidden="true">
-        <div class="card__preview-title">{{ title.name }}</div>
-        <div class="card__preview-meta">
-            {{ title.release_year }}{% if title.duration_minutes %} · {{ title.duration_minutes }} мин{% endif %}
-            {% if title.rating_average %} · ⭐ {{ title.rating_average }}{% endif %}
-        </div>
-        <div class="card__preview-desc">{{ title.description|truncatewords:30 }}</div>
-    </div>
-    {% endif %}
 
     <a class="card__link" href="{{ title.get_absolute_url }}" itemprop="url">
         <span class="visually-hidden">{% blocktranslate with name=title.name year=title.release_year %}{{ name }}, {{ year }}{% endblocktranslate %}</span>

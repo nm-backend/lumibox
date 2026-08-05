@@ -440,23 +440,6 @@
     min-width: 0;
 }
 
-/* Боковая панель внутренних страниц (includes/sidebar.html) —
-   та же колонка слева, прилипает при прокрутке. */
-.kg-contentwrap > .layout-sidebar__aside {
-    grid-column: 1;
-    grid-row: 1 / span 2;
-    min-width: 0;
-    position: sticky;
-    top: calc(var(--header-height) + var(--space-4));
-    max-height: calc(100vh - var(--header-height) - var(--space-8));
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    scrollbar-width: none;
-}
-
-.kg-contentwrap > .layout-sidebar__aside::-webkit-scrollbar {
-    display: none;
-}
 
 /* ---------- Карточка фильма (shortStory) ----------
 
@@ -492,25 +475,18 @@
     box-shadow: var(--card-shadow-hover);
 }
 
-.kg-shortstory__header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 0 var(--space-3);
-    line-height: 1;
-}
+/* Шапка карточки снята: название и мета-данные теперь живут в правой
+   колонке (см. .kg-shortstory__title ниже), иерархия читается сверху вниз:
+   постер → название → рейтинг → год → жанры → длительность → кнопка. */
 
 .kg-shortstory__title {
-    padding-right: var(--space-4);
-    min-width: 0;
-}
-
-.kg-shortstory__title h2,
-.kg-shortstory__title h3 {
     margin: 0;
+    min-width: 0;
     color: var(--color-text-strong);
-    font-size: 1.125rem;
+    font-size: 1.25rem;
     font-weight: 700;
+    line-height: 1.25;
+    letter-spacing: -0.01em;
 }
 
 .kg-shortstory__title a {
@@ -524,70 +500,59 @@
     text-shadow: 0 0 16px rgba(var(--color-accent-rgb), 0.5);
 }
 
+.kg-shortstory__original {
+    margin-top: var(--space-1);
+    color: var(--color-text-dim);
+    font-size: var(--text-sm);
+}
+
+/* Мета-строка: рейтинг · год · жанры · длительность в одну линию. */
+.kg-shortstory__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2) var(--space-4);
+    margin-top: var(--space-3);
+}
+
 .kg-shortstory__rating {
-    flex-shrink: 0;
-    text-align: center;
-    margin-right: var(--space-4);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    padding: var(--space-1) var(--space-2);
+    border-radius: var(--radius-sm);
+    background: var(--color-accent-dim);
+    border: 1px solid rgba(var(--color-accent-rgb), 0.2);
+    color: var(--color-accent);
+    font-size: var(--text-sm);
+    font-weight: 700;
 }
 
-/*
-  Рейтинг звёздами.
-
-  Раньше звёзды были текстовыми глифами «★», а заполнение — обрезкой строки
-  по ширине. Такой рейтинг зависит от системного шрифта: на Windows, macOS
-  и Android глиф разной ширины, насыщенности и вертикального выравнивания,
-  поэтому ряд получался неровным и читался как самоделка.
-
-  Теперь звезда нарисована собственной фигурой и повторяется маской.
-  Глифы в разметке остались (их читает скринридер), но визуально скрыты
-  нулевым кеглем — фигуру рисует маска, а не шрифт. Ширина заполнения
-  по-прежнему приходит процентом из шаблона, поэтому логика не изменилась.
-*/
-.kg-stars {
-    --star-size: 16px;
-    position: relative;
-    display: inline-block;
-    width: calc(var(--star-size) * 5);
-    height: var(--star-size);
-    /* Глиф не должен участвовать в отрисовке: фигуру задаёт маска. */
-    font-size: 0;
-    line-height: 0;
-    white-space: nowrap;
-    overflow: hidden;
+.kg-shortstory__rating-count {
+    color: var(--color-text-muted);
+    font-weight: 400;
+    font-size: var(--text-xs);
 }
 
-.kg-stars__track,
-.kg-stars__fill {
-    display: block;
-    height: var(--star-size);
-    background-color: currentColor;
-    -webkit-mask-image: var(--star-mask);
-    mask-image: var(--star-mask);
-    -webkit-mask-size: var(--star-size) var(--star-size);
-    mask-size: var(--star-size) var(--star-size);
-    -webkit-mask-repeat: repeat-x;
-    mask-repeat: repeat-x;
+.kg-shortstory__year a,
+.kg-shortstory__genres a {
+    color: var(--color-text-soft);
+    font-size: var(--text-sm);
+    text-decoration: none;
+    transition: color 0.12s ease;
 }
 
-.kg-stars__track {
-    width: 100%;
-    color: var(--color-border-strong);
-}
-
-.kg-stars__fill {
-    position: absolute;
-    top: 0;
-    left: 0;
+.kg-shortstory__year a:hover,
+.kg-shortstory__genres a:hover {
     color: var(--color-accent);
 }
 
-.kg-shortstory__stats {
-    margin-top: var(--space-1);
-    /* Было 9px — ниже порога читаемости. Счётчик оценок должен быть
-       второстепенным, но всё-таки читаемым. */
-    font-size: var(--text-xs);
+.kg-shortstory__duration {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
     color: var(--color-text-muted);
-    text-align: center;
+    font-size: var(--text-sm);
 }
 
 .kg-shortstory__body {
@@ -781,30 +746,9 @@
     line-height: 1.45;
 }
 
-.kg-shortstory__info span {
-    display: block;
-    margin-bottom: var(--space-2);
-}
-
-.kg-shortstory__info .kg-shortstory__row {
-    max-width: 70%;
-}
-
-.kg-shortstory__info b {
-    margin-right: var(--space-1);
-    font-weight: 700;
-    color: var(--color-text-dim);
-}
-
-.kg-shortstory__info a {
-    color: var(--color-text-soft);
-    text-decoration: underline;
-    transition: color 0.12s ease;
-}
-
-.kg-shortstory__info a:hover {
-    color: var(--color-accent);
-}
+/* Строки «Оригинальное название», «Страна», «Режиссёр» сняты: всё это
+   есть на странице фильма. В карточке остаётся только иерархия из
+   брифа: название, рейтинг, год, жанры, длительность, описание, CTA. */
 
 .kg-shortstory__excerpt {
     margin: var(--space-3) 0 0;
@@ -817,8 +761,9 @@
 
 .kg-shortstory__footer {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
-    gap: 2.5em;
+    gap: var(--space-4);
     margin-top: var(--space-4);
 }
 
@@ -1285,8 +1230,7 @@
 
     .kg-main,
     .kg-sidebar,
-    .kg-contentwrap > .ad-slot,
-    .kg-contentwrap > .layout-sidebar__aside {
+    .kg-contentwrap > .ad-slot {
         grid-column: 1;
         grid-row: auto;
         width: 100%;
@@ -1310,12 +1254,8 @@
         height: 180px;
     }
 
-    .kg-shortstory__header {
-        align-items: flex-start;
-    }
-
     .kg-shortstory__title {
-        padding-right: var(--space-2);
+        font-size: 1.125rem;
     }
 
     .kg-promo__inner {
@@ -1351,7 +1291,7 @@
 }
 
 @media (max-width: 420px) {
-    .kg-shortstory__rating {
+    .kg-shortstory__rating-count {
         display: none;
     }
 

@@ -28,6 +28,29 @@ def kg_posted(value):
 
 
 @register.filter
+def ru_plural(value, forms):
+    """Русские плюральные формы: «1 произведение, 2 произведения, 5 произведений».
+
+    forms — три формы через запятую: "произведение,произведения,произведений".
+    Стандартный фильтр pluralize в Django 5.2 поддерживает только две формы,
+    поэтому для русского нужен свой: правило — 1 (но не 11) → первая форма,
+    2–4 (но не 12–14) → вторая, остальное → третья.
+    """
+    try:
+        n = int(value)
+    except (TypeError, ValueError):
+        return forms.split(",")[-1]
+    one, few, many = forms.split(",")
+    n10 = n % 10
+    n100 = n % 100
+    if n10 == 1 and n100 != 11:
+        return one
+    if 2 <= n10 <= 4 and not (12 <= n100 <= 14):
+        return few
+    return many
+
+
+@register.filter
 def kg_crew(value, role):
     """Список имён съёмочной группы по роли: режиссёр, актёры и т.д.
 
