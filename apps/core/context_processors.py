@@ -1,7 +1,7 @@
-import time
+import os
+from functools import lru_cache
 
 from django.conf import settings
-from django.core.cache import cache
 from django.urls import reverse
 from django.utils.functional import SimpleLazyObject
 from django.utils.translation import gettext as _
@@ -14,14 +14,52 @@ def global_settings(request):
 
 
 def static_version(request):
-    return {
-        "static_version": int(time.time()),
-    }
+    """
+    Стабильный номер версии статики для cache-busting (?v=...).
+
+    В разработке считаем на каждый запрос: правка CSS/JS должна быть видна
+    сразу, без перезапуска сервера. В продакшене — один раз на процесс
+    (lru_cache): ассеты меняются только при деплое, и все воркеры одного
+    деплоя отдают одинаковую версию.
+    """
+    if settings.DEBUG:
+        return {"static_version": _scan_static_version()}
+    return {"static_version": _cached_static_version()}
+
+
+@lru_cache(maxsize=1)
+def _cached_static_version() -> str:
+    """Версия статики, зафиксированная на время жизни процесса."""
+    return _scan_static_version()
+
+
+def _scan_static_version() -> str:
+    """
+    Номер от времени изменения самого свежего файла в static/.
+
+    Раньше здесь стоял int(time.time()): номер менялся каждую секунду,
+    и браузер перекачивал все CSS и JS при каждом визите вместо того,
+    чтобы взять их из кэша. Теперь версия меняется только когда меняются
+    сами ассеты. Git-ревизию не берём: в образе .git отсутствует
+    (.dockerignore), а mtime работает везде — и в разработке, и в контейнере.
+    """
+    latest = 0.0
+    for entry in getattr(settings, "STATICFILES_DIRS", ()):
+        # В STATICFILES_DIRS могут лежать пары (префикс, путь).
+        base = entry[1] if isinstance(entry, (list, tuple)) else entry
+        for dirpath, _dirnames, filenames in os.walk(base):
+            for filename in filenames:
+                try:
+                    mtime = os.path.getmtime(os.path.join(dirpath, filename))
+                except OSError:
+                    continue
+                latest = max(latest, mtime)
+    return f"m{int(latest)}"
 
 
 def kg_topnav(request):
     """Верхняя навигация в стиле Kinogo — одинаковая на всех страницах."""
-    from apps.catalog.models import Genre, Title
+    from apps.catalog.models import Title
 
     catalog_url = reverse("catalog:title_list")
     url_name = getattr(request.resolver_match, "url_name", "")
@@ -34,16 +72,6 @@ def kg_topnav(request):
         (_("Фильмы"), f"{catalog_url}?type={Title.Type.MOVIE}", get.get("type") == str(Title.Type.MOVIE)),
         (_("Сериалы"), f"{catalog_url}?type={Title.Type.SERIES}", get.get("type") == str(Title.Type.SERIES)),
     ]
-    has_anime = cache.get("kg_topnav_has_anime")
-    if has_anime is None:
-        has_anime = Genre.objects.filter(slug="animaciya").exists()
-        cache.set("kg_topnav_has_anime", has_anime, 60 * 60)
-    if has_anime:
-        slug = ""
-        if request.resolver_match:
-            slug = request.resolver_match.kwargs.get("slug", "")
-        links.append((_("Аниме"), reverse("catalog:genre_titles", args=["animaciya"]),
-                      url_name == "genre_titles" and slug == "animaciya"))
     return {"kg_topnav": links}
 
 
@@ -65,10 +93,9 @@ def kg_sidebar(request):
     Значения ленивые. Context processor выполняется на каждый ответ, который
     рендерит шаблон, — включая robots.txt, правовые страницы и админку, где
     сайдбара нет вовсе. Раньше он безусловно строил страны, обновления
-    сериалов и аниме со всеми prefetch, отзывы, жанры, подборки и годы:
-    на холодном кэше robots.txt стоил 16 запросов. SimpleLazyObject
-    откладывает вычисление до первого обращения из шаблона, поэтому
-    страницы без сайдбара не платят ничего.
+    сериалов, отзывы, жанры, подборки и годы: на холодном кэше robots.txt
+    стоил 16 запросов. SimpleLazyObject откладывает вычисление до первого
+    обращения из шаблона, поэтому страницы без сайдбара не платят ничего.
 
     Вьюха может переопределить любой из этих ключей: её контекст важнее,
     и тогда ленивое значение так и остаётся невычисленным.
@@ -86,7 +113,6 @@ def kg_sidebar(request):
     return {
         "countries": from_sidebar("countries"),
         "series_updates": from_sidebar("series_updates"),
-        "anime_updates": from_sidebar("anime_updates"),
         "latest_reviews": from_sidebar("latest_reviews"),
         "genres": SimpleLazyObject(lambda: _get_cached_genre_chip_list(50)),
         "collections": SimpleLazyObject(get_featured_collections),

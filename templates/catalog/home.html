@@ -14,7 +14,7 @@
             <div class="kg-promo__inner">
                 <div class="kg-promo__copy">
                     <h1 class="kg-promo__title">{% trans "Смотреть фильмы и сериалы онлайн бесплатно" %}</h1>
-                    <p class="kg-promo__text">{% trans "Новинки кино, сериалы и аниме в хорошем качестве. Каждый день свежие премьеры." %}</p>
+                    <p class="kg-promo__text">{% trans "Новинки кино и сериалы в хорошем качестве. Каждый день свежие премьеры." %}</p>
                     <a class="kg-promo__btn" href="{% url 'catalog:title_list' %}">{% trans "Смотреть" %}</a>
                 </div>
                 {% if kg_carousel %}
@@ -124,36 +124,5 @@
 {% endblock %}
 
 {% block extra_js %}
-<script>
-(function () {
-    // Выпадающие списки xSort: открываются по клику, закрываются по клику
-    // мимо или по Escape.
-    var root = document.querySelector('.kg-xsort-area');
-    if (root) {
-        root.addEventListener('click', function (event) {
-            var div = event.target.closest('.kg-xsort-div');
-            if (!div) return;
-            var wasOpen = div.classList.contains('kg-xsort-div--open');
-            root.querySelectorAll('.kg-xsort-div--open').forEach(function (el) {
-                el.classList.remove('kg-xsort-div--open');
-            });
-            if (!wasOpen) div.classList.add('kg-xsort-div--open');
-        });
-        document.addEventListener('click', function (event) {
-            if (!root.contains(event.target)) {
-                root.querySelectorAll('.kg-xsort-div--open').forEach(function (el) {
-                    el.classList.remove('kg-xsort-div--open');
-                });
-            }
-        });
-        document.addEventListener('keydown', function (event) {
-            if (event.key === 'Escape') {
-                root.querySelectorAll('.kg-xsort-div--open').forEach(function (el) {
-                    el.classList.remove('kg-xsort-div--open');
-                });
-            }
-        });
-    }
-})();
-</script>
+    <script src="{% static 'js/home.js' %}?v={{ static_version }}" defer></script>
 {% endblock %}

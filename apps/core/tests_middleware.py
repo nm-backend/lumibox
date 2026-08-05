@@ -59,11 +59,12 @@ class CSPMiddlewareTests(TestCase):
         self.assertIn("img-src 'self' data: https:", csp)
 
     def test_csp_allows_embeds(self):
-        """frame-src должен разрешать YouTube и Vimeo для встроенных трейлеров."""
+        """frame-src должен разрешать YouTube, Vimeo и Rutube — всех встраиваемых хостингов embeds.py."""
         csp = self._check_csp_header(reverse("catalog:home"))
         self.assertIn("frame-src 'self'", csp)
         self.assertIn("youtube.com", csp)
         self.assertIn("vimeo.com", csp)
+        self.assertIn("rutube.ru", csp)
 
     def test_csp_blocks_objects(self):
         """object-src должен быть 'none' — Flash и плагины не нужны."""

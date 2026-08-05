@@ -95,18 +95,17 @@ TITLES = [
         "status": "published",
     },
     {
-        "name": "Унесённые призраками",
-        "original_name": "千と千尋の神隠し",
-        "slug": "unesennye-prizrakami-2001",
+        "name": "ВАЛЛ·И",
+        "original_name": "WALL·E",
+        "slug": "vall-i-2008",
         "type": "movie",
-        "release_year": 2001,
-        "duration_minutes": 125,
+        "release_year": 2008,
+        "duration_minutes": 98,
         "age_rating": "6+",
-        "genres": ["Анимация", "Фэнтези", "Приключения"],
-        "countries": ["Япония"],
-        "short_description": "Девочка, поезд без обратного билета и мир духов.",
-        "description": "Рисованная история девочки, попавшей в мир духов. Режиссёр — Хаяо Миядзаки, студия Ghibli.",
-        "trailer_url": "https://www.youtube.com/watch?v=mLbShBO05j4",
+        "genres": ["Анимация", "Фантастика", "Приключения"],
+        "countries": ["США"],
+        "short_description": "Последний робот на Земле нашёл то, ради чего стоит жить.",
+        "description": "Робот-уборщик остался один на покинутой людьми Земле и однажды встречает гостью с неба. Полнометражная анимация студии Pixar, отмеченная «Оскаром».",
         "status": "published",
     },
     {
@@ -297,7 +296,7 @@ PERSONS = [
     ("Джонатан Нолан", "dzhonatan-nolan"),
     ("Пон Джун-хо", "pon-dzhun-kho"),
     ("Хан Джин-вон", "khan-dzhin-von"),
-    ("Хаяо Миядзаки", "khayao-miyadzaki"),
+    ("Эндрю Стэнтон", "endryu-stenton"),
     ("Дени Вильнёв", "deni-vilnev"),
     ("Эрик Хайссерер", "erik-khaysserer"),
     ("Райан Джонсон", "rayan-dzhonson"),
@@ -354,7 +353,7 @@ PERSONS = [
     ("Вуди Харрельсон", "vudi-kharrelson"),
     # Композиторы и операторы
     ("Ханс Циммер", "khans-cimmer"),
-    ("Дзё Хисаиси", "dze-khisaisi"),
+    ("Томас Ньюман", "tomas-nyuman"),
     ("Ян Тьерсен", "yan-tersen"),
     ("Роджер Дикинс", "rodzher-dikins"),
     ("Йоханн Йоханнссон", "yokhann-yokhannsson"),
@@ -392,10 +391,10 @@ CREDITS = {
         ("dzhonatan-nolan", "writer", "", 6),
         ("khans-cimmer", "composer", "", 7),
     ],
-    "unesennye-prizrakami-2001": [
-        ("khayao-miyadzaki", "director", "", 1),
-        ("khayao-miyadzaki", "writer", "", 2),
-        ("dze-khisaisi", "composer", "", 3),
+    "vall-i-2008": [
+        ("endryu-stenton", "director", "", 1),
+        ("endryu-stenton", "writer", "", 2),
+        ("tomas-nyuman", "composer", "", 3),
     ],
     "pribytie-2016": [
         ("deni-vilnev", "director", "", 1),
@@ -529,7 +528,7 @@ COLLECTIONS = [
         "titles": [
             "parazity-2019",
             "chernobyl-2019",
-            "unesennye-prizrakami-2001",
+            "vall-i-2008",
             "ameli-2001",
         ],
     },
@@ -582,7 +581,7 @@ REVIEWS = {
         (9, ""),
         (7, ""),
     ],
-    "unesennye-prizrakami-2001": [
+    "vall-i-2008": [
         (10, "Лучшее, что сделала анимация. Показываю детям и смотрю сам."),
         (9, ""),
         (10, ""),

@@ -136,20 +136,12 @@ class HomeView(TemplateView):
                 )
         context["kg_country_links"] = kg_country_links
 
-        # Ссылки блока «Сериалы» сайдбара: проверяем по слагу жанра, чтобы
-        # не вести на 404, если «Аниме» ещё не завели.
-        genres_by_slug = {genre.slug: genre for genre in context.get("genres", [])}
-        kg_series_links = [
+        # Ссылки блока «Сериалы» сайдбара.
+        context["kg_series_links"] = [
             ("Все сериалы", f"{catalog_url}?type=series"),
-            ("Аниме", reverse("catalog:genre_titles", args=["animaciya"])),
             ("Фильмы", f"{catalog_url}?type=movie"),
             ("Подборки", reverse("catalog:collection_list")),
         ]
-        if "animaciya" not in genres_by_slug:
-            kg_series_links = [
-                (label, url) for label, url in kg_series_links if label != "Аниме"
-            ]
-        context["kg_series_links"] = kg_series_links
 
         # Выпадающий список «Сортировать» панели xSort.
         context["kg_sort_links"] = [

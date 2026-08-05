@@ -217,7 +217,7 @@ def get_featured_collections(limit=4):
 def get_home_sidebar():
     """
     Данные сайдбара главной (в стиле Kinogo): страны, обновления сериалов,
-    обновления аниме, последние отзывы.
+    последние отзывы.
 
     Кэшируются одним куском вместе с get_home_sections: меняются редко,
     а отдельными запросами на каждый заход стоили бы четыре запроса.
@@ -239,9 +239,6 @@ def get_home_sidebar():
         ),
         "series_updates": list(
             published.series().with_related().order_by(F("published_at").desc(nulls_last=True))[:6]
-        ),
-        "anime_updates": list(
-            published.with_related().filter(genres__slug="animaciya").distinct().order_by(F("published_at").desc(nulls_last=True))[:6]
         ),
         "latest_reviews": list(
             Review.objects.filter(status=Review.Status.PUBLISHED)
