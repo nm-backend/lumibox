@@ -7,6 +7,7 @@
 """
 
 from apps.catalog.models.collection import Collection, CollectionItem
+from apps.catalog.models.episode import Episode
 from apps.catalog.models.frame import Frame
 from apps.catalog.models.industry import Award, Studio, TitleAward
 from apps.catalog.models.person import Participation, Person
@@ -17,6 +18,7 @@ __all__ = [
     "Collection",
     "CollectionItem",
     "Country",
+    "Episode",
     "Frame",
     "Genre",
     "Award",

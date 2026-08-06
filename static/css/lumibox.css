@@ -1,10 +1,10 @@
 /*
-  Главная страница: структура как у Kinogo (топбар, шапка, навигация,
-  промо-зона, xSort, лента карточек, подвал), но в родной теме LumiBox —
-  чёрный кинозал с янтарным акцентом. Размеры зон подогнаны под оригинал.
+  Главная страница: топбар, шапка, навигация, промо-зона, панель
+  сортировки, лента карточек, подвал — в родной теме LumiBox:
+  чёрный кинозал с янтарным акцентом.
 */
 
-.kg-home {
+.lb-home {
     font-family: var(--font-base);
     font-size: 16px;
     line-height: 1.45;
@@ -15,15 +15,15 @@
 
 /* ---------- Главная: тёмная шапка в теме LumiBox ---------- */
 
-.kg-body {
+.lb-body {
     background: var(--color-bg);
 }
 
 /* Перебиваем глобальный Bebas Neue + uppercase: в карточках — обычный
    шрифт и регистр как на сайте. */
 
-.kg-home h1,
-.kg-home h2 {
+.lb-home h1,
+.lb-home h2 {
     font-family: var(--font-base);
     font-weight: 700;
     text-transform: none;
@@ -32,7 +32,7 @@
     text-wrap: normal;
 }
 
-.kg-wrap {
+.lb-wrap {
     width: 100%;
     max-width: var(--container-width);
     margin: 0 auto;
@@ -42,7 +42,7 @@
 /* На главной контейнер не ограничиваем: колонка ведёт себя как обычный
    container, но без паддингов — лента идёт впритык. */
 
-.kg-body .container {
+.lb-body .container {
     max-width: none;
     padding: 0;
 }
@@ -51,18 +51,18 @@
     min-height: 82px;
 }
 
-.kg-body .site-main {
+.lb-body .site-main {
     padding-top: 0;
 }
 
 /* ---------- Тонкая тёмная полоса вверху ---------- */
 
-.kg-topbar {
+.lb-topbar {
     background: var(--color-dark-bg);
     border-bottom: 1px solid var(--color-border);
 }
 
-.kg-topbar__inner {
+.lb-topbar__inner {
     width: 100%;
     max-width: var(--container-width);
     margin: 0 auto;
@@ -74,7 +74,7 @@
     padding: 0 var(--space-4);
 }
 
-.kg-topbar__text {
+.lb-topbar__text {
     font-size: var(--text-xs);
     color: var(--color-dark-text);
     white-space: nowrap;
@@ -82,7 +82,7 @@
     text-overflow: ellipsis;
 }
 
-.kg-topbar__link {
+.lb-topbar__link {
     font-size: var(--text-xs);
     color: var(--color-dark-text-soft);
     text-decoration: none;
@@ -90,7 +90,7 @@
     transition: color var(--transition-fast);
 }
 
-.kg-topbar__link:hover {
+.lb-topbar__link:hover {
     color: var(--color-accent-hover);
 }
 
@@ -159,7 +159,7 @@
 
 /* Узкие экраны: кнопка входа не помещалась в ряд шапки и растягивала всю
    страницу — на 360px это давало горизонтальную прокрутку на каждой
-   странице сайта. Правило живёт здесь, а не в layout.css: kinogo.css
+   странице сайта. Правило живёт здесь, а не в layout.css: lumibox.css
    подключается последним и перебил бы медиазапрос оттуда. */
 @media (max-width: 720px) {
     .site-header__login {
@@ -174,7 +174,7 @@
 
 /* ---------- Верхняя навигация (topNav) ---------- */
 
-.kg-topnav {
+.lb-topnav {
     display: flex;
     flex-wrap: wrap;
     margin-bottom: var(--space-2);
@@ -183,7 +183,7 @@
     border-radius: 0;
 }
 
-.kg-topnav__link {
+.lb-topnav__link {
     display: block;
     padding: 0 var(--space-4);
     font-size: var(--text-sm);
@@ -196,24 +196,24 @@
     transition: background var(--transition-fast), color var(--transition-fast);
 }
 
-.kg-topnav__link:hover {
+.lb-topnav__link:hover {
     background: var(--color-accent-dim);
     color: var(--color-accent);
 }
 
-.kg-topnav__link--active {
+.lb-topnav__link--active {
     background: transparent;
     color: var(--color-accent);
 }
 
 /* ---------- Промо-зона на месте рекламного баннера ---------- */
 
-.kg-promo {
+.lb-promo {
     background: linear-gradient(180deg, var(--color-surface) 0%, var(--color-card-hover) 100%);
     border-bottom: 1px solid var(--color-border);
 }
 
-.kg-promo__inner {
+.lb-promo__inner {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -222,12 +222,12 @@
     padding: var(--space-4);
 }
 
-.kg-promo__copy {
+.lb-promo__copy {
     flex: 1 1 auto;
     min-width: 0;
 }
 
-.kg-promo__title {
+.lb-promo__title {
     margin: 0 0 var(--space-2);
     font-size: 26px;
     font-weight: 700;
@@ -235,20 +235,20 @@
     line-height: 1.2;
 }
 
-.kg-promo__text {
+.lb-promo__text {
     margin: 0 0 var(--space-4);
     font-size: var(--text-sm);
     color: var(--color-text-muted);
     line-height: 1.5;
 }
 
-.kg-promo__posters {
+.lb-promo__posters {
     flex: 0 0 auto;
     display: flex;
     gap: var(--space-2);
 }
 
-.kg-promo__poster img {
+.lb-promo__poster img {
     display: block;
     width: 90px;
     height: 130px;
@@ -257,11 +257,11 @@
     transition: transform var(--transition-fast);
 }
 
-.kg-promo__poster:hover img {
+.lb-promo__poster:hover img {
     transform: translateY(-3px);
 }
 
-.kg-promo__btn {
+.lb-promo__btn {
     flex: 0 0 auto;
     background: var(--btn-fill);
     color: var(--color-on-accent);
@@ -274,7 +274,7 @@
     transition: background var(--transition-fast), box-shadow var(--transition-fast), transform var(--transition-fast);
 }
 
-.kg-promo__btn:hover {
+.lb-promo__btn:hover {
     background: var(--btn-fill-hover);
     box-shadow: var(--btn-shadow-hover);
     transform: translateY(-1px);
@@ -282,7 +282,7 @@
 
 /* ---------- Панель сортировки (xSort) ---------- */
 
-.kg-xsort-area {
+.lb-xsort-area {
     display: flex;
     align-items: stretch;
     gap: var(--space-1);
@@ -292,7 +292,7 @@
     border-bottom: 1px solid var(--color-border);
 }
 
-.kg-xsort-label {
+.lb-xsort-label {
     align-self: center;
     padding-right: var(--space-1);
     font-size: var(--text-xs);
@@ -300,7 +300,7 @@
     white-space: nowrap;
 }
 
-.kg-xsort-div {
+.lb-xsort-div {
     position: relative;
     height: 24px;
     line-height: 24px;
@@ -313,15 +313,15 @@
     transition: border-color var(--transition-fast);
 }
 
-.kg-xsort-div:hover {
+.lb-xsort-div:hover {
     border-color: var(--color-border-strong);
 }
 
-.kg-xsort-div--active {
+.lb-xsort-div--active {
     border-color: var(--color-accent);
 }
 
-.kg-xsort-selected {
+.lb-xsort-selected {
     cursor: pointer;
     padding-right: 15px;
     position: relative;
@@ -330,7 +330,7 @@
     user-select: none;
 }
 
-.kg-xsort-selected::after {
+.lb-xsort-selected::after {
     position: absolute;
     top: 50%;
     margin-top: -2px;
@@ -340,7 +340,7 @@
     content: "";
 }
 
-.kg-xsort-ul {
+.lb-xsort-ul {
     display: none;
     position: absolute;
     top: 113%;
@@ -357,11 +357,11 @@
     overflow: auto;
 }
 
-.kg-xsort-div--open .kg-xsort-ul {
+.lb-xsort-div--open .lb-xsort-ul {
     display: block;
 }
 
-.kg-xsort-option {
+.lb-xsort-option {
     display: block;
     color: var(--color-text-bright);
     border-bottom: 1px solid var(--color-dark-border);
@@ -372,26 +372,26 @@
     transition: background var(--transition-fast);
 }
 
-.kg-xsort-option:last-child {
+.lb-xsort-option:last-child {
     border-bottom: 0;
 }
 
-.kg-xsort-option a {
+.lb-xsort-option a {
     display: block;
     color: inherit;
     text-decoration: none;
 }
 
-.kg-xsort-option:hover {
+.lb-xsort-option:hover {
     background: var(--color-accent-dim);
 }
 
-.kg-xsort-option--current {
+.lb-xsort-option--current {
     color: var(--color-accent);
     background: var(--color-accent-dim);
 }
 
-.kg-xsort-clearall {
+.lb-xsort-clearall {
     width: 32px;
     padding: 0;
     border: 1px solid var(--color-border-strong);
@@ -407,14 +407,14 @@
     transition: color var(--transition-fast), border-color var(--transition-fast);
 }
 
-.kg-xsort-clearall:hover {
+.lb-xsort-clearall:hover {
     color: var(--color-accent);
     border-color: var(--color-accent);
 }
 
 /* ---------- Лента: одна колонка карточек (как в оригинале) ---------- */
 
-.kg-contentwrap {
+.lb-contentwrap {
     display: grid;
     grid-template-columns: 280px minmax(0, 1fr);
     align-items: start;
@@ -422,18 +422,18 @@
     margin-top: var(--space-3);
 }
 
-.kg-main {
+.lb-main {
     width: 100%;
     min-width: 0;
     grid-column: 2;
 }
 
-.kg-contentwrap > .ad-slot {
+.lb-contentwrap > .ad-slot {
     grid-column: 2;
     width: 100%;
 }
 
-.kg-sidebar {
+.lb-sidebar {
     display: block;
     grid-column: 1;
     grid-row: 1 / span 2;
@@ -454,7 +454,7 @@
    фоне страницы, а не как карточка.
 */
 
-.kg-shortstory {
+.lb-shortstory {
     position: relative;
     padding: var(--space-4);
     border: var(--card-border);
@@ -469,17 +469,17 @@
                 border-color var(--transition);
 }
 
-.kg-shortstory:hover {
+.lb-shortstory:hover {
     transform: var(--card-lift);
     border-color: var(--card-border-hover);
     box-shadow: var(--card-shadow-hover);
 }
 
 /* Шапка карточки снята: название и мета-данные теперь живут в правой
-   колонке (см. .kg-shortstory__title ниже), иерархия читается сверху вниз:
+   колонке (см. .lb-shortstory__title ниже), иерархия читается сверху вниз:
    постер → название → рейтинг → год → жанры → длительность → кнопка. */
 
-.kg-shortstory__title {
+.lb-shortstory__title {
     margin: 0;
     min-width: 0;
     color: var(--color-text-strong);
@@ -489,25 +489,25 @@
     letter-spacing: -0.01em;
 }
 
-.kg-shortstory__title a {
+.lb-shortstory__title a {
     color: var(--color-text);
     text-decoration: none;
     transition: color var(--transition-fast), text-shadow var(--transition-fast);
 }
 
-.kg-shortstory__title a:hover {
+.lb-shortstory__title a:hover {
     color: var(--color-accent);
     text-shadow: 0 0 16px rgba(var(--color-accent-rgb), 0.5);
 }
 
-.kg-shortstory__original {
+.lb-shortstory__original {
     margin-top: var(--space-1);
     color: var(--color-text-dim);
     font-size: var(--text-sm);
 }
 
 /* Мета-строка: рейтинг · год · жанры · длительность в одну линию. */
-.kg-shortstory__meta {
+.lb-shortstory__meta {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -515,7 +515,7 @@
     margin-top: var(--space-3);
 }
 
-.kg-shortstory__rating {
+.lb-shortstory__rating {
     display: inline-flex;
     align-items: center;
     gap: var(--space-1);
@@ -528,26 +528,26 @@
     font-weight: 700;
 }
 
-.kg-shortstory__rating-count {
+.lb-shortstory__rating-count {
     color: var(--color-text-muted);
     font-weight: 400;
     font-size: var(--text-xs);
 }
 
-.kg-shortstory__year a,
-.kg-shortstory__genres a {
+.lb-shortstory__year a,
+.lb-shortstory__genres a {
     color: var(--color-text-soft);
     font-size: var(--text-sm);
     text-decoration: none;
     transition: color 0.12s ease;
 }
 
-.kg-shortstory__year a:hover,
-.kg-shortstory__genres a:hover {
+.lb-shortstory__year a:hover,
+.lb-shortstory__genres a:hover {
     color: var(--color-accent);
 }
 
-.kg-shortstory__duration {
+.lb-shortstory__duration {
     display: inline-flex;
     align-items: center;
     gap: var(--space-1);
@@ -555,7 +555,30 @@
     font-size: var(--text-sm);
 }
 
-.kg-shortstory__body {
+.lb-shortstory__quality {
+    padding: var(--space-1) var(--space-2);
+    border-radius: var(--radius-sm);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: var(--color-text-soft);
+    font-size: var(--text-xs);
+    font-weight: 600;
+}
+
+.lb-shortstory__external {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    color: var(--color-text-muted);
+    font-size: var(--text-xs);
+}
+
+.lb-shortstory__external span + span::before {
+    content: "·";
+    margin-right: var(--space-2);
+    opacity: 0.5;
+}
+
+.lb-shortstory__body {
     display: grid;
     /* Ширина постера в процентах делала его разным в каталоге, избранном
        и профиле — контейнеры там разной ширины, и карточка выглядела
@@ -565,7 +588,7 @@
     gap: var(--space-5);
 }
 
-.kg-shortstory__poster {
+.lb-shortstory__poster {
     background: var(--color-card);
     overflow: hidden;
     border-radius: var(--radius-md);
@@ -574,7 +597,7 @@
     box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
 }
 
-.kg-shortstory__poster > a {
+.lb-shortstory__poster > a {
     position: relative;
     display: block;
 }
@@ -586,7 +609,7 @@
   просто не работало. Оставлен подъём: масштабирование внутри
   overflow: hidden даёт дрожание краёв во время анимации.
 */
-.kg-shortstory__poster a:hover img {
+.lb-shortstory__poster a:hover img {
     opacity: 1;
     transform: translateY(-2px);
     box-shadow: 0 6px 18px rgba(0, 0, 0, 0.55),
@@ -594,7 +617,7 @@
                 0 0 22px rgba(var(--color-accent-rgb), 0.25);
 }
 
-.kg-shortstory__poster img {
+.lb-shortstory__poster img {
     display: block;
     width: 100%;
     height: auto;
@@ -607,7 +630,7 @@
 }
 
 /* Затемнение снизу + кнопка воспроизведения при наведении */
-.kg-shortstory__poster a::after {
+.lb-shortstory__poster a::after {
     content: "";
     position: absolute;
     inset: 0;
@@ -617,11 +640,11 @@
     pointer-events: none;
 }
 
-.kg-shortstory__poster a:hover::after {
+.lb-shortstory__poster a:hover::after {
     opacity: 1;
 }
 
-.kg-shortstory__play {
+.lb-shortstory__play {
     position: absolute;
     top: 50%;
     left: 50%;
@@ -642,17 +665,17 @@
     z-index: 1;
 }
 
-.kg-shortstory__poster a:hover .kg-shortstory__play {
+.lb-shortstory__poster a:hover .lb-shortstory__play {
     opacity: 1;
     transform: translate(-50%, -50%) scale(1);
 }
 
-.kg-shortstory__poster a:hover .kg-shortstory__play svg {
+.lb-shortstory__poster a:hover .lb-shortstory__play svg {
     filter: drop-shadow(0 0 8px rgba(var(--color-accent-rgb), 0.8));
 }
 
 /* Бейджи на постере: возрастное ограничение и тип */
-.kg-badge {
+.lb-badge {
     position: absolute;
     z-index: 2;
     padding: var(--space-1) var(--space-2);
@@ -665,7 +688,7 @@
     pointer-events: none;
 }
 
-.kg-badge--age {
+.lb-badge--age {
     top: var(--space-2);
     left: var(--space-2);
     color: var(--color-dark-text-bright);
@@ -682,7 +705,7 @@
   Здесь оранжевый остаётся только в тексте и рамке: тип по-прежнему
   считывается мгновенно, но не кричит.
 */
-.kg-badge--type {
+.lb-badge--type {
     top: var(--space-2);
     right: var(--space-2);
     color: var(--color-accent);
@@ -691,7 +714,7 @@
     backdrop-filter: blur(4px);
 }
 
-.kg-shortstory__poster-fallback {
+.lb-shortstory__poster-fallback {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -708,12 +731,12 @@
     transition: color var(--transition-fast), box-shadow var(--transition-fast);
 }
 
-.kg-shortstory__poster a:hover .kg-shortstory__poster-fallback {
+.lb-shortstory__poster a:hover .lb-shortstory__poster-fallback {
     color: var(--color-accent);
     box-shadow: inset 0 0 0 1px rgba(var(--color-accent-rgb), 0.25);
 }
 
-.kg-shortstory__poster-fallback-name {
+.lb-shortstory__poster-fallback-name {
     max-width: 80%;
     font-size: var(--text-2xs);
     font-weight: 600;
@@ -724,7 +747,7 @@
     -webkit-box-orient: vertical;
 }
 
-.kg-shortstory__character {
+.lb-shortstory__character {
     color: var(--color-text);
     font-size: var(--text-xs);
     line-height: 1.4;
@@ -732,7 +755,7 @@
     overflow: hidden;
 }
 
-.kg-shortstory__character::before {
+.lb-shortstory__character::before {
     content: "★";
     color: var(--color-accent);
     margin-right: 6px;
@@ -740,7 +763,7 @@
     vertical-align: 1px;
 }
 
-.kg-shortstory__info {
+.lb-shortstory__info {
     font-size: var(--text-sm);
     min-width: 0;
     line-height: 1.45;
@@ -750,7 +773,7 @@
    есть на странице фильма. В карточке остаётся только иерархия из
    брифа: название, рейтинг, год, жанры, длительность, описание, CTA. */
 
-.kg-shortstory__excerpt {
+.lb-shortstory__excerpt {
     margin: var(--space-3) 0 0;
     color: var(--color-text-soft);
     font-size: var(--text-xs);
@@ -759,7 +782,7 @@
     line-height: 1.65;
 }
 
-.kg-shortstory__footer {
+.lb-shortstory__footer {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -771,7 +794,7 @@
    Своих числовых значений здесь больше нет: раньше эта кнопка,
    кнопка входа и кнопка промо-зоны задавали один и тот же градиент
    тремя разными наборами чисел, и правка одного не касалась двух других. */
-.kg-watch {
+.lb-watch {
     background: var(--btn-fill);
     border: 0;
     color: var(--color-on-accent);
@@ -786,14 +809,14 @@
     transition: background var(--transition-fast), box-shadow var(--transition-fast), transform var(--transition-fast);
 }
 
-.kg-watch:hover {
+.lb-watch:hover {
     background: var(--btn-fill-hover);
     color: var(--color-on-accent);
     transform: translateY(-1px);
     box-shadow: var(--btn-shadow-hover);
 }
 
-.kg-shortstory__time {
+.lb-shortstory__time {
     margin-left: auto;
     color: var(--color-text-muted);
     font-size: var(--text-xs);
@@ -801,7 +824,7 @@
 
 /* ---------- Пагинация (pagiNation) ---------- */
 
-.kg-pagination {
+.lb-pagination {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -811,33 +834,33 @@
     background: var(--color-surface);
 }
 
-.kg-pagination__link,
-.kg-pagination__current,
-.kg-pagination__prev,
-.kg-pagination__next {
+.lb-pagination__link,
+.lb-pagination__current,
+.lb-pagination__prev,
+.lb-pagination__next {
     color: var(--color-text-muted);
     text-decoration: none;
     font-size: var(--text-sm);
 }
 
-.kg-pagination__gap {
+.lb-pagination__gap {
     color: var(--color-text-dim);
     font-size: var(--text-sm);
 }
 
-.kg-pagination__current {
+.lb-pagination__current {
     color: var(--color-accent);
 }
 
-.kg-pagination__link:hover,
-.kg-pagination__next:hover,
-.kg-pagination__prev:hover {
+.lb-pagination__link:hover,
+.lb-pagination__next:hover,
+.lb-pagination__prev:hover {
     color: var(--color-text-strong);
 }
 
 /* ---------- Сайдбар ---------- */
 
-.kg-aheader {
+.lb-aheader {
     display: flex;
     align-items: center;
     padding: var(--space-2) var(--space-5);
@@ -846,7 +869,7 @@
     font-weight: 700;
 }
 
-.kg-aheader--row a {
+.lb-aheader--row a {
     margin-left: auto;
     padding: 8px 10px;
     margin-top: -8px;
@@ -859,26 +882,26 @@
     transition: color var(--transition-fast);
 }
 
-.kg-aheader--row a:hover {
+.lb-aheader--row a:hover {
     color: var(--color-accent);
 }
 
-.kg-mainnav {
+.lb-mainnav {
     padding: var(--space-4) var(--space-2) 5px;
 }
 
-.kg-categories,
-.kg-navsort > div {
+.lb-categories,
+.lb-navsort > div {
     padding-bottom: var(--space-3);
 }
 
-.kg-navsort > div + div {
+.lb-navsort > div + div {
     border-top: 1px solid var(--color-border);
     box-shadow: 0 -1px 0 rgba(0, 0, 0, 0.3);
     padding-top: var(--space-3);
 }
 
-.kg-accent {
+.lb-accent {
     display: block;
     margin-bottom: var(--space-2);
     color: var(--color-text);
@@ -888,38 +911,38 @@
     line-height: 17px;
 }
 
-.kg-accent--star {
+.lb-accent--star {
     color: var(--color-accent);
 }
 
-.kg-mainnav ul {
+.lb-mainnav ul {
     margin: 0;
     padding: 0;
     list-style: none;
 }
 
-.kg-categories li:first-child {
+.lb-categories li:first-child {
     margin-bottom: var(--space-2);
 }
 
-.kg-categories li {
+.lb-categories li {
     display: flex;
     align-items: center;
     justify-content: space-between;
     margin-bottom: var(--space-0);
 }
 
-.kg-mainnav li a {
+.lb-mainnav li a {
     color: var(--color-text-soft);
     text-decoration: none;
     transition: color var(--transition-fast);
 }
 
-.kg-mainnav li a:hover {
+.lb-mainnav li a:hover {
     color: var(--color-accent);
 }
 
-.kg-count {
+.lb-count {
     font-size: var(--text-xs);
     color: var(--color-text-dim);
     margin-left: var(--space-1);
@@ -927,11 +950,11 @@
 
 /* Подборки (franchise) */
 
-.kg-franchises {
+.lb-franchises {
     padding: 0 var(--space-4) var(--space-2);
 }
 
-.kg-franchise {
+.lb-franchise {
     display: flex;
     align-items: center;
     background: var(--color-surface);
@@ -944,7 +967,7 @@
     transition: background var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast);
 }
 
-.kg-franchise__img {
+.lb-franchise__img {
     flex: 0 0 60px;
     width: 60px;
     height: 40px;
@@ -954,25 +977,25 @@
     object-fit: cover;
 }
 
-.kg-franchise__title {
+.lb-franchise__title {
     font-size: var(--text-sm);
     line-height: var(--space-3);
 }
 
 /* Рекомендуемое (soonBlock) */
 
-.kg-soon {
+.lb-soon {
     padding: var(--space-1) var(--space-4) var(--space-2);
 }
 
-.kg-soon__item {
+.lb-soon__item {
     display: flex;
     align-items: center;
     text-decoration: none;
     margin-top: var(--space-2);
 }
 
-.kg-soon__item img {
+.lb-soon__item img {
     width: 83px;
     height: 123px;
     margin-right: var(--space-2);
@@ -984,11 +1007,11 @@
     transition: border-color var(--transition-fast);
 }
 
-.kg-soon__item:hover img {
+.lb-soon__item:hover img {
     border-color: var(--color-accent);
 }
 
-.kg-soon__title {
+.lb-soon__title {
     color: var(--color-text);
     font-size: var(--text-sm);
     line-height: var(--line-height-sm);
@@ -998,26 +1021,26 @@
     transition: color var(--transition-fast);
 }
 
-.kg-soon__item:hover .kg-soon__title {
+.lb-soon__item:hover .lb-soon__title {
     color: var(--color-accent);
 }
 
 /* Обновления сериалов (lastUpdates) */
 
-.kg-lastupdates {
+.lb-lastupdates {
     border-radius: var(--radius-md);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.24);
     overflow: hidden;
 }
 
-.kg-lastupdates__title {
+.lb-lastupdates__title {
     background: var(--color-surface-hover);
     color: var(--color-text-strong);
     font-size: var(--text-sm);
     padding: var(--space-2) var(--space-2);
 }
 
-.kg-lastupdates__item {
+.lb-lastupdates__item {
     display: flex;
     align-items: center;
     background: var(--color-surface);
@@ -1027,15 +1050,15 @@
     transition: background 0.12s ease;
 }
 
-.kg-lastupdates__item:last-child {
+.lb-lastupdates__item:last-child {
     border-bottom: 0;
 }
 
-.kg-lastupdates__item:hover {
+.lb-lastupdates__item:hover {
     background: var(--color-surface-hover);
 }
 
-.kg-lastupdates__poster {
+.lb-lastupdates__poster {
     width: 54px;
     height: 64px;
     flex-shrink: 0;
@@ -1044,7 +1067,7 @@
     background: var(--color-dark-bg);
 }
 
-.kg-lastupdates__main {
+.lb-lastupdates__main {
     padding: 0 var(--space-2);
     flex-grow: 1;
     min-width: 0;
@@ -1057,7 +1080,7 @@
   видна её верхняя половина: буквы выглядели обрубленными.
   line-clamp останавливает текст ровно на границе строки.
 */
-.kg-lastupdates__name {
+.lb-lastupdates__name {
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
@@ -1069,17 +1092,17 @@
     transition: color var(--transition-fast);
 }
 
-.kg-lastupdates__item:hover .kg-lastupdates__name {
+.lb-lastupdates__item:hover .lb-lastupdates__name {
     color: var(--color-accent);
 }
 
-.kg-lastupdates__year {
+.lb-lastupdates__year {
     color: var(--color-text-dim);
     font-weight: 400;
     margin-left: var(--space-0);
 }
 
-.kg-lastupdates__meta {
+.lb-lastupdates__meta {
     color: var(--color-text-dim);
     font-size: var(--text-xs);
     margin-top: var(--space-0);
@@ -1087,12 +1110,12 @@
 
 /* Последние отзывы (lastComments) */
 
-.kg-lastcomments {
+.lb-lastcomments {
     padding: var(--space-1) var(--space-4) var(--space-2);
     margin-top: var(--space-1);
 }
 
-.kg-lastcomment {
+.lb-lastcomment {
     background: var(--color-surface);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-sm);
@@ -1100,7 +1123,7 @@
     padding: var(--space-1) var(--space-2);
 }
 
-.kg-lastcomment__title {
+.lb-lastcomment__title {
     display: flex;
     align-items: center;
     color: var(--color-text-soft);
@@ -1109,11 +1132,11 @@
     transition: color var(--transition-fast);
 }
 
-.kg-lastcomment__title:hover {
+.lb-lastcomment__title:hover {
     color: var(--color-accent);
 }
 
-.kg-lastcomment__avatar {
+.lb-lastcomment__avatar {
     width: 22px;
     height: 22px;
     border-radius: 50%;
@@ -1128,7 +1151,7 @@
     flex-shrink: 0;
 }
 
-.kg-lastcomment__text {
+.lb-lastcomment__text {
     color: var(--color-text-muted);
     font-size: var(--text-xs);
     line-height: 1.4;
@@ -1136,7 +1159,7 @@
     overflow: hidden;
 }
 
-.kg-lastcomment__text span {
+.lb-lastcomment__text span {
     color: var(--color-text-bright);
     font-weight: 700;
     margin-right: var(--space-1);
@@ -1192,18 +1215,18 @@
 
 /* ---------- SEO-текст (footerText) ---------- */
 
-.kg-seo {
+.lb-seo {
     padding: var(--space-5) 0 5px;
 }
 
-.kg-seo h2 {
+.lb-seo h2 {
     color: var(--color-text-bright);
     font-size: 18px;
     font-weight: 500;
     margin-bottom: var(--space-4);
 }
 
-.kg-seo p {
+.lb-seo p {
     color: var(--color-text-muted);
     padding-bottom: var(--space-4);
     text-align: justify;
@@ -1215,22 +1238,22 @@
 /* ---------- Мобильная версия ---------- */
 
 @media (max-width: 900px) {
-    .kg-wrap,
-    .kg-topbar__inner {
+    .lb-wrap,
+    .lb-topbar__inner {
         width: 100%;
     }
 
-    .kg-topbar__inner {
+    .lb-topbar__inner {
         min-height: 44px;
     }
 
-    .kg-contentwrap {
+    .lb-contentwrap {
         grid-template-columns: minmax(0, 1fr);
     }
 
-    .kg-main,
-    .kg-sidebar,
-    .kg-contentwrap > .ad-slot {
+    .lb-main,
+    .lb-sidebar,
+    .lb-contentwrap > .ad-slot {
         grid-column: 1;
         grid-row: auto;
         width: 100%;
@@ -1238,51 +1261,51 @@
         max-height: none;
         overflow: visible;
     }
-    .kg-shortstory__body {
+    .lb-shortstory__body {
         grid-template-columns: 120px auto;
         gap: var(--space-3);
         min-height: 0;
     }
 
-    .kg-shortstory__poster img {
+    .lb-shortstory__poster img {
         width: 120px;
         height: 180px;
     }
 
-    .kg-shortstory__poster-fallback {
+    .lb-shortstory__poster-fallback {
         width: 120px;
         height: 180px;
     }
 
-    .kg-shortstory__title {
+    .lb-shortstory__title {
         font-size: 1.125rem;
     }
 
-    .kg-promo__inner {
+    .lb-promo__inner {
         flex-wrap: wrap;
     }
 
-    .kg-promo__title {
+    .lb-promo__title {
         font-size: 17px;
     }
 
-    .kg-xsort-label {
+    .lb-xsort-label {
         flex-basis: 100%;
     }
 
-    .kg-xsort-area {
+    .lb-xsort-area {
         flex-wrap: nowrap;
         overflow-x: auto;
         scrollbar-width: thin;
     }
 
-    .kg-xsort-div {
+    .lb-xsort-div {
         flex: 0 0 auto;
         max-width: none;
         overflow: visible;
     }
 
-    .kg-promo__posters {
+    .lb-promo__posters {
         overflow-x: auto;
         max-width: 100%;
         scrollbar-width: thin;
@@ -1291,21 +1314,21 @@
 }
 
 @media (max-width: 420px) {
-    .kg-shortstory__rating-count {
+    .lb-shortstory__rating-count {
         display: none;
     }
 
-    .kg-shortstory__poster img {
+    .lb-shortstory__poster img {
         width: 110px;
         height: 165px;
     }
 
-    .kg-shortstory__poster-fallback {
+    .lb-shortstory__poster-fallback {
         width: 110px;
         height: 165px;
     }
 
-    .kg-shortstory__footer {
+    .lb-shortstory__footer {
         gap: 1em;
     }
 }
@@ -1317,7 +1340,7 @@
 
 /* Мягкая янтарная подсветка по краям страницы */
 
-.kg-home {
+.lb-home {
     background-image:
         radial-gradient(1000px 340px at 50% -90px, rgba(var(--color-accent-rgb), 0.09), transparent 70%),
         radial-gradient(900px 320px at 0% 1100px, rgba(var(--color-accent-rgb), 0.05), transparent 70%),
@@ -1326,16 +1349,16 @@
 
 /* Топбар: янтарная волосяная линия снизу, ссылка с мерцающим подчёркиванием */
 
-.kg-topbar {
+.lb-topbar {
     border-bottom-color: rgba(var(--color-accent-rgb), 0.22);
     background: linear-gradient(180deg, var(--color-dark-surface) 0%, var(--color-dark-bg) 100%);
 }
 
-.kg-topbar__link {
+.lb-topbar__link {
     position: relative;
 }
 
-.kg-topbar__link::after {
+.lb-topbar__link::after {
     content: "";
     position: absolute;
     left: 0;
@@ -1348,7 +1371,7 @@
     transition: opacity var(--transition-fast);
 }
 
-.kg-topbar__link:hover::after {
+.lb-topbar__link:hover::after {
     opacity: 1;
 }
 
@@ -1405,30 +1428,30 @@
 
 /* Навигация: активный пункт — янтарная пилюля */
 
-.kg-topnav {
+.lb-topnav {
     background: linear-gradient(180deg, var(--color-card-hover) 0%, var(--color-card) 100%);
     border-bottom-color: var(--color-border);
 }
 
-.kg-topnav__link:hover {
+.lb-topnav__link:hover {
     background: var(--color-accent-dim);
     color: var(--color-accent);
 }
 
-.kg-topnav__link--active {
+.lb-topnav__link--active {
     background: linear-gradient(135deg, var(--color-accent-hover) 0%, var(--color-accent) 55%, var(--color-accent-deep) 100%);
     color: var(--color-on-accent);
     box-shadow: 0 2px 14px rgba(var(--color-accent-rgb), 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.35);
 }
 
-.kg-topnav__link--active:hover {
+.lb-topnav__link--active:hover {
     background: linear-gradient(135deg, var(--color-accent-soft) 0%, var(--color-accent-hover) 60%, var(--color-accent) 100%);
     color: var(--color-on-accent);
 }
 
 /* Промо-зона: кинозальный градиент, заголовок-афиша, светящаяся кнопка */
 
-.kg-promo {
+.lb-promo {
     background:
         radial-gradient(600px 220px at 12% 0%, rgba(var(--color-accent-rgb), 0.13), transparent 70%),
         radial-gradient(520px 280px at 92% 100%, rgba(var(--color-accent-rgb), 0.08), transparent 70%),
@@ -1443,7 +1466,7 @@
   внимание на себя сильнее, чем сам смысл заголовка, и спорит с кнопкой,
   которая рядом и тоже оранжевая. Крупный шрифт афиши даёт вес и без него.
 */
-.kg-promo__title {
+.lb-promo__title {
     font-family: var(--font-display);
     font-size: 30px;
     font-weight: 400;
@@ -1452,26 +1475,26 @@
     color: var(--color-dark-text-bright);
 }
 
-.kg-promo__text {
+.lb-promo__text {
     color: var(--color-dark-text-soft);
 }
 
-.kg-promo__poster img {
+.lb-promo__poster img {
     border: 1px solid rgba(var(--color-accent-rgb), 0.3);
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.03);
 }
 
-.kg-promo__poster:hover img {
+.lb-promo__poster:hover img {
     border-color: var(--color-accent);
     box-shadow: 0 8px 22px rgba(0, 0, 0, 0.55), 0 0 20px rgba(var(--color-accent-rgb), 0.35);
 }
 
-.kg-promo__btn {
+.lb-promo__btn {
     background: linear-gradient(135deg, var(--color-accent-hover) 0%, var(--color-accent) 55%, var(--color-accent-deep) 100%);
     box-shadow: 0 6px 22px rgba(var(--color-accent-rgb), 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.4);
 }
 
-.kg-promo__btn:hover {
+.lb-promo__btn:hover {
     background: linear-gradient(135deg, var(--color-accent-soft) 0%, var(--color-accent-hover) 60%, var(--color-accent) 100%);
     transform: translateY(-1px);
     box-shadow: 0 10px 30px rgba(var(--color-accent-rgb), 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.45);
@@ -1479,21 +1502,21 @@
 
 /* Панель сортировки: активный фильтр светится янтарём */
 
-.kg-xsort-area {
+.lb-xsort-area {
     background: linear-gradient(180deg, var(--color-surface-3) 0%, var(--color-surface) 100%);
 }
 
-.kg-xsort-div--active {
+.lb-xsort-div--active {
     border-color: var(--color-accent);
     background: var(--color-accent-dim);
     box-shadow: 0 0 12px rgba(var(--color-accent-rgb), 0.25);
 }
 
-.kg-xsort-div--active .kg-xsort-selected {
+.lb-xsort-div--active .lb-xsort-selected {
     color: var(--color-accent);
 }
 
-.kg-xsort-option--current {
+.lb-xsort-option--current {
     box-shadow: inset 2px 0 0 var(--color-accent);
 }
 
@@ -1504,11 +1527,11 @@
 
 /* Пагинация: текущая страница — светящаяся янтарная пилюля */
 
-.kg-pagination {
+.lb-pagination {
     background: linear-gradient(180deg, var(--color-surface) 0%, var(--color-card-hover) 100%);
 }
 
-.kg-pagination__current {
+.lb-pagination__current {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -1525,13 +1548,13 @@
 
 /* SEO-текст: янтарный маркер у заголовка */
 
-.kg-seo h2 {
+.lb-seo h2 {
     position: relative;
     padding-left: 16px;
     color: var(--color-text-strong);
 }
 
-.kg-seo h2::before {
+.lb-seo h2::before {
     content: "";
     position: absolute;
     left: 0;
@@ -1548,14 +1571,14 @@
    старый медиазапрос, поэтому размер задаём здесь, после). */
 
 @media (max-width: 900px) {
-    .kg-promo__title {
+    .lb-promo__title {
         font-size: 18px;
         letter-spacing: 0.03em;
     }
 }
 
 @media (max-width: 420px) {
-    .kg-promo__title {
+    .lb-promo__title {
         font-size: 16px;
     }
 }

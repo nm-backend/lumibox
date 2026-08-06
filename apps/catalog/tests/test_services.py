@@ -253,11 +253,11 @@ class CrewTests(TestCase):
     def test_empty_crew(self):
         self.assertEqual(get_crew_by_role(create_title()), [])
 
-    def test_kg_crew_filter_names_and_limit(self):
+    def test_lb_crew_filter_names_and_limit(self):
         from django.template import Context, Template
 
         from apps.catalog.models import Participation
-        from apps.catalog.templatetags.catalog_filters import kg_crew
+        from apps.catalog.templatetags.catalog_filters import lb_crew
 
         title = create_title()
         director = create_person(name="Кристофер Нолан")
@@ -267,11 +267,11 @@ class CrewTests(TestCase):
             )
         create_participation(title=title, person=director, role=Participation.Role.DIRECTOR)
 
-        self.assertEqual(kg_crew(title, "director"), "Кристофер Нолан")
-        self.assertEqual(len(kg_crew(title, "actor").split(" / ")), 5)
-        self.assertEqual(kg_crew(title, "writer"), "")
+        self.assertEqual(lb_crew(title, "director"), "Кристофер Нолан")
+        self.assertEqual(len(lb_crew(title, "actor").split(" / ")), 5)
+        self.assertEqual(lb_crew(title, "writer"), "")
 
-        rendered = Template("{% load catalog_filters %}{{ t|kg_crew:'actor' }}").render(
+        rendered = Template("{% load catalog_filters %}{{ t|lb_crew:'actor' }}").render(
             Context({"t": title})
         )
         self.assertTrue(rendered.startswith("Актёр 0 / "))

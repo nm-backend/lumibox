@@ -467,7 +467,9 @@ class RateTitleView(APIView):
         review, created = Review.objects.update_or_create(
             user=request.user,
             title=title,
-            defaults={"rating": rating, "text": ""},
+            # Только оценка: defaults без text, иначе быстрая оценка
+            # стирала бы текст уже оставленного отзыва.
+            defaults={"rating": rating},
         )
 
         return Response({"rating": rating, "created": created})

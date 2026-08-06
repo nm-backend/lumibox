@@ -18,8 +18,8 @@
         <h1 class="page-title">{{ page_heading }}</h1>
     </div>
 
-    <div class="kg-contentwrap">
-        <div class="kg-main" id="dle-content">
+    <div class="lb-contentwrap">
+        <div class="lb-main" id="lb-content">
 
             {# Quick filter genre chips #}
             {% if genres %}
@@ -73,9 +73,7 @@
 
         {% include "includes/ad_slot.html" %}
 
-        {% comment %} Тот же сайдбар, что и на главной. Раньше здесь стоял другой
-           (includes/sidebar.html) — с иным набором виджетов и иной вёрсткой,
-           из-за чего каталог выглядел страницей другого сайта. {% endcomment %}
-        {% include "includes/kg_sidebar.html" %}
+        {% comment %} Тот же сайдбар, что и на главной. {% endcomment %}
+        {% include "includes/lb_sidebar.html" %}
     </div>
 {% endblock %}

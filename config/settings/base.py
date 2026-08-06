@@ -129,8 +129,8 @@ TEMPLATES = [
                 # в base.html блок gtag не рендерится.
                 "apps.core.context_processors.global_settings",
                 "apps.core.context_processors.static_version",
-                "apps.core.context_processors.kg_topnav",
-"apps.core.context_processors.kg_sidebar",
+                "apps.core.context_processors.lb_topnav",
+"apps.core.context_processors.lb_sidebar",
             ],
         },
     },

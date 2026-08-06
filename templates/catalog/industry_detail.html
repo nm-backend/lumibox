@@ -26,9 +26,9 @@
         </div>
     </section>
 
-    <div class="kg-contentwrap">
+    <div class="lb-contentwrap">
     {% if titles %}
-        <div class="kg-main" id="dle-content">
+        <div class="lb-main" id="lb-content">
             {% for title in titles %}{% include "includes/story_card.html" %}{% endfor %}
 
             {% include "includes/pagination.html" %}
@@ -40,6 +40,6 @@
 
     {% include "includes/ad_slot.html" %}
 
-    {% include "includes/kg_sidebar.html" %}
+    {% include "includes/lb_sidebar.html" %}
     </div>
 {% endblock %}

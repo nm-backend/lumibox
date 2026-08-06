@@ -109,6 +109,19 @@
                     <span>{% blocktranslate with min=title.duration_minutes %}{{ min }} мин{% endblocktranslate %}</span>
                 {% endif %}
 
+                {% if title.quality %}
+                    <span class="film-hero__dot" aria-hidden="true">·</span>
+                    <span>{{ title.quality }}</span>
+                {% endif %}
+
+                {% if episode_stats %}
+                    <span class="film-hero__dot" aria-hidden="true">·</span>
+                    <span>
+                        {{ episode_stats.seasons }} {{ episode_stats.seasons|ru_plural:"сезон,сезона,сезонов" }}
+                        · {{ episode_stats.count }} {{ episode_stats.count|ru_plural:"серия,серии,серий" }}
+                    </span>
+                {% endif %}
+
                 {% if title.age_rating %}
                     <span class="film-hero__age">{{ title.age_rating }}</span>
                 {% endif %}
@@ -213,6 +226,14 @@
                         {% endfor %}
                     </span>
                 {% endif %}
+                {% if title.kp_rating or title.imdb_rating %}
+                    <span class="film-hero__spec">
+                        <span class="film-hero__spec-icon">{% icon "star" size=16 %}</span>
+                        {% if title.kp_rating %}<span>Кинопоиск {{ title.kp_rating|stringformat:".1f" }}</span>{% endif %}
+                        {% if title.kp_rating and title.imdb_rating %}<span class="film-hero__dot" aria-hidden="true"> · </span>{% endif %}
+                        {% if title.imdb_rating %}<span>IMDb {{ title.imdb_rating|stringformat:".1f" }}</span>{% endif %}
+                    </span>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -220,6 +241,55 @@
 {% endblock %}
 
 {% block content %}
+    {% if episodes %}
+        {# Плеер серий: первое, что видит посетитель после шапки фильма.
+           Список эпизодов сгруппирован по сезонам, переключение — без
+           перезагрузки страницы (static/js/title-detail.js). #}
+        <section class="player-section" aria-label="{% trans 'Смотреть онлайн' %}">
+            <div class="player">
+                <video class="player__video" controls preload="none" data-player-video>
+                    <source src="{{ episodes.0.file.url }}" data-player-source>
+                </video>
+            </div>
+
+            <div class="player-panel">
+                <h2 class="player-panel__title">{% trans "Смотреть онлайн" %}</h2>
+                <p class="player-panel__current" data-player-label aria-live="polite">{{ episodes.0.name|default:episodes.0.episode_number }}</p>
+
+                {% regroup episodes by season_number as seasons %}
+                <div class="player-seasons">
+                    {% for season in seasons %}
+                        <details class="player-season" {% if forloop.first %}open{% endif %}>
+                            <summary class="player-season__summary">
+                                <span>{% blocktranslate with n=season.grouper %}Сезон {{ n }}{% endblocktranslate %}</span>
+                                <span class="player-season__count">{{ season.list|length }} {{ season.list|length|ru_plural:"серия,серии,серий" }}</span>
+                            </summary>
+                            <ul class="player-season__list">
+                                {% for episode in season.list %}
+                                    <li>
+                                        <button class="player-episode{% if forloop.parentloop.counter == 1 and forloop.counter == 1 %} player-episode--active{% endif %}"
+                                                type="button"
+                                                data-episode
+                                                data-episode-file="{{ episode.file.url }}"
+                                                data-episode-label="{% if episode.name %}{{ episode.name }}{% else %}{% blocktranslate with n=episode.episode_number %}Серия {{ n }}{% endblocktranslate %}{% endif %}">
+                                            <span class="player-episode__num">{{ episode.episode_number }}</span>
+                                            <span class="player-episode__name">
+                                                {% if episode.name %}{{ episode.name }}{% else %}{% trans "Серия" %}{% endif %}
+                                            </span>
+                                            {% if episode.duration_minutes %}
+                                                <span class="player-episode__duration">{{ episode.duration_minutes }} {% trans "мин" %}</span>
+                                            {% endif %}
+                                        </button>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </details>
+                    {% endfor %}
+                </div>
+            </div>
+        </section>
+    {% endif %}
+
     {# Breadcrumbs — единый компонент, как на всём сайте #}
     {% url 'catalog:title_list' as titles_url %}
     {% if title.is_series %}

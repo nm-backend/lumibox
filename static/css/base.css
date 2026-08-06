@@ -386,9 +386,9 @@ body:not([data-loading]) .site-main {
 }
 
 .error-page__title {
+    margin: 0 0 var(--space-3);
     font-size: var(--text-lg);
     font-weight: 600;
-    margin-bottom: var(--space-3);
     color: var(--color-text);
 }
 
@@ -483,5 +483,5 @@ body:not([data-loading]) .site-main {
 
 /* ---------- Ultra-wide ---------- */
 
-/* Колонка фиксированная, как в Kinogo: на ультра-широких экранах
+/* Колонка фиксированная: на ультра-широких экранах
    контент остаётся по центру, поля по бокам расширяются. */

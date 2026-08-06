@@ -131,12 +131,41 @@
             if (lastFocus) lastFocus.focus();
         }
 
-        openBtn.addEventListener('click', openModal);
-        modal.querySelectorAll('[data-trailer-close]').forEach(function (el) {
-            el.addEventListener('click', closeModal);
+    /* ---------- 4. Плеер серий: переключение эпизодов ---------- */
+
+    var playerVideo = document.querySelector('[data-player-video]');
+    if (playerVideo) {
+        var source = playerVideo.querySelector('[data-player-source]');
+        var section = playerVideo.closest('.player-section');
+        var buttons = section ? section.querySelectorAll('[data-episode]') : [];
+        var currentLabel = section ? section.querySelector('[data-player-label]') : null;
+
+        function setEpisode(btn) {
+            buttons.forEach(function (b) {
+                b.classList.remove('player-episode--active');
+            });
+            btn.classList.add('player-episode--active');
+            if (source && btn.dataset.episodeFile) {
+                source.src = btn.dataset.episodeFile;
+            }
+            playerVideo.load();
+            playerVideo.play().catch(function () {});
+            if (currentLabel && btn.dataset.episodeLabel) {
+                currentLabel.textContent = btn.dataset.episodeLabel;
+            }
+        }
+
+        buttons.forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                setEpisode(btn);
+            });
         });
-        document.addEventListener('keydown', function (e) {
-            if (e.key === 'Escape' && !modal.hidden) closeModal();
-        });
+
+        /* Название текущей серии в подписи плеера при загрузке:
+           оно есть у первой (активной) кнопки. */
+        var active = section ? section.querySelector('.player-episode--active') : null;
+        if (active && currentLabel && active.dataset.episodeLabel) {
+            currentLabel.textContent = active.dataset.episodeLabel;
+        }
     }
 })();

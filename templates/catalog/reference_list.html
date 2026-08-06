@@ -18,8 +18,8 @@
 
     {% comment %} Тот же каркас «контент + боковая панель», что и на каталоге. Без него
        страницы жанров и стран были единственными в каталоге без сайдбара. {% endcomment %}
-    <div class="kg-contentwrap">
-        <div class="kg-main">
+    <div class="lb-contentwrap">
+        <div class="lb-main">
             <div class="reference-grid">
                 {% for reference in references %}
                     <a class="reference-card" href="{% url detail_url_name reference.slug %}">
@@ -33,6 +33,6 @@
             </div>
         </div>
 
-        {% include "includes/kg_sidebar.html" %}
+        {% include "includes/lb_sidebar.html" %}
     </div>
 {% endblock %}

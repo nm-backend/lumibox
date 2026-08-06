@@ -112,12 +112,12 @@ class HomeView(TemplateView):
         context["statistics"] = get_home_statistics()
         context["trending"] = get_trending_titles()
 
-        # Сайдбар и панель навигации главной в стиле Kinogo.
+        # Сайдбар и панель навигации главной.
         context.update(get_home_sidebar())
         from apps.catalog.forms import get_year_choices
-        context["kg_years"] = [int(year) for year, _ in get_year_choices() if year]
+        context["lb_years"] = [int(year) for year, _ in get_year_choices() if year]
 
-        # Курированные ссылки «По странам» — как в Kinogo: не полный список,
+        # Курированные ссылки «По странам»: не полный список,
         # а пара десятков самых ходовых с прилагательным в подписи.
         countries_by_name = {c.name: c for c in context.get("countries", [])}
         curated_countries = [
@@ -127,24 +127,24 @@ class HomeView(TemplateView):
             ("Южная Корея", "Корейские"),
             ("Великобритания", "Английские"),
         ]
-        kg_country_links = []
+        lb_country_links = []
         for name, label in curated_countries:
             country = countries_by_name.get(name)
             if country:
-                kg_country_links.append(
+                lb_country_links.append(
                     (reverse("catalog:country_titles", args=[country.slug]), label)
                 )
-        context["kg_country_links"] = kg_country_links
+        context["lb_country_links"] = lb_country_links
 
         # Ссылки блока «Сериалы» сайдбара.
-        context["kg_series_links"] = [
+        context["lb_series_links"] = [
             ("Все сериалы", f"{catalog_url}?type=series"),
             ("Фильмы", f"{catalog_url}?type=movie"),
             ("Подборки", reverse("catalog:collection_list")),
         ]
 
         # Выпадающий список «Сортировать» панели xSort.
-        context["kg_sort_links"] = [
+        context["lb_sort_links"] = [
             ("по дате", f"{catalog_url}?sort=-published_at"),
             ("по рейтингу", f"{catalog_url}?sort=-rating_average"),
             ("топ за неделю", catalog_url),
@@ -153,15 +153,14 @@ class HomeView(TemplateView):
         ]
 
         # Лента главной: популярное за неделю, затем топ по рейтингу,
-        # добитый новинками — как у Kinogo, где лента по умолчанию «топ за 3 дня».
-        # Карусель: популярное за неделю, добитое новинками.
-        # 8 карточек: высота страницы подогнана под оригинал Kinogo (036).
+        # добитый новинками. Карусель: популярное за неделю, добитое новинками.
+        # 8 карточек: высота страницы подогнана под высоту ленты.
         context["home_titles"] = _dedup_titles(
             context.get("trending", []),
             context.get("top_rated", []),
             context.get("new_titles", []),
         )[:8]
-        context["kg_carousel"] = _dedup_titles(
+        context["lb_carousel"] = _dedup_titles(
             context.get("trending", []), context.get("new_titles", [])
         )[:14]
 
@@ -169,7 +168,7 @@ class HomeView(TemplateView):
         # на страницы каталога, поэтому номера совпадают.
         from math import ceil
 
-        context["kg_pages"] = max(
+        context["lb_pages"] = max(
             1, ceil(context.get("statistics", {}).get("published_count", 0) / 24)
         )
         return context
@@ -344,9 +343,11 @@ class TitleDetailView(DetailView):
 
     # Черновик по прямой ссылке отдаёт 404.
     # with_crew подтягивает съёмочную группу заранее — иначе шаблон
-    # сходит в базу за каждым именем отдельно.
+    # сходит в базу за каждым именем отдельно. with_frames — кадры галереи:
+    # шаблон обращается к ним дважды, и каждый вызов без prefetch был
+    # отдельным запросом.
     # Рейтинг брать неоткуда не нужно: он лежит готовым в полях модели.
-    queryset = Title.objects.published().with_related().with_crew()
+    queryset = Title.objects.published().with_related().with_crew().with_frames()
 
     def get(self, request, *args, **kwargs):
         response = super().get(request, *args, **kwargs)
@@ -365,6 +366,16 @@ class TitleDetailView(DetailView):
         context["user_review"] = user_review
         context["is_favorite"] = self.is_favorite()
         context["is_watchlist"] = self.is_watchlist()
+
+        # Серии для секции «Смотреть онлайн». Один запрос вместо двух:
+        # список эпизодов из него же даёт число сезонов и серий.
+        episodes = list(self.object.episodes.all())
+        context["episodes"] = episodes
+        context["episode_stats"] = (
+            {"seasons": len({e.season_number for e in episodes}), "count": len(episodes)}
+            if episodes
+            else None
+        )
         return context
 
     def get_user_review(self):

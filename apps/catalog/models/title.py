@@ -42,6 +42,18 @@ class Title(SeoModel, TimeStampedModel):
         SIXTEEN = "16+", "16+"
         ADULT = "18+", "18+"
 
+    class Quality(models.TextChoices):
+        """Качество видеофайла — то, что видит посетитель в карточке."""
+
+        CAMRIP = "CAMRip", "CAMRip"
+        TS = "TS", "TS"
+        TC = "TC", "TC"
+        HDRIP = "HDRip", "HDRip"
+        WEBRIP = "WEBRip", "WEBRip"
+        WEB_DL = "WEB-DL", "WEB-DL"
+        BDRIP = "BDRip", "BDRip"
+        BLURAY = "Blu-ray", "Blu-ray"
+
     type = models.CharField(
         "Тип",
         max_length=10,
@@ -86,6 +98,31 @@ class Title(SeoModel, TimeStampedModel):
         null=True,
         blank=True,
         help_text="Для сериала — длительность одной серии",
+    )
+    quality = models.CharField(
+        "Качество",
+        max_length=10,
+        choices=Quality.choices,
+        blank=True,
+        help_text="Например: TC, WEB-DL, BDRip. Показывается в карточке каталога.",
+    )
+    imdb_rating = models.DecimalField(
+        "Рейтинг IMDb",
+        max_digits=3,
+        decimal_places=1,
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(0), MaxValueValidator(10)],
+        help_text="Внешний рейтинг для справки, от 0.0 до 10.0",
+    )
+    kp_rating = models.DecimalField(
+        "Рейтинг Кинопоиска",
+        max_digits=3,
+        decimal_places=1,
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(0), MaxValueValidator(10)],
+        help_text="Внешний рейтинг для справки, от 0.0 до 10.0",
     )
     age_rating = models.CharField(
         "Возрастной рейтинг",

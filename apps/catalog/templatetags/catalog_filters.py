@@ -1,4 +1,4 @@
-"""Фильтры шаблонов каталога для главной страницы в стиле Kinogo."""
+"""Фильтры шаблонов каталога для главной страницы."""
 
 from datetime import timedelta
 
@@ -10,8 +10,8 @@ register = template.Library()
 
 
 @register.filter
-def kg_posted(value):
-    """Относительная дата публикации как на Kinogo: «Сегодня, 14:05»,
+def lb_posted(value):
+    """Относительная дата публикации: «Сегодня, 14:05»,
     «Вчера, 22:31», для более старых записей — «31.07.2026, 20:33»."""
     if not value:
         return ""
@@ -51,7 +51,7 @@ def ru_plural(value, forms):
 
 
 @register.filter
-def kg_crew(value, role):
+def lb_crew(value, role):
     """Список имён съёмочной группы по роли: режиссёр, актёры и т.д.
 
     value — Title, role — строка-роль Participation.Role. Возвращает

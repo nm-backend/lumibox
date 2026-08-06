@@ -1,26 +1,26 @@
-﻿{% extends "base.html" %}
+{% extends "base.html" %}
 {% load static i18n catalog_filters %}
 
-{% block body_class %}kg-body{% endblock %}
+{% block body_class %}lb-body{% endblock %}
 
 {% block page_title %}{% trans "LumiBox — смотреть фильмы и сериалы онлайн" %}{% endblock %}
 
 {% block content %}
-<div class="kg-home">
-    <div class="kg-wrap">
+<div class="lb-home">
+    <div class="lb-wrap">
 
         {# ---------- Промо-зона (место баннера оригинала) ---------- #}
-        <section class="kg-promo" aria-label="{% trans "О кинотеатре" %}">
-            <div class="kg-promo__inner">
-                <div class="kg-promo__copy">
-                    <h1 class="kg-promo__title">{% trans "Смотреть фильмы и сериалы онлайн бесплатно" %}</h1>
-                    <p class="kg-promo__text">{% trans "Новинки кино и сериалы в хорошем качестве. Каждый день свежие премьеры." %}</p>
-                    <a class="kg-promo__btn" href="{% url 'catalog:title_list' %}">{% trans "Смотреть" %}</a>
+        <section class="lb-promo" aria-label="{% trans "О кинотеатре" %}">
+            <div class="lb-promo__inner">
+                <div class="lb-promo__copy">
+                    <h1 class="lb-promo__title">{% trans "Смотреть фильмы и сериалы онлайн бесплатно" %}</h1>
+                    <p class="lb-promo__text">{% trans "Новинки кино и сериалы в хорошем качестве. Каждый день свежие премьеры." %}</p>
+                    <a class="lb-promo__btn" href="{% url 'catalog:title_list' %}">{% trans "Смотреть" %}</a>
                 </div>
-                {% if kg_carousel %}
-                    <div class="kg-promo__posters">
-                        {% for title in kg_carousel|slice:":4" %}
-                            <a class="kg-promo__poster" href="{{ title.get_absolute_url }}" title="{{ title.name }}">
+                {% if lb_carousel %}
+                    <div class="lb-promo__posters">
+                        {% for title in lb_carousel|slice:":4" %}
+                            <a class="lb-promo__poster" href="{{ title.get_absolute_url }}" title="{{ title.name }}">
                                 {% if title.poster %}
                                     <img src="{{ title.poster.url }}" width="90" height="130" alt="{{ title.name }}" loading="lazy">
                                 {% else %}
@@ -34,14 +34,14 @@
         </section>
 
         {# ---------- Панель сортировки (xSort) ---------- #}
-        <div class="kg-xsort-area">
-            <span class="kg-xsort-label">{% trans "Сортировать:" %}</span>
+        <div class="lb-xsort-area">
+            <span class="lb-xsort-label">{% trans "Сортировать:" %}</span>
 
-            <div class="kg-xsort-div kg-xsort-div--active" data-kg-dropdown>
-                <div class="kg-xsort-selected">{% trans "топ за неделю" %}</div>
-                <ul class="kg-xsort-ul">
-                    {% for label, url in kg_sort_links %}
-                        <li class="kg-xsort-option{% if forloop.counter == 3 %} kg-xsort-option--current{% endif %}">
+            <div class="lb-xsort-div lb-xsort-div--active" data-lb-dropdown>
+                <div class="lb-xsort-selected">{% trans "топ за неделю" %}</div>
+                <ul class="lb-xsort-ul">
+                    {% for label, url in lb_sort_links %}
+                        <li class="lb-xsort-option{% if forloop.counter == 3 %} lb-xsort-option--current{% endif %}">
                             <a href="{{ url }}">{{ label }}</a>
                         </li>
                     {% endfor %}
@@ -49,43 +49,43 @@
             </div>
 
             {% if collections %}
-                <div class="kg-xsort-div" data-kg-dropdown>
-                    <div class="kg-xsort-selected">{% trans "Подборка" %}</div>
-                    <ul class="kg-xsort-ul">
+                <div class="lb-xsort-div" data-lb-dropdown>
+                    <div class="lb-xsort-selected">{% trans "Подборка" %}</div>
+                    <ul class="lb-xsort-ul">
                         {% for collection in collections %}
-                            <li class="kg-xsort-option"><a href="{{ collection.get_absolute_url }}">{{ collection.name }}</a></li>
+                            <li class="lb-xsort-option"><a href="{{ collection.get_absolute_url }}">{{ collection.name }}</a></li>
                         {% endfor %}
                     </ul>
                 </div>
             {% endif %}
 
-            <div class="kg-xsort-div" data-kg-dropdown>
-                <div class="kg-xsort-selected">{% trans "Год" %}</div>
-                <ul class="kg-xsort-ul">
-                    {% for year in kg_years %}
-                        <li class="kg-xsort-option"><a href="{% url 'catalog:title_list' %}?year={{ year }}">{{ year }}</a></li>
+            <div class="lb-xsort-div" data-lb-dropdown>
+                <div class="lb-xsort-selected">{% trans "Год" %}</div>
+                <ul class="lb-xsort-ul">
+                    {% for year in lb_years %}
+                        <li class="lb-xsort-option"><a href="{% url 'catalog:title_list' %}?year={{ year }}">{{ year }}</a></li>
                     {% endfor %}
                 </ul>
             </div>
 
-            {% if kg_country_links %}
-                <div class="kg-xsort-div" data-kg-dropdown>
-                    <div class="kg-xsort-selected">{% trans "Страны" %}</div>
-                    <ul class="kg-xsort-ul">
-                        {% for url, label in kg_country_links %}
-                            <li class="kg-xsort-option"><a href="{{ url }}">{{ label }}</a></li>
+            {% if lb_country_links %}
+                <div class="lb-xsort-div" data-lb-dropdown>
+                    <div class="lb-xsort-selected">{% trans "Страны" %}</div>
+                    <ul class="lb-xsort-ul">
+                        {% for url, label in lb_country_links %}
+                            <li class="lb-xsort-option"><a href="{{ url }}">{{ label }}</a></li>
                         {% endfor %}
                     </ul>
                 </div>
             {% endif %}
 
-            <a class="kg-xsort-clearall" href="{% url 'catalog:home' %}" title="{% trans "Сбросить выбранные значения" %}" aria-label="{% trans "Сбросить фильтры" %}">✕</a>
+            <a class="lb-xsort-clearall" href="{% url 'catalog:home' %}" title="{% trans "Сбросить выбранные значения" %}" aria-label="{% trans "Сбросить фильтры" %}">✕</a>
         </div>
 
-        {# ---------- Лента справа + сайдбар слева (как в Kinogo) ---------- #}
-        <div class="kg-contentwrap">
+        {# ---------- Лента справа + сайдбар слева ---------- #}
+        <div class="lb-contentwrap">
 
-            <section class="kg-main" id="dle-content" aria-label="{% trans 'Каталог фильмов' %}">
+            <section class="lb-main" id="lb-content" aria-label="{% trans 'Каталог фильмов' %}">
 
                 <h2 class="visually-hidden">{% trans "Каталог фильмов" %}</h2>
 
@@ -102,11 +102,11 @@
             {# ---------- Горизонтальное рекламное место (между лентой и SEO) ---------- #}
             {% include "includes/ad_slot.html" %}
 
-            {% include "includes/kg_sidebar.html" %}
+            {% include "includes/lb_sidebar.html" %}
         </div>
 
         {# ---------- SEO-текст (footerText) ---------- #}
-        <div class="kg-seo">
+        <div class="lb-seo">
             <h2>{% trans "LumiBox — фильмы и сериалы онлайн" %}</h2>
             <p>{% blocktranslate %}Рады приветствовать на LumiBox всех любителей интересного и качественного кино!
                 У нас более {{ statistics.movies_count }} фильмов и {{ statistics.series_count }} сериалов онлайн.

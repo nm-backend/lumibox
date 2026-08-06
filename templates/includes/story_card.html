@@ -1,74 +1,83 @@
 {% load i18n icons catalog_filters %}
 
-<article class="kg-shortstory">
-    <div class="kg-shortstory__body">
-        <div class="kg-shortstory__poster">
+<article class="lb-shortstory">
+    <div class="lb-shortstory__body">
+        <div class="lb-shortstory__poster">
             <a href="{{ title.get_absolute_url }}" title="{{ title.name }}">
                 {% if title.poster %}
                     <img src="{{ title.poster.url }}" width="200" height="300" alt="{{ title.name }}" loading="lazy">
                 {% else %}
-                    <span class="kg-shortstory__poster-fallback" aria-hidden="true">
+                    <span class="lb-shortstory__poster-fallback" aria-hidden="true">
                         <svg viewBox="0 0 64 64" width="34" height="34" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                             <rect x="4" y="10" width="56" height="44" rx="6" stroke-opacity="0.5"/>
                             <path d="M4 22h56" stroke-opacity="0.3"/>
                             <path d="M24 34l14 8-14 8z" fill="currentColor" fill-opacity="0.35" stroke="none"/>
                         </svg>
-                        <span class="kg-shortstory__poster-fallback-name">{{ title.name }}</span>
+                        <span class="lb-shortstory__poster-fallback-name">{{ title.name }}</span>
                     </span>
                 {% endif %}
-                <span class="kg-shortstory__play" aria-hidden="true">
+                <span class="lb-shortstory__play" aria-hidden="true">
                     <svg viewBox="0 0 24 24" width="26" height="26" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
                 </span>
                 {% if title.age_rating %}
-                    <span class="kg-badge kg-badge--age">{{ title.age_rating }}</span>
+                    <span class="lb-badge lb-badge--age">{{ title.age_rating }}</span>
                 {% endif %}
-                <span class="kg-badge kg-badge--type">{{ title.get_type_display }}</span>
+                <span class="lb-badge lb-badge--type">{{ title.get_type_display }}</span>
             </a>
         </div>
 
-        <div class="kg-shortstory__info">
-            <h3 class="kg-shortstory__title">
+        <div class="lb-shortstory__info">
+            <h3 class="lb-shortstory__title">
                 <a href="{{ title.get_absolute_url }}" title="{{ title.name }}">{{ title.name }}</a>
             </h3>
             {% if title.original_name %}
-                <p class="kg-shortstory__original">{{ title.original_name }}</p>
+                <p class="lb-shortstory__original">{{ title.original_name }}</p>
             {% endif %}
 
-            <div class="kg-shortstory__meta">
+            <div class="lb-shortstory__meta">
                 {% if title.rating_average %}
-                    <span class="kg-shortstory__rating">
+                    <span class="lb-shortstory__rating">
                         {% icon "star" size=12 %} {{ title.rating_average|floatformat:1 }}
-                        <span class="kg-shortstory__rating-count">/10 · {{ title.rating_count|default:0 }} {% trans "гол." %}</span>
+                        <span class="lb-shortstory__rating-count">/10 · {{ title.rating_count|default:0 }} {% trans "гол." %}</span>
                     </span>
                 {% endif %}
                 {% if title.release_year %}
-                    <span class="kg-shortstory__year"><a href="{% url 'catalog:title_list' %}?year={{ title.release_year }}">{{ title.release_year }}</a></span>
+                    <span class="lb-shortstory__year"><a href="{% url 'catalog:title_list' %}?year={{ title.release_year }}">{{ title.release_year }}</a></span>
                 {% endif %}
                 {% if title.genres.all %}
-                    <span class="kg-shortstory__genres">
+                    <span class="lb-shortstory__genres">
                         {% for genre in title.genres.all|slice:":3" %}
                             <a href="{% url 'catalog:genre_titles' genre.slug %}">{{ genre.name }}</a>{% if not forloop.last %}, {% endif %}
                         {% endfor %}
                     </span>
                 {% endif %}
                 {% if title.duration_minutes %}
-                    <span class="kg-shortstory__duration">{% icon "clock" size=12 %} {{ title.duration_minutes }} {% trans "мин" %}</span>
+                    <span class="lb-shortstory__duration">{% icon "clock" size=12 %} {{ title.duration_minutes }} {% trans "мин" %}</span>
+                {% endif %}
+                {% if title.quality %}
+                    <span class="lb-shortstory__quality">{{ title.quality }}</span>
+                {% endif %}
+                {% if title.kp_rating or title.imdb_rating %}
+                    <span class="lb-shortstory__external">
+                        {% if title.kp_rating %}<span>КП {{ title.kp_rating|stringformat:".1f" }}</span>{% endif %}
+                        {% if title.imdb_rating %}<span>IMDb {{ title.imdb_rating|stringformat:".1f" }}</span>{% endif %}
+                    </span>
                 {% endif %}
             </div>
 
             {% if title.short_description or title.description %}
-                <p class="kg-shortstory__excerpt">{{ title.short_description|default:title.description|truncatewords:40 }}</p>
+                <p class="lb-shortstory__excerpt">{{ title.short_description|default:title.description|truncatewords:40 }}</p>
             {% endif %}
 
-            <div class="kg-shortstory__footer">
-                <a class="kg-watch" href="{{ title.get_absolute_url }}" title="{% blocktranslate %}Смотреть {{ title.name }} онлайн{% endblocktranslate %}">
+            <div class="lb-shortstory__footer">
+                <a class="lb-watch" href="{{ title.get_absolute_url }}" title="{% blocktranslate %}Смотреть {{ title.name }} онлайн{% endblocktranslate %}">
                     {% icon "play" size=14 %} {% trans "Смотреть онлайн" %}
                 </a>
                 {% if character %}
-                    <span class="kg-shortstory__character" aria-label="{% blocktranslate %}Роль: {{ character }}{% endblocktranslate %}">{{ character }}</span>
+                    <span class="lb-shortstory__character" aria-label="{% blocktranslate %}Роль: {{ character }}{% endblocktranslate %}">{{ character }}</span>
                 {% endif %}
                 {% if title.published_at %}
-                    <time class="kg-shortstory__time" datetime="{{ title.published_at|date:'c' }}">{{ title.published_at|kg_posted }}</time>
+                    <time class="lb-shortstory__time" datetime="{{ title.published_at|date:'c' }}">{{ title.published_at|lb_posted }}</time>
                 {% endif %}
             </div>
         </div>

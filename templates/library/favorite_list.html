@@ -9,9 +9,9 @@
         <p class="page-subtitle">{% blocktranslate with count=paginator.count %}Всего: {{ count }}{% endblocktranslate %}</p>
     </div>
 
-    <div class="kg-contentwrap">
+    <div class="lb-contentwrap">
     {% if favorites %}
-        <div class="kg-main" id="dle-content">
+        <div class="lb-main" id="lb-content">
             {% for favorite in favorites %}
                 {% include "includes/story_card.html" with title=favorite.title %}
             {% endfor %}
@@ -28,6 +28,6 @@
 
     {% include "includes/ad_slot.html" %}
 
-    {% include "includes/kg_sidebar.html" %}
+    {% include "includes/lb_sidebar.html" %}
     </div>
 {% endblock %}

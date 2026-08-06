@@ -96,7 +96,7 @@
       --- Поверхность карточки ---
 
       Один язык для всех карточных поверхностей проекта. Раньше их было
-      пять и они расходились: .kg-shortstory — радиус lg и тень card,
+      пять и они расходились: .lb-shortstory — радиус lg и тень card,
       .card — радиус md без тени, .reference-card — md и shadow-sm,
       .collection-card — lg и shadow-sm, .sidebar-film — sm без тени.
       Четыре радиуса и три тени на одну сущность — это и создавало
@@ -236,7 +236,7 @@
 
 /* ---------- Typography base layer ---------- */
 
-/* Заголовки сайта — как в Kinogo: рабочий шрифт Inter, без декора.
+/* Заголовки сайта — рабочий шрифт Inter, без декора.
    Bebas Neue остаётся только в промо-зоне главной (стиль афиши). */
 h1, h2, h3.section__title, .film-hero__name {
     font-family: var(--font-base);

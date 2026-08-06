@@ -91,6 +91,17 @@ class TitleQuerySet(models.QuerySet):
             return self
         return self.prefetch_related(self._crew_prefetch())
 
+    def with_frames(self):
+        """
+        Подтягивает кадры галереи для страницы фильма.
+
+        Шаблон страницы фильма проверяет title.frames.all дважды — для
+        вкладки «Галерея» и в самом контенте. Без prefetch каждый вызов
+        шёл в базу отдельным запросом. Сортировка берётся из Meta.ordering
+        модели (порядок задаёт редактор), как и в других prefetch.
+        """
+        return self.prefetch_related("frames")
+
     def in_collection(self, collection):
         """
         Содержимое подборки в порядке, который задал редактор.

@@ -18,9 +18,9 @@
         {% endif %}
     </div>
 
-    <div class="kg-contentwrap">
+    <div class="lb-contentwrap">
     {% if history %}
-        <div class="kg-main" id="dle-content">
+        <div class="lb-main" id="lb-content">
             {% for entry in history %}
                 {% include "includes/story_card.html" with title=entry.title %}
             {% endfor %}
@@ -37,6 +37,6 @@
 
     {% include "includes/ad_slot.html" %}
 
-    {% include "includes/kg_sidebar.html" %}
+    {% include "includes/lb_sidebar.html" %}
     </div>
 {% endblock %}

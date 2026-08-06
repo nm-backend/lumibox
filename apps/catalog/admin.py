@@ -8,6 +8,7 @@ from apps.catalog.models import (
     Collection,
     CollectionItem,
     Country,
+    Episode,
     Frame,
     Genre,
     Participation,
@@ -109,6 +110,21 @@ class FrameInline(admin.TabularInline):
         )
 
 
+class EpisodeInline(admin.TabularInline):
+    """
+    Серии сериала прямо на странице фильма.
+
+    Поля сезона и серии задаются числами, как и порядок кадров:
+    перетаскивание требует стороннего пакета, а числа решают ту же
+    задачу штатными средствами. Уникальность пары «сезон + серия»
+    проверяет сама база.
+    """
+
+    model = Episode
+    extra = 0
+    fields = ["season_number", "episode_number", "name", "file", "duration_minutes"]
+
+
 class CollectionItemInline(admin.TabularInline):
     """Записи подборки с порядком показа."""
 
@@ -154,7 +170,7 @@ class CollectionAdmin(admin.ModelAdmin):
 class TitleAdmin(admin.ModelAdmin):
     """Админка фильмов и сериалов — основное рабочее место редактора."""
 
-    inlines = [ParticipationInline, FrameInline, TitleAwardInline]
+    inlines = [ParticipationInline, FrameInline, TitleAwardInline, EpisodeInline]
 
     # Похожие вручную ищутся автодополнением: список из тысяч фильмов
     # в обычном multi-select нерабочий.
@@ -205,12 +221,19 @@ class TitleAdmin(admin.ModelAdmin):
                     "release_year",
                     "release_date",
                     "duration_minutes",
+                    "quality",
                     "age_rating",
                     "genres",
                     "countries",
                     "studios",
                     "rating_display",
+                    "imdb_rating",
+                    "kp_rating",
                 ],
+                "description": (
+                    "Качество и внешние рейтинги (IMDb, Кинопоиск) — справка для "
+                    "посетителя. Внутренний рейтинг считается из отзывов автоматически."
+                ),
             },
         ),
         (

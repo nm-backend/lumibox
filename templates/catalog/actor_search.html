@@ -22,7 +22,7 @@
         <p class="page-subtitle">{% trans "Введите имя актёра — и найдите все фильмы и сериалы с его участием." %}</p>
     </div>
 
-    <div class="kg-contentwrap">
+    <div class="lb-contentwrap">
     {# Search form #}
     <div class="actor-search">
         <div class="actor-search__form-wrapper">
@@ -73,7 +73,7 @@
                             </div>
 
                             {% if item.participations %}
-                                <div class="kg-main" id="dle-content">
+                                <div class="lb-main" id="lb-content">
                                     {% for participation in item.participations %}
                                         {% include "includes/story_card.html" with title=participation.title %}
                                     {% endfor %}
@@ -96,7 +96,7 @@
 
     {% include "includes/ad_slot.html" %}
 
-    {% include "includes/kg_sidebar.html" %}
+    {% include "includes/lb_sidebar.html" %}
     </div>
 {% endblock %}
 

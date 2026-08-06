@@ -233,6 +233,50 @@ class ReviewApiTests(TestCase):
         self.assertTrue(Review.objects.filter(pk=review.pk).exists())
 
 
+class RateTitleApiTests(TestCase):
+    """Быстрая оценка звёздами с той же страницы фильма."""
+
+    def setUp(self):
+        self.user = create_user()
+        self.title = create_title()
+        self.url = reverse("api:v1:title-rate", args=[self.title.slug])
+
+    def test_guest_cannot_rate(self):
+        response = self.client.post(self.url, {"rating": 8}, content_type="application/json")
+        self.assertIn(response.status_code, (401, 403))
+
+    def test_quick_rating_creates_review(self):
+        self.client.force_login(self.user)
+        response = self.client.post(self.url, {"rating": 7}, content_type="application/json")
+
+        self.assertEqual(response.status_code, 200)
+        review = Review.objects.get(user=self.user, title=self.title)
+        self.assertEqual(review.rating, 7)
+
+    def test_quick_rating_does_not_wipe_review_text(self):
+        """
+        Быстрая оценка меняет только оценку: текст уже оставленного
+        отзыва не должен стираться (раньше update_or_create
+        подставлял text='' вместе с новой оценкой).
+        """
+        create_review(title=self.title, user=self.user, rating=5, text="Отличное кино")
+        self.client.force_login(self.user)
+
+        response = self.client.post(self.url, {"rating": 9}, content_type="application/json")
+
+        self.assertEqual(response.status_code, 200)
+        review = Review.objects.get(user=self.user, title=self.title)
+        self.assertEqual(review.rating, 9)
+        self.assertEqual(review.text, "Отличное кино")
+
+    def test_rating_outside_scale_rejected(self):
+        self.client.force_login(self.user)
+        response = self.client.post(self.url, {"rating": 42}, content_type="application/json")
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(Review.objects.count(), 0)
+
+
 class SchemaDocsTests(TestCase):
     """
     Документация собирается из кода. Эти тесты сторожат, что она вообще

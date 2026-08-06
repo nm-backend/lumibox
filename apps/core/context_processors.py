@@ -57,8 +57,8 @@ def _scan_static_version() -> str:
     return f"m{int(latest)}"
 
 
-def kg_topnav(request):
-    """Верхняя навигация в стиле Kinogo — одинаковая на всех страницах."""
+def lb_topnav(request):
+    """Верхняя навигация — одинаковая на всех страницах."""
     from apps.catalog.models import Title
 
     catalog_url = reverse("catalog:title_list")
@@ -72,10 +72,10 @@ def kg_topnav(request):
         (_("Фильмы"), f"{catalog_url}?type={Title.Type.MOVIE}", get.get("type") == str(Title.Type.MOVIE)),
         (_("Сериалы"), f"{catalog_url}?type={Title.Type.SERIES}", get.get("type") == str(Title.Type.SERIES)),
     ]
-    return {"kg_topnav": links}
+    return {"lb_topnav": links}
 
 
-def kg_sidebar(request):
+def lb_sidebar(request):
     """
     Данные боковой панели каталога — для любой страницы сайта.
 
@@ -116,7 +116,7 @@ def kg_sidebar(request):
         "latest_reviews": from_sidebar("latest_reviews"),
         "genres": SimpleLazyObject(lambda: _get_cached_genre_chip_list(50)),
         "collections": SimpleLazyObject(get_featured_collections),
-        "kg_years": SimpleLazyObject(
+        "lb_years": SimpleLazyObject(
             lambda: [int(year) for year, _ in get_year_choices() if year]
         ),
     }

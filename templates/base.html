@@ -17,7 +17,7 @@
     <link rel="stylesheet" href="{% static 'css/components.css' %}?v={{ static_version }}">
     <link rel="stylesheet" href="{% static 'css/footer.css' %}?v={{ static_version }}">
     <link rel="stylesheet" href="{% static 'css/ads.css' %}?v={{ static_version }}">
-    <link rel="stylesheet" href="{% static 'css/kinogo.css' %}?v={{ static_version }}">
+    <link rel="stylesheet" href="{% static 'css/lumibox.css' %}?v={{ static_version }}">
 
     <link rel="icon" type="image/svg+xml" href="{% static 'img/favicon.svg' %}">
     <link rel="alternate icon" href="{% static 'img/favicon.svg' %}">
@@ -137,10 +137,10 @@
     {% endcomment %}
     <a class="skip-link" href="#main-content">{% trans "К содержанию" %}</a>
 
-    <div class="kg-topbar" role="region" aria-label="{% trans 'Верхняя панель' %}">
-        <div class="kg-topbar__inner">
-            <span class="kg-topbar__text">{% trans "Онлайн-кинотеатр LumiBox — фильмы и сериалы бесплатно" %}</span>
-            <a class="kg-topbar__link" href="{% url 'catalog:title_list' %}?sort=-published_at">{% trans "Новинки" %}</a>
+    <div class="lb-topbar" role="region" aria-label="{% trans 'Верхняя панель' %}">
+        <div class="lb-topbar__inner">
+            <span class="lb-topbar__text">{% trans "Онлайн-кинотеатр LumiBox — фильмы и сериалы бесплатно" %}</span>
+            <a class="lb-topbar__link" href="{% url 'catalog:title_list' %}?sort=-published_at">{% trans "Новинки" %}</a>
         </div>
     </div>
 
@@ -153,8 +153,8 @@
 
             {% comment %}
                Старая десктопная навигация (site-nav__desktop) удалена:
-               её полностью заменяет глобальный топ-нав kg-topnav,
-               который строится context processor'ом kg_topnav.
+               её полностью заменяет глобальный топ-нав lb-topnav,
+               который строится context processor'ом lb_topnav.
             {% endcomment %}
 
             <div class="search-wrapper site-header__search">
@@ -217,9 +217,9 @@
         </div>
     </header>
 
-    <nav class="kg-topnav" aria-label="{% trans "Основная навигация" %}">
-        {% for label, url, is_active in kg_topnav %}
-            <a class="kg-topnav__link{% if is_active %} kg-topnav__link--active{% endif %}"
+    <nav class="lb-topnav" aria-label="{% trans "Основная навигация" %}">
+        {% for label, url, is_active in lb_topnav %}
+            <a class="lb-topnav__link{% if is_active %} lb-topnav__link--active{% endif %}"
                href="{{ url }}">{{ label }}</a>
         {% endfor %}
     </nav>
