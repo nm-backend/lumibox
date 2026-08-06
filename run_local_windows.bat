@@ -9,8 +9,9 @@ setlocal
 cd /d "%~dp0"
 
 rem Force our own settings. Without this a DJANGO_SETTINGS_MODULE left over
-rem from another project (e.g. kinogo's config.settings.dev) would hijack us
-rem and crash with "no such table". This project uses development settings.
+rem from another project (e.g. another Django app's config.settings.dev)
+rem would hijack us and crash with "no such table". This project uses
+rem development settings.
 set "DJANGO_SETTINGS_MODULE=config.settings.development"
 
 echo ============================================
@@ -77,7 +78,8 @@ echo [4/6] Applying migrations...
 echo [5/6] Loading demo data ^(movies, cast, collections, posters^)...
 "%VPY%" manage.py ensure_demo_data
 
-rem --- 6. Admin user (only if none exists) ---set "DJANGO_SUPERUSER_EMAIL=admin@lumibox.local"
+rem --- 6. Admin user (only if none exists) ---
+set "DJANGO_SUPERUSER_EMAIL=admin@lumibox.local"
 set "DJANGO_SUPERUSER_USERNAME=admin"
 set "DJANGO_SUPERUSER_PASSWORD=admin12345"
 "%VPY%" manage.py createsuperuser --noinput >nul 2>&1

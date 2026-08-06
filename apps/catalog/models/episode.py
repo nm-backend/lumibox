@@ -1,6 +1,8 @@
 from django.core.validators import FileExtensionValidator
 from django.db import models
 
+from apps.catalog.validators import validate_video_signature, validate_video_size
+
 
 class Episode(models.Model):
     """
@@ -38,7 +40,11 @@ class Episode(models.Model):
     file = models.FileField(
         "Видеофайл",
         upload_to="episodes/%Y/%m",
-        validators=[FileExtensionValidator(["mp4", "webm", "ogg"])],
+        validators=[
+            FileExtensionValidator(["mp4", "webm", "ogg"]),
+            validate_video_signature,
+            validate_video_size,
+        ],
         help_text="Видео серии (mp4, webm, ogg)",
     )
     duration_minutes = models.PositiveSmallIntegerField(

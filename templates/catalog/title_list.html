@@ -24,10 +24,10 @@
             {# Quick filter genre chips #}
             {% if genres %}
                 <nav class="genre-chips" aria-label="{% trans 'Быстрая фильтрация по жанрам' %}">
-                    <a class="genre-chip {% if not request.GET.genres__slug %}genre-chip--active{% endif %}" href="{% url 'catalog:title_list' %}">{% trans "Все" %}</a>
+                    <a class="genre-chip {% if not request.GET.genre %}genre-chip--active{% endif %}" href="{% url 'catalog:title_list' %}">{% trans "Все" %}</a>
                     {% for genre in genres %}
-                        <a class="genre-chip {% if request.GET.genres__slug == genre.slug %}genre-chip--active{% endif %}"
-                           href="{% url 'catalog:title_list' %}?genres__slug={{ genre.slug }}">{{ genre.name }}</a>
+                        <a class="genre-chip {% if request.GET.genre == genre.slug %}genre-chip--active{% endif %}"
+                           href="{% url 'catalog:title_list' %}?genre={{ genre.slug }}">{{ genre.name }}</a>
                     {% endfor %}
                 </nav>
             {% endif %}

@@ -22,4 +22,5 @@ urlpatterns = [
     path("titles/<slug:title_slug>/reviews/", reviews, name="title-reviews"),
     path("titles/<slug:title_slug>/reviews/<int:pk>/", review_detail, name="title-review-detail"),
     path("titles/<slug:title_slug>/rate/", views.RateTitleView.as_view(), name="title-rate"),
+    path("titles/<slug:title_slug>/watch/", views.TitleWatchProgressView.as_view(), name="title-watch"),
 ]

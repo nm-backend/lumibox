@@ -60,6 +60,11 @@ jobs:
       - name: Линт (ruff)
         run: ruff check apps config scripts
 
+      - name: Брендинг без рецидивов
+        # Тот же чек, что и pre-commit-хук: kg-*/kinogo не должны
+        # возвращаться в разметку и код.
+        run: python scripts/check_branding.py $(git ls-files)
+
       - name: Проверка проекта
         run: python manage.py check
 

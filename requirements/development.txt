@@ -6,6 +6,10 @@
 # Запуск: ruff check apps config
 ruff==0.15.22
 
+# Git-хуки: единые правила для всех, кто трогает репозиторий.
+# Установка: pre-commit install, запуск: pre-commit run --all-files
+pre-commit==4.6.1
+
 # Измерение покрытия тестами. Показывает, какие строки ни разу
 # не выполнялись — именно так нашлась команда seed_catalog с 0% покрытия.
 # Запуск: coverage run --source=apps manage.py test apps && coverage report

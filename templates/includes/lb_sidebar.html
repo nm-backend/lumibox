@@ -36,6 +36,7 @@
                                 {% endfor %}
                             </ul>
                         </div>
+                        {% if lb_country_links %}
                         <div class="lb-bycountry">
                             <i class="lb-accent">{% trans "По странам" %}</i>
                             <ul>
@@ -44,6 +45,8 @@
                                 {% endfor %}
                             </ul>
                         </div>
+                        {% endif %}
+                        {% if lb_series_links %}
                         <div class="lb-byseries">
                             <i class="lb-accent">{% trans "Сериалы" %}</i>
                             <ul>
@@ -52,7 +55,7 @@
                                 {% endfor %}
                             </ul>
                         </div>
-                    </div>
+                        {% endif %}                    </div>
                 </nav>
 
                 {# ---------- Рекомендуемое (только для вошедших) ---------- #}

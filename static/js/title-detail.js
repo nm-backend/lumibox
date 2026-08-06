@@ -4,6 +4,12 @@
 (function () {
     'use strict';
 
+    function getCookie(name) {
+        var value = '; ' + document.cookie;
+        var parts = value.split('; ' + name + '=');
+        if (parts.length === 2) return parts.pop().split(';').shift();
+    }
+
     /* ---------- 1. Быстрая оценка звёздами ---------- */
 
     var ratingContainer = document.querySelector('[data-star-rating]');
@@ -62,12 +68,6 @@
                 xhr.send(JSON.stringify({ rating: value }));
             });
         });
-    }
-
-    function getCookie(name) {
-        var value = '; ' + document.cookie;
-        var parts = value.split('; ' + name + '=');
-        if (parts.length === 2) return parts.pop().split(';').shift();
     }
 
     /* ---------- 2. Кнопки «Поделиться» ---------- */
@@ -139,6 +139,18 @@
         var section = playerVideo.closest('.player-section');
         var buttons = section ? section.querySelectorAll('[data-episode]') : [];
         var currentLabel = section ? section.querySelector('[data-player-label]') : null;
+        var titleSlug = section ? section.dataset.titleSlug : '';
+
+        /* Прогресс просмотра: анонимно не пишем — сервер сам откажет,
+           но и лишний запрос от гостя ни к чему. */
+        function reportProgress(episodeId) {
+            if (!episodeId || !titleSlug) return;
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/api/v1/titles/' + titleSlug + '/watch/');
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.setRequestHeader('X-CSRFToken', getCookie('csrftoken'));
+            xhr.send(JSON.stringify({ episode: episodeId }));
+        }
 
         function setEpisode(btn) {
             buttons.forEach(function (b) {
@@ -153,6 +165,7 @@
             if (currentLabel && btn.dataset.episodeLabel) {
                 currentLabel.textContent = btn.dataset.episodeLabel;
             }
+            reportProgress(btn.dataset.episodeId);
         }
 
         buttons.forEach(function (btn) {

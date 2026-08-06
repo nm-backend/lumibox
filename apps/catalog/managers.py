@@ -102,6 +102,44 @@ class TitleQuerySet(models.QuerySet):
         """
         return self.prefetch_related("frames")
 
+    def with_episodes(self):
+        """
+        Подтягивает серии для страницы фильма.
+
+        Список серий строится один раз (для плеера и для метаданных
+        «N сезонов · M серий»), поэтому выносим его в prefetch, а не
+        тянем из get_context_data. В списках каталога не используется:
+        story_card_prefetches его не содержит, чтобы не платить
+        лишним запросом за каждую страницу каталога.
+        """
+        return self.prefetch_related("episodes")
+
+    def with_progress(self, user):
+        """
+        Подтягивает последнюю просмотренную серию для каждого тайтла.
+
+        Нужен карточке каталога: бейдж «Продолжить с S1E3» строится из
+        записи истории просмотра, и без prefetch каждый тайтл сходил бы
+        в базу отдельно. Гостям ничего не предзагружаем — у них истории
+        нет. Точечный queryset с select_related: в бейдже нужна сама серия,
+        а не её связь с записью.
+        """
+        if not user.is_authenticated:
+            return self
+        from django.db.models import Prefetch
+
+        from apps.library.models import WatchHistory
+
+        return self.prefetch_related(
+            Prefetch(
+                "watchhistory_set",
+                queryset=WatchHistory.objects.filter(
+                    user=user, episode__isnull=False
+                ).select_related("episode"),
+                to_attr="progress_item",
+            )
+        )
+
     def in_collection(self, collection):
         """
         Содержимое подборки в порядке, который задал редактор.

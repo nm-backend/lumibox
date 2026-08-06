@@ -119,4 +119,42 @@ def lb_sidebar(request):
         "lb_years": SimpleLazyObject(
             lambda: [int(year) for year, _ in get_year_choices() if year]
         ),
+        "lb_country_links": SimpleLazyObject(
+            lambda: _curated_country_links(get_home_sidebar()["countries"])
+        ),
+        "lb_series_links": SimpleLazyObject(_series_links),
     }
+
+
+def _curated_country_links(countries):
+    """
+    Курированные ссылки «По странам»: не полный список, а пара десятков
+    самых ходовых с прилагательным в подписи («Американские», «Корейские»).
+    """
+    from django.urls import reverse
+
+    by_name = {country.name: country for country in countries}
+    curated = [
+        ("США", "Американские"),
+        ("Россия", "Российские"),
+        ("Индия", "Индийские"),
+        ("Южная Корея", "Корейские"),
+        ("Великобритания", "Английские"),
+    ]
+    return [
+        (reverse("catalog:country_titles", args=[by_name[name].slug]), label)
+        for name, label in curated
+        if name in by_name
+    ]
+
+
+def _series_links():
+    """Ссылки блока «Сериалы» сайдбара."""
+    from django.urls import reverse
+
+    catalog_url = reverse("catalog:title_list")
+    return [
+        ("Все сериалы", f"{catalog_url}?type=series"),
+        ("Фильмы", f"{catalog_url}?type=movie"),
+        ("Подборки", reverse("catalog:collection_list")),
+    ]

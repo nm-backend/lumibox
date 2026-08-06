@@ -7,6 +7,7 @@ from django.utils import timezone
 from apps.catalog.managers import TitleQuerySet
 from apps.catalog.models.person import Person
 from apps.catalog.models.reference import Country, Genre
+from apps.catalog.validators import validate_video_signature, validate_video_size
 from apps.core.models import SeoModel, TimeStampedModel
 from apps.core.validators import validate_image_file
 
@@ -24,7 +25,8 @@ class Title(SeoModel, TimeStampedModel):
     пришлось бы писать дважды, а «Избранное» пользователя ссылалось бы
     на две разные таблицы.
 
-    Сезоны и серии появятся отдельной моделью со ссылкой на Title.
+    Серии живут в отдельной модели Episode со ссылкой на Title
+    (related_name="episodes"): у сериала их много, у фильма — ни одной.
     """
 
     class Type(models.TextChoices):
@@ -177,7 +179,11 @@ class Title(SeoModel, TimeStampedModel):
         "Видеофайл трейлера",
         upload_to="trailers/%Y/%m",
         blank=True,
-        validators=[FileExtensionValidator(["mp4", "webm", "ogg"])],
+        validators=[
+            FileExtensionValidator(["mp4", "webm", "ogg"]),
+            validate_video_signature,
+            validate_video_size,
+        ],
         help_text="Своё видео (mp4, webm, ogg). Оставьте пустым, если указываете ссылку.",
     )
 
@@ -246,7 +252,7 @@ class Title(SeoModel, TimeStampedModel):
     class Meta:
         verbose_name = "Фильм или сериал"
         verbose_name_plural = "Фильмы и сериалы"
-        ordering = ["-release_year", "name"]
+        ordering = ["-release_year", "name", "pk"]
         indexes = [
             # Каталог почти всегда просит «опубликованные фильмы»
             # или «опубликованные сериалы» — этот индекс закрывает оба случая.

@@ -61,9 +61,20 @@ class WatchHistory(UserTitleRelation):
 
     Пользователь может открывать страницу много раз, но в истории
     остаётся одна запись — обновляется время последнего просмотра.
+    Поле episode — последняя серия, с которой начали смотреть: из него
+    карточка каталога показывает бейдж «Продолжить с S1E3».
     """
 
     watched_at = models.DateTimeField("Последний просмотр", auto_now=True)
+    episode = models.ForeignKey(
+        "catalog.Episode",
+        verbose_name="Последняя серия",
+        related_name="progress_entries",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        help_text="Серия, с которой пользователь начал смотреть. Пусто — страницу только открывали.",
+    )
 
     class Meta:
         verbose_name = "История просмотров"

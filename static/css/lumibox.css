@@ -589,6 +589,7 @@
 }
 
 .lb-shortstory__poster {
+    position: relative;
     background: var(--color-card);
     overflow: hidden;
     border-radius: var(--radius-md);
@@ -712,6 +713,40 @@
     background: rgba(7, 8, 13, 0.78);
     border: 1px solid rgba(var(--color-accent-rgb), 0.45);
     backdrop-filter: blur(4px);
+}
+
+/*
+  «Смотреть с S1E3» — продолжение просмотра поверх постера. Тот же
+  стеклянный стиль, что у бейджей, но это полноценная ссылка, поэтому
+  z-index выше (играет и как кнопка), и фон чуть плотнее — поверх
+  постера текст должен оставаться читаемым.
+*/
+.lb-shortstory__resume {
+    position: absolute;
+    left: var(--space-2);
+    right: var(--space-2);
+    bottom: var(--space-2);
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: var(--space-1) var(--space-2);
+    border-radius: var(--radius-sm);
+    font-size: var(--text-2xs);
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    line-height: 1.6;
+    color: var(--color-dark-text-bright);
+    background: rgba(7, 8, 13, 0.86);
+    border: 1px solid rgba(var(--color-accent-rgb), 0.55);
+    backdrop-filter: blur(6px);
+    transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+
+.lb-shortstory__resume:hover {
+    background: rgba(var(--color-accent-rgb), 0.22);
+    border-color: var(--color-accent);
 }
 
 .lb-shortstory__poster-fallback {

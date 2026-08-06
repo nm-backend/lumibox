@@ -1,0 +1,25 @@
+# Git-хуки перед коммитом: единые правила для всех, кто трогает репозиторий.
+# Установка: pre-commit install
+# Линтер и форматтер: pre-commit run --all-files
+#
+# Версии хуков не прибиты к requirements: pre-commit живёт в собственном
+# окружении и сам себе ставит инструменты. Пин держим только здесь.
+
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.15.22
+    hooks:
+      - id: ruff
+        # Те же папки, что в CI: линт всегда проверяет весь код,
+        # а не только изменённые файлы — регрессии не проскочат.
+        args: [apps, config, scripts]
+
+  - repo: local
+    hooks:
+      - id: check-branding
+        name: check-branding
+        entry: python scripts/check_branding.py
+        language: system
+        types: [file]
+        # Разметка и код: туда брендинг вернулся бы в первую очередь.
+        exclude: ^(\.github|docs)/

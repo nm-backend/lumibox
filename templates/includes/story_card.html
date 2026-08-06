@@ -24,6 +24,14 @@
                 {% endif %}
                 <span class="lb-badge lb-badge--type">{{ title.get_type_display }}</span>
             </a>
+            {% with progress=title.progress_item|first %}
+                {% if progress %}
+                    <a class="lb-shortstory__resume" href="{{ title.get_absolute_url }}">
+                        {% icon "play" size=12 %}
+                        {% blocktranslate with s=progress.episode.season_number e=progress.episode.episode_number %}Смотреть с S{{ s }}E{{ e }}{% endblocktranslate %}
+                    </a>
+                {% endif %}
+            {% endwith %}
         </div>
 
         <div class="lb-shortstory__info">

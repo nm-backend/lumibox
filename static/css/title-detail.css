@@ -785,6 +785,13 @@
     margin: 0;
 }
 
+.player-panel__resume {
+    margin: calc(-1 * var(--space-2)) 0 0;
+    color: var(--color-accent);
+    font-size: var(--text-sm);
+    font-weight: 600;
+}
+
 .player-seasons {
     display: grid;
     gap: var(--space-3);

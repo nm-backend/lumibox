@@ -19,6 +19,12 @@ class UserManager(BaseUserManager):
             raise ValueError("Электронная почта обязательна")
 
         email = self.normalize_email(email)
+        # Приводим весь адрес к нижнему регистру, а не только домен:
+        # вход на сайте принимает email без учёта регистра (forms.py
+        # приводит к lower), а нормализация Django трогает лишь домен.
+        # Иначе пользователь, созданный из админки через createsuperuser
+        # с «Vasya@mail.ru», никогда не смог бы войти.
+        email = email.lower()
         user = self.model(email=email, **extra_fields)
 
         # make_password хеширует пароль. В базу открытый текст не попадает никогда.

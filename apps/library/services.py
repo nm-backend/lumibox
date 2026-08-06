@@ -51,3 +51,19 @@ def remember_view(user, title):
         return
 
     WatchHistory.objects.update_or_create(user=user, title=title)
+
+
+def remember_episode_start(user, title, episode):
+    """
+    Запоминает, с какой серии пользователь начал смотреть.
+
+    Та же запись, что и в истории просмотров: страницу фильма открыли —
+    remember_view, начали смотреть серию — этот сервис. Серия кладётся
+    в ту же строку, а не в отдельную таблицу: один фильм — одна строка.
+    """
+    if not user.is_authenticated:
+        return
+
+    WatchHistory.objects.update_or_create(
+        user=user, title=title, defaults={"episode": episode}
+    )

@@ -244,17 +244,30 @@
     {% if episodes %}
         {# Плеер серий: первое, что видит посетитель после шапки фильма.
            Список эпизодов сгруппирован по сезонам, переключение — без
-           перезагрузки страницы (static/js/title-detail.js). #}
-        <section class="player-section" aria-label="{% trans 'Смотреть онлайн' %}">
+           перезагрузки страницы (static/js/title-detail.js).
+           Авторизованному пользователю плеер открывается на последней
+           просмотренной серии (resume_episode), гостю — на первой. #}
+        <section class="player-section" data-title-slug="{{ title.slug }}" aria-label="{% trans 'Смотреть онлайн' %}">
             <div class="player">
                 <video class="player__video" controls preload="none" data-player-video>
-                    <source src="{{ episodes.0.file.url }}" data-player-source>
+                    <source src="{% if resume_episode %}{{ resume_episode.file.url }}{% else %}{{ episodes.0.file.url }}{% endif %}" data-player-source>
                 </video>
             </div>
 
             <div class="player-panel">
                 <h2 class="player-panel__title">{% trans "Смотреть онлайн" %}</h2>
-                <p class="player-panel__current" data-player-label aria-live="polite">{{ episodes.0.name|default:episodes.0.episode_number }}</p>
+                <p class="player-panel__current" data-player-label aria-live="polite">
+                    {% if resume_episode %}
+                        {{ resume_episode.name|default:resume_episode.episode_number }}
+                    {% else %}
+                        {{ episodes.0.name|default:episodes.0.episode_number }}
+                    {% endif %}
+                </p>
+                {% if resume_episode %}
+                    <p class="player-panel__resume">
+                        {% blocktranslate with s=resume_episode.season_number e=resume_episode.episode_number %}Продолжить с S{{ s }}E{{ e }}{% endblocktranslate %}
+                    </p>
+                {% endif %}
 
                 {% regroup episodes by season_number as seasons %}
                 <div class="player-seasons">
@@ -267,9 +280,10 @@
                             <ul class="player-season__list">
                                 {% for episode in season.list %}
                                     <li>
-                                        <button class="player-episode{% if forloop.parentloop.counter == 1 and forloop.counter == 1 %} player-episode--active{% endif %}"
+                                        <button class="player-episode{% if resume_episode %}{% if episode.pk == resume_episode.pk %} player-episode--active{% endif %}{% elif forloop.parentloop.counter == 1 and forloop.counter == 1 %} player-episode--active{% endif %}"
                                                 type="button"
                                                 data-episode
+                                                data-episode-id="{{ episode.pk }}"
                                                 data-episode-file="{{ episode.file.url }}"
                                                 data-episode-label="{% if episode.name %}{{ episode.name }}{% else %}{% blocktranslate with n=episode.episode_number %}Серия {{ n }}{% endblocktranslate %}{% endif %}">
                                             <span class="player-episode__num">{{ episode.episode_number }}</span>
@@ -467,7 +481,7 @@
                         </a>
                     {% endfor %}
                 </div>
-                {% with first_genre=title.genres.first %}{% if first_genre %}<a class="sidebar-section__more" href="{% url 'catalog:title_list' %}?genres__slug={{ first_genre.slug }}">{% trans "Больше похожих" %} →</a>{% endif %}{% endwith %}
+                {% with first_genre=title.genres.first %}{% if first_genre %}<a class="sidebar-section__more" href="{% url 'catalog:title_list' %}?genre={{ first_genre.slug }}">{% trans "Больше похожих" %} →</a>{% endif %}{% endwith %}
             </section>
         {% endif %}
 

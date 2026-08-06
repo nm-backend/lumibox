@@ -22,7 +22,7 @@ from apps.catalog.services import (
     get_similar_titles,
 )
 from apps.core.views import ElidedPaginationMixin
-from apps.library.models import Favorite, Watchlist
+from apps.library.models import Favorite, WatchHistory, Watchlist
 from apps.library.services import remember_view
 from apps.reviews.forms import ReviewForm
 from apps.reviews.models import Review
@@ -117,32 +117,6 @@ class HomeView(TemplateView):
         from apps.catalog.forms import get_year_choices
         context["lb_years"] = [int(year) for year, _ in get_year_choices() if year]
 
-        # Курированные ссылки «По странам»: не полный список,
-        # а пара десятков самых ходовых с прилагательным в подписи.
-        countries_by_name = {c.name: c for c in context.get("countries", [])}
-        curated_countries = [
-            ("США", "Американские"),
-            ("Россия", "Российские"),
-            ("Индия", "Индийские"),
-            ("Южная Корея", "Корейские"),
-            ("Великобритания", "Английские"),
-        ]
-        lb_country_links = []
-        for name, label in curated_countries:
-            country = countries_by_name.get(name)
-            if country:
-                lb_country_links.append(
-                    (reverse("catalog:country_titles", args=[country.slug]), label)
-                )
-        context["lb_country_links"] = lb_country_links
-
-        # Ссылки блока «Сериалы» сайдбара.
-        context["lb_series_links"] = [
-            ("Все сериалы", f"{catalog_url}?type=series"),
-            ("Фильмы", f"{catalog_url}?type=movie"),
-            ("Подборки", reverse("catalog:collection_list")),
-        ]
-
         # Выпадающий список «Сортировать» панели xSort.
         context["lb_sort_links"] = [
             ("по дате", f"{catalog_url}?sort=-published_at"),
@@ -198,7 +172,7 @@ class TitleListView(ElidedPaginationMixin, ListView):
 
     def get_base_queryset(self):
         """Точка расширения для страниц жанра и страны."""
-        return Title.objects.published().with_related()
+        return Title.objects.published().with_related().with_progress(self.request.user)
 
     def get_queryset(self):
         return self.get_filter_form().filter(self.get_base_queryset())
@@ -345,9 +319,15 @@ class TitleDetailView(DetailView):
     # with_crew подтягивает съёмочную группу заранее — иначе шаблон
     # сходит в базу за каждым именем отдельно. with_frames — кадры галереи:
     # шаблон обращается к ним дважды, и каждый вызов без prefetch был
-    # отдельным запросом.
+    # отдельным запросом. with_episodes — серии для плеера и метаданных.
     # Рейтинг брать неоткуда не нужно: он лежит готовым в полях модели.
-    queryset = Title.objects.published().with_related().with_crew().with_frames()
+    queryset = (
+        Title.objects.published()
+        .with_related()
+        .with_crew()
+        .with_frames()
+        .with_episodes()
+    )
 
     def get(self, request, *args, **kwargs):
         response = super().get(request, *args, **kwargs)
@@ -366,9 +346,11 @@ class TitleDetailView(DetailView):
         context["user_review"] = user_review
         context["is_favorite"] = self.is_favorite()
         context["is_watchlist"] = self.is_watchlist()
+        context["resume_episode"] = self.get_resume_episode()
 
-        # Серии для секции «Смотреть онлайн». Один запрос вместо двух:
-        # список эпизодов из него же даёт число сезонов и серий.
+        # Серии уже подтянуты prefetch'ем (with_episodes): обращения к БД
+        # здесь нет. Один список эпизодов даёт и секцию плеера, и метаданные
+        # «N сезонов · M серий».
         episodes = list(self.object.episodes.all())
         context["episodes"] = episodes
         context["episode_stats"] = (
@@ -398,6 +380,20 @@ class TitleDetailView(DetailView):
         if not self.request.user.is_authenticated:
             return False
         return Watchlist.objects.filter(user=self.request.user, title=self.object).exists()
+
+    def get_resume_episode(self):
+        """
+        Последняя серия, с которой пользователь начал смотреть.
+
+        Возвращает: Episode или None. Один запрос к истории: единственная
+        строка на пару «пользователь — запись» (unique_watch_history).
+        """
+        if not self.request.user.is_authenticated:
+            return None
+        history = WatchHistory.objects.filter(
+            user=self.request.user, title=self.object, episode__isnull=False
+        ).first()
+        return history.episode if history else None
 
 
 class PersonDetailView(DetailView):
@@ -488,7 +484,12 @@ class StudioDetailView(ElidedPaginationMixin, ListView):
 
     def get_queryset(self):
         self.studio = get_object_or_404(Studio, slug=self.kwargs["slug"])
-        return Title.objects.published().with_related().filter(studios=self.studio)
+        return (
+            Title.objects.published()
+            .with_related()
+            .with_progress(self.request.user)
+            .filter(studios=self.studio)
+        )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -539,6 +540,7 @@ class AwardDetailView(ElidedPaginationMixin, ListView):
         return (
             Title.objects.published()
             .with_related()
+            .with_progress(self.request.user)
             .filter(award_entries__award=self.award)
             .annotate(award_year=Max("award_entries__year"))
             .order_by(F("award_year").desc(nulls_last=True), "name")
@@ -684,7 +686,12 @@ class CollectionDetailView(ElidedPaginationMixin, ListView):
         self.collection = get_object_or_404(
             Collection.objects.published(), slug=self.kwargs["slug"]
         )
-        return Title.objects.published().with_related().in_collection(self.collection)
+        return (
+            Title.objects.published()
+            .with_related()
+            .with_progress(self.request.user)
+            .in_collection(self.collection)
+        )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

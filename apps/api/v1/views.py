@@ -1,5 +1,5 @@
 from django.db import IntegrityError
-from django.db.models import Q
+from django.db.models import F, Q
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import (
@@ -24,9 +24,9 @@ from apps.api.v1.serializers import (
     TitleDetailSerializer,
     TitleListSerializer,
 )
-from apps.catalog.models import Collection, Country, Genre, Person, Title
+from apps.catalog.models import Collection, Country, Episode, Genre, Person, Title
 from apps.catalog.services import get_similar_titles
-from apps.library.services import toggle_favorite, toggle_watchlist
+from apps.library.services import remember_episode_start, toggle_favorite, toggle_watchlist
 from apps.reviews.models import Review
 
 
@@ -42,15 +42,33 @@ class StableOrderingFilter(filters.OrderingFilter):
 
     def get_ordering(self, request, queryset, view):
         ordering = super().get_ordering(request, queryset, view)
-        if ordering and "pk" not in ordering and "-pk" not in ordering:
-            return [*ordering, "pk"]
-        return ordering
+        if not ordering:
+            return ordering
+        result = []
+        for item in ordering:
+            if item == "-rating_average":
+                # Как в веб-каталоге: неоценённые записи уходят в конец,
+                # а не встают первыми (PostgreSQL ставит NULL вперёд при убывании).
+                result.append(F("rating_average").desc(nulls_last=True))
+            elif item == "rating_average":
+                result.append(F("rating_average").asc(nulls_last=False))
+            else:
+                result.append(item)
+        if "pk" not in ordering and "-pk" not in ordering:
+            result.append("pk")
+        return result
 
 
 class RateRequestSerializer(serializers.Serializer):
     """Оценка фильма или сериала от 1 до 10."""
 
     rating = serializers.IntegerField(min_value=1, max_value=10)
+
+
+class EpisodeWatchRequestSerializer(serializers.Serializer):
+    """Номер серии, которую пользователь начал смотреть."""
+
+    episode = serializers.IntegerField()
 
 
 class SearchResultSerializer(serializers.Serializer):
@@ -473,3 +491,47 @@ class RateTitleView(APIView):
         )
 
         return Response({"rating": rating, "created": created})
+
+
+@extend_schema(
+    summary="Сохранить прогресс просмотра",
+    description=(
+        "Плеер шлёт запрос, когда пользователь начинает смотреть серию. "
+        "Записывается последняя серия — карточка каталога покажет "
+        "«Продолжить с S1E3». Повторный вызов перезаписывает серию."
+    ),
+    request=EpisodeWatchRequestSerializer,
+    responses={
+        200: OpenApiResponse(description="Прогресс сохранён"),
+        403: OpenApiResponse(description="Требуется вход"),
+        404: OpenApiResponse(description="Записи или серии нет"),
+    },
+    tags=["titles"],
+)
+class TitleWatchProgressView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, title_slug):
+        try:
+            title = Title.objects.published().get(slug=title_slug)
+        except Title.DoesNotExist:
+            return Response({"detail": "Запись не найдена."}, status=404)
+
+        serializer = EpisodeWatchRequestSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response({"detail": "Укажите номер серии."}, status=400)
+
+        # Серия должна принадлежать именно этой записи: иначе прогресс
+        # одной страницы писался бы в историю другой.
+        episode = (
+            Episode.objects.filter(
+                pk=serializer.validated_data["episode"], title=title
+            )
+            .only("pk")
+            .first()
+        )
+        if episode is None:
+            return Response({"detail": "Серия не найдена."}, status=404)
+
+        remember_episode_start(request.user, title, episode)
+        return Response({"ok": True})

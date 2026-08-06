@@ -96,6 +96,10 @@ class TitleAward(TimeStampedModel):
             models.UniqueConstraint(
                 fields=["title", "award", "person", "year", "category"],
                 name="unique_title_award_entry",
+                # person может быть пустым (награда произведению, а не участнику),
+                # а в PostgreSQL два NULL не считаются равными — без этого флага
+                # одна и та же награда проходила бы сколько угодно раз.
+                nulls_distinct=False,
             ),
         ]
         indexes = [
