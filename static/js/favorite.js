@@ -38,16 +38,20 @@ document.addEventListener("submit", async (event) => {
         return;
     }
 
-    event.preventDefault();
-
     const form = event.target.closest(config.formSelector);
     const button = form.querySelector(config.buttonSelector);
+    if (!button) {
+        // Кнопка не нашлась (разметка изменилась) — отдаём отправку браузеру.
+        return;
+    }
+
+    event.preventDefault();
     button.disabled = true;
 
     try {
         const response = await fetch(form.action, {
             method: "POST",
-            body: new FormData(button.form),
+            body: new FormData(form),
             headers: {
                 // По этому заголовку сервер понимает, что ответить надо JSON,
                 // а не редиректом.
@@ -76,7 +80,7 @@ document.addEventListener("submit", async (event) => {
     } catch {
         // Что-то пошло не так — отправляем форму обычным способом.
         // Пользователь получит результат, просто с перезагрузкой.
-        button.form.submit();
+        form.submit();
     } finally {
         button.disabled = false;
     }

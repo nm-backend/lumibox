@@ -151,13 +151,11 @@ class TitleViewSet(viewsets.ReadOnlyModelViewSet):
         # студии и съёмочную группу ради карточки сайта.
         if self.action == "list":
             queryset = queryset.prefetch_related("genres")
+        elif self.action == "retrieve":
+            # Страны, студии и съёмочная группа нужны только карточке записи.
+            queryset = queryset.with_detail()
         else:
             queryset = queryset.with_related()
-
-        # Съёмочную группу тянем только для одной записи: в списке
-        # она не нужна и стоила бы лишнего запроса.
-        if self.action == "retrieve":
-            queryset = queryset.with_crew()
 
         return queryset
 

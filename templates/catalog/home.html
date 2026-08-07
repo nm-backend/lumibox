@@ -92,6 +92,9 @@
                 {# ---------- Лента карточек ---------- #}
                 {% for title in home_titles %}
                     {% include "includes/story_card.html" %}
+                {% empty %}
+                    {% trans "Пока нет опубликованных произведений" as empty_title %}
+                    {% include "includes/empty_state.html" with empty_inline=True empty_title=empty_title %}
                 {% endfor %}
 
                 {# ---------- Пагинация (pagiNation) ---------- #}

@@ -13,11 +13,15 @@
     var emptyMsg = suggestions.getAttribute('data-empty-msg') || '';
     var projectsMsg = suggestions.getAttribute('data-projects-msg') || '';
     var timer = null;
+    // Отменяем предыдущий запрос при новом вводе: медленный ответ
+    // не должен перекрывать подсказки для свежего запроса.
+    var currentRequest = null;
 
     input.addEventListener('input', function () {
         var q = this.value.trim();
         if (q.length < 2) {
             suggestions.classList.remove('actor-search__suggestions--open');
+            if (currentRequest) { currentRequest.abort(); currentRequest = null; }
             return;
         }
         clearTimeout(timer);
@@ -38,17 +42,23 @@
 
     function fetchActorSuggestions(q) {
         if (!searchUrl) return;
+        if (currentRequest) currentRequest.abort();
+        var controller = new AbortController();
+        currentRequest = controller;
         fetch(searchUrl + '?q=' + encodeURIComponent(q), {
-            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            signal: controller.signal
         })
             .then(function (response) {
                 if (!response.ok) throw new Error('Search failed');
                 return response.json();
             })
             .then(function (data) {
+                if (controller.signal.aborted) return;
                 renderSuggestions(data.results || []);
             })
-            .catch(function () {
+            .catch(function (error) {
+                if (error && error.name === 'AbortError') return;
                 suggestions.classList.remove('actor-search__suggestions--open');
             });
     }

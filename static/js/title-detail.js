@@ -23,10 +23,10 @@
 
         function setStars(value) {
             stars.forEach(function (star) {
-                star.classList.toggle(
-                    'star-rating__star--active',
-                    parseInt(star.dataset.value, 10) <= value
-                );
+                var isActive = parseInt(star.dataset.value, 10) <= value;
+                star.classList.toggle('star-rating__star--active', isActive);
+                // Для скринридеров шкала ведёт себя как радиогруппа.
+                star.setAttribute('aria-checked', String(isActive));
             });
         }
 
@@ -37,6 +37,38 @@
         }
 
         setStars(currentRating);
+
+        /* Клавиатурная доступность: <label> без <input> не фокусируется,
+           поэтому навешиваем роль радиогруппы и навигацию стрелками. */
+        var widget = ratingContainer.querySelector('[data-star-rating-widget]');
+        if (widget) widget.setAttribute('role', 'radiogroup');
+        stars.forEach(function (star) {
+            star.setAttribute('role', 'radio');
+            star.setAttribute('aria-label', 'Оценка ' + star.dataset.value);
+            star.tabIndex = -1;
+        });
+        if (stars[0]) stars[0].tabIndex = 0;
+        stars.forEach(function (star) {
+            star.addEventListener('focus', function () {
+                stars.forEach(function (s) { s.tabIndex = s === star ? 0 : -1; });
+            });
+        });
+        if (statusEl) statusEl.setAttribute('aria-live', 'polite');
+
+        stars.forEach(function (star, index) {
+            star.addEventListener('keydown', function (event) {
+                if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    star.click();
+                } else if (event.key === 'ArrowRight' || event.key === 'ArrowDown') {
+                    event.preventDefault();
+                    stars[(index + 1) % stars.length].focus();
+                } else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') {
+                    event.preventDefault();
+                    stars[(index - 1 + stars.length) % stars.length].focus();
+                }
+            });
+        });
 
         stars.forEach(function (star) {
             star.addEventListener('mouseenter', function () {
@@ -82,21 +114,39 @@
                 return;
             }
 
-            var input = document.createElement('input');
-            input.value = url;
-            document.body.appendChild(input);
-            input.select();
-            document.execCommand('copy');
-            document.body.removeChild(input);
+            /* Копируем ссылку: современный Clipboard API с фолбэком на
+               execCommand для старых браузеров и http-окружений. */
+            function copyToClipboard(text) {
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    return navigator.clipboard.writeText(text);
+                }
+                var input = document.createElement('textarea');
+                input.value = text;
+                input.setAttribute('readonly', '');
+                input.style.position = 'fixed';
+                input.style.opacity = '0';
+                document.body.appendChild(input);
+                input.select();
+                try {
+                    document.execCommand('copy');
+                } catch (err) {
+                    document.body.removeChild(input);
+                    return Promise.reject(err);
+                }
+                document.body.removeChild(input);
+                return Promise.resolve();
+            }
 
             var copiedMsg = shareBtn.dataset.copiedMsg || '';
-            var original = shareBtn.innerHTML;
-            shareBtn.innerHTML = '<span>' + copiedMsg + '</span>';
-            shareBtn.classList.add('sidebar-share__btn--copied');
-            setTimeout(function () {
-                shareBtn.innerHTML = original;
-                shareBtn.classList.remove('sidebar-share__btn--copied');
-            }, 2000);
+            copyToClipboard(url).then(function () {
+                var original = shareBtn.innerHTML;
+                shareBtn.textContent = copiedMsg;
+                shareBtn.classList.add('sidebar-share__btn--copied');
+                setTimeout(function () {
+                    shareBtn.innerHTML = original;
+                    shareBtn.classList.remove('sidebar-share__btn--copied');
+                }, 2000);
+            }).catch(function () {});
         });
     });
 
@@ -130,6 +180,18 @@
             if (modalFrame) modalFrame.src = '';
             if (lastFocus) lastFocus.focus();
         }
+
+        openBtn.addEventListener('click', openModal);
+        modal.querySelectorAll('[data-trailer-close]').forEach(function (close) {
+            close.addEventListener('click', closeModal);
+        });
+        modal.addEventListener('click', function (event) {
+            if (event.target === modal) closeModal();
+        });
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape' && !modal.hidden) closeModal();
+        });
+    }
 
     /* ---------- 4. Плеер серий: переключение эпизодов ---------- */
 

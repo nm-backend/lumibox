@@ -88,7 +88,7 @@ class FavoriteListView(LoginRequiredMixin, ElidedPaginationMixin, ListView):
         return (
             Favorite.objects.for_user(self.request.user)
             .filter(title__status=Title.Status.PUBLISHED)
-            .with_title()
+            .with_title(self.request.user)
         )
 
 
@@ -105,7 +105,7 @@ class WatchlistListView(LoginRequiredMixin, ElidedPaginationMixin, ListView):
         return (
             Watchlist.objects.for_user(self.request.user)
             .filter(title__status=Title.Status.PUBLISHED)
-            .with_title()
+            .with_title(self.request.user)
         )
 
 
@@ -122,7 +122,7 @@ class WatchHistoryListView(LoginRequiredMixin, ElidedPaginationMixin, ListView):
         return (
             WatchHistory.objects.for_user(self.request.user)
             .filter(title__status=Title.Status.PUBLISHED)
-            .with_title()
+            .with_title(self.request.user)
         )
 
 

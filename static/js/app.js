@@ -28,11 +28,18 @@
     const searchInput = document.querySelector('[data-search-input]');
     const dropdown = document.querySelector('[data-search-dropdown]');
     let searchTimer = null;
+    // Отмена устаревшего запроса: без неё медленный ответ может прийти
+    // после свежего и переписать подсказки результатами старого ввода.
+    let searchController = null;
 
     if (searchInput && dropdown) {
         searchInput.addEventListener('input', function () {
             const q = this.value.trim();
-            if (q.length < 2) { dropdown.classList.remove('search__dropdown--open'); return; }
+            if (q.length < 2) {
+                dropdown.classList.remove('search__dropdown--open');
+                if (searchController) { searchController.abort(); searchController = null; }
+                return;
+            }
             clearTimeout(searchTimer);
             searchTimer = setTimeout(() => fetchSuggestions(q), 250);
         });
@@ -48,15 +55,23 @@
         });
 
         async function fetchSuggestions(q) {
+            if (searchController) searchController.abort();
+            const controller = new AbortController();
+            searchController = controller;
             try {
                 const response = await fetch(`/api/v1/titles/search/?q=${encodeURIComponent(q)}&limit=6`, {
-                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    signal: controller.signal
                 });
                 if (!response.ok) throw new Error('Search failed');
                 const data = await response.json();
+                if (controller.signal.aborted) return;
                 renderSuggestions(data.results || data);
-            } catch {
+            } catch (error) {
+                if (error && error.name === 'AbortError') return;
                 dropdown.classList.remove('search__dropdown--open');
+            } finally {
+                if (searchController === controller) searchController = null;
             }
         }
 
@@ -294,22 +309,40 @@
     };
     const TOAST_CLOSE_ICON = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
 
+    /* Разбираем статичную SVG-строку иконки в DOM-узел: строка своя,
+       константа, поэтому её можно скормить template.innerHTML.
+       А вот message пользовательский текст — его вставляем только
+       через textContent, чтобы название фильма из базы не исполнилось
+       как разметка. */
+    const svgFromString = function (html) {
+        const template = document.createElement('template');
+        template.innerHTML = html.trim();
+        return template.content.firstElementChild;
+    };
+
     window.showToast = function (message, type = 'info', duration = 4000) {
         const container = document.querySelector('[data-toast-container]');
         if (!container) return;
 
         const toast = document.createElement('div');
         toast.className = `toast toast--${type}`;
-        toast.innerHTML = `
-            ${TOAST_ICONS[type] || TOAST_ICONS.info}
-            <span class="toast__message">${message}</span>
-            <button class="toast__close" type="button" aria-label="Закрыть">${TOAST_CLOSE_ICON}</button>
-        `;
+        toast.appendChild(svgFromString(TOAST_ICONS[type] || TOAST_ICONS.info));
 
-        toast.querySelector('.toast__close').addEventListener('click', () => {
+        const messageEl = document.createElement('span');
+        messageEl.className = 'toast__message';
+        messageEl.textContent = message;
+        toast.appendChild(messageEl);
+
+        const closeBtn = document.createElement('button');
+        closeBtn.type = 'button';
+        closeBtn.className = 'toast__close';
+        closeBtn.setAttribute('aria-label', 'Закрыть');
+        closeBtn.appendChild(svgFromString(TOAST_CLOSE_ICON));
+        closeBtn.addEventListener('click', () => {
             toast.style.animation = 'toastOut 0.25s ease both';
             setTimeout(() => toast.remove(), 300);
         });
+        toast.appendChild(closeBtn);
 
         container.appendChild(toast);
 
@@ -392,7 +425,8 @@
     /* -----------------------------------------------
        14. Page entrance animation on load
     ----------------------------------------------- */
-    document.querySelector('.site-main').classList.add('page-enter');
+    const siteMain = document.querySelector('.site-main');
+    if (siteMain) siteMain.classList.add('page-enter');
 
     /* Уплотнение шапки при прокрутке живёт в пункте 9 — там один общий
        обработчик scroll на всю страницу. Здесь раньше стоял его дубликат,

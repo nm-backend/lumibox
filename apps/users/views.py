@@ -102,6 +102,6 @@ class ProfileView(LoginRequiredMixin, UpdateView):
 
         # Немного свежего избранного прямо в профиле — чтобы страница
         # не была пустой анкетой.
-        context["recent_favorites"] = Favorite.objects.for_user(user).with_title()[:6]
-        context["recent_watchlist"] = Watchlist.objects.for_user(user).with_title()[:6]
+        context["recent_favorites"] = Favorite.objects.for_user(user).with_title(user)[:6]
+        context["recent_watchlist"] = Watchlist.objects.for_user(user).with_title(user)[:6]
         return context

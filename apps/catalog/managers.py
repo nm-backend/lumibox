@@ -2,12 +2,12 @@ from django.db import models
 from django.db.models import F
 
 
-def story_card_prefetches(prefix=""):
+def story_card_prefetches(prefix="", user=None):
     """
     Связи, без которых шаблон includes/story_card.html идёт в базу сам.
 
-    Карточка показывает жанры, страны, студии, режиссёра и актёров. Пока
-    список нужных связей был вписан только в TitleQuerySet.with_related(),
+    Карточка показывает жанры и (для вошедших) бейдж продолжения просмотра.
+    Пока список нужных связей был вписан только в TitleQuerySet.with_related(),
     любая вьюха, строившая запрос не от Title, про него не знала. Так и
     вышло на странице персоны: она отбирала Participation и прегружала
     только жанры, а карточка добирала персон по одному — восемь лишних
@@ -15,23 +15,25 @@ def story_card_prefetches(prefix=""):
 
     Принимает: prefix — путь до Title из текущей модели. Пусто для самого
     Title, "title__" — когда запрос строится от Participation.
+    user — для префетча прогресса просмотра (бейдж «Смотреть с S1E3»).
     Возвращает: список аргументов для prefetch_related.
     """
     from django.db.models import Prefetch
 
-    from apps.catalog.models.person import Participation
+    prefetches = [f"{prefix}genres"]
+    if user is not None and user.is_authenticated:
+        from apps.library.models import WatchHistory
 
-    return [
-        f"{prefix}genres",
-        f"{prefix}countries",
-        f"{prefix}studios",
-        Prefetch(
-            f"{prefix}participations",
-            # select_related("person") обязателен: без него Django достанет
-            # участия без самих персон и сходит в базу за каждым именем.
-            queryset=Participation.objects.select_related("person"),
-        ),
-    ]
+        prefetches.append(
+            Prefetch(
+                f"{prefix}watchhistory_set",
+                queryset=WatchHistory.objects.filter(
+                    user=user, episode__isnull=False
+                ).select_related("episode"),
+                to_attr="progress_item",
+            )
+        )
+    return prefetches
 
 
 class TitleQuerySet(models.QuerySet):
@@ -62,16 +64,33 @@ class TitleQuerySet(models.QuerySet):
         Подтягивает всё, что нужно карточке каталога, одним набором запросов.
 
         Без этого список из 24 карточек делает десятки лишних обращений
-        к базе — по одному на жанры, страны и каждое имя из съёмочной группы.
+        к базе — по одному на жанры и каждое имя из съёмочной группы.
         Состав связей описан в story_card_prefetches: он общий с вьюхами,
-        которые строят запрос не от Title.
+        которые строят запрос не от Title. Страны и студии карточке не
+        нужны — их подтягивает with_detail только на странице записи.
         """
         return self.prefetch_related(*story_card_prefetches())
 
     @staticmethod
     def _crew_prefetch():
         """Prefetch участий с персонами — общий для with_related и with_crew."""
-        return story_card_prefetches()[-1]
+        from django.db.models import Prefetch
+
+        from apps.catalog.models.person import Participation
+
+        return Prefetch(
+            "participations",
+            # select_related("person") обязателен: без него Django достанет
+            # участия без самих персон и сходит в базу за каждым именем.
+            queryset=Participation.objects.select_related("person"),
+        )
+
+    def with_detail(self):
+        """
+        Полный набор для страницы записи и API-карточки: страны и студии
+        добавляются только здесь, спискам карточек они не нужны.
+        """
+        return self.with_related().with_crew().prefetch_related("countries", "studios")
 
     def with_crew(self):
         """

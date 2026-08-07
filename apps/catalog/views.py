@@ -325,8 +325,7 @@ class TitleDetailView(DetailView):
     # Рейтинг брать неоткуда не нужно: он лежит готовым в полях модели.
     queryset = (
         Title.objects.published()
-        .with_related()
-        .with_crew()
+        .with_detail()
         .with_frames()
         .with_episodes()
     )
@@ -419,7 +418,7 @@ class PersonDetailView(DetailView):
                 title__status=Title.Status.PUBLISHED,
             )
             .select_related("title")
-            .prefetch_related(*story_card_prefetches("title__"))
+            .prefetch_related(*story_card_prefetches("title__", user=self.request.user))
             .order_by("-title__release_year")
         )
         context["awards"] = self.object.award_entries.select_related("award", "title")[:12]
@@ -589,7 +588,7 @@ class ActorSearchView(TemplateView):
                     title__status=Title.Status.PUBLISHED,
                 )
                 .select_related("title")
-                .prefetch_related(*story_card_prefetches("title__"))
+                .prefetch_related(*story_card_prefetches("title__", user=self.request.user))
                 .order_by("-title__release_year")
             )
 
