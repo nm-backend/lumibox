@@ -511,8 +511,9 @@
 
 .hamburger {
     display: none;
-    width: 40px;
-    height: 40px;
+    flex-shrink: 0;
+    width: var(--touch-target);
+    height: var(--touch-target);
     padding: 10px 8px;
     border: 0;
     background: none;
@@ -599,6 +600,12 @@
     border: none;
     border-top: 1px solid var(--color-border);
     margin: var(--space-2) 0;
+}
+
+/* Языковой переключатель, перенесённый в drawer на мобильных: круглый
+   триггер и дропдаун поверх содержимого drawer'а. */
+.mobile-nav__lang {
+    padding: var(--space-1) var(--space-4);
 }
 
 /* ---------- РљР°СЂС‚РѕС‡РєР° С„РёР»СЊРјР° ---------- */

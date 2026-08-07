@@ -11,6 +11,11 @@
 html {
     scroll-behavior: smooth;
     font-family: var(--font-base);
+    /* Декоративные fixed-элементы (cinema-glow и пр.) выходят за край
+       вьюпорта и расширяли scrollWidth документа на мобильных — от 1px
+       до десятков пикселей. clip (не hidden!) не создаёт scroll
+       container, поэтому position: sticky в шапке продолжает работать. */
+    overflow-x: clip;
 }
 
 /* Мягкое появление страницы. Класс навешивает app.js после загрузки.

@@ -212,7 +212,10 @@
                     </div>
                 </details>
             {% else %}
-                <a class="button button--primary site-header__login" href="{% url 'users:login' %}">{% trans "Войти" %}</a>
+                <a class="button button--primary site-header__login" href="{% url 'users:login' %}">
+                    {% icon "user" size=16 class_name="site-header__login-icon" %}
+                    <span class="site-header__login-text">{% trans "Войти" %}</span>
+                </a>
             {% endif %}
         </div>
     </header>
@@ -241,7 +244,14 @@
             <a class="mobile-nav__link" href="{% url 'library:favorites' %}">{% trans "Избранное" %}</a>
             <a class="mobile-nav__link" href="{% url 'library:watchlist' %}">{% trans "Смотреть позже" %}</a>
             <a class="mobile-nav__link" href="{% url 'library:history' %}">{% trans "История" %}</a>
+        {% else %}
+            <hr class="mobile-nav__divider">
+            <a class="mobile-nav__link" href="{% url 'users:login' %}">{% trans "Войти" %}</a>
         {% endif %}
+        <hr class="mobile-nav__divider">
+        <div class="mobile-nav__lang">
+            {% include "includes/language_switcher.html" %}
+        </div>
     </nav>
 
     <main id="main-content" class="site-main{% if messages %} site-main--with-messages{% endif %}">

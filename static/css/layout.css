@@ -322,6 +322,55 @@
         min-width: 0;
         margin-left: 0;
     }
+
+    /*
+      На телефонах шапка не может вместить все кнопки рядом с поиском:
+      telegram и переключатель языка переезжают в мобильный drawer
+      (base.html: mobile-nav__lang), а вход становится круглой кнопкой
+      с иконкой, чтобы поиск не сжимался в нулевую ширину.
+    */
+    .telegram-header-link,
+    .lang-menu {
+        display: none;
+    }
+
+    /* Иконка-кнопка входа 44×44 — тач-таргет вместо сжатой кнопки с текстом */
+    .site-header__login {
+        width: var(--touch-target);
+        height: var(--touch-target);
+        flex: 0 0 var(--touch-target);
+        padding: 0;
+        border-radius: 50%;
+    }
+
+    .site-header__login-text {
+        display: none;
+    }
+
+    /* Поиск: крупная кнопка-лупа и полный тач-таргет */
+    .search__submit {
+        width: var(--touch-target);
+        height: var(--touch-target);
+        flex: 0 0 var(--touch-target);
+    }
+}
+
+/*
+  На очень узких экранах поиск в один ряд с логотипом сжимается до
+  десятка пикселей — бесполезный инпут. Переставляем его на отдельную
+  строку под кнопками: логотип и кнопки остаются в первом ряду,
+  поиск получает всю ширину шапки (как на мобильных кинопорталах).
+*/
+@media (max-width: 560px) {
+    .site-header__inner {
+        flex-wrap: wrap;
+    }
+
+    .site-header__search {
+        flex: 1 1 100%;
+        order: 99;
+        margin-top: var(--space-1);
+    }
 }
 
 /* ---------- Большие мониторы ---------- */

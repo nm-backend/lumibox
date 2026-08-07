@@ -229,10 +229,10 @@
 
 .lb-promo__title {
     margin: 0 0 var(--space-2);
-    font-size: 26px;
+    font-size: 30px;
     font-weight: 700;
     color: var(--color-dark-text-bright);
-    line-height: 1.2;
+    line-height: 1.15;
 }
 
 .lb-promo__text {
@@ -248,17 +248,23 @@
     gap: var(--space-2);
 }
 
+.lb-promo__poster {
+    flex: 0 0 104px;
+}
+
 .lb-promo__poster img {
     display: block;
-    width: 90px;
-    height: 130px;
+    width: 104px;
+    height: 154px;
     border-radius: var(--radius-sm);
     background: var(--color-surface);
-    transition: transform var(--transition-fast);
+    box-shadow: var(--shadow-sm);
+    transition: transform var(--transition-fast), box-shadow var(--transition-fast);
 }
 
 .lb-promo__poster:hover img {
     transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
 }
 
 .lb-promo__btn {
@@ -1282,6 +1288,13 @@
         min-height: 44px;
     }
 
+    /* На планшетах и телефонах верхний топ-нав дублирует мобильный drawer
+       (mobile-nav) и нижнее меню (bottom-nav) — три навигации на одном
+       экране. Прячем строку: drawer и bottom-nav полностью её заменяют. */
+    .lb-topnav {
+        display: none;
+    }
+
     .lb-contentwrap {
         grid-template-columns: minmax(0, 1fr);
     }
@@ -1320,8 +1333,10 @@
         flex-wrap: wrap;
     }
 
-    .lb-promo__title {
-        font-size: 17px;
+    /* Сортировка (xSort): 24px десктопной высоты не тронуть пальцем */
+    .lb-xsort-div {
+        height: 36px;
+        line-height: 36px;
     }
 
     .lb-xsort-label {
@@ -1368,6 +1383,55 @@
     }
 }
 
+/* На самых узких экранах тонкая верхняя полоса — лишняя вертикаль над
+   шапкой: её единственная ссылка «Новинки» продублирована в drawer. */
+@media (max-width: 420px) {
+    .lb-topbar {
+        display: none;
+    }
+}
+
+/* ---------- Мобильные тач-таргеты ----------
+   Правила собраны здесь (lumibox.css подключается последним), чтобы
+   перебить десктопные размеры из components/layout/footer: на телефоне
+   мелкие ссылки и кнопки получают зону касания, близкую к 44px. */
+
+@media (max-width: 720px) {
+    .search__submit {
+        width: var(--touch-target);
+        height: var(--touch-target);
+    }
+
+    .breadcrumbs a {
+        padding: var(--space-2) var(--space-1);
+    }
+
+    .sidebar-category__link,
+    .badge {
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
+
+    .footer-nav__link {
+        padding: var(--space-2) 0;
+    }
+
+    .lb-xsort-clearall {
+        width: 36px;
+        height: 36px;
+        flex: 0 0 36px;
+        border-radius: var(--radius-full);
+    }
+
+    .auth-card a {
+        padding: var(--space-2) 0;
+        display: inline-block;
+    }
+
+    .logo {
+        padding: var(--space-1) 0;
+    }
+}
 /* ==================================================================
    Богатый стиль: чёрный кинозал с янтарным свечением.
    Только декор (градиенты, тени, свечение) — размеры зон не меняются.
@@ -1607,14 +1671,14 @@
 
 @media (max-width: 900px) {
     .lb-promo__title {
-        font-size: 18px;
+        font-size: 20px;
         letter-spacing: 0.03em;
     }
 }
 
 @media (max-width: 420px) {
     .lb-promo__title {
-        font-size: 16px;
+        font-size: 18px;
     }
 }
 
