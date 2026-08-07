@@ -35,12 +35,28 @@ class UserModelTests(TestCase):
         self.assertTrue(admin.is_staff)
         self.assertTrue(admin.is_superuser)
 
+    def test_manager_lowercases_email(self):
+        """Адрес из админки/createsuperuser с заглавными буквами не ломает вход."""
+        admin = User.objects.create_superuser(
+            email="Admin@Example.COM", username="admin", password="pass"
+        )
+        self.assertEqual(admin.email, "admin@example.com")
+        self.assertTrue(admin.check_password("pass"))
+
     def test_display_name_falls_back_to_email(self):
         user = create_user(username="", email="ivan@example.com")
         self.assertEqual(user.display_name, "ivan")
 
 
 class RegistrationTests(TestCase):
+    def setUp(self):
+        # Счётчик регистраций живёт в кэше, а кэш переживает транзакцию
+        # теста. Без очистки лимит, набранный одним тестом, резал бы
+        # регистрацию в следующем.
+        from django.core.cache import cache
+
+        cache.clear()
+
     def test_register_creates_and_logs_in(self):
         response = self.client.post(
             reverse("users:register"),
@@ -115,6 +131,33 @@ class RegistrationTests(TestCase):
         self.client.force_login(create_user())
         response = self.client.get(reverse("users:register"))
         self.assertRedirects(response, reverse("catalog:home"))
+
+    def test_rate_limit_blocks_after_ten_registrations(self):
+        """11-я регистрация с одного IP получает 429, а не падает в 500."""
+        url = reverse("users:register")
+        for i in range(10):
+            response = self.client.post(
+                url,
+                {
+                    "email": f"user{i}@example.com",
+                    "username": f"user{i}",
+                    "password1": "sложный-Пароль-99",
+                    "password2": "sложный-Пароль-99",
+                },
+            )
+            self.assertEqual(response.status_code, 302)
+
+        response = self.client.post(
+            url,
+            {
+                "email": "eleventh@example.com",
+                "username": "eleventh",
+                "password1": "sложный-Пароль-99",
+                "password2": "sложный-Пароль-99",
+            },
+        )
+        self.assertEqual(response.status_code, 429)
+        self.assertFalse(User.objects.filter(email="eleventh@example.com").exists())
 
 
 class LoginLogoutTests(TestCase):

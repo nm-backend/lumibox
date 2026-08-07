@@ -26,38 +26,38 @@ class RegisterView(CreateView):
     success_url = reverse_lazy("catalog:home")
 
     def dispatch(self, request, *args, **kwargs):
+        # Rate limiting проверяется до редиректа авторизованных: после
+        # успешной регистрации посетитель уже вошёл, и если бы проверка
+        # стояла позже, каждый мог бы обойти лимит, разлогиниваясь между
+        # регистрациями. Залогиненному вернётся 429 на POST, а GET по-прежнему
+        # просто уведёт на главную.
+        if request.method == "POST":
+            from axes.helpers import get_client_ip_address
+            from django.core.cache import cache
+
+            ip = get_client_ip_address(request) or request.META.get("REMOTE_ADDR", "unknown")
+            cache_key = f"register:rate:{ip}"
+
+            # Считаются попытки регистрации (POST), а не открытие страницы.
+            # Счётчик растёт и на успешных, и на отклонённых попытках: после
+            # успешной регистрации посетитель авторизован, и если считать
+            # только успехи, счётчик никогда не превысит единицу — лимит
+            # молча перестанет работать.
+            attempts = cache.get(cache_key, 0)
+            if attempts >= 10:
+                # Именно 429 «слишком много запросов», а не 403: причина во
+                # временном превышении лимита, и через час попытка пройдёт.
+                return render(request, "429.html", status=429)
+            cache.set(cache_key, attempts + 1, 3600)
+
         # Авторизованному регистрация не нужна — уводим на главную.
         if request.user.is_authenticated:
             return redirect("catalog:home")
-
-        # Rate limiting: 10 регистраций в час с одного IP.
-        # Ключ — IP адрес. Используем cache.get/set для совместимости
-        # с любым бэкендом (не только Redis). Считаются только успешные
-        # регистрации — простое открытие страницы лимит не тратит.
-        if request.method == "POST":
-            from django.core.cache import cache
-
-            ip = request.META.get("REMOTE_ADDR", "unknown")
-            cache_key = f"register:rate:{ip}"
-
-            if cache.get(cache_key, 0) >= 10:
-                # Именно 429 «слишком много запросов», а не 403: причина во
-                # временном превышении лимита, и через час попытка пройдёт.
-                # Раньше здесь ответ оборачивался в HttpResponseForbidden —
-                # страница уходила бы телом чужого ответа с кодом 403, но до
-                # этого не доходило: render не был импортирован и вьюха падала
-                # с NameError, отдавая посетителю 500.
-                return render(request, "429.html", status=429)
 
         return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
         response = super().form_valid(form)
-        from django.core.cache import cache
-
-        ip = self.request.META.get("REMOTE_ADDR", "unknown")
-        cache_key = f"register:rate:{ip}"
-        cache.incr(cache_key) if cache.get(cache_key) else cache.set(cache_key, 1, 3600)
         login(self.request, self.object, backend="django.contrib.auth.backends.ModelBackend")
         messages.success(self.request, f"Добро пожаловать, {self.object.display_name}!")
         return response

@@ -118,10 +118,12 @@ class HomeView(TemplateView):
         context["lb_years"] = [int(year) for year, _ in get_year_choices() if year]
 
         # Выпадающий список «Сортировать» панели xSort.
+        # «топ за неделю» тут нет: тренды считаются отдельным механизмом
+        # (см. get_trending_titles), и сортировки каталога с таким именем
+        # не существует — обещание, которое каталог не выполняет.
         context["lb_sort_links"] = [
             ("по дате", f"{catalog_url}?sort=-published_at"),
             ("по рейтингу", f"{catalog_url}?sort=-rating_average"),
-            ("топ за неделю", catalog_url),
             ("по комментариям", f"{catalog_url}?sort=-rating_count"),
             ("по году", f"{catalog_url}?sort=-release_year"),
         ]

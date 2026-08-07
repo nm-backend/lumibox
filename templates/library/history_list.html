@@ -11,7 +11,7 @@
         </div>
 
         {% if history %}
-            <form method="post" action="{% url 'library:clear_history' %}">
+            <form method="post" action="{% url 'library:clear_history' %}" data-confirm="{% trans 'Удалить всю историю просмотров? Это действие нельзя отменить.' %}">
                 {% csrf_token %}
                 <button class="button button--ghost" type="submit">{% icon "trash" size=14 %} {% trans "Очистить историю" %}</button>
             </form>

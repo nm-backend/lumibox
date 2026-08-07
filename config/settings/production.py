@@ -98,6 +98,14 @@ SECURE_SSL_REDIRECT = True
 # Этот заголовок объясняет Django, что исходный запрос всё-таки был защищённым.
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
+# За прокси nginx реальный IP лежит в X-Forwarded-For. Без этого axes
+# (брутфорс-защита /login/) и лимит регистраций видели бы только адрес
+# nginx — один на всех посетителей, и блокировка одного сработала бы
+# для всех.
+AXES_BEHIND_REVERSE_PROXY = True
+# Перед Django ровно один прокси — сам nginx из deploy/nginx.conf.
+AXES_PROXY_COUNT = 1
+
 # Cookie сессии и CSRF отдаём только по HTTPS, чтобы их нельзя было перехватить.
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True

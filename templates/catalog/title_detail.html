@@ -24,9 +24,9 @@
 {
     "@context": "https://schema.org",
     "@type": "{% if title.is_series %}TVSeries{% else %}Movie{% endif %}",
-    "name": "{{ title.name }}",
-    "{% if title.is_series %}alternateName{% else %}alternativeHeadline{% endif %}": "{{ title.original_name }}",
-    "description": "{{ title.short_description|default:title.get_meta_description }}",
+    "name": "{{ title.name|escapejs }}",
+    "{% if title.is_series %}alternateName{% else %}alternativeHeadline{% endif %}": "{{ title.original_name|escapejs }}",
+    "description": "{{ title.short_description|default:title.get_meta_description|escapejs }}",
     {% if title.release_date %}"datePublished": "{{ title.release_date|date:"Y-m-d" }}",{% else %}"datePublished": "{{ title.release_year }}",{% endif %}
     {% if title.duration_minutes %}"duration": "PT{{ title.duration_minutes }}M",{% endif %}
     {% if title.age_rating %}"contentRating": "{{ title.age_rating }}",{% endif %}
