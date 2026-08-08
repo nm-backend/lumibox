@@ -80,3 +80,27 @@ class CSPMiddlewareTests(TestCase):
         """form-action должен быть 'self' — нельзя отправить форму на чужой домен."""
         csp = self._check_csp_header(reverse("catalog:home"))
         self.assertIn("form-action 'self'", csp)
+
+
+class RequestIdMiddlewareTests(TestCase):
+    """X-Request-ID: генерация, проброс входящего, уникальность."""
+
+    def setUp(self):
+        self.client = Client()
+
+    def test_response_has_request_id_header(self):
+        """Каждый ответ содержит сгенерированный X-Request-ID."""
+        response = self.client.get("/")
+        self.assertIn("X-Request-ID", response)
+        self.assertEqual(len(response["X-Request-ID"]), 16)
+
+    def test_incoming_request_id_is_preserved(self):
+        """Входящий X-Request-ID (от балансировщика/CDN) пробрасывается."""
+        response = self.client.get("/", HTTP_X_REQUEST_ID="trace-123")
+        self.assertEqual(response["X-Request-ID"], "trace-123")
+
+    def test_request_id_differs_between_requests(self):
+        """Два разных запроса получают разные ID."""
+        first = self.client.get("/").headers["X-Request-ID"]
+        second = self.client.get("/").headers["X-Request-ID"]
+        self.assertNotEqual(first, second)
