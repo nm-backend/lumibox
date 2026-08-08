@@ -210,6 +210,35 @@
     }
 
     /* -----------------------------------------------
+       4b. Мобильный поиск (кнопка-лупа)
+    ----------------------------------------------- */
+    const searchToggle = document.querySelector('[data-search-toggle]');
+    const searchInputEl = document.querySelector('[data-search-input]');
+    if (searchToggle) {
+        const setSearchOpen = function (open) {
+            document.documentElement.classList.toggle('search-open', open);
+            searchToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+            if (open && searchInputEl) {
+                // Поле только что появилось в DOM — фокус после кадра.
+                requestAnimationFrame(function () { searchInputEl.focus(); });
+            }
+        };
+
+        searchToggle.addEventListener('click', function () {
+            const isOpen = document.documentElement.classList.contains('search-open');
+            setSearchOpen(!isOpen);
+        });
+
+        // Esc закрывает раскрытый поиск.
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && document.documentElement.classList.contains('search-open')) {
+                setSearchOpen(false);
+                searchToggle.focus();
+            }
+        });
+    }
+
+    /* -----------------------------------------------
        5. Lightbox
     ----------------------------------------------- */
     const lightbox = document.querySelector('[data-lightbox]');

@@ -1,5 +1,5 @@
 ﻿{% extends "base.html" %}
-{% load static i18n %}
+{% load static i18n catalog_filters %}
 
 {% block page_title %}{{ collection.get_meta_title }} — LumiBox{% endblock %}
 {% block page_description %}{{ collection.get_meta_description }}{% endblock %}
@@ -15,7 +15,7 @@
 
     <div class="collection-hero">
         {% if collection.cover %}
-            <img class="collection-hero__image" src="{{ collection.cover.url }}" alt="" loading="lazy" decoding="async">
+            <img class="collection-hero__image" src="{{ collection.cover|webp_url }}" alt="" loading="lazy" decoding="async">
         {% endif %}
 
         <div class="collection-hero__body">

@@ -34,6 +34,16 @@
 
             {% include "includes/catalog_filters.html" %}
 
+            {# Панель быстрых сортировок: по дате, популярности, рейтингу, году #}
+            {% if lb_sort_links %}
+                <nav class="lb-quicksort" aria-label="{% trans 'Быстрая сортировка' %}">
+                    {% for label, url, is_active in lb_sort_links %}
+                        <a class="lb-quicksort__link{% if is_active %} lb-quicksort__link--active{% endif %}"
+                           href="{{ url }}">{{ label }}</a>
+                    {% endfor %}
+                </nav>
+            {% endif %}
+
             <div class="catalog__toolbar">
                 <p class="catalog__count">
                     {% if request.GET.q %}

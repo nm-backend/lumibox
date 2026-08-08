@@ -57,7 +57,7 @@
 {% block hero %}
 <section class="film-hero">
     {% if title.backdrop %}
-        <img class="film-hero__backdrop" src="{{ title.backdrop.url }}" alt="" aria-hidden="true" loading="eager" fetchpriority="high">
+        <img class="film-hero__backdrop" src="{{ title.backdrop|webp_url }}" alt="" aria-hidden="true" loading="eager" fetchpriority="high">
     {% endif %}
     <div class="film-hero__scrim" aria-hidden="true"></div>
 
@@ -68,7 +68,7 @@
     <div class="container film-hero__inner">
         <div class="film-hero__poster">
             {% if title.poster %}
-                <img class="film-hero__poster-image" src="{{ title.poster.url }}" alt="{% blocktranslate with name=title.name %}Постер: {{ name }}{% endblocktranslate %}" decoding="async">
+                <img class="film-hero__poster-image" src="{{ title.poster|webp_url }}" alt="{% blocktranslate with name=title.name %}Постер: {{ name }}{% endblocktranslate %}" decoding="async">
             {% else %}
                 <span class="card__placeholder" aria-hidden="true">{{ title.name|first }}</span>
             {% endif %}
@@ -226,6 +226,18 @@
                         {% endfor %}
                     </span>
                 {% endif %}
+                {% if title.voice_acting %}
+                    <span class="film-hero__spec">
+                        <span class="film-hero__spec-icon">{% icon "volume" size=16 %}</span>
+                        <span>{{ title.get_voice_acting_display }}</span>
+                    </span>
+                {% endif %}
+                {% if title.views_count %}
+                    <span class="film-hero__spec">
+                        <span class="film-hero__spec-icon">{% icon "target" size=16 %}</span>
+                        <span>{{ title.views_count }} {% trans "просмотров" %}</span>
+                    </span>
+                {% endif %}
                 {% if title.kp_rating or title.imdb_rating %}
                     <span class="film-hero__spec">
                         <span class="film-hero__spec-icon">{% icon "star" size=16 %}</span>
@@ -241,19 +253,70 @@
 {% endblock %}
 
 {% block content %}
-    {% if episodes %}
-        {# Плеер серий: первое, что видит посетитель после шапки фильма.
-           Список эпизодов сгруппирован по сезонам, переключение — без
-           перезагрузки страницы (static/js/title-detail.js).
-           Авторизованному пользователю плеер открывается на последней
-           просмотренной серии (resume_episode), гостю — на первой. #}
+    {% if episodes or title.player_url_2 %}
+        {% comment %}Секция «Смотреть онлайн»: мультиплеер как на кинопорталах.
+           Вкладки появляются по числу доступных источников: Плеер 1
+           (основное видео — серии, либо iframe), Плеер 2 (player_url_2)
+           и Трейлер. Переключение — без перезагрузки страницы
+           (static/js/title-detail.js).{% endcomment %}
         <section class="player-section" data-title-slug="{{ title.slug }}" aria-label="{% trans 'Смотреть онлайн' %}">
-            <div class="player">
-                <video class="player__video" controls preload="none" data-player-video>
-                    <source src="{% if resume_episode %}{{ resume_episode.file.url }}{% else %}{{ episodes.0.file.url }}{% endif %}" data-player-source>
-                </video>
+            <div class="player-tabs" data-player-tabs role="tablist" aria-label="{% trans 'Источники видео' %}">
+                <button class="player-tabs__tab player-tabs__tab--active" type="button" data-player-tab="player1" role="tab" aria-selected="true">{% trans "Плеер 1" %}</button>
+                {% if episodes and title.player_url_2 %}
+                    <button class="player-tabs__tab" type="button" data-player-tab="player2" role="tab" aria-selected="false">{% trans "Плеер 2" %}</button>
+                {% endif %}
+                {% if title.trailer_source %}
+                    <button class="player-tabs__tab" type="button" data-player-tab="trailer" role="tab" aria-selected="false">{% trans "Трейлер" %}</button>
+                {% endif %}
             </div>
 
+            <div class="player" data-player-pane="player1">
+                {% if episodes %}
+                    <video class="player__video" controls preload="none" data-player-video>
+                        <source src="{% if resume_episode %}{{ resume_episode.file.url }}{% else %}{{ episodes.0.file.url }}{% endif %}" data-player-source>
+                    </video>
+                {% else %}
+                    <iframe class="player__frame player__frame--embed"
+                            src="{{ title.player_url_2 }}"
+                            title="{% blocktranslate with name=title.name %}Смотреть: {{ name }}{% endblocktranslate %}"
+                            loading="lazy"
+                            referrerpolicy="strict-origin-when-cross-origin"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; picture-in-picture"
+                            allowfullscreen></iframe>
+                {% endif %}
+            </div>
+
+            {% if episodes and title.player_url_2 %}
+                <div class="player" data-player-pane="player2" hidden>
+                    <iframe class="player__frame player__frame--embed"
+                            src="{{ title.player_url_2 }}"
+                            title="{% blocktranslate with name=title.name %}Плеер 2: {{ name }}{% endblocktranslate %}"
+                            loading="lazy"
+                            referrerpolicy="strict-origin-when-cross-origin"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; picture-in-picture"
+                            allowfullscreen></iframe>
+                </div>
+            {% endif %}
+
+            {% if title.trailer_source %}
+                <div class="player" data-player-pane="trailer" hidden>
+                    {% if title.trailer_source == "file" %}
+                        <video class="player__video" controls preload="metadata">
+                            <source src="{{ title.trailer_file.url }}">
+                        </video>
+                    {% else %}
+                        <iframe class="player__frame player__frame--embed"
+                                src="{{ title.trailer_embed_url }}"
+                                title="{% blocktranslate with name=title.name %}Трейлер: {{ name }}{% endblocktranslate %}"
+                                loading="lazy"
+                                referrerpolicy="strict-origin-when-cross-origin"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; picture-in-picture"
+                                allowfullscreen></iframe>
+                    {% endif %}
+                </div>
+            {% endif %}
+
+            {% if episodes %}
             <div class="player-panel">
                 <h2 class="player-panel__title">{% trans "Смотреть онлайн" %}</h2>
                 <p class="player-panel__current" data-player-label aria-live="polite">
@@ -301,6 +364,7 @@
                     {% endfor %}
                 </div>
             </div>
+            {% endif %}
         </section>
     {% endif %}
 
@@ -391,6 +455,38 @@
                                 </div>
                             </dd>
                         {% endif %}
+                        {% if title.quality %}
+                            <dt class="spec-list__label">{% trans "Качество" %}</dt>
+                            <dd class="spec-list__value">{{ title.quality }}</dd>
+                        {% endif %}
+                        {% if title.voice_acting %}
+                            <dt class="spec-list__label">{% trans "Озвучка / Перевод" %}</dt>
+                            <dd class="spec-list__value">{{ title.get_voice_acting_display }}</dd>
+                        {% endif %}
+                        {% if title.latest_episode_info %}
+                            <dt class="spec-list__label">{% trans "Последняя серия" %}</dt>
+                            <dd class="spec-list__value">{{ title.latest_episode_info }}</dd>
+                        {% endif %}
+                        {% if title.views_count %}
+                            <dt class="spec-list__label">{% trans "Просмотры" %}</dt>
+                            <dd class="spec-list__value">{{ title.views_count }}</dd>
+                        {% endif %}
+                        {% for role_label, participations in crew_by_role %}
+                            {% if participations.0.role == "director" %}
+                                <dt class="spec-list__label">{% trans "Режиссёр" %}</dt>
+                                <dd class="spec-list__value">
+                                    {% for participation in participations %}<a href="{{ participation.person.get_absolute_url }}">{{ participation.person.name }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}
+                                </dd>
+                            {% endif %}
+                        {% endfor %}
+                        {% for role_label, participations in crew_by_role %}
+                            {% if participations.0.role == "actor" %}
+                                <dt class="spec-list__label">{% trans "В ролях" %}</dt>
+                                <dd class="spec-list__value">
+                                    {% for participation in participations|slice:":5" %}<a href="{{ participation.person.get_absolute_url }}">{{ participation.person.name }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}
+                                </dd>
+                            {% endif %}
+                        {% endfor %}
                         {% if title.rating_average %}
                             <dt class="spec-list__label">{% trans "Оценка зрителей" %}</dt>
                             <dd class="spec-list__value">{% blocktranslate with avg=title.rating_average count=title.rating_count %}{{ avg }} / 10 ({{ count }}){% endblocktranslate %}</dd>
@@ -458,33 +554,6 @@
 
     {# Sidebar #}
     <aside class="detail-layout__sidebar">
-        {% if similar_titles %}
-            <section class="sidebar-section">
-                <h2 class="sidebar-section__title">{% trans "Похожие" %}</h2>
-                <div class="sidebar-carousel">
-                    {% for similar in similar_titles|slice:":8" %}
-                        <a class="sidebar-card" href="{{ similar.get_absolute_url }}">
-                            <div class="sidebar-card__poster">
-                                {% if similar.poster %}
-                                    <img class="sidebar-card__image" src="{{ similar.poster.url }}" alt="" loading="lazy">
-                                {% else %}
-                                    <span class="sidebar-card__placeholder">{{ similar.name|first }}</span>
-                                {% endif %}
-                            </div>
-                            <div class="sidebar-card__body">
-                                <span class="sidebar-card__name">{{ similar.name }}</span>
-                                <span class="sidebar-card__meta">
-                                    {{ similar.release_year }}
-                                    {% if similar.rating_average %} · {{ similar.rating_average }}{% endif %}
-                                </span>
-                            </div>
-                        </a>
-                    {% endfor %}
-                </div>
-                {% with first_genre=title.genres.first %}{% if first_genre %}<a class="sidebar-section__more" href="{% url 'catalog:title_list' %}?genre={{ first_genre.slug }}">{% trans "Больше похожих" %} →</a>{% endif %}{% endwith %}
-            </section>
-        {% endif %}
-
         <section class="sidebar-section">
             <h2 class="sidebar-section__title">{% trans "Поделиться" %}</h2>
             <div class="sidebar-share">
@@ -503,6 +572,33 @@
         </section>
     </aside>
 </div>
+
+{% comment %}Блок «Рекомендуем посмотреть» — секция в контенте,
+   после детального лейаута (вкладки и характеристики), с вертикальными
+   постерами 2:3 и названием под ними. На мобильном — горизонтальная
+   лента.{% endcomment %}
+{% if similar_titles %}
+    <section class="similar-section" aria-label="{% trans 'Рекомендуем посмотреть' %}">
+        <h2 class="section__title">{% trans "Рекомендуем посмотреть" %}</h2>
+        <div class="similar-carousel">
+            {% for similar in similar_titles|slice:":10" %}
+                <a class="similar-card" href="{{ similar.get_absolute_url }}" title="{{ similar.name }}">
+                    <span class="similar-card__poster">
+                        {% if similar.poster %}
+                            <img class="similar-card__image" src="{{ similar.poster|webp_url }}" alt="" loading="lazy" decoding="async">
+                        {% else %}
+                            <span class="similar-card__placeholder">{{ similar.name|first }}</span>
+                        {% endif %}
+                    </span>
+                    <span class="similar-card__name">{{ similar.name }}</span>
+                </a>
+            {% endfor %}
+        </div>
+        {% with first_genre=title.genres.first %}{% if first_genre %}
+            <a class="similar-section__more" href="{% url 'catalog:title_list' %}?genre={{ first_genre.slug }}">{% trans "Все похожие" %} →</a>
+        {% endif %}{% endwith %}
+    </section>
+{% endif %}
 
 {% include "includes/ad_slot.html" %}
 

@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load i18n catalog_filters %}
 
 {% comment %}
    Боковая панель каталога — одна на весь сайт.
@@ -58,6 +58,31 @@
                         {% endif %}                    </div>
                 </nav>
 
+                {# ---------- Популярное (топ по просмотрам) ---------- #}
+                {% if lb_most_viewed %}
+                    <div class="lb-aheader lb-aheader--row">
+                        {% trans "Популярное" %}
+                        <a href="{% url 'catalog:title_list' %}?sort=-views_count">{% trans "Все" %}</a>
+                    </div>
+                    <div class="lb-mostviewed">
+                        {% for title in lb_most_viewed %}
+                            <a class="lb-mostviewed__item" href="{{ title.get_absolute_url }}">
+                                <span class="lb-mostviewed__rank" aria-hidden="true">{{ forloop.counter }}</span>
+                                {% if title.poster %}
+                                    <img class="lb-mostviewed__poster" src="{{ title.poster|webp_url }}" width="54" height="64" alt="" loading="lazy">
+                                {% endif %}
+                                <span class="lb-mostviewed__main">
+                                    <span class="lb-mostviewed__name">{{ title.name }}</span>
+                                    <span class="lb-mostviewed__meta">
+                                        {{ title.release_year }}
+                                        {% if title.views_count %} · {{ title.views_count }} {% trans "просм." %}{% endif %}
+                                    </span>
+                                </span>
+                            </a>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
                 {# ---------- Рекомендуемое (только для вошедших) ---------- #}
                 {% if user.is_authenticated and recommendations %}
                     <div class="lb-aheader">{% trans "Вам может понравиться" %}</div>
@@ -65,7 +90,7 @@
                         {% for title in recommendations|slice:":4" %}
                             <a class="lb-soon__item" href="{{ title.get_absolute_url }}">
                                 {% if title.poster %}
-                                    <img src="{{ title.poster.url }}" width="83" height="123" alt="" loading="lazy">
+                                    <img src="{{ title.poster|webp_url }}" width="83" height="123" alt="" loading="lazy">
                                 {% endif %}
                                 <span class="lb-soon__title">{{ title.name }}</span>
                             </a>
@@ -83,7 +108,7 @@
                         {% for collection in collections %}
                             <a class="lb-franchise" href="{{ collection.get_absolute_url }}">
                                 {% if collection.cover %}
-                                    <img class="lb-franchise__img" src="{{ collection.cover.url }}" width="60" height="40" alt="" loading="lazy">
+                                    <img class="lb-franchise__img" src="{{ collection.cover|webp_url }}" width="60" height="40" alt="" loading="lazy">
                                 {% endif %}
                                 <span class="lb-franchise__title">{{ collection.name }}</span>
                             </a>
@@ -102,7 +127,7 @@
                         {% for title in series_updates %}
                             <a class="lb-lastupdates__item" href="{{ title.get_absolute_url }}">
                                 {% if title.poster %}
-                                    <img class="lb-lastupdates__poster" src="{{ title.poster.url }}" width="54" height="64" alt="" loading="lazy">
+                                    <img class="lb-lastupdates__poster" src="{{ title.poster|webp_url }}" width="54" height="64" alt="" loading="lazy">
                                 {% endif %}
                                 <span class="lb-lastupdates__main">
                                     <span class="lb-lastupdates__name">{{ title.name }}<span class="lb-lastupdates__year">{{ title.release_year }}</span></span>

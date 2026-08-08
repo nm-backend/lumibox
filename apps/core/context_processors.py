@@ -66,11 +66,14 @@ def lb_topnav(request):
     get = request.GET
     links = [
         (_("Главная"), reverse("catalog:home"), url_name == "home"),
+        (_("Фильмы"), f"{catalog_url}?type={Title.Type.MOVIE}", get.get("type") == str(Title.Type.MOVIE)),
+        (_("Сериалы"), f"{catalog_url}?type={Title.Type.SERIES}", get.get("type") == str(Title.Type.SERIES)),
+        (_("Мультфильмы"), f"{catalog_url}?type={Title.Type.CARTOON}", get.get("type") == str(Title.Type.CARTOON)),
+        (_("Аниме"), f"{catalog_url}?type={Title.Type.ANIME}", get.get("type") == str(Title.Type.ANIME)),
+        (_("ТВ-шоу"), f"{catalog_url}?type={Title.Type.TV_SHOW}", get.get("type") == str(Title.Type.TV_SHOW)),
         (_("Новинки"), f"{catalog_url}?sort=-published_at", get.get("sort") == "-published_at"),
         (_("Подборки"), reverse("catalog:collection_list"),
          url_name in ("collection_list", "collection_detail")),
-        (_("Фильмы"), f"{catalog_url}?type={Title.Type.MOVIE}", get.get("type") == str(Title.Type.MOVIE)),
-        (_("Сериалы"), f"{catalog_url}?type={Title.Type.SERIES}", get.get("type") == str(Title.Type.SERIES)),
     ]
     return {"lb_topnav": links}
 
@@ -123,6 +126,14 @@ def lb_sidebar(request):
             lambda: _curated_country_links(get_home_sidebar()["countries"])
         ),
         "lb_series_links": SimpleLazyObject(_series_links),
+        # Топ популярного берём из того же кэшированного блока сайдбара,
+        # что и остальные ключи (countries, series_updates, latest_reviews):
+        # отдельный запрос на каждую страницу противоречил бы схеме
+        # «лениво и из кэша». Сам ключ собирает get_home_sidebar, где
+        # «популярное» отфильтровано по views_count > 0 — иначе блок
+        # вырождается в «последние добавленные», и чужие тайтлы мелькают
+        # в сайдбаре на страницах избранного/списков.
+        "lb_most_viewed": from_sidebar("most_viewed"),
     }
 
 
@@ -155,6 +166,9 @@ def _series_links():
     catalog_url = reverse("catalog:title_list")
     return [
         ("Все сериалы", f"{catalog_url}?type=series"),
+        ("Мультфильмы", f"{catalog_url}?type=cartoon"),
+        ("Аниме", f"{catalog_url}?type=anime"),
+        ("ТВ-шоу", f"{catalog_url}?type=tv_show"),
         ("Фильмы", f"{catalog_url}?type=movie"),
         ("Подборки", reverse("catalog:collection_list")),
     ]

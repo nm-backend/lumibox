@@ -22,7 +22,7 @@
                         {% for title in lb_carousel|slice:":4" %}
                             <a class="lb-promo__poster" href="{{ title.get_absolute_url }}" title="{{ title.name }}">
                                 {% if title.poster %}
-                                    <img src="{{ title.poster.url }}" width="104" height="154" alt="{{ title.name }}" loading="lazy">
+                                    <img src="{{ title.poster|webp_url }}" width="104" height="154" alt="{{ title.name }}" loading="lazy">
                                 {% else %}
                                     <img src="{% static 'img/favicon.svg' %}" width="104" height="154" alt="{{ title.name }}" loading="lazy">
                                 {% endif %}

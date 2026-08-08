@@ -176,7 +176,7 @@ class TitleAdmin(admin.ModelAdmin):
     # в обычном multi-select нерабочий.
     autocomplete_fields = ["related_titles"]
 
-    list_display = ["poster_thumb", "name", "type", "release_year", "status", "rating_display"]
+    list_display = ["poster_thumb", "name", "type", "release_year", "views_count", "status", "rating_display"]
     list_display_links = ["poster_thumb", "name"]
     list_filter = ["status", "type", "genres", "countries", "release_year"]
     search_fields = ["name", "original_name"]
@@ -187,6 +187,8 @@ class TitleAdmin(admin.ModelAdmin):
     # Удобный выбор жанров и стран двумя списками вместо неудобного multi-select.
     filter_horizontal = ["genres", "countries", "studios"]
 
+    # views_count не в списке: editable=False на поле уже делает его
+    # readonly в админке автоматически.
     readonly_fields = [
         "poster_preview",
         "backdrop_preview",
@@ -222,6 +224,8 @@ class TitleAdmin(admin.ModelAdmin):
                     "release_date",
                     "duration_minutes",
                     "quality",
+                    "voice_acting",
+                    "latest_episode_info",
                     "age_rating",
                     "genres",
                     "countries",
@@ -231,8 +235,9 @@ class TitleAdmin(admin.ModelAdmin):
                     "kp_rating",
                 ],
                 "description": (
-                    "Качество и внешние рейтинги (IMDb, Кинопоиск) — справка для "
-                    "посетителя. Внутренний рейтинг считается из отзывов автоматически."
+                    "Качество, озвучка/перевод и плашка последней серии — справка "
+                    "для посетителя. Внутренний рейтинг считается из отзывов "
+                    "автоматически, просмотры растут сами."
                 ),
             },
         ),
@@ -263,13 +268,22 @@ class TitleAdmin(admin.ModelAdmin):
             },
         ),
         (
-            "Трейлер",
+            "Видео",
             {
-                "fields": ["trailer_url", "trailer_file"],
+                "fields": ["trailer_url", "trailer_file", "player_url_2"],
                 "description": (
-                    "Заполните ОДИН вариант: либо ссылку на видеохостинг, "
-                    "либо свой видеофайл. Не оба сразу."
+                    "Трейлер: заполните ОДИН вариант — ссылку или свой видеофайл. "
+                    "player_url_2 — альтернативный источник (вкладка «Плеер 2»), "
+                    "например iframe стороннего кинотеатра."
                 ),
+            },
+        ),
+        (
+            "Просмотры",
+            {
+                "fields": ["views_count"],
+                "classes": ["collapse"],
+                "description": "Растёт автоматически при открытии страницы фильма (не чаще раза в сутки на сессию).",
             },
         ),
         (

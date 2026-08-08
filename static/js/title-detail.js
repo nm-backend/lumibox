@@ -243,4 +243,56 @@
             currentLabel.textContent = active.dataset.episodeLabel;
         }
     }
+
+    /* ---------- 4. Вкладки мультиплеера (Плеер 1 | Плеер 2 | Трейлер) ---------- */
+
+    var playerTabs = document.querySelector('[data-player-tabs]');
+    if (playerTabs) {
+        var tabButtons = playerTabs.querySelectorAll('[data-player-tab]');
+        var panes = document.querySelectorAll('[data-player-pane]');
+
+        function selectPlayerTab(name) {
+            tabButtons.forEach(function (btn) {
+                var isActive = btn.dataset.playerTab === name;
+                btn.classList.toggle('player-tabs__tab--active', isActive);
+                btn.setAttribute('aria-selected', String(isActive));
+                if (isActive) btn.tabIndex = 0;
+                else btn.tabIndex = -1;
+            });
+            panes.forEach(function (pane) {
+                var isActive = pane.dataset.playerPane === name;
+                pane.hidden = !isActive;
+            });
+            /* Переключение источника у видео-панели: при возврате на
+               «Плеер 1» восстанавливаем выбранную серию. */
+            if (name === 'player1') {
+                var videoPane = document.querySelector('[data-player-pane="player1"]');
+                var video = videoPane ? videoPane.querySelector('video') : null;
+                if (video) video.load();
+            }
+        }
+
+        tabButtons.forEach(function (btn, index) {
+            btn.addEventListener('click', function () {
+                selectPlayerTab(btn.dataset.playerTab);
+            });
+            btn.addEventListener('keydown', function (event) {
+                if (event.key === 'ArrowRight') {
+                    var next = tabButtons[(index + 1) % tabButtons.length];
+                    next.focus();
+                    selectPlayerTab(next.dataset.playerTab);
+                } else if (event.key === 'ArrowLeft') {
+                    var prev = tabButtons[(index - 1 + tabButtons.length) % tabButtons.length];
+                    prev.focus();
+                    selectPlayerTab(prev.dataset.playerTab);
+                }
+            });
+        });
+
+        /* Роли для корректной работы со скринридером: роль tablist
+           вешаем прямо в разметке, здесь — только навигация. */
+        tabButtons.forEach(function (btn, index) {
+            btn.tabIndex = index === 0 ? 0 : -1;
+        });
+    }
 })();

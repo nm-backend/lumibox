@@ -245,6 +245,12 @@ def get_home_sidebar():
             .select_related("user", "title")
             .order_by("-created_at")[:4]
         ),
+        # Топ популярного за всё время — для блока «Популярное» сайдбара.
+        # Кэш живёт столько же, сколько и остальной сайдбар: счётчик
+        # просмотров растёт часто, но сайдбар обновляется раз в CACHE_TTL_HOME.
+        # Только реально просмотренное (views_count > 0): иначе блок вырождается
+        # в «последние добавленные» и чужие тайтлы мелькают в сайдбаре.
+        "most_viewed": list(published.filter(views_count__gt=0).most_viewed(limit=5)),
     }
     cache.set(HOME_SIDEBAR_CACHE_KEY, sidebar, settings.CACHE_TTL_HOME)
     return sidebar

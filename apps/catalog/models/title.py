@@ -32,6 +32,25 @@ class Title(SeoModel, TimeStampedModel):
     class Type(models.TextChoices):
         MOVIE = "movie", "Фильм"
         SERIES = "series", "Сериал"
+        CARTOON = "cartoon", "Мультфильм"
+        ANIME = "anime", "Аниме"
+        TV_SHOW = "tv_show", "ТВ-шоу"
+
+    class VoiceActing(models.TextChoices):
+        """Типовые варианты озвучки/перевода.
+
+        Значения — те, что привычны зрителю кинопорталов. Поле допускает
+        и свободный ввод: редактор может написать название своей студии,
+        не входящее в список.
+        """
+
+        DUBBED = "dubbed", "Дублированный (Лицензия)"
+        LOSTFILM = "lostfilm", "LostFilm"
+        HDREZKA = "hdrezka", "HDRezka Studio"
+        NEWSTUDIO = "newstudio", "NewStudio"
+        ORIGINAL = "original", "Оригинал (Eng.)"
+        SUBTITLES = "subtitles", "Субтитры"
+        MULTIVOICE = "multivoice", "Многоголосый"
 
     class Status(models.TextChoices):
         DRAFT = "draft", "Черновик"
@@ -164,6 +183,44 @@ class Title(SeoModel, TimeStampedModel):
         symmetrical=False,
         related_name="related_to",
         help_text="Если пусто — похожее подберётся автоматически по совпадению жанров.",
+    )
+
+    # Озвучка/перевод — поле выбора с возможностью свободного ввода.
+    # Не editable=False: редактор вправе вписать свою студию озвучки.
+    voice_acting = models.CharField(
+        "Озвучка / Перевод",
+        max_length=100,
+        choices=VoiceActing.choices,
+        blank=True,
+        help_text="Как озвучен контент: дубляж, студия или оригинал.",
+    )
+
+    # Счётчик просмотров. Держим готовым числом, а не считаем по истории
+    # на каждый показ: список «популярное» сортируется по нему без JOIN.
+    # Значение растёт через Title.increment_views() — с сессионной защитой
+    # от накрутки во вьюхе детальной страницы.
+    views_count = models.PositiveIntegerField(
+        "Число просмотров",
+        default=0,
+        editable=False,
+    )
+
+    # Второй источник видео — для мультиплеера («Плеер 1 | Плеер 2»).
+    # Обычно это ссылка на сторонний плеер/зеркало; файловый плеер на второй
+    # вкладке не требуется — достаточно URL, который встраиваем iframe'ом.
+    player_url_2 = models.URLField(
+        "Второй плеер",
+        blank=True,
+        help_text="Альтернативный источник просмотра (iframe). Плеер 2 на странице фильма.",
+    )
+
+    # Плашка «10 сезон 5 серия» на карточке сериала — без отдельной модели:
+    # редактор пишет строку сам, когда сериал выходит по расписанию.
+    latest_episode_info = models.CharField(
+        "Последняя серия",
+        max_length=120,
+        blank=True,
+        help_text="Текстовая плашка для сериалов, например: «10 сезон 5 серия».",
     )
 
     # Трейлер задаётся одним из двух способов, но не обоими сразу — это
@@ -326,3 +383,16 @@ class Title(SeoModel, TimeStampedModel):
     @property
     def is_series(self):
         return self.type == self.Type.SERIES
+
+    def increment_views(self):
+        """Увеличивает счётчик просмотров на единицу.
+
+        update() вместо save(): не трогаем updated_at и не запускаем
+        логику save() — просмотр это событие, а не правка редактора.
+        Возвращает новое значение счётчика.
+        """
+        from django.db.models import F
+
+        Title.objects.filter(pk=self.pk).update(views_count=F("views_count") + 1)
+        self.views_count += 1
+        return self.views_count

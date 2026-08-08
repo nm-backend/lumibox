@@ -1,11 +1,37 @@
 {% load i18n icons catalog_filters %}
 
 <article class="lb-shortstory">
+    {% comment %}Шапка карточки (sHead + hRating): заголовок и
+       звёздный рейтинг над постером. Видна только на мобильном ≤599px;
+       на десктопе заголовок и рейтинг остаются в info-колонке, а этот
+       блок скрывается (правило .lb-shortstory__head в lumibox.css).{% endcomment %}
+    <div class="lb-shortstory__head">
+        <h3 class="lb-shortstory__head-title">
+            <a href="{{ title.get_absolute_url }}" title="{{ title.name }}">{{ title.name }}</a>
+        </h3>
+        {% if title.original_name %}
+            <p class="lb-shortstory__head-original">{{ title.original_name }}</p>
+        {% endif %}
+        {% if title.rating_average %}
+            <div class="lb-shortstory__head-rating">
+                <span class="lb-rating-stars" aria-hidden="true">
+                    <span class="lb-rating-stars__bg">★★★★★</span>
+                    <span class="lb-rating-stars__fill" style="width: {% widthratio title.rating_average 10 100 %}%">★★★★★</span>
+                </span>
+                <span class="lb-rating-value">{{ title.rating_average|floatformat:1 }}</span>
+                <span class="lb-shortstory__rating-count">/10 · {{ title.rating_count|default:0 }} {% trans "гол." %}</span>
+            </div>
+        {% endif %}
+    </div>
+
     <div class="lb-shortstory__body">
         <div class="lb-shortstory__poster">
             <a href="{{ title.get_absolute_url }}" title="{{ title.name }}">
                 {% if title.poster %}
-                    <img src="{{ title.poster.url }}" width="200" height="300" alt="{{ title.name }}" loading="lazy">
+                    <picture>
+                        {% if title.poster|webp_url != title.poster.url %}<source type="image/webp" srcset="{{ title.poster|webp_url }}">{% endif %}
+                        <img src="{{ title.poster.url }}" width="200" height="300" alt="{{ title.name }}" loading="lazy">
+                    </picture>
                 {% else %}
                     <span class="lb-shortstory__poster-fallback" aria-hidden="true">
                         <svg viewBox="0 0 64 64" width="34" height="34" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
@@ -23,6 +49,12 @@
                     <span class="lb-badge lb-badge--age">{{ title.age_rating }}</span>
                 {% endif %}
                 <span class="lb-badge lb-badge--type">{{ title.get_type_display }}</span>
+                {% if title.latest_episode_info %}
+                    <span class="lb-badge lb-badge--episode">{{ title.latest_episode_info }}</span>
+                {% endif %}
+                {% if title.quality %}
+                    <span class="lb-badge lb-badge--quality">{{ title.quality }}</span>
+                {% endif %}
             </a>
             {% with progress=title.progress_item|first %}
                 {% if progress %}
@@ -57,6 +89,13 @@
                 {% if title.release_year %}
                     <span class="lb-shortstory__year"><span class="lb-shortstory__label">{% trans "Год:" %}</span><a href="{% url 'catalog:title_list' %}?year={{ title.release_year }}">{{ title.release_year }}</a></span>
                 {% endif %}
+                {% if title.countries.all %}
+                    <span class="lb-shortstory__country"><span class="lb-shortstory__label">{% trans "Страна:" %}</span>
+                        {% for country in title.countries.all|slice:":2" %}
+                            <a href="{% url 'catalog:country_titles' country.slug %}">{{ country.name }}</a>{% if not forloop.last %}, {% endif %}
+                        {% endfor %}
+                    </span>
+                {% endif %}
                 {% if title.genres.all %}
                     <span class="lb-shortstory__genres"><span class="lb-shortstory__label">{% trans "Жанр:" %}</span>
                         {% for genre in title.genres.all|slice:":3" %}
@@ -69,6 +108,12 @@
                 {% endif %}
                 {% if title.quality %}
                     <span class="lb-shortstory__quality"><span class="lb-shortstory__label">{% trans "Качество:" %}</span>{{ title.quality }}</span>
+                {% endif %}
+                {% if title.voice_acting %}
+                    <span class="lb-shortstory__quality"><span class="lb-shortstory__label">{% trans "Озвучка:" %}</span>{{ title.get_voice_acting_display }}</span>
+                {% endif %}
+                {% if title.views_count %}
+                    <span class="lb-shortstory__quality"><span class="lb-shortstory__label">{% trans "Просмотры:" %}</span>{{ title.views_count }}</span>
                 {% endif %}
                 {% if title.kp_rating or title.imdb_rating %}
                     <span class="lb-shortstory__external">

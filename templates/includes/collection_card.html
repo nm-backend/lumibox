@@ -1,10 +1,10 @@
-{% load i18n %}
+{% load i18n catalog_filters %}
 
 <a class="collection-card" href="{{ collection.get_absolute_url }}">
     <span class="collection-card__cover">
         {% if collection.cover %}
             <img class="collection-card__image"
-                 src="{{ collection.cover.url }}"
+                 src="{{ collection.cover|webp_url }}"
                  alt=""
                  loading="lazy">
         {% else %}

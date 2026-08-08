@@ -1,4 +1,5 @@
 from random import randrange
+from time import time
 
 from django.conf import settings
 from django.core.cache import cache
@@ -189,7 +190,48 @@ class TitleListView(ElidedPaginationMixin, ListView):
         context["page_subtitle"] = self.page_subtitle
         # Genre chips for quick filter navigation
         context["genres"] = _get_cached_genre_chip_list()
+
+        # Панель быстрых сортировок — сохраняем уже
+        # применённые фильтры (жанр, страна, тип), меняя только sort.
+        context["lb_sort_links"] = self._sort_links()
         return context
+
+    def _sort_links(self):
+        """Ссылки быстрой сортировки: текущий фильтр + новая сортировка.
+
+        Возвращает список (подпись, url, активна_ли). Активность считаем
+        здесь, а не в шаблоне: у сортировки «по дате» sort-параметра нет
+        (это значение по умолчанию), и сравнение строк в шаблоне
+        получилось бы хрупким.
+
+        Базой ссылки служит request.path, а не reverse('catalog:title_list'):
+        панель рендерится и на страницах жанра/страны, и там путь несёт
+        фильтр (/genres/drama/), который в GET не попадёт — reverse()
+        выбрасывал бы его, уводя на весь каталог.
+        """
+        catalog_url = self.request.path
+        base = self.request.GET.copy()
+        base.pop("page", None)
+        # Сортировку по умолчанию («по дате обновления») каталог применяет
+        # и при явном sort=-published_at (из «Новинок») — считаем обе
+        # равнозначными активному состоянию панели.
+        current = self.request.GET.get("sort", "")
+        links = []
+        for sort, label in (
+            ("", "По дате обновления"),
+            ("-views_count", "По просмотрам"),
+            ("-rating_average", "По рейтингу"),
+            ("-release_year", "По году"),
+        ):
+            query = base.copy()
+            if sort:
+                query["sort"] = sort
+            else:
+                query.pop("sort", None)
+            url = f"{catalog_url}?{query.urlencode()}" if query else catalog_url
+            is_active = current == sort or (sort == "" and current == "-published_at")
+            links.append((label, url, is_active))
+        return links
 
     def build_active_filters(self, form):
         """
@@ -334,7 +376,27 @@ class TitleDetailView(DetailView):
         response = super().get(request, *args, **kwargs)
         # Запоминаем просмотр после успешной отрисовки страницы.
         remember_view(request.user, self.object)
+        # Счётчик просмотров тоже растёт здесь, но не на каждый заход:
+        # одна сессия засчитывает один просмотр на запись (защита от накрутки
+        # при обновлении страницы). Гость и авторизованный учитываются одинаково.
+        self._count_view(request)
         return response
+
+    def _count_view(self, request):
+        """Увеличивает views_count не чаще раза в сутки на запись.
+
+        Значение ключа — метка времени последнего засчитанного просмотра.
+        Сверяем её, а не просто «ключ есть»: это позволяет отпускать ключ
+        через сутки, не трогая set_expiry всей сессии (продлевать жизнь
+        логина и CSRF-токена на каждый просмотр не хочется).
+        """
+        key = f"viewed:{self.object.pk}"
+        last_seen = request.session.get(key)
+        now = int(time())
+        if last_seen and now - last_seen < 60 * 60 * 24:
+            return
+        request.session[key] = now
+        self.object.increment_views()
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

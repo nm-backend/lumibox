@@ -20,7 +20,10 @@ def story_card_prefetches(prefix="", user=None):
     """
     from django.db.models import Prefetch
 
-    prefetches = [f"{prefix}genres"]
+    # Страны нужны карточке каталога: кинго-карточка показывает строку
+    # «Год / Страна / Жанр», и без prefetch каждая страна шла бы в базу
+    # отдельным запросом на каждую карточку.
+    prefetches = [f"{prefix}genres", f"{prefix}countries"]
     if user is not None and user.is_authenticated:
         from apps.library.models import WatchHistory
 
@@ -58,6 +61,22 @@ class TitleQuerySet(models.QuerySet):
 
     def series(self):
         return self.filter(type=self.model.Type.SERIES)
+
+    def cartoons(self):
+        return self.filter(type=self.model.Type.CARTOON)
+
+    def anime(self):
+        return self.filter(type=self.model.Type.ANIME)
+
+    def tv_shows(self):
+        return self.filter(type=self.model.Type.TV_SHOW)
+
+    def most_viewed(self, limit=None):
+        """Самые просматриваемые: порядок по счётчику просмотров."""
+        qs = self.order_by(F("views_count").desc(nulls_last=True), F("published_at").desc(nulls_last=True))
+        if limit is not None:
+            qs = qs[:limit]
+        return qs
 
     def with_related(self):
         """
