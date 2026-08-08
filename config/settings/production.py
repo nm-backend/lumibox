@@ -103,8 +103,9 @@ SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 # nginx — один на всех посетителей, и блокировка одного сработала бы
 # для всех.
 AXES_BEHIND_REVERSE_PROXY = True
-# Перед Django ровно один прокси — сам nginx из deploy/nginx.conf.
-AXES_PROXY_COUNT = 1
+# ВАЖНО: AXES_PROXY_COUNT убран — в axes 8.x он объявлен устаревшим
+# (W004) и падает check --deploy. Число прокси зашито в сам
+# AXES_BEHIND_REVERSE_PROXY (см. документацию axes).
 
 # Cookie сессии и CSRF отдаём только по HTTPS, чтобы их нельзя было перехватить.
 SESSION_COOKIE_SECURE = True
