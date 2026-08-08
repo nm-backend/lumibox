@@ -153,6 +153,8 @@
                         {# Шкала 1–10: десять символов — десять звёзд, forloop.counter даёт номер 1..10 #}
                         {% for i in "0123456789"|make_list %}
                             <label class="star-rating__star" data-value="{{ forloop.counter }}" data-star>
+                                <input type="radio" name="star_rating" value="{{ forloop.counter }}"
+                                       class="visually-hidden" aria-label="{% blocktrans %}Оценка {{ forloop.counter }}{% endblocktrans %}">
                                 <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path d="M10 1.5l2.47 5.01 5.53.8-4 3.9.95 5.49L10 13.5l-4.95 2.6.95-5.49-4-3.9 5.53-.8L10 1.5z"/></svg>
                             </label>
                         {% endfor %}

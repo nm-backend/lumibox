@@ -1,7 +1,6 @@
 from django.core.cache import cache
 from django.db import connection
-from django.http import Http404, JsonResponse
-from django.views.static import serve
+from django.http import JsonResponse
 
 
 def health_check(request):
@@ -45,12 +44,14 @@ def health_check(request):
 
 
 def serve_public_media(request, path, document_root=None):
-    """Не позволяет обойти контроллер плеера прямой ссылкой на приватное медиа."""
-    normalized_path = path.replace("\\", "/").lstrip("/")
-    if normalized_path.startswith("private_media/"):
-        raise Http404("Файл доступен только через защищённый маршрут.")
-    return serve(request, path, document_root=document_root)
+    """Не позволяет обойти контроллер плеера прямой ссылкой на приватное медиа.
 
+    Раздаёт файл через media_serving.serve_public_media — Range-запросы
+    (206), защита от обхода каталога и кэш-заголовки.
+    """
+    from apps.core.media_serving import serve_public_media as _serve
+
+    return _serve(request, path, document_root=document_root)
 
 class ElidedPaginationMixin:
     """

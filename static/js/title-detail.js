@@ -29,8 +29,10 @@
             stars.forEach(function (star) {
                 var isActive = parseInt(star.dataset.value, 10) <= value;
                 star.classList.toggle('star-rating__star--active', isActive);
-                // Для скринридеров шкала ведёт себя как радиогруппа.
-                star.setAttribute('aria-checked', String(isActive));
+                // Для скринридеров шкала ведёт себя как радиогруппа:
+                // состояние хранит настоящий input[type=radio] внутри label.
+                var input = star.querySelector('input[type="radio"]');
+                if (input) input.checked = isActive;
             });
         }
 
@@ -42,37 +44,7 @@
 
         setStars(currentRating);
 
-        /* Клавиатурная доступность: <label> без <input> не фокусируется,
-           поэтому навешиваем роль радиогруппы и навигацию стрелками. */
-        var widget = ratingContainer.querySelector('[data-star-rating-widget]');
-        if (widget) widget.setAttribute('role', 'radiogroup');
-        stars.forEach(function (star) {
-            star.setAttribute('role', 'radio');
-            star.setAttribute('aria-label', 'Оценка ' + star.dataset.value);
-            star.tabIndex = -1;
-        });
-        if (stars[0]) stars[0].tabIndex = 0;
-        stars.forEach(function (star) {
-            star.addEventListener('focus', function () {
-                stars.forEach(function (s) { s.tabIndex = s === star ? 0 : -1; });
-            });
-        });
         if (statusEl) statusEl.setAttribute('aria-live', 'polite');
-
-        stars.forEach(function (star, index) {
-            star.addEventListener('keydown', function (event) {
-                if (event.key === 'Enter' || event.key === ' ') {
-                    event.preventDefault();
-                    star.click();
-                } else if (event.key === 'ArrowRight' || event.key === 'ArrowDown') {
-                    event.preventDefault();
-                    stars[(index + 1) % stars.length].focus();
-                } else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') {
-                    event.preventDefault();
-                    stars[(index - 1 + stars.length) % stars.length].focus();
-                }
-            });
-        });
 
         stars.forEach(function (star) {
             star.addEventListener('mouseenter', function () {
@@ -83,7 +55,11 @@
                 setStars(currentRating);
             });
 
-            star.addEventListener('click', function () {
+            star.addEventListener('click', function (event) {
+                // Клик по label с input[type=radio] всплывает дважды:
+                // сначала по label, потом с активированного radio. Второй
+                // вариант — синтетический, с target=INPUT: игнорируем.
+                if (event.target && event.target.tagName === 'INPUT') return;
                 var value = parseInt(this.dataset.value, 10);
                 if (value === currentRating) return;
 
@@ -297,6 +273,15 @@
            вешаем прямо в разметке, здесь — только навигация. */
         tabButtons.forEach(function (btn, index) {
             btn.tabIndex = index === 0 ? 0 : -1;
+        });
+    }
+
+    /* ---------- 10. Событие view_item (просмотр тайтла) ---------- */
+    var trackSection = document.querySelector('[data-title-slug]');
+    if (trackSection && window.lbTrack) {
+        window.lbTrack('view_item', {
+            'item_id': trackSection.getAttribute('data-title-slug'),
+            'item_name': document.title,
         });
     }
 })();

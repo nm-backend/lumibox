@@ -15,7 +15,6 @@ from __future__ import annotations
 import logging
 import os
 
-from django.conf import settings
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
@@ -27,8 +26,24 @@ IMAGE_FIELDS_BY_MODEL: dict[str, list[str]] = {
     "catalog.Title": ["poster", "backdrop", "logo"],
     "catalog.Frame": ["image"],
     "catalog.Collection": ["cover"],
+    "catalog.Person": ["photo"],
+    "catalog.Studio": ["logo"],
+    "catalog.Award": ["logo"],
     "users.User": ["avatar"],
 }
+
+
+def storage_is_local() -> bool:
+    """Локальный ли дефолтный storage (FileSystemStorage).
+
+    WebP-копии генерируются только для локального диска: у S3/R2 нет
+    настоящего пути к файлу (field.path выбрасывает NotImplementedError),
+    а сжатием на бакете занимается сам бакет или CDN.
+    """
+    from django.conf import settings
+
+    backend = settings.STORAGES["default"]["BACKEND"]
+    return backend.endswith("django.core.files.storage.FileSystemStorage")
 
 
 def _get_webp_path(original_path: str) -> str:
@@ -77,7 +92,7 @@ def convert_images_to_webp(sender, instance, **kwargs) -> None:
 
     # Если файловое хранилище не локальное (S3/R2), пропускаем —
     # конвертацию делает сам бакет или CDN.
-    if not getattr(settings, "USE_LOCAL_STORAGE", True):
+    if not storage_is_local():
         return
 
     for field_name in fields:

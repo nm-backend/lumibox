@@ -18,6 +18,7 @@ from apps.catalog.models import (
     Collection,
     CollectionItem,
     Country,
+    Episode,
     Frame,
     Genre,
     Participation,
@@ -113,3 +114,57 @@ def reset_cache_on_frame_change(sender, instance, **kwargs):
 @receiver(post_delete, sender=TitleAward)
 def reset_cache_on_industry_change(sender, instance, **kwargs):
     _invalidate(sender, instance, **kwargs)
+
+
+# ─── Удаление файлов из хранилища ───────────────────────────────────
+# Django оставляет файлы на диске при удалении записи. На эфемерной ФС
+# и в R2 это копит мусор, поэтому каждый post_delete чистит файлы полей
+# модели (и WebP-копии) через apps.core.storage_cleanup.
+
+@receiver(post_delete, sender=Title)
+def delete_title_files(sender, instance, **kwargs):
+    from apps.core.storage_cleanup import delete_media_files
+
+    delete_media_files(instance, ["poster", "backdrop", "logo", "trailer_file"])
+
+
+@receiver(post_delete, sender=Episode)
+def delete_episode_file(sender, instance, **kwargs):
+    from apps.core.storage_cleanup import delete_media_files
+
+    delete_media_files(instance, ["file"])
+
+
+@receiver(post_delete, sender=Frame)
+def delete_frame_file(sender, instance, **kwargs):
+    from apps.core.storage_cleanup import delete_media_files
+
+    delete_media_files(instance, ["image"])
+
+
+@receiver(post_delete, sender=Collection)
+def delete_collection_cover(sender, instance, **kwargs):
+    from apps.core.storage_cleanup import delete_media_files
+
+    delete_media_files(instance, ["cover"])
+
+
+@receiver(post_delete, sender=Studio)
+def delete_studio_logo(sender, instance, **kwargs):
+    from apps.core.storage_cleanup import delete_media_files
+
+    delete_media_files(instance, ["logo"])
+
+
+@receiver(post_delete, sender=Award)
+def delete_award_logo(sender, instance, **kwargs):
+    from apps.core.storage_cleanup import delete_media_files
+
+    delete_media_files(instance, ["logo"])
+
+
+@receiver(post_delete, sender=Person)
+def delete_person_photo(sender, instance, **kwargs):
+    from apps.core.storage_cleanup import delete_media_files
+
+    delete_media_files(instance, ["photo"])

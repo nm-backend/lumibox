@@ -87,3 +87,10 @@ jobs:
 
       - name: Тесты
         run: python manage.py test apps
+
+      - name: Покрытие
+        # Нижняя планка: падение ниже означает, что регрессия в тестах
+        # не заметна на глаз — лучше упасть на пуше, чем выкатить меньше.
+        run: |
+          coverage run --source=apps manage.py test apps
+          coverage report --fail-under=90

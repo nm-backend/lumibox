@@ -104,20 +104,12 @@
     {% endblock %}
 
     {% comment %} Google Analytics / Google Tag Manager — вставляется только когда
-       GA_MEASUREMENT_ID задан через переменную окружения. Без него
+       GA_MEASUREMENT_ID задан через переменную окружения, и только после
+       явного согласия посетителя (static/js/analytics.js). Без него
        на странице нет ни лишних байт, ни запросов к Google.
     {% endcomment %}
     {% if ga_measurement_id %}
-    <script async src="https://www.googletagmanager.com/gtag/js?id={{ ga_measurement_id }}"></script>
-    <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', '{{ ga_measurement_id }}', {
-        'cookie_flags': 'SameSite=Lax;Secure',
-        'anonymize_ip': true,
-    });
-    </script>
+    <script>window.lbGaId = '{{ ga_measurement_id }}';</script>
     {% endif %}
 </head>
 <body class="{% block body_class %}{% endblock %}">
@@ -329,6 +321,18 @@
 
     {% include "includes/footer.html" %}
 
+    {% comment %} Баннер согласия на аналитику. Показывается только когда
+       GA_MEASUREMENT_ID задан, и только пока посетитель не нажал «Принять»
+       (решение хранится в localStorage, статический js/analytics.js).
+    {% endcomment %}
+    <div class="cookie-consent" id="cookie-consent" role="dialog" aria-labelledby="cookie-consent-title" aria-hidden="true">
+        <p class="cookie-consent__text" id="cookie-consent-title">
+            {% trans "Мы используем cookies для аналитики посещаемости. Продолжая пользоваться сайтом, вы соглашаетесь с этим." %}
+        </p>
+        <button class="cookie-consent__accept btn btn--primary" type="button">{% trans "Принять" %}</button>
+    </div>
+
+    <script src="{% static 'js/analytics.js' %}?v={{ static_version }}" defer></script>
     <script src="{% static 'js/favorite.js' %}?v={{ static_version }}" defer></script>
     <script src="{% static 'js/app.js' %}?v={{ static_version }}" defer></script>
     {% block extra_js %}{% endblock %}

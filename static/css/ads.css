@@ -51,8 +51,7 @@
 
 .ad-rail__disclaimer {
     font-size: 10px;
-    color: var(--color-text-dim);
-    opacity: 0.6;
+    color: var(--color-text-muted);
 }
 
 /* Плейсхолдер пустого рекламного места */
@@ -80,7 +79,6 @@
 .ad-rail__placeholder-size {
     color: var(--color-text-dim);
     font-size: 10px;
-    opacity: 0.5;
 }
 
 /* ===== Горизонтальный блок между секциями ===== */

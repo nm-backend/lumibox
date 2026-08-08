@@ -84,12 +84,6 @@ services:
       - key: DEFAULT_FROM_EMAIL
         value: "LumiBox <noreply@lumibox.app>"
 
-      # --- Stripe (опционально) ---
-      - key: STRIPE_SECRET_KEY
-        sync: false
-      - key: STRIPE_WEBHOOK_SECRET
-        sync: false
-
   - type: worker
     name: lumibox-worker
     runtime: docker

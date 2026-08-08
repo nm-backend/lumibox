@@ -351,6 +351,12 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 MEDIA_URL = "media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
+# Лимиты загрузки. Изображения до 10 МБ принимаются в память;
+# видео (до 4 ГБ, валидатор validate_video_size) пишутся во временный
+# файл на диск и затем в MEDIA_ROOT — без этого Django держал бы их в RAM.
+DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024
+FILE_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024
+
 STORAGES = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
     "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},

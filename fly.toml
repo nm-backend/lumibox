@@ -1,6 +1,19 @@
 # Fly.io. Разворачивает тот же production-образ из Dockerfile.
 # Postgres и Redis на Fly создаются отдельно (fly postgres create,
 # Upstash Redis) и подключаются секретами DATABASE_URL / REDIS_URL.
+#
+# Фоновые задачи (пересчёт рейтингов, прогрев кэша) выполняются по
+# расписанию Celery beat. Поднять воркер и планировщик отдельными
+# машинами в process groups:
+#
+#   fly machine run --app <app> "celery -A config worker -l info" \
+#       --name worker --process-group worker
+#   fly machine run --app <app> "celery -A config beat -l info" \
+#       --name beat --process-group beat
+#
+# Worker обязательно нужен при заданном REDIS_URL: без него задачи
+# копятся в очереди, а beat-задачи (warm-home-cache и др.) не выполняются.
+# Без REDIS_URL Celery работает в eager-режиме и воркер не требуется.
 app = "lumibox"
 primary_region = "fra"
 

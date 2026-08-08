@@ -64,6 +64,10 @@ if _USE_R2:
         "signature_version": "s3v4",
         # Не перезаписывать файлы — каждый новый файл получает уникальное имя.
         "file_overwrite": False,
+        # Имена файлов уникальны (file_overwrite=False), поэтому кэш на сутки
+        # безопасен: обновление файла всегда новый URL. Уменьшает трафик
+        # из бакета и готовит раздачу к выносу за CDN.
+        "object_parameters": {"CacheControl": "public, max-age=86400"},
     }
 
     STORAGES = {
@@ -78,6 +82,9 @@ if _USE_R2:
                 "custom_domain": env("CLOUDFLARE_R2_PUBLIC_URL", default="") or None,
                 # Постеры, фоны, логотипы, кадры: их тянет <img> прямо из браузера,
                 # подписывать такие адреса незачем.
+                # Видео эпизодов тоже публичное (облачные файлы-источники):
+                # раздаётся прямым URL с custom_domain (CDN-готовность)
+                # и Range-запросами самого R2.
                 "default_acl": "public-read",
             },
         },
@@ -93,6 +100,12 @@ else:
 
 # Весь трафик переводим на HTTPS.
 SECURE_SSL_REDIRECT = True
+
+# Почта. В base.py по умолчанию console-бэкенд: письма печатаются в лог
+# воркера, но не уходят. Как только задан EMAIL_HOST (SMTP Mailgun/SendGrid/
+# Gmail), включаем настоящую отправку — без неё сброс пароля не работает.
+if env("EMAIL_HOST", default=""):
+    EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 
 # Nginx принимает HTTPS и ходит в Django по HTTP.
 # Этот заголовок объясняет Django, что исходный запрос всё-таки был защищённым.
