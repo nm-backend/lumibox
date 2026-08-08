@@ -141,6 +141,19 @@ class HomeView(TemplateView):
             context.get("trending", []), context.get("new_titles", [])
         )[:14]
 
+        # Бейдж «Продолжить с S1E3» на главной. Секции главной приходят
+        # из кэша, поэтому прогресс нельзя вешать на их объекты атрибутом:
+        # LocMemCache вернул бы чужой прогресс другому пользователю.
+        # Пересобираем объекты свежим запросом с prefetch истории.
+        if self.request.user.is_authenticated:
+            ids = {t.pk for t in context["home_titles"] + context["lb_carousel"]}
+            fresh = {
+                t.pk: t
+                for t in Title.objects.published().filter(pk__in=ids).with_progress(self.request.user)
+            }
+            context["home_titles"] = [fresh.get(t.pk, t) for t in context["home_titles"]]
+            context["lb_carousel"] = [fresh.get(t.pk, t) for t in context["lb_carousel"]]
+
         # Пагинация как в каталоге: 24 записи на страницу, ссылки ведут
         # на страницы каталога, поэтому номера совпадают.
         from math import ceil
@@ -636,6 +649,13 @@ class ActorSearchView(TemplateView):
         if q:
             persons = list(
                 Person.objects.filter(name__icontains=q)
+                .annotate(
+                    published_works=Count(
+                        "participations",
+                        filter=Q(participations__title__status=Title.Status.PUBLISHED),
+                    )
+                )
+                .filter(published_works__gt=0)
                 .order_by("name")[:20]
             )
 

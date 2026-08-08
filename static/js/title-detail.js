@@ -4,9 +4,13 @@
 (function () {
     'use strict';
 
-    function getCookie(name) {
+    function getCsrfToken() {
+        // В проде CSRF_COOKIE_HTTPONLY=True: cookie недоступен JS,
+        // токен берём из meta-тега, cookie — как фолбэк.
+        var meta = document.querySelector('meta[name="csrf-token"]');
+        if (meta && meta.getAttribute('content')) return meta.getAttribute('content');
         var value = '; ' + document.cookie;
-        var parts = value.split('; ' + name + '=');
+        var parts = value.split('; csrftoken=');
         if (parts.length === 2) return parts.pop().split(';').shift();
     }
 
@@ -86,7 +90,7 @@
                 var xhr = new XMLHttpRequest();
                 xhr.open('POST', '/api/v1/titles/' + slug + '/rate/');
                 xhr.setRequestHeader('Content-Type', 'application/json');
-                xhr.setRequestHeader('X-CSRFToken', getCookie('csrftoken'));
+                xhr.setRequestHeader('X-CSRFToken', getCsrfToken());
                 xhr.onload = function () {
                     if (xhr.status === 200) {
                         currentRating = value;
@@ -210,7 +214,7 @@
             var xhr = new XMLHttpRequest();
             xhr.open('POST', '/api/v1/titles/' + titleSlug + '/watch/');
             xhr.setRequestHeader('Content-Type', 'application/json');
-            xhr.setRequestHeader('X-CSRFToken', getCookie('csrftoken'));
+            xhr.setRequestHeader('X-CSRFToken', getCsrfToken());
             xhr.send(JSON.stringify({ episode: episodeId }));
         }
 

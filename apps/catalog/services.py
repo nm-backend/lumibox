@@ -354,7 +354,7 @@ def get_home_statistics():
         "series_count": Title.objects.published().series().count(),
         "published_count": Title.objects.published().count(),
         "users_count": get_user_model().objects.count(),
-        "reviews_count": Review.objects.count(),
+        "reviews_count": Review.objects.filter(status=Review.Status.PUBLISHED).count(),
     }
     cache.set(HOME_STATS_CACHE_KEY, stats, settings.CACHE_TTL_HOME)
     return stats

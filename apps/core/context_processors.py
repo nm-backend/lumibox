@@ -69,7 +69,6 @@ def lb_topnav(request):
         (_("Фильмы"), f"{catalog_url}?type={Title.Type.MOVIE}", get.get("type") == str(Title.Type.MOVIE)),
         (_("Сериалы"), f"{catalog_url}?type={Title.Type.SERIES}", get.get("type") == str(Title.Type.SERIES)),
         (_("Мультфильмы"), f"{catalog_url}?type={Title.Type.CARTOON}", get.get("type") == str(Title.Type.CARTOON)),
-        (_("Аниме"), f"{catalog_url}?type={Title.Type.ANIME}", get.get("type") == str(Title.Type.ANIME)),
         (_("ТВ-шоу"), f"{catalog_url}?type={Title.Type.TV_SHOW}", get.get("type") == str(Title.Type.TV_SHOW)),
         (_("Новинки"), f"{catalog_url}?sort=-published_at", get.get("sort") == "-published_at"),
         (_("Подборки"), reverse("catalog:collection_list"),
@@ -167,7 +166,6 @@ def _series_links():
     return [
         ("Все сериалы", f"{catalog_url}?type=series"),
         ("Мультфильмы", f"{catalog_url}?type=cartoon"),
-        ("Аниме", f"{catalog_url}?type=anime"),
         ("ТВ-шоу", f"{catalog_url}?type=tv_show"),
         ("Фильмы", f"{catalog_url}?type=movie"),
         ("Подборки", reverse("catalog:collection_list")),

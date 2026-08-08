@@ -33,7 +33,7 @@ class UserTitleRelationQuerySet(models.QuerySet):
 
         from apps.library.models import WatchHistory
 
-        prefetches = ["title__genres"]
+        prefetches = ["title__genres", "title__countries"]
         if user is not None and user.is_authenticated:
             prefetches.append(
                 Prefetch(

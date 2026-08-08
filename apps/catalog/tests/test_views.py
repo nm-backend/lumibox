@@ -9,6 +9,8 @@ from apps.core.test_factories import (
     create_collection,
     create_country,
     create_genre,
+    create_participation,
+    create_person,
     create_title,
     create_user,
 )
@@ -299,3 +301,39 @@ class AwardDetailViewTests(TestCase):
         response = self.client.get(self.award.get_absolute_url())
 
         self.assertEqual(list(response.context["titles"]), [mine])
+
+
+class ActorSearchViewTests(TestCase):
+    def setUp(self):
+        cache.clear()
+
+    def tearDown(self):
+        cache.clear()
+
+    def test_person_without_published_works_hidden(self):
+        person = create_person(name="Актёр-призрак")
+        create_participation(
+            title=create_title(name="Черновик с участием", status=Title.Status.DRAFT),
+            person=person,
+        )
+
+        response = self.client.get(
+            reverse("catalog:actor_search"), {"q": "призрак"}
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, "Актёр-призрак")
+
+    def test_person_with_published_work_shown(self):
+        person = create_person(name="Актёр-любимец")
+        create_participation(
+            title=create_title(name="Публичный фильм"),
+            person=person,
+        )
+
+        response = self.client.get(
+            reverse("catalog:actor_search"), {"q": "любимец"}
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Актёр-любимец")

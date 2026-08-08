@@ -65,9 +65,6 @@ class TitleQuerySet(models.QuerySet):
     def cartoons(self):
         return self.filter(type=self.model.Type.CARTOON)
 
-    def anime(self):
-        return self.filter(type=self.model.Type.ANIME)
-
     def tv_shows(self):
         return self.filter(type=self.model.Type.TV_SHOW)
 

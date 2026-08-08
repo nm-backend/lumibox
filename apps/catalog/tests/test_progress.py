@@ -221,3 +221,29 @@ class WithProgressPrefetchTests(TestCase):
         fetched = Title.objects.published().with_progress(user).get(pk=title.pk)
         self.assertEqual(len(fetched.progress_item), 1)
         self.assertEqual(fetched.progress_item[0].episode, episode)
+
+
+class HomeResumeBadgeTests(TestCase):
+    def setUp(self):
+        self.user = create_user()
+        self.title = create_title(type=Title.Type.SERIES, name="Главная-сериал")
+        self.episode = create_episode(self.title, season=3, episode=1)
+        self.home_url = reverse("catalog:home")
+
+    def test_guest_home_has_no_resume_badge(self):
+        response = self.client.get(self.home_url)
+        html = response.content.decode("utf-8")
+        self.assertNotIn("Смотреть с S3E1", html)
+        self.assertNotIn("lb-shortstory__resume", html)
+
+    def test_user_home_shows_resume_badge(self):
+        remember_episode_start(self.user, self.title, self.episode)
+        self.client.force_login(self.user)
+        response = self.client.get(self.home_url)
+        self.assertContains(response, "Смотреть с S3E1")
+
+    def test_other_user_badge_not_shown_on_home(self):
+        remember_episode_start(create_user(), self.title, self.episode)
+        self.client.force_login(self.user)
+        response = self.client.get(self.home_url)
+        self.assertNotIn("Смотреть с S3E1", response.content.decode("utf-8"))

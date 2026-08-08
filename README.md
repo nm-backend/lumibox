@@ -256,7 +256,7 @@ docker compose exec web python manage.py createsuperuser
 docker compose exec web python manage.py test apps
 ```
 
-**153 теста**, около полутора минут. Ожидаемый результат — `OK`.
+**295 тестов**, около полутора минут. Ожидаемый результат — `OK`.
 
 Тесты создают собственную временную базу и удаляют её после прогона —
 ваши данные не пострадают.
@@ -285,7 +285,7 @@ docker compose exec web coverage run --source=apps \
 docker compose exec web coverage report
 ```
 
-Текущее покрытие — **97%**. Показать только непокрытые файлы:
+Текущее покрытие — **91%**. Показать только непокрытые файлы:
 
 ```bash
 docker compose exec web coverage report --skip-covered --sort=cover

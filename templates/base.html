@@ -29,6 +29,9 @@
 
     <link rel="icon" type="image/svg+xml" href="{% static 'img/favicon.svg' %}">
 
+    {# CSRF-токен для JS (X-CSRFToken): cookie в проде HttpOnly, читаем из meta #}
+    <meta name="csrf-token" content="{{ csrf_token }}">
+
     {% comment %}
        Канонический адрес — без строки запроса: /catalog/?page=2&sort=name и
        /catalog/ это для поисковика одна и та же страница в разных сочетаниях
@@ -243,7 +246,6 @@
         <a class="mobile-nav__link" href="{% url 'catalog:title_list' %}?type=movie">{% trans "Фильмы" %}</a>
         <a class="mobile-nav__link" href="{% url 'catalog:title_list' %}?type=series">{% trans "Сериалы" %}</a>
         <a class="mobile-nav__link" href="{% url 'catalog:title_list' %}?type=cartoon">{% trans "Мультфильмы" %}</a>
-        <a class="mobile-nav__link" href="{% url 'catalog:title_list' %}?type=anime">{% trans "Аниме" %}</a>
         <a class="mobile-nav__link" href="{% url 'catalog:title_list' %}?type=tv_show">{% trans "ТВ-шоу" %}</a>
         <a class="mobile-nav__link" href="{% url 'catalog:genre_list' %}">{% trans "Жанры" %}</a>
         <a class="mobile-nav__link" href="{% url 'catalog:collection_list' %}">{% trans "Подборки" %}</a>

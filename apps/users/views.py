@@ -98,7 +98,9 @@ class ProfileView(LoginRequiredMixin, UpdateView):
         context["favorites_count"] = Favorite.objects.for_user(user).count()
         context["watchlist_count"] = Watchlist.objects.for_user(user).count()
         context["history_count"] = WatchHistory.objects.for_user(user).count()
-        context["reviews_count"] = Review.objects.filter(user=user).count()
+        context["reviews_count"] = Review.objects.filter(
+            user=user, status=Review.Status.PUBLISHED
+        ).count()
 
         # Немного свежего избранного прямо в профиле — чтобы страница
         # не была пустой анкетой.

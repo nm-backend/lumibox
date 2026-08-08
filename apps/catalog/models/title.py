@@ -33,7 +33,6 @@ class Title(SeoModel, TimeStampedModel):
         MOVIE = "movie", "Фильм"
         SERIES = "series", "Сериал"
         CARTOON = "cartoon", "Мультфильм"
-        ANIME = "anime", "Аниме"
         TV_SHOW = "tv_show", "ТВ-шоу"
 
     class VoiceActing(models.TextChoices):
