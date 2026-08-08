@@ -187,13 +187,14 @@ class TitleAdmin(admin.ModelAdmin):
     # Удобный выбор жанров и стран двумя списками вместо неудобного multi-select.
     filter_horizontal = ["genres", "countries", "studios"]
 
-    # views_count не в списке: editable=False на поле уже делает его
-    # readonly в админке автоматически.
+    # views_count явно добавлен: non-editable поля нельзя указывать в
+    # fieldsets, пока они не объявлены readonly_fields.
     readonly_fields = [
         "poster_preview",
         "backdrop_preview",
         "logo_preview",
         "rating_display",
+        "views_count",
         "created_at",
         "updated_at",
     ]
