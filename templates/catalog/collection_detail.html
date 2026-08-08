@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+﻿{% extends "base.html" %}
 {% load static i18n %}
 
 {% block page_title %}{{ collection.get_meta_title }} — LumiBox{% endblock %}
@@ -7,7 +7,7 @@
 {% block breadcrumb_2_name %}{{ collection.name }}{% endblock %}
 
 {% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/collections.css' %}">
+    <link rel="stylesheet" href="{% static 'css/collections.css' %}?v={{ static_version }}">
 {% endblock %}
 
 {% block content %}

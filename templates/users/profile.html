@@ -1,10 +1,10 @@
-{% extends "base.html" %}
+﻿{% extends "base.html" %}
 {% load static i18n icons %}
 
 {% block page_title %}{% blocktranslate with name=user.display_name %}Профиль — {{ name }} — LumiBox{% endblocktranslate %}{% endblock %}
 
 {% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/profile.css' %}">
+    <link rel="stylesheet" href="{% static 'css/profile.css' %}?v={{ static_version }}">
 {% endblock %}
 
 {% block content %}

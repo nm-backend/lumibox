@@ -1,4 +1,4 @@
-/*
+﻿/*
   Главная страница: топбар, шапка, навигация, промо-зона, панель
   сортировки, лента карточек, подвал — в родной теме LumiBox:
   чёрный кинозал с янтарным акцентом.
@@ -1310,19 +1310,19 @@
         overflow: visible;
     }
     .lb-shortstory__body {
-        grid-template-columns: 120px auto;
+        grid-template-columns: 150px auto;
         gap: var(--space-3);
         min-height: 0;
     }
 
     .lb-shortstory__poster img {
-        width: 120px;
-        height: 180px;
+        width: 150px;
+        height: 225px;
     }
 
     .lb-shortstory__poster-fallback {
-        width: 120px;
-        height: 180px;
+        width: 150px;
+        height: 225px;
     }
 
     .lb-shortstory__title {
@@ -1361,6 +1361,63 @@
         scrollbar-width: thin;
         padding-bottom: var(--space-1);
     }
+
+    /* Тач-таргеты: всё, что в десктопной версии ниже 44px, на мобильной
+       поднимаем до стандарта. Кнопка «Смотреть» в карточке, промо-кнопка,
+       чипы жанров, ссылки футера. */
+    .lb-watch {
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .lb-promo__btn {
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .genre-chip {
+        padding-top: 12px;
+        padding-bottom: 12px;
+    }
+
+    .footer-nav__link {
+        padding-top: 12px;
+        padding-bottom: 12px;
+    }
+}
+
+/* Планшетная лента (паттерн с двумя колонками): карточки в две колонки, всё
+   остальное (промо, сортировка, пагинация) — на всю ширину. */
+@media (min-width: 600px) and (max-width: 899px) {
+    /* В двух колонках постер 150px вытеснил бы текст — возвращаем 130. */
+    .lb-shortstory__body {
+        grid-template-columns: 130px auto;
+    }
+
+    .lb-shortstory__poster img,
+    .lb-shortstory__poster-fallback {
+        width: 130px;
+        height: 195px;
+    }
+
+    .lb-main {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: var(--space-3);
+        align-items: start;
+    }
+
+    .lb-main > * {
+        min-width: 0;
+    }
+
+    .lb-main > :not(.lb-shortstory) {
+        grid-column: 1 / -1;
+    }
 }
 
 @media (max-width: 420px) {
@@ -1368,13 +1425,19 @@
         display: none;
     }
 
+    .lb-shortstory__body {
+        grid-template-columns: 120px auto;
+        gap: var(--space-3);
+        min-height: 0;
+    }
+
     .lb-shortstory__poster img {
-        width: 110px;
+        width: 120px;
         height: 165px;
     }
 
     .lb-shortstory__poster-fallback {
-        width: 110px;
+        width: 120px;
         height: 165px;
     }
 
@@ -1396,36 +1459,134 @@
    перебить десктопные размеры из components/layout/footer: на телефоне
    мелкие ссылки и кнопки получают зону касания, близкую к 44px. */
 
-@media (max-width: 720px) {
+/* Планшетная шапка (721–900): лупа поиска 32px из components.css
+   перебивает 44px из layout.css (порядок подключения) — дублируем. */
+@media (min-width: 721px) and (max-width: 900px) {
+    .search__submit {
+        width: 44px;
+        height: 44px;
+    }
+}
+
+@media (max-width: 900px) {
     .search__submit {
         width: var(--touch-target);
         height: var(--touch-target);
     }
 
     .breadcrumbs a {
-        padding: var(--space-2) var(--space-1);
+        padding: 12px var(--space-1);
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .film-hero__spec a {
+        padding-top: 10px;
+        padding-bottom: 10px;
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .footer-credits__link,
+    .footer-trust__item--link {
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
     }
 
     .sidebar-category__link,
     .badge {
+        min-height: 44px;
+        padding-top: 12px;
+        padding-bottom: 12px;
+    }
+
+    .scroll-top {
+        width: 44px;
+        height: 44px;
+    }
+
+    .footer-bottom__telegram-link {
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .lb-mainnav li a,
+    .lb-categories a,
+    .lb-topbar__link,
+    .lb-aheader--row a {
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .lb-franchise,
+    .lb-lastcomment__title {
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .lb-shortstory__title a,
+    .lb-shortstory__year a,
+    .lb-shortstory__genres a {
         padding-top: 10px;
         padding-bottom: 10px;
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
     }
 
     .footer-nav__link {
-        padding: var(--space-2) 0;
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
+        padding: 12px 0;
     }
 
     .lb-xsort-clearall {
-        width: 36px;
-        height: 36px;
-        flex: 0 0 36px;
+        width: 44px;
+        height: 44px;
+        flex: 0 0 44px;
         border-radius: var(--radius-full);
+    }
+
+    .lb-xsort-option {
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+    }
+
+    .logo {
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
     }
 
     .auth-card a {
         padding: var(--space-2) 0;
         display: inline-block;
+    }
+
+    .auth-card__forgot a,
+    .auth-card__footer a {
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .user-menu__link {
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .lang-menu__link {
+        padding-top: 12px;
+        padding-bottom: 12px;
     }
 
     .logo {
@@ -1696,4 +1857,472 @@
     background-clip: text;
     -webkit-text-fill-color: transparent;
     color: transparent;
+}
+
+/* ---------- Кинго-рейтинг в карточке ----------
+   Звёзды (5-балльная шкала рейтинга) показываются только на мобильной
+   версии: десктопный вид карточки не меняется. Заполнение идёт от
+   10-балльного rating_average через widthratio в шаблоне. */
+
+.lb-rating-stars {
+    display: none;
+    position: relative;
+    line-height: 1;
+    font-size: 13px;
+    letter-spacing: 2px;
+    white-space: nowrap;
+    color: #555555;
+}
+
+.lb-rating-stars__fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    color: #ffc107;
+}
+
+.lb-shortstory__label {
+    display: none;
+}
+
+/* =====================================================================
+   МОБИЛЬНАЯ ВЕРСИЯ В СТИЛЕ KINOGO (≤599px)
+
+   Внешний вид кинго-карточек по дампу главной референсного сайта:
+   тёмно-серая палитра (#1d1d1d карточки, #404040 рамки), красный
+   акцент #F44336, жёлтые заголовки секций #ffc107, звёздный рейтинг,
+   красная кнопка «Смотреть онлайн» на всю ширину карточки,
+   карусель постеров вместо текстовой промо-зоны.
+   ===================================================================== */
+
+@media (max-width: 599px) {
+    :root {
+        --color-bg: #111111;
+        --color-surface: #161616;
+        --color-surface-hover: #1d1d1d;
+        --color-surface-2: #1d1d1d;
+        --color-surface-3: #1a1a1a;
+        --color-surface-deep: #0f0f0f;
+        --color-card: #1d1d1d;
+        --color-card-hover: #242424;
+
+        --color-text: #e0dfdc;
+        --color-text-muted: #a0a0a0;
+        --color-text-dim: #8f8f8f;
+        --color-text-soft: #cccccc;
+        --color-text-bright: #e6e6e6;
+        --color-text-strong: #f5f5f5;
+        --color-text-faint: #777777;
+
+        --color-accent: #f44336;
+        --color-accent-rgb: 244, 67, 54;
+        --color-accent-hover: #ff6659;
+        --color-accent-soft: #ff8a80;
+        --color-accent-deep: #d32f2f;
+        --color-accent-dim: rgba(244, 67, 54, 0.12);
+        --color-accent-glow: rgba(244, 67, 54, 0.10);
+        --color-on-accent: #ffffff;
+
+        --color-border: #404040;
+        --color-border-soft: #3a3a3a;
+        --color-border-strong: #555555;
+
+        --glass-bg: rgba(22, 22, 22, 0.88);
+        --glass-border: rgba(64, 64, 64, 0.6);
+
+        --card-border: 1px solid #404040;
+        --card-bg: #1d1d1d;
+        --card-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+        --card-shadow-hover: 0 6px 18px rgba(0, 0, 0, 0.5);
+        --card-border-hover: #f44336;
+    }
+
+    /* --- Карточка: кинго-плашка #1d1d1d, прямые углы, лёгкая тень --- */
+    .lb-shortstory {
+        border-radius: 6px;
+        padding: 14px;
+    }
+
+    .lb-shortstory__title {
+        font-size: 1.05rem;
+    }
+
+    .lb-shortstory__original {
+        font-size: 12px;
+        color: #909090;
+    }
+
+    /* Мета-данные колонкой, как у референса: строки с жирной подписью */
+    .lb-shortstory__meta {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 2px;
+        margin-top: 10px;
+    }
+
+    .lb-shortstory__meta > span {
+        display: inline-flex;
+        align-items: baseline;
+        flex-wrap: wrap;
+        gap: 0 6px;
+        font-size: 12px;
+    }
+
+    .lb-shortstory__label {
+        display: inline;
+        color: #f5f5f5;
+        font-weight: 700;
+    }
+
+    .lb-shortstory__year a,
+    .lb-shortstory__genres a {
+        color: #c8c8c8;
+        font-size: 12px;
+    }
+
+    .lb-shortstory__year a:hover,
+    .lb-shortstory__genres a:hover {
+        color: #ffc107;
+    }
+
+    .lb-shortstory__duration {
+        color: #b8b8b8;
+        font-size: 12px;
+    }
+
+    .lb-shortstory__quality {
+        border-color: #555555;
+        color: #dddddd;
+        font-size: 11px;
+    }
+
+    .lb-shortstory__external {
+        color: #c0c0c0;
+        font-size: 12px;
+    }
+
+    /* Рейтинг: жёлтые кинго-звёзды без плашки */
+    .lb-shortstory__rating {
+        background: none;
+        border: 0;
+        padding: 0;
+        border-radius: 0;
+        gap: 5px;
+        font-size: 13px;
+        margin-bottom: 2px;
+    }
+
+    .lb-shortstory__rating > svg {
+        display: none;
+    }
+
+    .lb-rating-stars {
+        display: inline-flex;
+        vertical-align: -1px;
+    }
+
+    .lb-rating-value {
+        color: #ffc107;
+        font-weight: 700;
+    }
+
+    .lb-shortstory__rating-count {
+        color: #909090;
+        font-size: 11px;
+    }
+
+    /* Кнопка «Смотреть онлайн»: красная, на всю ширину, как у референса */
+    .lb-shortstory__footer {
+        gap: 4px;
+        margin-top: 12px;
+        flex-wrap: wrap;
+    }
+
+    .lb-watch {
+        flex: 0 0 100%;
+        width: 100%;
+        min-height: 44px;
+        border-radius: 4px;
+        padding: 12px 16px;
+        background: #f44336;
+        font-size: 14px;
+        font-weight: 700;
+        box-shadow: 0 2px 8px rgba(244, 67, 54, 0.35);
+    }
+
+    .lb-watch:hover {
+        background: #ff6659;
+        transform: none;
+        box-shadow: 0 2px 8px rgba(244, 67, 54, 0.35);
+    }
+
+    .lb-shortstory__time {
+        margin-left: 0;
+        width: 100%;
+        text-align: center;
+        color: #909090;
+        font-size: 11px;
+    }
+
+    .lb-shortstory__excerpt {
+        font-size: 12px;
+        color: #b8b8b8;
+    }
+
+    /* --- Промо-зона → кинго-карусель постеров (topSlider) --- */
+    .lb-promo {
+        background: #111111;
+        border-bottom: 1px solid #404040;
+    }
+
+    .lb-promo__inner {
+        flex-wrap: nowrap;
+        padding: 10px 0;
+    }
+
+    .lb-promo__copy {
+        display: none;
+    }
+
+    .lb-promo__posters {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        gap: 8px;
+        margin: 0;
+        padding: 4px 12px 6px;
+        scroll-snap-type: x mandatory;
+        scrollbar-width: none;
+    }
+
+    .lb-promo__posters::-webkit-scrollbar {
+        display: none;
+    }
+
+    .lb-promo__poster {
+        flex: 0 0 118px;
+        scroll-snap-align: start;
+    }
+
+    .lb-promo__poster img {
+        width: 118px;
+        height: 174px;
+        border-radius: 4px;
+        border: 1px solid #404040;
+        box-shadow: none;
+    }
+
+    .lb-promo__poster:hover img {
+        border-color: #f44336;
+        box-shadow: none;
+    }
+
+    /* --- Сортировка (xSort): кинго-плашки с красным активным --- */
+    .lb-xsort-area {
+        background: #161616;
+    }
+
+    .lb-xsort-label {
+        color: #a0a0a0;
+    }
+
+    .lb-xsort-div {
+        height: 36px;
+        line-height: 36px;
+        border: 1px solid #404040;
+        border-radius: 3px;
+        background: #1d1d1d;
+    }
+
+    .lb-xsort-div:hover {
+        border-color: #525252;
+    }
+
+    .lb-xsort-div--active {
+        border-color: #f44336;
+        background: #1d1d1d;
+        box-shadow: none;
+    }
+
+    .lb-xsort-div--active .lb-xsort-selected {
+        color: #f44336;
+    }
+
+    .lb-xsort-selected {
+        color: #e6e6e6;
+    }
+
+    .lb-xsort-selected:after {
+        border-top-color: #777777;
+    }
+
+    .lb-xsort-ul {
+        background: rgba(16, 16, 16, 0.88);
+        backdrop-filter: blur(30px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 0 0 5px 5px;
+    }
+
+    .lb-xsort-option {
+        color: #e6e6e6;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .lb-xsort-option:hover {
+        background: rgba(255, 255, 255, 0.12);
+    }
+
+    .lb-xsort-option--current {
+        box-shadow: none;
+        background: rgba(57, 57, 57, 0.73);
+        color: #ffffff;
+    }
+
+    .lb-xsort-option--current a {
+        color: #ffffff;
+    }
+
+    .lb-xsort-clearall {
+        border: 1px solid #404040;
+        background: #1d1d1d;
+        border-radius: 3px;
+    }
+
+    /* --- Сайдбар: жёлтые кинго-заголовки --- */
+    .site-header {
+        background-color: rgba(22, 22, 22, 0.97);
+    }
+
+    .lb-aheader {
+        color: #ffc107;
+        font-size: 1rem;
+        padding: 10px 0;
+        border-bottom: 1px solid #404040;
+        margin-bottom: 8px;
+    }
+
+    .lb-aheader--row a {
+        color: #a0a0a0;
+    }
+
+    .lb-aheader--row a:hover {
+        color: #ffc107;
+    }
+
+    .lb-accent {
+        color: #ffc107;
+    }
+
+    .lb-mainnav li a {
+        color: #d0d0d0;
+    }
+
+    .lb-mainnav li a:hover {
+        color: #ffc107;
+    }
+
+    .lb-count {
+        color: #777777;
+    }
+
+    .lb-lastupdates__title {
+        color: #909090;
+    }
+
+    .lb-soon__title {
+        color: #cccccc;
+    }
+
+    .lb-soon__title:hover {
+        color: #ffc107;
+    }
+
+    .lb-franchise__title {
+        color: #cccccc;
+    }
+
+    .lb-franchise__title:hover {
+        color: #ffc107;
+    }
+
+    .lb-lastcomment__title,
+    .lb-lastcomment__text span {
+        color: #cccccc;
+    }
+
+    .lb-lastcomment__title:hover {
+        color: #ffc107;
+    }
+
+    /* --- Пагинация: «Раньше»/«Позже» красными кнопками, цифры в плашках --- */
+    .lb-pagination {
+        background: transparent;
+        border-top: 1px solid #404040;
+        gap: 6px;
+        padding: 14px 0 20px;
+    }
+
+    .lb-pagination__prev,
+    .lb-pagination__next {
+        background: #f44336;
+        color: #ffffff;
+        padding: 10px 18px;
+        border-radius: 3px;
+        font-weight: 600;
+        font-size: 13px;
+    }
+
+    .lb-pagination__prev:hover,
+    .lb-pagination__next:hover {
+        background: #ff6659;
+        color: #ffffff;
+    }
+
+    .lb-pagination__link,
+    .lb-pagination__current {
+        min-width: 34px;
+        height: 34px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid #404040;
+        border-radius: 3px;
+        color: #cccccc;
+        font-size: 13px;
+        background: #1d1d1d;
+    }
+
+    .lb-pagination__link:hover {
+        color: #ffc107;
+        border-color: #555555;
+    }
+
+    .lb-pagination__current {
+        background: #f44336;
+        border-color: #f44336;
+        color: #ffffff;
+        font-weight: 700;
+    }
+
+    .lb-pagination__gap {
+        color: #777777;
+    }
+
+    /* --- SEO-текст и прочее --- */
+    .lb-seo h2::before {
+        background: #f44336;
+    }
+
+    .lb-seo h2 {
+        color: #f5f5f5;
+    }
+
+    .breadcrumbs a {
+        color: #a0a0a0;
+    }
+
+    .breadcrumbs a:hover {
+        color: #ffc107;
+    }
 }

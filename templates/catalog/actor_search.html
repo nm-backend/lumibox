@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+﻿{% extends "base.html" %}
 {% load static i18n icons catalog_filters %}
 
 {% block page_title %}{% trans "Поиск по актёру — LumiBox" %}{% endblock %}
@@ -9,7 +9,7 @@
 {% block twitter_description %}{% trans "Найдите все фильмы и сериалы с любимым актёром." %}{% endblock %}
 
 {% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/catalog.css' %}">
+    <link rel="stylesheet" href="{% static 'css/catalog.css' %}?v={{ static_version }}">
 {% endblock %}
 
 {% block content %}

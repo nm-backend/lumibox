@@ -1,11 +1,11 @@
-{% extends "base.html" %}
+﻿{% extends "base.html" %}
 {% load static i18n %}
 
 {% block page_title %}{% trans "Политика конфиденциальности — LumiBox" %}{% endblock %}
 {% block page_description %}{% trans "Политика конфиденциальности LumiBox: какие данные мы собираем, как используем и защищаем." %}{% endblock %}
 
 {% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/forms.css' %}">
+    <link rel="stylesheet" href="{% static 'css/forms.css' %}?v={{ static_version }}">
 {% endblock %}
 
 {% block content %}

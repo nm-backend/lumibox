@@ -45,25 +45,30 @@
             <div class="lb-shortstory__meta">
                 {% if title.rating_average %}
                     <span class="lb-shortstory__rating">
-                        {% icon "star" size=12 %} {{ title.rating_average|floatformat:1 }}
+                        {% icon "star" size=12 %}
+                        <span class="lb-rating-stars" aria-hidden="true">
+                            <span class="lb-rating-stars__bg">★★★★★</span>
+                            <span class="lb-rating-stars__fill" style="width: {% widthratio title.rating_average 10 100 %}%">★★★★★</span>
+                        </span>
+                        <span class="lb-rating-value">{{ title.rating_average|floatformat:1 }}</span>
                         <span class="lb-shortstory__rating-count">/10 · {{ title.rating_count|default:0 }} {% trans "гол." %}</span>
                     </span>
                 {% endif %}
                 {% if title.release_year %}
-                    <span class="lb-shortstory__year"><a href="{% url 'catalog:title_list' %}?year={{ title.release_year }}">{{ title.release_year }}</a></span>
+                    <span class="lb-shortstory__year"><span class="lb-shortstory__label">{% trans "Год:" %}</span><a href="{% url 'catalog:title_list' %}?year={{ title.release_year }}">{{ title.release_year }}</a></span>
                 {% endif %}
                 {% if title.genres.all %}
-                    <span class="lb-shortstory__genres">
+                    <span class="lb-shortstory__genres"><span class="lb-shortstory__label">{% trans "Жанр:" %}</span>
                         {% for genre in title.genres.all|slice:":3" %}
                             <a href="{% url 'catalog:genre_titles' genre.slug %}">{{ genre.name }}</a>{% if not forloop.last %}, {% endif %}
                         {% endfor %}
                     </span>
                 {% endif %}
                 {% if title.duration_minutes %}
-                    <span class="lb-shortstory__duration">{% icon "clock" size=12 %} {{ title.duration_minutes }} {% trans "мин" %}</span>
+                    <span class="lb-shortstory__duration"><span class="lb-shortstory__label">{% trans "Длительность:" %}</span>{% icon "clock" size=12 %} {{ title.duration_minutes }} {% trans "мин" %}</span>
                 {% endif %}
                 {% if title.quality %}
-                    <span class="lb-shortstory__quality">{{ title.quality }}</span>
+                    <span class="lb-shortstory__quality"><span class="lb-shortstory__label">{% trans "Качество:" %}</span>{{ title.quality }}</span>
                 {% endif %}
                 {% if title.kp_rating or title.imdb_rating %}
                     <span class="lb-shortstory__external">

@@ -1,11 +1,11 @@
-{% extends "base.html" %}
+﻿{% extends "base.html" %}
 {% load static i18n %}
 
 {% block page_title %}{% trans "Пользовательское соглашение — LumiBox" %}{% endblock %}
 {% block page_description %}{% trans "Условия использования сервиса LumiBox." %}{% endblock %}
 
 {% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/forms.css' %}">
+    <link rel="stylesheet" href="{% static 'css/forms.css' %}?v={{ static_version }}">
 {% endblock %}
 
 {% block content %}

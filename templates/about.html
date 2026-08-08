@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+﻿{% extends "base.html" %}
 {% load static i18n %}
 
 {% block page_title %}{% trans "О проекте — LumiBox" %}{% endblock %}
@@ -9,7 +9,7 @@
 {% block twitter_description %}{% trans "Современный каталог фильмов и сериалов: миссия, преимущества, дорожная карта." %}{% endblock %}
 
 {% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/forms.css' %}">
+    <link rel="stylesheet" href="{% static 'css/forms.css' %}?v={{ static_version }}">
 {% endblock %}
 
 {% block content %}

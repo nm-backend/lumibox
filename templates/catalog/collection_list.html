@@ -1,11 +1,11 @@
-{% extends "base.html" %}
+﻿{% extends "base.html" %}
 {% load static i18n %}
 
 {% block page_title %}{% trans "Подборки — LumiBox" %}{% endblock %}
 {% block page_description %}{% trans "Тематические подборки фильмов и сериалов." %}{% endblock %}
 
 {% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/collections.css' %}">
+    <link rel="stylesheet" href="{% static 'css/collections.css' %}?v={{ static_version }}">
 {% endblock %}
 
 {% block content %}

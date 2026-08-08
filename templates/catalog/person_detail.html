@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+﻿{% extends "base.html" %}
 {% load static i18n lumibox_urls icons catalog_filters %}
 
 {% block page_title %}{% blocktranslate with name=person.name %}{{ name }} — фильмография — LumiBox{% endblocktranslate %}{% endblock %}
@@ -8,8 +8,8 @@
 {% block breadcrumb_2_url %}{% absolute_url request.path %}{% endblock %}
 
 {% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/title-detail.css' %}">
-    <link rel="stylesheet" href="{% static 'css/profile.css' %}">
+    <link rel="stylesheet" href="{% static 'css/title-detail.css' %}?v={{ static_version }}">
+    <link rel="stylesheet" href="{% static 'css/profile.css' %}?v={{ static_version }}">
 {% endblock %}
 
 {% block content %}

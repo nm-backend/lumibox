@@ -342,3 +342,13 @@
 [data-theme="light"] .auth-card__forgot {
     color: var(--color-accent-hover);
 }
+
+/* ---------- Мобильный вид (≤599px) ---------- */
+
+@media (max-width: 599px) {
+    .legal-page__title {
+        font-size: 28px;
+        line-height: 1.25;
+        overflow-wrap: break-word;
+    }
+}

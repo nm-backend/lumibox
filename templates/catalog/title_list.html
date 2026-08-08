@@ -1,11 +1,11 @@
-{% extends "base.html" %}
+﻿{% extends "base.html" %}
 {% load static i18n icons %}
 
 {% block page_title %}{% blocktranslate with heading=page_heading %}{{ heading }} — LumiBox{% endblocktranslate %}{% endblock %}
 {% block page_description %}{% blocktranslate with heading=page_heading %}Смотрите {{ heading }} на LumiBox: фильтры по жанрам, странам, годам, рейтингу.{% endblocktranslate %}{% endblock %}
 
 {% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/catalog.css' %}">
+    <link rel="stylesheet" href="{% static 'css/catalog.css' %}?v={{ static_version }}">
 {% endblock %}
 
 {% block content %}
