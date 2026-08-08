@@ -62,8 +62,10 @@ jobs:
 
       - name: Брендинг без рецидивов
         # Тот же чек, что и pre-commit-хук: kg-*/kinogo не должны
-        # возвращаться в разметку и код.
-        run: python scripts/check_branding.py $(git ls-files)
+        # возвращаться в разметку и код. Файлы .github и docs исключаем,
+        # как в .pre-commit-config.yaml (иначе чек падает сам на себе:
+        # комментарий в этом же файле упоминает запрещённые токены).
+        run: python scripts/check_branding.py $(git ls-files | grep -vE '^(\.github|docs)/')
 
       - name: Проверка проекта
         run: python manage.py check
