@@ -64,11 +64,11 @@ class Command(BaseCommand):
             # тогда title.save() не вызвался бы, а файл на диске осиротел.
             changed = False
 
-            if force or not title.poster:
+            if force or not title.poster or self._file_missing(title.poster):
                 self._save(title.poster, self._poster(title, accent), f"{title.slug}.jpg")
                 drawn += 1
                 changed = True
-            if force or not title.backdrop:
+            if force or not title.backdrop or self._file_missing(title.backdrop):
                 self._save(title.backdrop, self._backdrop(title, accent), f"{title.slug}-bg.jpg")
                 changed = True
 
@@ -77,6 +77,27 @@ class Command(BaseCommand):
                 title.save(update_fields=["poster", "backdrop"])
 
         self.stdout.write(self.style.SUCCESS(f"Готово. Постеров нарисовано: {drawn}."))
+
+    def _file_missing(self, field):
+        """Файл задан в БД, но физически отсутствует на диске.
+
+        Нужно для платформ с эфемерной файловой системой (бесплатный Render):
+        после перезапуска контейнера файлы пропадают, а поле в базе остаётся
+        заполненным. Без этой проверки команда считала постер «есть» и не
+        перерисовывала его — витрина оставалась без картинок до --force.
+
+        Локальному диску не доверяем (он эфемерный), поэтому смотрим именно
+        в хранилище. Для S3/R2 хранилище отвечает на exists() запросом к
+        бакету, и битый путь вернёт False — тоже перерисуем.
+        """
+        if not field or not field.name:
+            return True
+        try:
+            return not field.storage.exists(field.name)
+        except (NotImplementedError, OSError):
+            # Не можем спросить хранилище — считаем файл на месте,
+            # чтобы не перетирать чужие данные из-за временного сбоя.
+            return False
 
     def _accent_color(self, slug):
         """Стабильный насыщенный цвет из адреса записи."""
