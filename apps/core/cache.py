@@ -13,6 +13,7 @@
 from __future__ import annotations
 
 import logging
+from typing import Callable
 
 from django.core.cache import cache
 
@@ -81,7 +82,7 @@ def _clear_industry_cache():
 
 # Маппинг модель → список действий инвалидации.
 # ВАЖНО: ключи в нижнем регистре — соответствуют _meta.label_lower (а не _meta.label).
-CACHE_INVALIDATORS: dict[str, list[callable]] = {
+CACHE_INVALIDATORS: dict[str, list[Callable[[], None]]] = {
     # Главная страница
     "catalog.title": [_clear_all_title_caches],
     "catalog.collection": [_clear_home_and_collections],

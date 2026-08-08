@@ -60,6 +60,9 @@ jobs:
       - name: Линт (ruff)
         run: ruff check apps config scripts
 
+      - name: Статические типы (mypy)
+        run: mypy apps
+
       - name: Брендинг без рецидивов
         # Тот же чек, что и pre-commit-хук: kg-*/kinogo не должны
         # возвращаться в разметку и код. Файлы .github и docs исключаем,

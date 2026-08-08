@@ -63,7 +63,7 @@ def _convert_to_webp(image_path: str) -> str | None:
         return webp_path
 
     try:
-        img = Image.open(image_path)
+        img: Image.Image = Image.open(image_path)
         img = img.convert("RGBA") if img.mode in ("P",) else img
         img.save(
             webp_path,

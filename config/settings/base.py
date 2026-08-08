@@ -92,6 +92,8 @@ INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    # ID запроса: X-Request-ID в ответе и request_id в логах и Sentry.
+    "apps.core.middleware.RequestIdMiddleware",
     # Сжатие ответов gzip — уменьшает размер HTML/JSON/CSS/JS.
     "django.middleware.gzip.GZipMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -373,14 +375,20 @@ LOGGING = {
     "disable_existing_loggers": False,
     "formatters": {
         "verbose": {
-            "format": "{levelname} {asctime} {name} {message}",
+            "format": "{levelname} {asctime} {name} [rid={request_id}] {message}",
             "style": "{",
+        },
+    },
+    "filters": {
+        "request_id": {
+            "()": "apps.core.middleware.RequestIdFilter",
         },
     },
     "handlers": {
         "console": {
             "class": "logging.StreamHandler",
             "formatter": "verbose",
+            "filters": ["request_id"],
         },
     },
     "root": {

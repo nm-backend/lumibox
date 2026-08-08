@@ -161,6 +161,14 @@ if _SENTRY_DSN:
     import sentry_sdk
     from sentry_sdk.integrations.django import DjangoIntegration
 
+    from apps.core.middleware import get_request_id
+
+    def _tag_request_id(event, hint):
+        # Привязываем событие к запросу: по request_id его находят
+        # в логах приложения и наоборот.
+        event.setdefault("tags", {})["request_id"] = get_request_id()
+        return event
+
     sentry_sdk.init(
         dsn=_SENTRY_DSN,
         integrations=[DjangoIntegration()],
@@ -169,4 +177,5 @@ if _SENTRY_DSN:
         traces_sample_rate=0.1,
         send_default_pii=False,
         environment="production",
+        before_send=_tag_request_id,
     )

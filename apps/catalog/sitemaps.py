@@ -1,4 +1,5 @@
 from django.contrib.sitemaps import Sitemap
+from django.db.models import Model
 from django.urls import reverse
 
 from apps.catalog.models import Award, Collection, Country, Genre, Person, Studio, Title
@@ -25,10 +26,11 @@ class ReferenceSitemap(Sitemap):
     changefreq = "monthly"
     priority = 0.5
 
-    model = None
-    url_name = ""
+    model: type[Model] | None = None
+    url_name: str = ""
 
     def items(self):
+        assert self.model is not None
         return self.model.objects.all()
 
     def location(self, reference):
