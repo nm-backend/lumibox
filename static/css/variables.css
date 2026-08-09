@@ -1,92 +1,119 @@
-﻿/*
+/*
   Дизайн-токены LumiBox.
 
-  Оформление приведено к классике кинопорталов:
-  абсолютный чёрный фон, Manrope, колонка 1080px, серо-красный
-  акцент, минимальные скругления. Контраст и доступность сохранены.
+  Кинотеатр — это тёмный зал, свет проектора, мерцание экрана.
+  Отсюда палитра: глубокий чёрный, тёплый янтарь проекторного луча,
+  серебристый отблеск киноплёнки.
+
+  Шрифты: Bebas Neue для заголовков (афиша), Inter для текста (программа).
 */
 
 /* Шрифты подключаются в base.html с display=swap, чтобы их загрузка
    не задерживала первую отрисовку страницы. */
 
 :root {
-    /* --- Цвета (палитра кинопортала) --- */
-    --color-bg: #000000;
-    --color-surface: #1b1b1b;
-    --color-surface-hover: #2b2b2b;
+    /* --- Цвета --- */
 
-    /* Текст: светлый с прозрачностью, как на кинопорталах */
-    --color-text: #dfdfdfe0;
-    --color-text-muted: #818181;
-    --color-text-dim: #686868;
-    --color-text-soft: #e5e5e5;
-    --color-text-bright: #e5e5e5;
-    --color-text-strong: #ffffff;
+    /* Фон: кинозал — абсолютный чёрный с микро-оттенком синего */
+    --color-bg: #07080d;
+    --color-surface: #12151e;
+    --color-surface-hover: #1a1f2b;
+
+    /* Текст: серебро киноплёнки */
+    --color-text: #e8ecf4;
+    --color-text-muted: #8891a8;
+    --color-text-dim: #7c8599;
+    --color-text-soft: #c9d1e4;
+    --color-text-bright: #e6e6e6;
+    --color-text-strong: #f3f3f3;
     --color-text-faint: #686868;
     --color-text-shadow: rgba(0, 0, 0, 0.6);
 
     /*
-      Акцент — кинопортальный красный (#b33a2d).
+      Акцент — свет кинопроектора: яркий насыщенный оранжевый.
+      Между классическим orange и amber: не жёлтый, не красный, не кислотный.
+
       --color-accent-rgb хранит те же три канала без обёртки rgb(), чтобы
       полупрозрачные варианты писались как rgba(var(--color-accent-rgb), .25).
+      Раньше такие значения были вписаны числами в 65 местах по девяти файлам,
+      и смена акцента требовала правки каждого. Теперь цвет живёт в одной
+      строке, а все свечения, подсветки и границы следуют за ним сами.
     */
-    --color-accent: #b33a2d;
-    --color-accent-rgb: 179, 58, 45;
-    --color-accent-hover: #c94a3d;
-    --color-accent-soft: #d9776c;
-    --color-accent-deep: #8b3b32;
+    --color-accent: #ff8a1f;
+    --color-accent-rgb: 255, 138, 31;
+    --color-accent-hover: #ffa04a;
+    --color-accent-soft: #ffc28a;
+    --color-accent-deep: #d96a00;
     --color-accent-dim: rgba(var(--color-accent-rgb), 0.12);
     --color-accent-glow: rgba(var(--color-accent-rgb), 0.10);
-    --color-on-accent: #ffffff;
+    /* Текст поверх оранжевой заливки: почти чёрный даёт контраст 9.2:1 */
+    --color-on-accent: #1a0e00;
 
     /* Отражения */
-    --color-success: #9ab96d;
-    --color-error: #b33a2d;
+    --color-success: #4ade80;
+    --color-error: #ff6b5a;
     --color-info: #5b9cf5;
 
-    /* Карточки и поверхности — градации чёрного */
-    --color-card: #000000;
-    --color-card-hover: #1b1b1b;
-    --color-surface-2: #2b2b2b;
-    --color-surface-3: #1b1b1b;
-    --color-surface-deep: #0a0a0a;
+    /* Карточки и поверхности — градации кинозала */
+    --color-card: #0b0d12;
+    --color-card-hover: #0d1017;
+    --color-surface-2: #161a26;
+    --color-surface-3: #141826;
+    --color-surface-deep: #0a0c11;
 
-    /* Границы — полупрозрачный белый */
-    --color-border: rgba(255, 255, 255, 0.12);
-    --color-border-soft: rgba(255, 255, 255, 0.08);
-    --color-border-strong: rgba(255, 255, 255, 0.25);
+    /* Границы */
+    --color-border: #222838;
+    --color-border-soft: #2a2f3d;
+    --color-border-strong: #3a4154;
 
-    /* Glass — чуть светлее фона */
-    --glass-bg: rgba(27, 27, 27, 0.78);
-    --glass-border: rgba(255, 255, 255, 0.12);
+    /* Glass — чуть теплее, чем фон */
+    --glass-bg: rgba(18, 21, 30, 0.78);
+    --glass-border: rgba(34, 40, 56, 0.5);
     --glass-blur: 18px;
 
-    /* Зоны «кинозала» — верхняя полоса и промо-зона */
+    /*
+      Зоны «кинозала» — верхняя полоса и промо-зона. Они остаются чёрными
+      даже в светлой теме (эффект тёмного зала при дневном свете), поэтому
+      их цвета определены здесь и не переопределяются в [data-theme="light"].
+    */
     --color-dark-bg: #000;
     --color-dark-surface: #141826;
     --color-dark-surface-deep: #0a0c11;
-    --color-dark-text: #818181;
-    --color-dark-text-soft: #e5e5e5;
-    --color-dark-text-bright: #ffffff;
+    --color-dark-text: #8891a8;
+    --color-dark-text-soft: #c9d1e4;
+    --color-dark-text-bright: #f3f3f3;
     --color-dark-border: rgba(255, 255, 255, 0.12);
 
-    /* Плашки поверх изображений (бейджи, возраст, оверлей карточки) */
-    --color-overlay: rgba(0, 0, 0, 0.85);
-    --color-overlay-strong: rgba(0, 0, 0, 0.97);
+    /*
+      Плашки поверх изображений (бейджи, возраст, оверлей карточки) —
+      тёмные в обеих темах, как плёнка поверх постера. Не переопределяются
+      в [data-theme="light"].
+    */
+    --color-overlay: rgba(11, 13, 18, 0.85);
+    --color-overlay-strong: rgba(11, 13, 18, 0.97);
 
     /*
       --- Поверхность карточки ---
 
-      Кинопорталы не закрашивают карточки: постеры стоят прямо на чёрном,
-      заголовок — строка под/рядом. Отступы и типографика едины.
+      Один язык для всех карточных поверхностей проекта. Раньше их было
+      пять и они расходились: .lb-shortstory — радиус lg и тень card,
+      .card — радиус md без тени, .reference-card — md и shadow-sm,
+      .collection-card — lg и shadow-sm, .sidebar-film — sm без тени.
+      Четыре радиуса и три тени на одну сущность — это и создавало
+      ощущение, что страницы делали разные люди.
     */
-    --card-radius: var(--radius-sm);
-    --card-radius-sm: var(--radius-xs);
+    --card-radius: var(--radius-lg);
+    --card-radius-sm: var(--radius-md);
     --card-border: 1px solid var(--color-border);
-    --card-bg: transparent;
-    --card-shadow: none;
-    --card-shadow-hover: none;
+    --card-bg: linear-gradient(180deg, var(--color-surface-2) 0%, var(--color-surface) 100%);
+    /* Внутренняя светлая кромка отделяет карточку от фона мягче, чем
+       вторая рамка: край читается, но композиция не утяжеляется. */
+    --card-shadow: var(--shadow-card), inset 0 1px 0 rgba(255, 255, 255, 0.03);
+    --card-shadow-hover: var(--shadow-card), 0 12px 28px rgba(0, 0, 0, 0.5),
+                         inset 0 1px 0 rgba(255, 255, 255, 0.05);
     --card-border-hover: rgba(var(--color-accent-rgb), 0.35);
+    /* Подъём при наведении одинаковый у всех карточек: разные величины
+       читаются как разное поведение и ломают ощущение одного продукта. */
     --card-lift: translateY(-2px);
 
     /* Фигура звезды рейтинга — собственная, нарисованная контуром.
@@ -95,12 +122,14 @@
        же правке. Маска не зависит от системного шрифта, в отличие от глифа. */
     --star-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23000' d='M12 2.6l2.85 6.05 6.65.92-4.82 4.6 1.18 6.58L12 17.6l-5.86 3.15 1.18-6.58-4.82-4.6 6.65-.92z'/%3E%3C/svg%3E");
 
-    /* --- Типографика: Manrope (вариативный) --- */
-    --font-display: "Manrope", "Segoe UI", sans-serif;
-    --font-base: "Manrope", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    /* --- Типографика --- */
+    --font-display: "Bebas Neue", "Impact", sans-serif;
+    --font-base: "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
     --font-mono: "JetBrains Mono", "Cascadia Code", monospace;
 
-    /* Ступень ниже xs — только для бейджей на постере (возраст, тип). */
+    /* Ступень ниже xs — только для бейджей на постере (возраст, тип).
+       Отдельный токен, а не число по месту: иначе размер расползается
+       по файлам и шкала перестаёт быть шкалой. */
     --text-2xs: 0.6875rem;
     --text-xs: 0.75rem;
     --text-sm: 0.875rem;
@@ -114,6 +143,7 @@
     --line-height-sm: 1.25;
 
     /* --- Отступы (4px шаг) --- */
+    /* Микро-шаг 2px — только для точечных подгонок в плотных списках */
     --space-0: 0.125rem;
     --space-1: 0.25rem;
     --space-2: 0.5rem;
@@ -125,82 +155,92 @@
     --space-8: 3rem;
     --space-10: 4rem;
 
-    /* --- Скругления: кинопорталы почти не скругляют --- */
-    --radius-xs: 3px;
-    --radius-sm: 3px;
-    --radius-md: 6px;
-    --radius-lg: 8px;
+    /* --- Скругления --- */
+    --radius-xs: 4px;
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 16px;
     --radius-full: 999px;
 
-    /* --- Тени --- */
-    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.5);
-    --shadow-md: 0 3px 8px rgba(0, 0, 0, 0.5), 0 8px 20px rgba(0, 0, 0, 0.3);
+    /* --- Тени: кинозал бросает глубокие тени --- */
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4);
+    --shadow-md: 0 3px 8px rgba(0, 0, 0, 0.4), 0 8px 20px rgba(0, 0, 0, 0.3);
     --shadow-card: 0 4px 12px rgba(0, 0, 0, 0.5), 0 16px 40px rgba(0, 0, 0, 0.35);
     --shadow-accent: 0 8px 28px rgba(var(--color-accent-rgb), 0.15);
     --shadow-glass: 0 8px 32px rgba(0, 0, 0, 0.55);
 
     /* --- Анимации --- */
+    /*
+      Длительности подогнаны под рекомендации UI/UX Pro Max:
+      — hover 150–200ms (быстрое ощущение отклика)
+      — переходы 200–300ms (стандарт)
+      — выход быстрее входа (exit-faster-than-enter)
+    */
     --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
     --transition: 250ms cubic-bezier(0.4, 0, 0.2, 1);
     --transition-slow: 400ms cubic-bezier(0.4, 0, 0.2, 1);
     --transition-spring: 400ms cubic-bezier(0.34, 1.56, 0.64, 1);
     --transition-exit: 200ms cubic-bezier(0.4, 0, 1, 1);
 
-    /* --- Макет: колонка кинопортала 1080px, боковой индент 40px --- */
-    --container-width: 1080px;
-    --header-height: 60px;
+    /* --- Макет --- */
+    --container-width: 1211px;
+    --header-height: 82px;
     --touch-target: 44px;
 
-    /* Выделение текста */
+    /* Выделение текста — цвет кинопроектора */
     --color-selection-bg: rgba(var(--color-accent-rgb), 0.28);
     --color-selection-text: inherit;
 }
 
-/* ---------- Светлая тема ---------- */
+/* ---------- Светлая тема: кинозал днём ---------- */
 
 [data-theme="light"] {
-    --color-bg: #f5f5f5;
+    --color-bg: #f2f4f8;
     --color-surface: #ffffff;
-    --color-surface-hover: #e8e8e8;
-    --color-border: rgba(0, 0, 0, 0.12);
-    --color-text: #222222;
-    --color-text-muted: #686868;
-    --color-text-dim: #686868;
-    --color-text-soft: #333333;
-    --color-text-bright: #111111;
-    --color-text-strong: #000000;
-    --color-text-faint: #9a9a9a;
+    --color-surface-hover: #e8ebf2;
+    --color-border: #d4d9e3;
+    --color-text: #12141c;
+    --color-text-muted: #5a6278;
+    --color-text-dim: #5f677c;
+    --color-text-soft: #3d4657;
+    --color-text-bright: #232630;
+    --color-text-strong: #0b0d12;
+    --color-text-faint: #9aa3b8;
     --color-text-shadow: rgba(255, 255, 255, 0.55);
-    --color-accent: #b33a2d;
-    --color-accent-rgb: 179, 58, 45;
-    --color-accent-hover: #a02f24;
-    --color-accent-soft: #d9776c;
-    --color-accent-deep: #8b3b32;
+    /* Тот же оранжевый тон, но затемнённый: #ff8a1f на белом даёт контраст
+       около 2:1 и не читается как текст. Затемнённый вариант проходит AA,
+       оставаясь узнаваемо тем же цветом бренда. */
+    --color-accent: #a34f00;
+    --color-accent-rgb: 163, 79, 0;
+    --color-accent-hover: #8a4200;
+    --color-accent-soft: #c46414;
+    --color-accent-deep: #6f3600;
     --color-accent-dim: rgba(var(--color-accent-rgb), 0.08);
     --color-accent-glow: rgba(var(--color-accent-rgb), 0.06);
     --color-on-accent: #ffffff;
     --color-card: #ffffff;
-    --color-card-hover: #f5f5f5;
-    --color-surface-2: #f0f0f0;
-    --color-surface-3: #ebebeb;
-    --color-surface-deep: #e6e6e6;
-    --color-border-soft: rgba(0, 0, 0, 0.08);
-    --color-border-strong: rgba(0, 0, 0, 0.2);
+    --color-card-hover: #f2f4f8;
+    --color-surface-2: #eef1f6;
+    --color-surface-3: #e8ebf2;
+    --color-surface-deep: #dfe3ec;
+    --color-border-soft: #dfe3ec;
+    --color-border-strong: #c3cad6;
     --glass-bg: rgba(255, 255, 255, 0.82);
-    --glass-border: rgba(0, 0, 0, 0.1);
+    --glass-border: rgba(212, 217, 227, 0.6);
     --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.06);
     --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.06), 0 4px 18px rgba(0, 0, 0, 0.04);
     --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.06), 0 8px 28px rgba(0, 0, 0, 0.04);
-    --shadow-accent: 0 8px 24px rgba(179, 58, 45, 0.12);
+    --shadow-accent: 0 8px 24px rgba(150, 102, 18, 0.12);
     --shadow-glass: 0 4px 16px rgba(0, 0, 0, 0.06);
 }
 
 /* ---------- Typography base layer ---------- */
 
-/* Заголовки сайта — рабочий шрифт Manrope, без декора. */
+/* Заголовки сайта — рабочий шрифт Inter, без декора.
+   Bebas Neue остаётся только в промо-зоне главной (стиль афиши). */
 h1, h2, h3.section__title, .film-hero__name {
     font-family: var(--font-base);
-    font-weight: 700;
+    font-weight: 600;
     letter-spacing: normal;
     line-height: 1.2;
     text-transform: none;

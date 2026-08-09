@@ -6,17 +6,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="color-scheme" content="dark light">
 
-    <title>{% block page_title %}{% trans "LumiBox вЂ” РєР°С‚Р°Р»РѕРі С„РёР»СЊРјРѕРІ Рё СЃРµСЂРёР°Р»РѕРІ" %}{% endblock %}</title>
-    <meta name="description" content="{% block page_description %}{% trans "РљР°С‚Р°Р»РѕРі С„РёР»СЊРјРѕРІ Рё СЃРµСЂРёР°Р»РѕРІ: РїРѕРёСЃРє, С„РёР»СЊС‚СЂС‹, РїРѕРґР±РѕСЂРєРё." %}{% endblock %}">
+    <title>{% block page_title %}{% trans "LumiBox — каталог фильмов и сериалов" %}{% endblock %}</title>
+    <meta name="description" content="{% block page_description %}{% trans "Каталог фильмов и сериалов: поиск, фильтры, подборки." %}{% endblock %}">
 
     <link rel="stylesheet" href="{% static 'css/fonts.css' %}?v={{ static_version }}">
 
-    {% comment %} Preload РєСЂРёС‚РёС‡РЅС‹С… С€СЂРёС„С‚РѕРІ: Manrope РґР»СЏ С‚РµРєСЃС‚Р° Рё Р·Р°РіРѕР»РѕРІРєРѕРІ.
-       font-display: swap РІСЃС‘ СЂР°РІРЅРѕ РїРѕРєР°Р¶РµС‚ С‚РµРєСЃС‚ fallback-С€СЂРёС„С‚РѕРј, РЅРѕ preload
-       СѓСЃРєРѕСЂСЏРµС‚ Р·Р°РјРµРЅСѓ РЅР° С€СЂРёС„С‚. РљРёСЂРёР»Р»РёС†Р° РЅСѓР¶РЅР° РґР»СЏ СЂСѓСЃСЃРєРѕРіРѕ С‚РµРєСЃС‚Р°,
-       РїРѕСЌС‚РѕРјСѓ РѕР±Рµ РїРѕРґРјРЅРѕР¶РµСЃС‚РІР°. {% endcomment %}
-    <link rel="preload" href="{% static 'fonts/Manrope-latin.woff2' %}" as="font" type="font/woff2" crossorigin>
-    <link rel="preload" href="{% static 'fonts/Manrope-cyrillic.woff2' %}" as="font" type="font/woff2" crossorigin>
+    {% comment %} Preload критичных шрифтов: Bebas Neue для заголовков и Inter 600 для
+       H1 (LCP-элемент на каталоге). font-display: swap всё равно покажет
+       текст fallback-шрифтом, но preload ускоряет замену на шрифт.
+       Кириллица нужна для русского текста, поэтому обе подмножества. {% endcomment %}
+    <link rel="preload" href="{% static 'fonts/BebasNeue-400-latin.woff2' %}" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="{% static 'fonts/Inter-600-latin.woff2' %}" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="{% static 'fonts/Inter-600-cyrillic.woff2' %}" as="font" type="font/woff2" crossorigin>
 
     <link rel="stylesheet" href="{% static 'css/variables.css' %}?v={{ static_version }}">
     <link rel="stylesheet" href="{% static 'css/base.css' %}?v={{ static_version }}">
@@ -25,41 +26,40 @@
     <link rel="stylesheet" href="{% static 'css/footer.css' %}?v={{ static_version }}">
     <link rel="stylesheet" href="{% static 'css/ads.css' %}?v={{ static_version }}">
     <link rel="stylesheet" href="{% static 'css/lumibox.css' %}?v={{ static_version }}">
-    <link rel="stylesheet" href="{% static 'css/portal.css' %}?v={{ static_version }}">
 
     <link rel="icon" type="image/svg+xml" href="{% static 'img/favicon.svg' %}">
 
-    {# CSRF-С‚РѕРєРµРЅ РґР»СЏ JS (X-CSRFToken): cookie РІ РїСЂРѕРґРµ HttpOnly, С‡РёС‚Р°РµРј РёР· meta #}
+    {# CSRF-токен для JS (X-CSRFToken): cookie в проде HttpOnly, читаем из meta #}
     <meta name="csrf-token" content="{{ csrf_token }}">
 
     {% comment %}
-       РљР°РЅРѕРЅРёС‡РµСЃРєРёР№ Р°РґСЂРµСЃ вЂ” Р±РµР· СЃС‚СЂРѕРєРё Р·Р°РїСЂРѕСЃР°: /catalog/?page=2&sort=name Рё
-       /catalog/ СЌС‚Рѕ РґР»СЏ РїРѕРёСЃРєРѕРІРёРєР° РѕРґРЅР° Рё С‚Р° Р¶Рµ СЃС‚СЂР°РЅРёС†Р° РІ СЂР°Р·РЅС‹С… СЃРѕС‡РµС‚Р°РЅРёСЏС…
-       С„РёР»СЊС‚СЂРѕРІ, Рё Р±РµР· canonical РѕРЅ РґРµР»РёС‚ РµС‘ РІРµСЃ РјРµР¶РґСѓ СЃРѕС‚РЅСЏРјРё РїРѕС‡С‚Рё
-       РѕРґРёРЅР°РєРѕРІС‹С… Р°РґСЂРµСЃРѕРІ. РЎС‚СЂР°РЅРёС†Р° РјРѕР¶РµС‚ РїРµСЂРµРѕРїСЂРµРґРµР»РёС‚СЊ Р±Р»РѕРє, РµСЃР»Рё Сѓ РЅРµС‘
-       РµСЃС‚СЊ СЃРІРѕР№ РѕСЃРЅРѕРІРЅРѕР№ Р°РґСЂРµСЃ.
+       Канонический адрес — без строки запроса: /catalog/?page=2&sort=name и
+       /catalog/ это для поисковика одна и та же страница в разных сочетаниях
+       фильтров, и без canonical он делит её вес между сотнями почти
+       одинаковых адресов. Страница может переопределить блок, если у неё
+       есть свой основной адрес.
     {% endcomment %}
     <link rel="canonical" href="{% block canonical_url %}{% if request %}{% absolute_url request.path %}{% endif %}{% endblock %}">
 
     {# Open Graph / Social sharing #}
     <meta property="og:site_name" content="LumiBox">
     <meta property="og:type" content="website">
-    <meta property="og:title" content="{% block og_title %}{% trans 'LumiBox вЂ” РєР°С‚Р°Р»РѕРі С„РёР»СЊРјРѕРІ Рё СЃРµСЂРёР°Р»РѕРІ' %}{% endblock %}">
-    <meta property="og:description" content="{% block og_description %}{% trans 'РљР°С‚Р°Р»РѕРі С„РёР»СЊРјРѕРІ Рё СЃРµСЂРёР°Р»РѕРІ: РїРѕРёСЃРє, С„РёР»СЊС‚СЂС‹, РїРѕРґР±РѕСЂРєРё.' %}{% endblock %}">
+    <meta property="og:title" content="{% block og_title %}{% trans 'LumiBox — каталог фильмов и сериалов' %}{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}{% trans 'Каталог фильмов и сериалов: поиск, фильтры, подборки.' %}{% endblock %}">
     <meta property="og:url" content="{% block og_url %}{% if request %}{% absolute_url request.path %}{% endif %}{% endblock %}">
     <meta property="og:image" content="{% block og_image %}{% absolute_static 'img/og-default.png' %}{% endblock %}">
     <meta property="og:locale" content="{{ LANGUAGE_CODE }}">
 
     {# Twitter Card #}
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="{% block twitter_title %}{% trans 'LumiBox вЂ” РєР°С‚Р°Р»РѕРі С„РёР»СЊРјРѕРІ Рё СЃРµСЂРёР°Р»РѕРІ' %}{% endblock %}">
-    <meta name="twitter:description" content="{% block twitter_description %}{% trans 'РљР°С‚Р°Р»РѕРі С„РёР»СЊРјРѕРІ Рё СЃРµСЂРёР°Р»РѕРІ: РїРѕРёСЃРє, С„РёР»СЊС‚СЂС‹, РїРѕРґР±РѕСЂРєРё.' %}{% endblock %}">
+    <meta name="twitter:title" content="{% block twitter_title %}{% trans 'LumiBox — каталог фильмов и сериалов' %}{% endblock %}">
+    <meta name="twitter:description" content="{% block twitter_description %}{% trans 'Каталог фильмов и сериалов: поиск, фильтры, подборки.' %}{% endblock %}">
     <meta name="twitter:image" content="{% block twitter_image %}{% absolute_static 'img/og-default.png' %}{% endblock %}">
 
     {% block extra_meta %}{% endblock %}
     {% block extra_css %}{% endblock %}
 
-    {# Organization Schema вЂ” РѕСЃРЅРѕРІРЅР°СЏ РёРЅС„РѕСЂРјР°С†РёСЏ Рѕ СЃР°Р№С‚Рµ РґР»СЏ РїРѕРёСЃРєРѕРІРёРєРѕРІ #}
+    {# Organization Schema — основная информация о сайте для поисковиков #}
     {% if request %}
     <script type="application/ld+json">
     {
@@ -67,7 +67,7 @@
         "@type": "Organization",
         "name": "LumiBox",
         "url": "{{ request.build_absolute_uri|cut:request.get_full_path }}",
-        "description": "{% trans 'РљР°С‚Р°Р»РѕРі С„РёР»СЊРјРѕРІ Рё СЃРµСЂРёР°Р»РѕРІ: РїРѕРёСЃРє, С„РёР»СЊС‚СЂС‹, РїРѕРґР±РѕСЂРєРё.' %}",
+        "description": "{% trans 'Каталог фильмов и сериалов: поиск, фильтры, подборки.' %}",
         "logo": "{% absolute_static 'img/favicon.svg' %}",
         "sameAs": [
             "https://t.me/lumiboxxx",
@@ -77,7 +77,7 @@
     </script>
     {% endif %}
 
-    {# BreadcrumbList Schema вЂ” РЅР°РІРёРіР°С†РёРѕРЅРЅР°СЏ С†РµРїРѕС‡РєР° РґР»СЏ РїРѕРёСЃРєРѕРІРёРєРѕРІ #}
+    {# BreadcrumbList Schema — навигационная цепочка для поисковиков #}
     {% block breadcrumb_schema %}
     {% if request %}
     <script type="application/ld+json">
@@ -88,13 +88,13 @@
             {
                 "@type": "ListItem",
                 "position": 1,
-                "name": "{% trans 'Р“Р»Р°РІРЅР°СЏ' %}",
+                "name": "{% trans 'Главная' %}",
                 "item": "{% absolute_url '/' %}"
             }{% if request.resolver_match and request.resolver_match.url_name and request.resolver_match.url_name != 'home' %},
             {
                 "@type": "ListItem",
                 "position": 2,
-                "name": "{% block breadcrumb_2_name %}{% trans 'РљР°С‚Р°Р»РѕРі' %}{% endblock %}",
+                "name": "{% block breadcrumb_2_name %}{% trans 'Каталог' %}{% endblock %}",
                 "item": "{% block breadcrumb_2_url %}{% absolute_url request.path %}{% endblock %}"
             }{% endif %}
         ]
@@ -103,46 +103,46 @@
     {% endif %}
     {% endblock %}
 
-    {% comment %} Google Analytics / Google Tag Manager вЂ” РІСЃС‚Р°РІР»СЏРµС‚СЃСЏ С‚РѕР»СЊРєРѕ РєРѕРіРґР°
-       GA_MEASUREMENT_ID Р·Р°РґР°РЅ С‡РµСЂРµР· РїРµСЂРµРјРµРЅРЅСѓСЋ РѕРєСЂСѓР¶РµРЅРёСЏ, Рё С‚РѕР»СЊРєРѕ РїРѕСЃР»Рµ
-       СЏРІРЅРѕРіРѕ СЃРѕРіР»Р°СЃРёСЏ РїРѕСЃРµС‚РёС‚РµР»СЏ (static/js/analytics.js). Р‘РµР· РЅРµРіРѕ
-       РЅР° СЃС‚СЂР°РЅРёС†Рµ РЅРµС‚ РЅРё Р»РёС€РЅРёС… Р±Р°Р№С‚, РЅРё Р·Р°РїСЂРѕСЃРѕРІ Рє Google.
+    {% comment %} Google Analytics / Google Tag Manager — вставляется только когда
+       GA_MEASUREMENT_ID задан через переменную окружения, и только после
+       явного согласия посетителя (static/js/analytics.js). Без него
+       на странице нет ни лишних байт, ни запросов к Google.
     {% endcomment %}
     {% if ga_measurement_id %}
     <script>window.lbGaId = '{{ ga_measurement_id }}';</script>
     {% endif %}
 </head>
 <body class="{% block body_class %}{% endblock %}">
-    {% comment %} Р”РІР° РґРµРєРѕСЂР°С‚РёРІРЅС‹С… СЃР»РѕСЏ С„РѕРЅР°. РЎС‚РёР»Рё РґР»СЏ РЅРёС… РІ РїСЂРѕРµРєС‚Рµ СѓР¶Рµ Р±С‹Р»Рё,
-       Р° СЂР°Р·РјРµС‚РєРё РЅРµ Р±С‹Р»Рѕ вЂ” С‚Рѕ РµСЃС‚СЊ РїСЂР°РІРёР»Р° Р»РµР¶Р°Р»Рё РјС‘СЂС‚РІС‹Рј РіСЂСѓР·РѕРј.
+    {% comment %} Два декоративных слоя фона. Стили для них в проекте уже были,
+       а разметки не было — то есть правила лежали мёртвым грузом.
 
-       cinema-glow вЂ” С‚С‘РїР»РѕРµ СЃРІРµС‡РµРЅРёРµ РїСЂРѕРµРєС‚РѕСЂР° СЃРЅРёР·Сѓ СЃРїСЂР°РІР°, РґР°С‘С‚ РіР»СѓР±РёРЅСѓ
-       РІРјРµСЃС‚Рѕ РїР»РѕСЃРєРѕР№ Р·Р°Р»РёРІРєРё. grain-overlay вЂ” РµРґРІР° Р·Р°РјРµС‚РЅРѕРµ Р·РµСЂРЅРѕ РїР»С‘РЅРєРё
-       (РїСЂРѕР·СЂР°С‡РЅРѕСЃС‚СЊ 0.025), РёР·-Р·Р° РєРѕС‚РѕСЂРѕРіРѕ С‡С‘СЂРЅС‹Р№ РїРµСЂРµСЃС‚Р°С‘С‚ РІС‹РіР»СЏРґРµС‚СЊ
-       В«С†РёС„СЂРѕРІС‹РјВ». РћР±Р° СЃР»РѕСЏ РЅРµ РїРµСЂРµС…РІР°С‚С‹РІР°СЋС‚ СЃРѕР±С‹С‚РёСЏ РјС‹С€Рё, Р° Р·РµСЂРЅРѕ
-       РѕС‚РєР»СЋС‡Р°РµС‚СЃСЏ РїСЂРё prefers-reduced-motion.
+       cinema-glow — тёплое свечение проектора снизу справа, даёт глубину
+       вместо плоской заливки. grain-overlay — едва заметное зерно плёнки
+       (прозрачность 0.025), из-за которого чёрный перестаёт выглядеть
+       «цифровым». Оба слоя не перехватывают события мыши, а зерно
+       отключается при prefers-reduced-motion.
     {% endcomment %}
     <div class="cinema-glow" aria-hidden="true"></div>
     <div class="grain-overlay" aria-hidden="true"></div>
 
-    {% comment %} Р‘РѕРєРѕРІС‹Рµ СЂРµРєР»Р°РјРЅС‹Рµ СЂРµР»СЊСЃС‹. Р’РёРґРЅС‹ С‚РѕР»СЊРєРѕ РЅР° С€РёСЂРѕРєРёС… СЌРєСЂР°РЅР°С…
-       (в‰Ґ1640px) вЂ” С‚Р°Рј, РіРґРµ РєРѕРЅС‚РµР№РЅРµСЂ РЅРµ Р·Р°РЅРёРјР°РµС‚ РІСЃСЋ С€РёСЂРёРЅСѓ РѕРєРЅР°. РЎРµР№С‡Р°СЃ
-       СЌС‚Рѕ РїР»РµР№СЃС…РѕР»РґРµСЂС‹: РІС‘СЂСЃС‚РєР° Рё СЂР°Р·РјРµСЂС‹ (160Г—600) С„РёРЅР°Р»СЊРЅС‹Рµ, РїРѕРґСЃС‚Р°РІРёС‚СЊ
-       СЂРµР°Р»СЊРЅС‹Рµ Р±Р°РЅРЅРµСЂС‹ РјРѕР¶РЅРѕ Р±РµР· РёР·РјРµРЅРµРЅРёСЏ СЂР°Р·РјРµС‚РєРё.
+    {% comment %} Боковые рекламные рельсы. Видны только на широких экранах
+       (≥1640px) — там, где контейнер не занимает всю ширину окна. Сейчас
+       это плейсхолдеры: вёрстка и размеры (160×600) финальные, подставить
+       реальные баннеры можно без изменения разметки.
     {% endcomment %}
     {% include "includes/ad_rail.html" with side="left" %}
     {% include "includes/ad_rail.html" with side="right" %}
 
-    {% comment %} Skip-to-content: СЃРєСЂРёРЅСЂРёРґРµСЂС‹ Рё РЅР°РІРёРіР°С†РёСЏ СЃ РєР»Р°РІРёР°С‚СѓСЂС‹ РїСЂРѕРїСѓСЃРєР°СЋС‚
-       РїРѕРІС‚РѕСЂСЏСЋС‰РёРµСЃСЏ Р±Р»РѕРєРё С€Р°РїРєРё Рё СЃСЂР°Р·Сѓ РїРµСЂРµС…РѕРґСЏС‚ Рє РѕСЃРЅРѕРІРЅРѕРјСѓ РєРѕРЅС‚РµРЅС‚Сѓ.
-       РЎСЃС‹Р»РєР° РІРёР·СѓР°Р»СЊРЅРѕ СЃРєСЂС‹С‚Р° Рё РїРѕСЏРІР»СЏРµС‚СЃСЏ РїСЂРё С„РѕРєСѓСЃРµ СЃ РєР»Р°РІРёР°С‚СѓСЂС‹.
+    {% comment %} Skip-to-content: скринридеры и навигация с клавиатуры пропускают
+       повторяющиеся блоки шапки и сразу переходят к основному контенту.
+       Ссылка визуально скрыта и появляется при фокусе с клавиатуры.
     {% endcomment %}
-    <a class="skip-link" href="#main-content">{% trans "Рљ СЃРѕРґРµСЂР¶Р°РЅРёСЋ" %}</a>
+    <a class="skip-link" href="#main-content">{% trans "К содержанию" %}</a>
 
-    <div class="lb-topbar" role="region" aria-label="{% trans 'Р’РµСЂС…РЅСЏСЏ РїР°РЅРµР»СЊ' %}">
+    <div class="lb-topbar" role="region" aria-label="{% trans 'Верхняя панель' %}">
         <div class="lb-topbar__inner">
-            <span class="lb-topbar__text">{% trans "РћРЅР»Р°Р№РЅ-РєРёРЅРѕС‚РµР°С‚СЂ LumiBox вЂ” С„РёР»СЊРјС‹ Рё СЃРµСЂРёР°Р»С‹ Р±РµСЃРїР»Р°С‚РЅРѕ" %}</span>
-            <a class="lb-topbar__link" href="{% url 'catalog:title_list' %}?sort=-published_at">{% trans "РќРѕРІРёРЅРєРё" %}</a>
+            <span class="lb-topbar__text">{% trans "Онлайн-кинотеатр LumiBox — фильмы и сериалы бесплатно" %}</span>
+            <a class="lb-topbar__link" href="{% url 'catalog:title_list' %}?sort=-published_at">{% trans "Новинки" %}</a>
         </div>
     </div>
 
@@ -154,30 +154,38 @@
             </a>
 
             {% comment %}
-               РЎС‚Р°СЂР°СЏ РґРµСЃРєС‚РѕРїРЅР°СЏ РЅР°РІРёРіР°С†РёСЏ (site-nav__desktop) СѓРґР°Р»РµРЅР°:
-               РµС‘ РїРѕР»РЅРѕСЃС‚СЊСЋ Р·Р°РјРµРЅСЏРµС‚ РіР»РѕР±Р°Р»СЊРЅС‹Р№ С‚РѕРї-РЅР°РІ lb-topnav,
-               РєРѕС‚РѕСЂС‹Р№ СЃС‚СЂРѕРёС‚СЃСЏ context processor'РѕРј lb_topnav.
+               Старая десктопная навигация (site-nav__desktop) удалена:
+               её полностью заменяет глобальный топ-нав lb-topnav,
+               который строится context processor'ом lb_topnav.
             {% endcomment %}
 
             <div class="search-wrapper site-header__search">
                 <form class="search" action="{% url 'catalog:title_list' %}" method="get" role="search" data-search-form>
-                    <label class="visually-hidden" for="search-input">{% trans "РџРѕРёСЃРє РїРѕ РєР°С‚Р°Р»РѕРіСѓ" %}</label>
+                    <label class="visually-hidden" for="search-input">{% trans "Поиск по каталогу" %}</label>
                     <input class="search__input"
                            id="search-input"
                            type="search"
                            name="q"
                            value="{{ request.GET.q|default:'' }}"
-                           placeholder="{% trans 'РџРѕРёСЃРє...' %}"
+                           placeholder="{% trans 'Поиск...' %}"
                            autocomplete="off"
                            data-search-input>
-                    <button class="search__submit" type="submit" aria-label="{% trans 'РќР°Р№С‚Рё' %}">{% icon "search" size=16 %}</button>
+                    <button class="search__submit" type="submit" aria-label="{% trans 'Найти' %}">{% icon "search" size=16 %}</button>
                 </form>
                 <div class="search__dropdown" data-search-dropdown></div>
             </div>
 
+            <button class="search-toggle" type="button" data-search-toggle aria-label="{% trans 'Поиск' %}" aria-expanded="false">{% icon "search" size=18 %}</button>
+
             <button class="theme-toggle" type="button" data-theme-toggle aria-label="{% trans 'Toggle theme' %}">{% icon "moon" class_name="theme-moon" %}{% icon "sun" class_name="theme-sun" %}</button>
 
-            <button class="hamburger" type="button" data-hamburger aria-controls="mobile-nav" aria-label="{% trans 'РњРµРЅСЋ' %}" aria-expanded="false">
+            <a class="telegram-header-link" href="https://t.me/lumiboxxx" target="_blank" rel="noopener noreferrer" aria-label="{% trans 'Telegram' %}">
+                {% icon "send" size=18 %}
+            </a>
+
+            {% include "includes/language_switcher.html" %}
+
+            <button class="hamburger" type="button" data-hamburger aria-controls="mobile-nav" aria-label="{% trans 'Меню' %}" aria-expanded="false">
                 <span class="hamburger__line"></span>
                 <span class="hamburger__line"></span>
                 <span class="hamburger__line"></span>
@@ -185,7 +193,7 @@
 
             {% if user.is_authenticated %}
                 <details class="user-menu">
-                    <summary class="user-menu__trigger" aria-label="{% trans 'РњРµРЅСЋ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ' %}">
+                    <summary class="user-menu__trigger" aria-label="{% trans 'Меню пользователя' %}">
                         <span class="avatar">
                             {% if user.avatar %}
                                 <img class="avatar__image" src="{{ user.avatar.url }}" alt="" loading="lazy" decoding="async">
@@ -197,26 +205,26 @@
 
                     <div class="user-menu__dropdown">
                         <p class="user-menu__name">{{ user.display_name }}</p>
-                        <a class="user-menu__link" href="{% url 'users:profile' %}">{% trans "РџСЂРѕС„РёР»СЊ" %}</a>
-                        <a class="user-menu__link" href="{% url 'library:favorites' %}">{% trans "РР·Р±СЂР°РЅРЅРѕРµ" %}</a>
-                        <a class="user-menu__link" href="{% url 'library:watchlist' %}">{% trans "РЎРјРѕС‚СЂРµС‚СЊ РїРѕР·Р¶Рµ" %}</a>
-                        <a class="user-menu__link" href="{% url 'library:history' %}">{% trans "РСЃС‚РѕСЂРёСЏ" %}</a>
+                        <a class="user-menu__link" href="{% url 'users:profile' %}">{% trans "Профиль" %}</a>
+                        <a class="user-menu__link" href="{% url 'library:favorites' %}">{% trans "Избранное" %}</a>
+                        <a class="user-menu__link" href="{% url 'library:watchlist' %}">{% trans "Смотреть позже" %}</a>
+                        <a class="user-menu__link" href="{% url 'library:history' %}">{% trans "История" %}</a>
                         <form method="post" action="{% url 'users:logout' %}">
                             {% csrf_token %}
-                            <button class="user-menu__link user-menu__link--button" type="submit">{% trans "Р’С‹Р№С‚Рё" %}</button>
+                            <button class="user-menu__link user-menu__link--button" type="submit">{% trans "Выйти" %}</button>
                         </form>
                     </div>
                 </details>
             {% else %}
                 <a class="button button--primary site-header__login" href="{% url 'users:login' %}">
                     {% icon "user" size=16 class_name="site-header__login-icon" %}
-                    <span class="site-header__login-text">{% trans "Р’РѕР№С‚Рё" %}</span>
+                    <span class="site-header__login-text">{% trans "Войти" %}</span>
                 </a>
             {% endif %}
         </div>
     </header>
 
-    <nav class="lb-topnav" aria-label="{% trans "РћСЃРЅРѕРІРЅР°СЏ РЅР°РІРёРіР°С†РёСЏ" %}">
+    <nav class="lb-topnav" aria-label="{% trans "Основная навигация" %}">
         {% for label, url, is_active in lb_topnav %}
             <a class="lb-topnav__link{% if is_active %} lb-topnav__link--active{% endif %}"
                href="{{ url }}">{{ label }}</a>
@@ -224,27 +232,27 @@
     </nav>
 
     {# Mobile drawer nav #}
-    <nav id="mobile-nav" class="mobile-nav" data-mobile-nav aria-label="{% trans 'РњРѕР±РёР»СЊРЅР°СЏ РЅР°РІРёРіР°С†РёСЏ' %}">
-        <a class="mobile-nav__link" href="{% url 'catalog:home' %}">{% trans "Р“Р»Р°РІРЅР°СЏ" %}</a>
-        <a class="mobile-nav__link" href="{% url 'catalog:title_list' %}">{% trans "Р’РµСЃСЊ РєР°С‚Р°Р»РѕРі" %}</a>
-        <a class="mobile-nav__link" href="{% url 'catalog:title_list' %}?type=movie">{% trans "Р¤РёР»СЊРјС‹" %}</a>
-        <a class="mobile-nav__link" href="{% url 'catalog:title_list' %}?type=series">{% trans "РЎРµСЂРёР°Р»С‹" %}</a>
-        <a class="mobile-nav__link" href="{% url 'catalog:title_list' %}?type=cartoon">{% trans "РњСѓР»СЊС‚С„РёР»СЊРјС‹" %}</a>
-        <a class="mobile-nav__link" href="{% url 'catalog:title_list' %}?type=tv_show">{% trans "РўР’-С€РѕСѓ" %}</a>
-        <a class="mobile-nav__link" href="{% url 'catalog:genre_list' %}">{% trans "Р–Р°РЅСЂС‹" %}</a>
-        <a class="mobile-nav__link" href="{% url 'catalog:collection_list' %}">{% trans "РџРѕРґР±РѕСЂРєРё" %}</a>
-        <a class="mobile-nav__link" href="{% url 'catalog:title_list' %}?sort=-rating_average">{% trans "Р’С‹СЃРѕРєРёР№ СЂРµР№С‚РёРЅРі" %}</a>
-        <a class="mobile-nav__link" href="{% url 'catalog:title_list' %}?sort=-published_at">{% trans "РќРѕРІРёРЅРєРё" %}</a>
-        <a class="mobile-nav__link" href="{% url 'catalog:random_title' %}">{% trans "РЎР»СѓС‡Р°Р№РЅС‹Р№ С„РёР»СЊРј" %}</a>
+    <nav id="mobile-nav" class="mobile-nav" data-mobile-nav aria-label="{% trans 'Мобильная навигация' %}">
+        <a class="mobile-nav__link" href="{% url 'catalog:home' %}">{% trans "Главная" %}</a>
+        <a class="mobile-nav__link" href="{% url 'catalog:title_list' %}">{% trans "Весь каталог" %}</a>
+        <a class="mobile-nav__link" href="{% url 'catalog:title_list' %}?type=movie">{% trans "Фильмы" %}</a>
+        <a class="mobile-nav__link" href="{% url 'catalog:title_list' %}?type=series">{% trans "Сериалы" %}</a>
+        <a class="mobile-nav__link" href="{% url 'catalog:title_list' %}?type=cartoon">{% trans "Мультфильмы" %}</a>
+        <a class="mobile-nav__link" href="{% url 'catalog:title_list' %}?type=tv_show">{% trans "ТВ-шоу" %}</a>
+        <a class="mobile-nav__link" href="{% url 'catalog:genre_list' %}">{% trans "Жанры" %}</a>
+        <a class="mobile-nav__link" href="{% url 'catalog:collection_list' %}">{% trans "Подборки" %}</a>
+        <a class="mobile-nav__link" href="{% url 'catalog:title_list' %}?sort=-rating_average">{% trans "Высокий рейтинг" %}</a>
+        <a class="mobile-nav__link" href="{% url 'catalog:title_list' %}?sort=-published_at">{% trans "Новинки" %}</a>
+        <a class="mobile-nav__link" href="{% url 'catalog:random_title' %}">{% trans "Случайный фильм" %}</a>
         {% if user.is_authenticated %}
             <hr class="mobile-nav__divider">
-            <a class="mobile-nav__link" href="{% url 'users:profile' %}">{% trans "РџСЂРѕС„РёР»СЊ" %}</a>
-            <a class="mobile-nav__link" href="{% url 'library:favorites' %}">{% trans "РР·Р±СЂР°РЅРЅРѕРµ" %}</a>
-            <a class="mobile-nav__link" href="{% url 'library:watchlist' %}">{% trans "РЎРјРѕС‚СЂРµС‚СЊ РїРѕР·Р¶Рµ" %}</a>
-            <a class="mobile-nav__link" href="{% url 'library:history' %}">{% trans "РСЃС‚РѕСЂРёСЏ" %}</a>
+            <a class="mobile-nav__link" href="{% url 'users:profile' %}">{% trans "Профиль" %}</a>
+            <a class="mobile-nav__link" href="{% url 'library:favorites' %}">{% trans "Избранное" %}</a>
+            <a class="mobile-nav__link" href="{% url 'library:watchlist' %}">{% trans "Смотреть позже" %}</a>
+            <a class="mobile-nav__link" href="{% url 'library:history' %}">{% trans "История" %}</a>
         {% else %}
             <hr class="mobile-nav__divider">
-            <a class="mobile-nav__link" href="{% url 'users:login' %}">{% trans "Р’РѕР№С‚Рё" %}</a>
+            <a class="mobile-nav__link" href="{% url 'users:login' %}">{% trans "Войти" %}</a>
         {% endif %}
         <hr class="mobile-nav__divider">
         <div class="mobile-nav__lang">
@@ -274,54 +282,54 @@
     <div class="toast-container" data-toast-container></div>
 
     {# Lightbox #}
-    <div class="lightbox" data-lightbox role="dialog" aria-modal="true" aria-label="{% trans 'РџСЂРѕСЃРјРѕС‚СЂ РёР·РѕР±СЂР°Р¶РµРЅРёСЏ' %}">
-        <button class="lightbox__close" type="button" data-lightbox-close aria-label="{% trans 'Р—Р°РєСЂС‹С‚СЊ' %}">{% icon "close" size=24 %}</button>
+    <div class="lightbox" data-lightbox role="dialog" aria-modal="true" aria-label="{% trans 'Просмотр изображения' %}">
+        <button class="lightbox__close" type="button" data-lightbox-close aria-label="{% trans 'Закрыть' %}">{% icon "close" size=24 %}</button>
         <img class="lightbox__img" alt="" data-lightbox-img>
     </div>
 
     {% comment %}
-       РќРёР¶РЅРµРµ РјРµРЅСЋ РґР»СЏ РјРѕР±РёР»СЊРЅС‹С…. Р‘РµР· РєСЌС€Р° СЃРѕР·РЅР°С‚РµР»СЊРЅРѕ: РїРѕСЃР»РµРґРЅРёР№ РїСѓРЅРєС‚
-       Р·Р°РІРёСЃРёС‚ РѕС‚ С‚РѕРіРѕ, РІРѕС€С‘Р» Р»Рё РїРѕСЃРµС‚РёС‚РµР»СЊ, Р° РєР»СЋС‡ С„СЂР°РіРјРµРЅС‚Р° СЌС‚РѕРіРѕ РЅРµ
-       СѓС‡РёС‚С‹РІР°Р» вЂ” РІРѕС€РµРґС€РёР№ РІРёРґРµР» В«Р’РѕР№С‚РёВ» РІРјРµСЃС‚Рѕ В«РР·Р±СЂР°РЅРЅРѕРіРѕВ», РµСЃР»Рё РєСЌС€
-       РґРѕ РЅРµРіРѕ РїСЂРѕРіСЂРµР» РіРѕСЃС‚СЊ.
+       Нижнее меню для мобильных. Без кэша сознательно: последний пункт
+       зависит от того, вошёл ли посетитель, а ключ фрагмента этого не
+       учитывал — вошедший видел «Войти» вместо «Избранного», если кэш
+       до него прогрел гость.
     {% endcomment %}
-    <nav class="bottom-nav" aria-label="{% trans 'Р‘С‹СЃС‚СЂР°СЏ РЅР°РІРёРіР°С†РёСЏ' %}">
+    <nav class="bottom-nav" aria-label="{% trans 'Быстрая навигация' %}">
         <a class="bottom-nav__link" href="{% url 'catalog:home' %}">
             <span class="bottom-nav__icon">{% icon "home" %}</span>
-            {% trans "Р“Р»Р°РІРЅР°СЏ" %}
+            {% trans "Главная" %}
         </a>
         <a class="bottom-nav__link" href="{% url 'catalog:title_list' %}">
             <span class="bottom-nav__icon">{% icon "movie" %}</span>
-            {% trans "РљР°С‚Р°Р»РѕРі" %}
+            {% trans "Каталог" %}
         </a>
         <a class="bottom-nav__link" href="{% url 'catalog:genre_list' %}">
             <span class="bottom-nav__icon">{% icon "tag" %}</span>
-            {% trans "Р–Р°РЅСЂС‹" %}
+            {% trans "Жанры" %}
         </a>
         {% if user.is_authenticated %}
             <a class="bottom-nav__link" href="{% url 'library:favorites' %}">
                 <span class="bottom-nav__icon">{% icon "heart" %}</span>
-                {% trans "РР·Р±СЂР°РЅРЅРѕРµ" %}
+                {% trans "Избранное" %}
             </a>
         {% else %}
             <a class="bottom-nav__link" href="{% url 'users:login' %}">
                 <span class="bottom-nav__icon">{% icon "user" %}</span>
-                {% trans "Р’РѕР№С‚Рё" %}
+                {% trans "Войти" %}
             </a>
         {% endif %}
     </nav>
 
     {% include "includes/footer.html" %}
 
-    {% comment %} Р‘Р°РЅРЅРµСЂ СЃРѕРіР»Р°СЃРёСЏ РЅР° Р°РЅР°Р»РёС‚РёРєСѓ. РџРѕРєР°Р·С‹РІР°РµС‚СЃСЏ С‚РѕР»СЊРєРѕ РєРѕРіРґР°
-       GA_MEASUREMENT_ID Р·Р°РґР°РЅ, Рё С‚РѕР»СЊРєРѕ РїРѕРєР° РїРѕСЃРµС‚РёС‚РµР»СЊ РЅРµ РЅР°Р¶Р°Р» В«РџСЂРёРЅСЏС‚СЊВ»
-       (СЂРµС€РµРЅРёРµ С…СЂР°РЅРёС‚СЃСЏ РІ localStorage, СЃС‚Р°С‚РёС‡РµСЃРєРёР№ js/analytics.js).
+    {% comment %} Баннер согласия на аналитику. Показывается только когда
+       GA_MEASUREMENT_ID задан, и только пока посетитель не нажал «Принять»
+       (решение хранится в localStorage, статический js/analytics.js).
     {% endcomment %}
     <div class="cookie-consent" id="cookie-consent" role="dialog" aria-labelledby="cookie-consent-title" aria-hidden="true">
         <p class="cookie-consent__text" id="cookie-consent-title">
-            {% trans "РњС‹ РёСЃРїРѕР»СЊР·СѓРµРј cookies РґР»СЏ Р°РЅР°Р»РёС‚РёРєРё РїРѕСЃРµС‰Р°РµРјРѕСЃС‚Рё. РџСЂРѕРґРѕР»Р¶Р°СЏ РїРѕР»СЊР·РѕРІР°С‚СЊСЃСЏ СЃР°Р№С‚РѕРј, РІС‹ СЃРѕРіР»Р°С€Р°РµС‚РµСЃСЊ СЃ СЌС‚РёРј." %}
+            {% trans "Мы используем cookies для аналитики посещаемости. Продолжая пользоваться сайтом, вы соглашаетесь с этим." %}
         </p>
-        <button class="cookie-consent__accept btn btn--primary" type="button">{% trans "РџСЂРёРЅСЏС‚СЊ" %}</button>
+        <button class="cookie-consent__accept btn btn--primary" type="button">{% trans "Принять" %}</button>
     </div>
 
     <script src="{% static 'js/analytics.js' %}?v={{ static_version }}" defer></script>
