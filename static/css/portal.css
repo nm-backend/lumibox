@@ -1,0 +1,816 @@
+/*
+  Слой кинопортала: структура, отступы и типографика.
+
+  Живой эталон — современный кинопортал:
+  — колонка 1080px, боковой индент 40px (20px на экранах ≤1220px);
+  — чёрный фон, Manrope 14px, letter-spacing 0.02em;
+  — меню-строка 14px rgba(223,223,223,.88);
+  — чипы-фильтры 12px на #1b1b1b с радиусом 3px;
+  — карточка списка: постер 160×240, заголовок 18px/600, мета 13px, текст 14px;
+  — сайдбар слева 340px, контент 738px;
+  — кнопки 40px, 12px/600, uppercase, radius 3px (заливка #414141, hover красный);
+  — брейкпоинты 1220 / 960 / 760 / 590.
+
+  Файл подключается последним (после lumibox.css и тематических css),
+  поэтому его правила гарантированно побеждают.
+*/
+
+/* ---------- База ---------- */
+
+body {
+    font-size: 14px;
+    letter-spacing: 0.02em;
+}
+
+.container {
+    max-width: 1080px;
+    padding: 0;
+}
+
+/* Главная: колонка идёт через .lb-wrap, а не .container */
+.lb-body .container {
+    max-width: 1080px;
+    padding: 0;
+}
+
+.lb-wrap {
+    max-width: 1080px;
+    padding: 0;
+}
+
+.lb-home {
+    font-size: 14px;
+}
+
+/* Внутренние инденты (кинопортальный --indent: 40px → 20px ≤1220px) */
+.page-header,
+.detail-layout,
+.player-section,
+.similar-section,
+.breadcrumbs {
+    padding-left: 40px;
+    padding-right: 40px;
+}
+
+.film-hero__inner {
+    padding-left: 40px;
+    padding-right: 40px;
+}
+
+/* ---------- Верхняя полоса (header_black) ---------- */
+
+.lb-topbar__inner {
+    min-height: 33px;
+    padding: 0 40px;
+}
+
+/* ---------- Шапка ---------- */
+
+.site-header {
+    background: var(--color-bg);
+}
+
+.site-header__inner {
+    min-height: 60px;
+    gap: var(--space-5);
+}
+
+.site-header__inner::after {
+    display: none;
+}
+
+.logo {
+    font-size: 1.125rem;
+    letter-spacing: 0;
+}
+
+.logo__mark {
+    width: 24px;
+    height: 24px;
+    border-radius: var(--radius-xs);
+}
+
+.logo__mark::before {
+    border-width: 5px 0 5px 8px;
+    margin-left: 2px;
+}
+
+/* Поиск — как на кинопортале: компактный инпут */
+.search {
+    height: 40px;
+    border-radius: 4px;
+}
+
+.search__input {
+    font-size: 13px;
+}
+
+.site-header__search {
+    flex: 0 1 300px;
+}
+
+.theme-toggle,
+.telegram-header-link,
+.lang-menu__trigger {
+    width: 40px;
+    height: 40px;
+    border-radius: 4px;
+}
+
+/* Кнопки входа и меню — компактные пилюли */
+.site-header__login {
+    height: 40px;
+    border-radius: 3px;
+    padding: 0 var(--space-5);
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* ---------- Меню-строка (carou__menu) ---------- */
+
+.lb-topnav {
+    margin-bottom: 0;
+    padding: 0 40px;
+    justify-content: center;
+}
+
+.lb-topnav__link {
+    padding: 0 18px;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 40px;
+    color: rgba(223, 223, 223, 0.88);
+}
+
+.lb-topnav__link:hover {
+    background: transparent;
+    color: var(--color-accent);
+}
+
+.lb-topnav__link--active {
+    color: var(--color-text-strong);
+    font-weight: 600;
+}
+
+/* ---------- Промо-зона: на кинопорталах её нет, убираем ---------- */
+
+.lb-promo {
+    display: none;
+}
+
+/* ---------- Сортировка и фильтры (xsort) ---------- */
+
+.lb-xsort-area {
+    padding: 12px 0;
+}
+
+.lb-xsort-label {
+    font-size: 12px;
+    color: var(--color-text-muted);
+}
+
+.lb-xsort-div {
+    padding: 0 10px;
+    height: 32px;
+    background: var(--color-surface);
+    border-radius: 3px;
+    font-size: 12px;
+    color: #e5e5e5;
+    border: 1px solid transparent;
+}
+
+.lb-xsort-div:hover,
+.lb-xsort-div--active,
+.lb-xsort-div--open {
+    background: var(--color-surface-hover);
+    border-color: var(--color-border-strong);
+}
+
+.lb-xsort-selected {
+    color: #e5e5e5;
+}
+
+.lb-xsort-option a {
+    font-size: 12px;
+    color: var(--color-text);
+}
+
+.lb-xsort-clearall {
+    font-size: 13px;
+    color: var(--color-accent);
+}
+
+/* ---------- Двухколонка: сайдбар слева 340 + контент ---------- */
+
+.lb-contentwrap {
+    grid-template-columns: 340px minmax(0, 1fr);
+    gap: 20px;
+    margin-top: 0;
+}
+
+/* ---------- Карточка списка (shortStory → card) ---------- */
+
+.lb-shortstory {
+    padding: 20px 0;
+    border: 0;
+    border-bottom: 1px solid var(--color-border);
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    transition: none;
+}
+
+.lb-shortstory:hover {
+    transform: none;
+    box-shadow: none;
+    border-color: var(--color-border);
+}
+
+.lb-shortstory__body {
+    grid-template-columns: 160px minmax(0, 1fr);
+    gap: 20px;
+}
+
+.lb-shortstory__poster {
+    border-radius: 3px;
+    box-shadow: none;
+}
+
+.lb-shortstory__poster img {
+    aspect-ratio: 2 / 3;
+    border-radius: 3px;
+}
+
+.lb-shortstory__poster a:hover img {
+    box-shadow: 0 0 0 2px rgba(var(--color-accent-rgb), 0.4);
+}
+
+.lb-shortstory__title {
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: normal;
+    line-height: 1.3;
+}
+
+.lb-shortstory__title a {
+    color: rgba(223, 223, 223, 0.88);
+}
+
+.lb-shortstory__title a:hover {
+    color: var(--color-accent);
+    text-shadow: none;
+}
+
+.lb-shortstory__original {
+    font-size: 13px;
+}
+
+.lb-shortstory__meta {
+    gap: var(--space-2) var(--space-4);
+    margin-top: 8px;
+}
+
+.lb-shortstory__meta span,
+.lb-shortstory__meta a,
+.lb-shortstory__rating {
+    font-size: 13px;
+}
+
+.lb-shortstory__rating {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--color-text);
+    font-weight: 400;
+}
+
+.lb-shortstory__rating .lb-rating-value {
+    color: var(--color-text-strong);
+    font-weight: 700;
+}
+
+.lb-shortstory__excerpt {
+    margin-top: 12px;
+    font-size: 14px;
+    line-height: 1.5;
+    color: rgba(223, 223, 223, 0.88);
+}
+
+/* Кнопка «Смотреть онлайн» — кинопортальная пилюля */
+.lb-watch {
+    height: 40px;
+    padding: 0 20px;
+    border-radius: 3px;
+    background: #414141;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: none;
+}
+
+.lb-watch:hover {
+    background: var(--color-accent);
+    color: #fff;
+    transform: translateY(-1px);
+    box-shadow: none;
+}
+
+.lb-shortstory__time {
+    font-size: 13px;
+    color: var(--color-text-muted);
+}
+
+/* ---------- Кнопки: кинопортальные пилюли 40px ---------- */
+
+.button {
+    height: 40px;
+    padding: 0 20px;
+    border-radius: 3px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.button--primary {
+    background: #414141;
+    box-shadow: none;
+}
+
+.button--primary:hover {
+    background: var(--color-accent);
+    box-shadow: none;
+}
+
+/* ---------- Пагинация ---------- */
+
+.lb-pagination {
+    padding: 20px 0 0;
+}
+
+.lb-pagination__link,
+.lb-pagination__current,
+.lb-pagination__prev,
+.lb-pagination__next {
+    min-width: 40px;
+    height: 40px;
+    border-radius: 3px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    background: #414141;
+    color: #fff;
+    border: 0;
+}
+
+.lb-pagination__current {
+    background: var(--color-accent);
+    color: #fff;
+}
+
+.lb-pagination__link:hover,
+.lb-pagination__next:hover,
+.lb-pagination__prev:hover {
+    background: var(--color-accent);
+    color: #fff;
+}
+
+/* ---------- Сайдбар ---------- */
+
+.lb-sidebar {
+    font-size: 14px;
+}
+
+.lb-aheader {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--color-text-strong);
+    padding: 0 0 10px;
+    border-bottom: 0;
+}
+
+.lb-aheader--row a {
+    font-size: 12px;
+    color: var(--color-text-muted);
+}
+
+.lb-mainnav a,
+.lb-navsort a,
+.lb-byyear a,
+.lb-bycountry a,
+.lb-byseries a {
+    font-size: 14px;
+    color: rgba(223, 223, 223, 0.88);
+}
+
+.lb-categories .lb-accent,
+.lb-navsort .lb-accent {
+    font-style: normal;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--color-text-strong);
+}
+
+.lb-mostviewed__name {
+    font-size: 13px;
+}
+
+.lb-mostviewed__meta {
+    font-size: 12px;
+}
+
+/* ---------- Страница фильма (компактная шапка кинопортала) ---------- */
+
+.film-hero {
+    margin-top: 0;
+    padding: 20px 0;
+    background: transparent;
+}
+
+.film-hero__backdrop,
+.film-hero__trailer,
+.film-hero__scrim {
+    display: none;
+}
+
+.film-hero__inner {
+    grid-template-columns: 177px minmax(0, 1fr);
+    gap: 20px;
+}
+
+.film-hero__poster {
+    border-radius: 3px;
+    box-shadow: none;
+    background: var(--color-surface);
+}
+
+.film-hero__poster:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+.film-hero__name {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--color-text-strong);
+}
+
+.film-hero__original {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--color-text-muted);
+}
+
+.film-hero__meta {
+    font-size: 13px;
+    color: var(--color-text);
+}
+
+.film-hero__tagline {
+    font-size: 14px;
+}
+
+.film-hero__description {
+    font-size: 14px;
+    line-height: 1.55;
+}
+
+.score {
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+}
+
+.score__value {
+    font-size: 20px;
+    color: var(--color-text-strong);
+}
+
+/* Бейджи жанров — чипы на тёмном */
+.badge {
+    background: var(--color-surface);
+    border-color: var(--color-border);
+    color: var(--color-text-soft);
+    font-size: 12px;
+    border-radius: 3px;
+}
+
+/* ---------- Секция «Рекомендуем посмотреть»: сетка постеров 5×N ---------- */
+
+.similar-carousel {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 20px;
+    overflow: visible;
+    padding: 0;
+    margin: 0;
+}
+
+.similar-card__poster {
+    border-radius: 3px;
+}
+
+.similar-card__image {
+    aspect-ratio: 2 / 3;
+    border-radius: 3px;
+}
+
+.similar-card__name {
+    font-size: 14px;
+    color: var(--color-text-soft);
+    font-weight: 400;
+}
+
+/* ---------- Вкладки детальной ---------- */
+
+.tabs {
+    gap: 0;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.tab {
+    font-size: 13px;
+    font-weight: 400;
+    text-transform: none;
+    letter-spacing: normal;
+    padding: 12px 18px;
+    color: var(--color-text-muted);
+    background: transparent;
+    border-radius: 0;
+}
+
+.tab--active {
+    color: var(--color-text-strong);
+    font-weight: 600;
+    background: transparent;
+}
+
+/* ---------- Крупные мониторы: колонка кинопортала не растёт ---------- */
+
+@media (min-width: 1440px) {
+    .container {
+        max-width: 1080px;
+    }
+}
+
+@media (min-width: 1920px) {
+    :root {
+        --container-width: 1080px;
+    }
+}
+
+/* ---------- Планшет: индент 20px ---------- */
+
+@media (max-width: 1220px) {
+    .container,
+    .lb-body .container,
+    .lb-wrap,
+    .lb-topbar__inner,
+    .lb-topnav,
+    .page-header,
+    .detail-layout,
+    .player-section,
+    .similar-section,
+    .breadcrumbs,
+    .film-hero__inner {
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+}
+
+/* ---------- 960: двухколонка в одну, сайдбар прячется ---------- */
+
+@media (max-width: 960px) {
+    .lb-contentwrap {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .lb-sidebar {
+        display: none;
+    }
+
+    .similar-carousel {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+}
+
+/* ---------- 760: карточка списка — постер 150×220 ---------- */
+
+@media (max-width: 760px) {
+    .lb-shortstory__body {
+        grid-template-columns: 150px minmax(0, 1fr);
+        gap: 16px;
+    }
+
+    .lb-shortstory__poster img,
+    .lb-shortstory__poster-fallback {
+        width: 150px;
+        height: 220px;
+    }
+
+    .lb-shortstory__excerpt,
+    .lb-shortstory__footer .lb-shortstory__time,
+    .lb-shortstory__meta .lb-shortstory__external {
+        display: none;
+    }
+
+    .lb-watch {
+        height: 36px;
+        font-size: 11px;
+        padding: 0 14px;
+    }
+
+    .film-hero__inner {
+        grid-template-columns: 120px minmax(0, 1fr);
+        gap: 16px;
+    }
+
+    .film-hero__name {
+        font-size: 20px;
+    }
+
+    .film-hero__specs {
+        display: none;
+    }
+
+    .similar-carousel {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+/* ---------- 590: компактный постер 108×159, шапка-иконки ---------- */
+
+@media (max-width: 590px) {
+    .lb-shortstory__body {
+        grid-template-columns: 108px minmax(0, 1fr);
+        gap: 12px;
+    }
+
+    .lb-shortstory__poster img,
+    .lb-shortstory__poster-fallback {
+        width: 108px;
+        height: 159px;
+    }
+
+    .lb-shortstory {
+        padding: 16px 0;
+    }
+
+    .lb-shortstory__title {
+        font-size: 16px;
+    }
+
+    .lb-shortstory__meta span,
+    .lb-shortstory__meta a {
+        font-size: 12px;
+    }
+
+    .lb-shortstory__footer {
+        margin-top: 8px;
+    }
+
+    .lb-watch {
+        height: 32px;
+        font-size: 10px;
+        padding: 0 12px;
+    }
+
+    .site-header__inner {
+        gap: var(--space-2);
+    }
+
+    .site-header__login-text {
+        display: none;
+    }
+
+    .site-header__login {
+        width: 40px;
+        padding: 0;
+        font-size: 0;
+    }
+
+    .film-hero__inner {
+        grid-template-columns: 100px minmax(0, 1fr);
+        gap: 12px;
+    }
+
+    .film-hero__name {
+        font-size: 18px;
+    }
+
+    .film-hero__description {
+        font-size: 13px;
+    }
+
+    .film-hero__actions {
+        flex-wrap: wrap;
+    }
+
+    .similar-carousel {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+/* ---------- Доступность: контраст мелкого текста ----------
+   Акцентный красный #b33a2d не проходит WCAG AA на чёрном фоне
+   (≈2.9:1) для текста 12px, поэтому в текстовых элементах
+   используется его светлый вариант #d9776c (≈6.5:1). */
+
+/* Скрытый для зрения заголовок главной (промо-блок не виден) */
+.lb-sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* Чипы жанров и активный фильтр */
+.genre-chip {
+    color: var(--color-text);
+}
+
+.genre-chip:hover,
+.genre-chip--active {
+    color: var(--color-accent-soft);
+}
+
+/* Активный пункт выпадающих фильтров */
+.lb-xsort-div--active .lb-xsort-selected {
+    color: var(--color-accent-soft);
+}
+
+/* Хлебные крошки */
+.breadcrumbs a {
+    color: var(--color-text);
+}
+
+/* Год и мета в сайдбаре «Обновления» и обновлениях в целом */
+.lb-lastupdates__year,
+.lb-lastupdates__meta,
+.lb-lastcomment__text {
+    color: #9a9a9a;
+}
+
+/* Счётчики в списках (подборки, жанры) */
+.lb-count {
+    color: #9a9a9a;
+}
+
+/* Сайдбар каталога: категории и фильтры */
+.sidebar-category__title {
+    color: #9a9a9a;
+}
+
+.sidebar-category__link {
+    color: var(--color-text);
+}
+
+.sidebar-category__link--active,
+.sidebar-category__link:hover {
+    color: var(--color-accent-soft);
+}
+
+/* Метки полей форм и фильтров */
+label[for] {
+    color: var(--color-text);
+}
+
+/* Текущая страница пагинации */
+span[aria-current="page"] {
+    color: var(--color-accent-soft);
+}
+
+/* Ссылка «Ещё похожие» на детальной */
+.similar-section__more {
+    color: var(--color-accent-soft);
+}
+
+/* Оригинальное название (12px) и счётчик каталога */
+.lb-shortstory__original,
+.catalog__count {
+    color: #9a9a9a;
+}
+
+/* Тексты страниц-документов (о проекте, правила, реклама) */
+.legal-section__text,
+.legal-list__item {
+    color: #9a9a9a;
+}
+
+/* Тексты рекламных заглушек */
+.ad-rail__label,
+.ad-rail__placeholder-title,
+.ad-rail__placeholder-size {
+    color: #9a9a9a;
+}
+

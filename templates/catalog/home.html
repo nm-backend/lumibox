@@ -1,4 +1,4 @@
-﻿{% extends "base.html" %}
+{% extends "base.html" %}
 {% load static i18n catalog_filters %}
 
 {% block body_class %}lb-body{% endblock %}
@@ -8,6 +8,7 @@
 {% block content %}
 <div class="lb-home">
     <div class="lb-wrap">
+        <h1 class="lb-sr-only">{% trans "Смотреть фильмы и сериалы онлайн бесплатно" %}</h1>
 
         {# ---------- Промо-зона (место баннера оригинала) ---------- #}
         <section class="lb-promo" aria-label="{% trans "О кинотеатре" %}">
