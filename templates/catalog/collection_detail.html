@@ -31,6 +31,7 @@
     <div class="lb-contentwrap">
     {% if titles %}
         <div class="lb-main" id="lb-content">
+            <h2 class="visually-hidden">{% trans "Фильмы в подборке" %}</h2>
             {% for title in titles %}
                 {% include "includes/story_card.html" %}
             {% endfor %}

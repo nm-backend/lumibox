@@ -28,6 +28,9 @@ msgstr "All"
 msgid "Фильмы"
 msgstr "Movies"
 
+msgid "Фильмы в подборке"
+msgstr "Movies in this collection"
+
 msgid "Сериалы"
 msgstr "Series"
 
