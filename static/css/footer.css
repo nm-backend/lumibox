@@ -22,6 +22,15 @@
     padding-bottom: var(--space-6);
 }
 
+/* На главной body.lb-body снимает max-width у .container — футеру его
+   возвращаем, чтобы подвал вёл себя как обычный контейнер. */
+.lb-body .site-footer .container,
+.site-footer .container {
+    max-width: var(--container-width);
+    padding-left: var(--space-4);
+    padding-right: var(--space-4);
+}
+
 /* ---------- Сетка: бренд + 3 колонки навигации ---------- */
 
 .footer-grid {
