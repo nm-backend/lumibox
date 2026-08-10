@@ -319,3 +319,35 @@ class PlaybackSourceFilterDataTests(TestCase):
 
         self.assertEqual(len(names(response)), 1)
         self.assertEqual(PlaybackSource.objects.count(), 2)
+
+
+class RemovedAnimeTypeTests(TestCase):
+    """
+    Тип «Аниме» убран из каталога по решению владельца сайта.
+
+    Проверяем не только отсутствие пункта в меню: тип раздавался ссылками
+    вида ?type=anime, и они разошлись по закладкам и поисковикам. Такая
+    ссылка не должна ронять страницу — только перестать что-либо отбирать.
+    """
+
+    def setUp(self):
+        cache.clear()
+        create_title(name="Обычный фильм")
+
+    def tearDown(self):
+        cache.clear()
+
+    def test_type_is_not_offered_anywhere(self):
+        self.assertNotIn("anime", dict(Title.Type.choices))
+
+    def test_navigation_does_not_mention_anime(self):
+        response = self.client.get(reverse("catalog:home"))
+
+        self.assertNotContains(response, "Аниме")
+        self.assertNotContains(response, "type=anime")
+
+    def test_stale_link_opens_catalog_instead_of_failing(self):
+        response = self.client.get(reverse("catalog:title_list"), {"type": "anime"})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(names(response), ["Обычный фильм"])

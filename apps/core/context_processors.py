@@ -72,7 +72,6 @@ def lb_topnav(request):
         by_type(_("Фильмы"), Title.Type.MOVIE),
         by_type(_("Сериалы"), Title.Type.SERIES),
         by_type(_("Мультфильмы"), Title.Type.CARTOON),
-        by_type(_("Аниме"), Title.Type.ANIME),
         by_type(_("ТВ-шоу"), Title.Type.TV_SHOW),
         # Новинки и премьеры — собственные разделы, а не сортировка каталога:
         # у раздела свой адрес, заголовок и место в поиске.
@@ -178,7 +177,6 @@ def _series_links():
     return [
         (_("Все сериалы"), f"{catalog_url}?type=series"),
         (_("Мультфильмы"), f"{catalog_url}?type=cartoon"),
-        (_("Аниме"), f"{catalog_url}?type=anime"),
         (_("ТВ-шоу"), f"{catalog_url}?type=tv_show"),
         (_("Фильмы"), f"{catalog_url}?type=movie"),
         (_("Подборки"), reverse("catalog:collection_list")),

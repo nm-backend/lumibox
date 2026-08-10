@@ -214,7 +214,7 @@ class SearchSuggestApiTests(TestCase):
     def test_type_label_comes_from_server(self):
         """
         Скрипт подписывал «Сериалом» всё, что не «movie», — включая
-        мультфильмы, ТВ-шоу и аниме.
+        мультфильмы и ТВ-шоу.
         """
         create_title(name="Мультик про кота", type=Title.Type.CARTOON)
 

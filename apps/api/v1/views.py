@@ -88,7 +88,7 @@ class SearchResultSerializer(serializers.Serializer):
     slug = serializers.SlugField()
     type = serializers.CharField()
     # Подпись типа считает сервер: раньше её собирал скрипт, и всё,
-    # что не «movie», подписывалось «Сериал» — мультфильмы, ТВ-шоу и аниме
+    # что не «movie», подписывалось «Сериал» — мультфильмы и ТВ-шоу
     # в подсказках выглядели сериалами.
     type_display = serializers.CharField()
     release_year = serializers.IntegerField()
