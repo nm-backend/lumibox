@@ -19,7 +19,11 @@
     </div>
 
     <div class="lb-contentwrap">
-        <div class="lb-main" id="lb-content">
+        {% comment %} data-testid — якорь для тестов: по нему они вырезают область результатов
+           и проверяют, что отфильтрованное действительно исчезло. Сайдбар
+           показывает популярное и новинки независимо от фильтров, поэтому
+           проверять по всей странице нельзя. {% endcomment %}
+        <div class="lb-main" id="lb-content" data-testid="results">
 
             {# Quick filter genre chips #}
             {% if genres %}

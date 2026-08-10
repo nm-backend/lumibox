@@ -112,7 +112,10 @@
     <script>window.lbGaId = '{{ ga_measurement_id }}';</script>
     {% endif %}
 </head>
-<body class="{% block body_class %}{% endblock %}">
+{% comment %} data-authenticated — признак входа для скриптов. Полностраничного
+   кэша в проекте нет, поэтому атрибут всегда соответствует текущему посетителю.
+   Нужен, чтобы гость не слал запросы, на которые сервер заведомо ответит 403. {% endcomment %}
+<body class="{% block body_class %}{% endblock %}" data-authenticated="{{ user.is_authenticated|yesno:"1,0" }}">
     {% comment %} Два декоративных слоя фона. Стили для них в проекте уже были,
        а разметки не было — то есть правила лежали мёртвым грузом.
 

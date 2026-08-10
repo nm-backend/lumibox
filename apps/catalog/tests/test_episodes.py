@@ -5,7 +5,7 @@ from django.db import IntegrityError
 from django.test import TestCase
 from django.urls import reverse
 
-from apps.catalog.models import Episode, Title
+from apps.catalog.models import Episode, PlaybackSource, Title
 from apps.core.test_factories import create_title
 
 
@@ -13,11 +13,32 @@ def episode_file(name="episode.mp4"):
     return SimpleUploadedFile(name, b"fake-video-bytes", content_type="video/mp4")
 
 
-def create_episode(title, season=1, episode=1, **kwargs):
+def create_episode(title, season=1, episode=1, with_source=True, **kwargs):
+    """
+    Серия и, по умолчанию, источник видео к ней.
+
+    Видео переехало из Episode.file в PlaybackSource, но почти всем тестам
+    нужна именно «серия, которую можно смотреть». Поэтому источник создаётся
+    заодно — передайте with_source=False, если нужна серия без видео.
+    """
     kwargs.setdefault("season_number", season)
     kwargs.setdefault("episode_number", episode)
-    kwargs.setdefault("file", episode_file())
-    return Episode.objects.create(title=title, **kwargs)
+    instance = Episode.objects.create(title=title, **kwargs)
+    if with_source:
+        create_source(instance)
+    return instance
+
+
+def create_source(episode=None, title=None, **kwargs):
+    """Источник видео: по умолчанию файл, привязанный к серии."""
+    kwargs.setdefault("kind", PlaybackSource.Kind.FILE)
+    if kwargs["kind"] == PlaybackSource.Kind.FILE:
+        kwargs.setdefault("file", episode_file())
+    return PlaybackSource.objects.create(
+        title=title or episode.title,
+        episode=episode,
+        **kwargs,
+    )
 
 
 class EpisodeModelTests(TestCase):

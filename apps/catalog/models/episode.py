@@ -1,16 +1,18 @@
-from django.core.validators import FileExtensionValidator
 from django.db import models
-
-from apps.catalog.validators import validate_video_signature, validate_video_size
 
 
 class Episode(models.Model):
     """
-    Серия сериала (или отдельная часть фильма) с видеофайлом.
+    Серия сериала (или отдельная часть фильма).
 
     Отдельная модель, а не поле у Title: серий может быть сколько угодно,
     и добавление десятой не должно требовать миграции. Нумерация задаётся
     парой «сезон + серия», уникальной в пределах одного фильма или сериала.
+
+    Само видео здесь не хранится. Раньше у серии было ровно одно поле file,
+    то есть ровно одна озвучка, и выбрать другую зритель не мог. Теперь
+    источники живут в PlaybackSource: у серии их столько, сколько озвучек
+    залил редактор (related_name="playback_sources").
 
     Показ на сайте: у Title с эпизодами над вкладками появляется секция
     «Смотреть онлайн» с плеером и списком серий, сгруппированных по сезонам.
@@ -36,16 +38,6 @@ class Episode(models.Model):
         max_length=255,
         blank=True,
         help_text="Необязательно, например «Пилот»",
-    )
-    file = models.FileField(
-        "Видеофайл",
-        upload_to="episodes/%Y/%m",
-        validators=[
-            FileExtensionValidator(["mp4", "webm", "ogg"]),
-            validate_video_signature,
-            validate_video_size,
-        ],
-        help_text="Видео серии (mp4, webm, ogg)",
     )
     duration_minutes = models.PositiveSmallIntegerField(
         "Длительность, мин",

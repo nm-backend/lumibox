@@ -36,6 +36,11 @@ PUBLISHED_TITLES = Q(titles__status=Title.Status.PUBLISHED)
 # Отдельный от GenreListView — там данные другие (titles_count sorted).
 GENRE_CHIPS_CACHE_KEY = "catalog:genre_chips:v2"
 
+# Сколько постеров показывает промо-блок главной. Константа, а не число
+# по месту: шаблон и вьюха должны договориться об одном значении, иначе
+# снова начнём прегружать карточки, которые никто не увидит.
+PROMO_POSTERS = 4
+
 
 def _dedup_titles(*groups):
     """Объединяет списки записей без повторов, сохраняя порядок."""
@@ -84,17 +89,14 @@ class HomeView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        # Пять запросов главной берём из кэша одним куском.
-        # Баннер — свежая публикация с описанием: пустой выглядел бы сломанным.
+        # Секции главной берём из кэша одним куском.
         context.update(get_home_sections())
 
-        # Адреса подборок собираем из маршрута, а не пишем строкой в шаблоне:
-        # поменяется адрес каталога — здесь всё останется рабочим.
         catalog_url = reverse("catalog:title_list")
-        context["new_url"] = f"{catalog_url}?sort=-published_at"
-        context["top_rated_url"] = f"{catalog_url}?sort=-rating_average"
-        context["movies_url"] = f"{catalog_url}?type={Title.Type.MOVIE}"
-        context["series_url"] = f"{catalog_url}?type={Title.Type.SERIES}"
+
+        # Здесь заводились ещё new_url / top_rated_url / movies_url / series_url —
+        # их не читал ни один шаблон. Ссылки на разделы каталога живут в
+        # верхней навигации (context processor lb_topnav) и в сайдбаре.
 
         # Гостю блок рекомендаций не показываем, поэтому и не считаем:
         # лишний запрос на каждой загрузке главной ни к чему.
@@ -137,9 +139,12 @@ class HomeView(TemplateView):
             context.get("top_rated", []),
             context.get("new_titles", []),
         )[:8]
+        # Постеры промо-блока. Ровно столько, сколько рисует шаблон: раньше
+        # здесь собиралось 14 объектов со всеми связями, а промо показывало
+        # четыре — десять карточек прегружались и выбрасывались.
         context["lb_carousel"] = _dedup_titles(
             context.get("trending", []), context.get("new_titles", [])
-        )[:14]
+        )[:PROMO_POSTERS]
 
         # Бейдж «Продолжить с S1E3» на главной. Секции главной приходят
         # из кэша, поэтому прогресс нельзя вешать на их объекты атрибутом:
@@ -383,6 +388,7 @@ class TitleDetailView(DetailView):
         .with_detail()
         .with_frames()
         .with_episodes()
+        .with_sources()
     )
 
     def get(self, request, *args, **kwargs):
@@ -434,7 +440,54 @@ class TitleDetailView(DetailView):
             if episodes
             else None
         )
+        context.update(self.get_playback(episodes))
         return context
+
+    def get_playback(self, episodes):
+        """
+        Раскладывает источники видео по сериям.
+
+        Шаблон не умеет искать по словарю, поэтому список источников каждой
+        серии вешаем прямо на объект серии — тот самый приём, что и с
+        progress_item в карточке каталога. Источники уже в памяти
+        (with_sources), новых запросов здесь нет.
+
+        Возвращает ключи:
+        - playback_voices — озвучки в порядке появления, для выбора в плеере;
+        - title_sources — источники записи целиком (у фильма их и используем);
+        - primary_source — что открыть сразу: продолжаем с той серии,
+          на которой остановился зритель, иначе с первой.
+        """
+        sources = list(self.object.playback_sources.all())
+
+        by_episode = {}
+        title_sources = []
+        for source in sources:
+            if source.episode_id:
+                by_episode.setdefault(source.episode_id, []).append(source)
+            else:
+                title_sources.append(source)
+
+        for episode in episodes:
+            episode.sources = by_episode.get(episode.pk, [])
+
+        voices, seen = [], set()
+        for source in sources:
+            if source.voice_id and source.voice_id not in seen:
+                seen.add(source.voice_id)
+                voices.append(source.voice)
+
+        resume = self.get_resume_episode()
+        opening = resume or (episodes[0] if episodes else None)
+        candidates = by_episode.get(opening.pk, []) if opening else title_sources
+        primary = candidates[0] if candidates else (title_sources[0] if title_sources else None)
+
+        return {
+            "playback_voices": voices,
+            "title_sources": title_sources,
+            "primary_source": primary,
+            "has_playback": bool(sources),
+        }
 
     def get_user_review(self):
         """Отзыв текущего пользователя, если он уже есть."""
@@ -463,13 +516,21 @@ class TitleDetailView(DetailView):
 
         Возвращает: Episode или None. Один запрос к истории: единственная
         строка на пару «пользователь — запись» (unique_watch_history).
+        Результат запоминаем — его спрашивают и контекст, и раскладка
+        источников, а ходить в базу дважды за одним и тем же незачем.
         """
+        if hasattr(self, "_resume_episode"):
+            return self._resume_episode
+
         if not self.request.user.is_authenticated:
+            self._resume_episode = None
             return None
+
         history = WatchHistory.objects.filter(
             user=self.request.user, title=self.object, episode__isnull=False
         ).first()
-        return history.episode if history else None
+        self._resume_episode = history.episode if history else None
+        return self._resume_episode
 
 
 class PersonDetailView(DetailView):

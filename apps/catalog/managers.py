@@ -137,6 +137,25 @@ class TitleQuerySet(models.QuerySet):
         """
         return self.prefetch_related("frames")
 
+    def with_sources(self):
+        """
+        Подтягивает источники видео вместе с озвучкой.
+
+        select_related("voice") обязателен: иначе выбор озвучки в плеере
+        сходил бы в базу за каждым названием отдельно. Спискам каталога
+        источники не нужны — только странице записи.
+        """
+        from django.db.models import Prefetch
+
+        from apps.catalog.models.playback import PlaybackSource
+
+        return self.prefetch_related(
+            Prefetch(
+                "playback_sources",
+                queryset=PlaybackSource.objects.select_related("voice"),
+            )
+        )
+
     def with_episodes(self):
         """
         Подтягивает серии для страницы фильма.

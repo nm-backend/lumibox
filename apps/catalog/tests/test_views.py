@@ -11,42 +11,60 @@ from apps.core.test_factories import (
     create_genre,
     create_participation,
     create_person,
+    create_review,
     create_title,
     create_user,
 )
+
+RESULTS_MARKER = 'data-testid="results"'
 
 
 def results_grid_html(response):
     """
     Возвращает HTML только блока с результатами каталога.
 
-    Страница теперь включает сайдбар с популярным и новинками, которые
-    показывают фильмы независимо от активных фильтров.
-    Поэтому проверять «отфильтрованное не показывается» нужно по сетке
-    результатов, а не по всей странице.
+    Страница включает сайдбар с популярным и новинками, которые показывают
+    фильмы независимо от активных фильтров. Поэтому проверять
+    «отфильтрованное не показывается» нужно по области результатов,
+    а не по всей странице.
+
+    Якорь — атрибут data-testid="results" на контейнере списка.
+    Раньше здесь искался класс `title-grid`, которого в разметке давно нет:
+    функция молча возвращала пустую строку, и половина пяти фильтр-тестов
+    (`assertNotIn(...)`) проходила вхолостую — проверяла отсутствие текста
+    в пустой строке. Поэтому теперь отсутствие якоря — это ошибка, а не
+    тихий пропуск: сломанная разметка обязана валить тесты, а не зеленить их.
     """
     content = response.content.decode("utf-8")
-    marker = 'class="title-grid'
-    start = content.find(marker)
+    start = content.find(RESULTS_MARKER)
     if start == -1:
-        return ""
+        raise AssertionError(
+            f"В ответе нет {RESULTS_MARKER} — область результатов не найдена. "
+            "Если разметка каталога изменилась, перенесите якорь, "
+            "а не удаляйте его: без него фильтр-тесты снова станут пустыми."
+        )
 
-    tag_end = content.find(">", start)
+    # Открывающий тег может быть любым (div, section) — берём его имя,
+    # чтобы считать вложенность именно этого элемента.
+    tag_start = content.rfind("<", 0, start)
+    tag_name = content[tag_start + 1 : start].split()[0]
+    open_token, close_token = f"<{tag_name}", f"</{tag_name}>"
+
     depth = 0
-    pos = tag_end + 1
+    pos = content.find(">", start) + 1
     while True:
-        open_idx = content.find("<div", pos)
-        close_idx = content.find("</div>", pos)
+        open_idx = content.find(open_token, pos)
+        close_idx = content.find(close_token, pos)
         if close_idx == -1:
-            return content[start:]
+            return content[tag_start:]
         if open_idx != -1 and open_idx < close_idx:
             depth += 1
-            pos = open_idx + 4
+            pos = open_idx + len(open_token)
         else:
             if depth == 0:
-                return content[start : close_idx + len("</div>")]
+                return content[tag_start : close_idx + len(close_token)]
             depth -= 1
-            pos = close_idx + 6
+            pos = close_idx + len(close_token)
 
 
 class HomeViewTests(TestCase):
@@ -337,3 +355,77 @@ class ActorSearchViewTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Актёр-любимец")
+
+
+class BlockTranslatePlaceholderTests(TestCase):
+    """
+    Подстановки внутри {% blocktranslate %} обязаны реально печататься.
+
+    Django ищет плейсхолдер по имени верхнего уровня: переменная с точкой
+    ({{ statistics.movies_count }}, {{ forloop.counter }}) или с фильтром
+    ({{ count|ru_plural:... }}) в контексте не находится, и на её место
+    подставляется string_if_invalid — пустая строка.
+
+    Баг был молчаливым: страница отдавала 200, тесты на код ответа проходили,
+    а посетитель видел «У нас более  фильмов» и слышал десять одинаковых
+    «Оценка » вместо номеров. Поэтому здесь проверяется именно результат
+    подстановки, а не статус ответа.
+    """
+
+    def setUp(self):
+        cache.clear()
+
+    def tearDown(self):
+        cache.clear()
+
+    def test_home_seo_text_shows_counts(self):
+        create_title(name="Фильм для счётчика", type=Title.Type.MOVIE)
+        create_title(name="Сериал для счётчика", type=Title.Type.SERIES)
+
+        response = self.client.get(reverse("catalog:home"))
+
+        self.assertContains(response, "более 1 фильмов")
+        self.assertContains(response, "и 1 сериалов")
+
+    def test_story_card_watch_link_keeps_title_name(self):
+        create_title(name="Карточка с именем")
+
+        response = self.client.get(reverse("catalog:title_list"))
+
+        self.assertContains(response, "Смотреть Карточка с именем онлайн")
+
+    def test_person_directory_description_keeps_heading(self):
+        create_participation(
+            title=create_title(name="Фильм с актёром"),
+            person=create_person(name="Известный актёр"),
+        )
+
+        response = self.client.get(reverse("catalog:actor_list"))
+
+        self.assertContains(response, "Список актёры на LumiBox")
+
+    def test_reference_list_description_keeps_heading(self):
+        genre = create_genre(name="Драма", slug="drama")
+        create_title(genres=[genre])
+
+        response = self.client.get(reverse("catalog:genre_list"))
+
+        self.assertContains(response, "Справочник жанры на LumiBox")
+
+    def test_title_detail_shows_declined_rating_word(self):
+        title = create_title(name="Фильм с оценкой")
+        create_review(title=title, rating=7)
+
+        response = self.client.get(title.get_absolute_url())
+
+        self.assertContains(response, "1 оценка")
+
+    def test_star_rating_labels_carry_numbers(self):
+        title = create_title(name="Фильм для оценки")
+        self.client.force_login(create_user())
+
+        response = self.client.get(title.get_absolute_url())
+
+        # Крайние номера шкалы: если подстановка сломается, оба исчезнут.
+        self.assertContains(response, 'aria-label="Оценка 1"')
+        self.assertContains(response, 'aria-label="Оценка 10"')

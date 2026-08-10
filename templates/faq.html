@@ -6,6 +6,13 @@
 {% block og_title %}{% trans "Часто задаваемые вопросы — LumiBox" %}{% endblock %}
 {% block og_description %}{% trans "Ответы на популярные вопросы о платформе LumiBox." %}{% endblock %}
 
+{% comment %} Классы .legal-* живут в forms.css. Без этого блока страница открывалась
+   неоформленной: остальные правовые страницы подключают файл сами, а FAQ —
+   единственная из них — про него забыла. {% endcomment %}
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/forms.css' %}?v={{ static_version }}">
+{% endblock %}
+
 {% block content %}
     <div class="legal-page">
         <h1 class="legal-page__title">{% trans "Часто задаваемые вопросы" %}</h1>

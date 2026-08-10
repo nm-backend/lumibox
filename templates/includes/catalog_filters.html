@@ -9,9 +9,12 @@
         <a class="sidebar-category__link {% if request.GET.type == 'movie' or not request.GET.type %}sidebar-category__link--active{% endif %}" href="{% url 'catalog:title_list' %}?type=movie">
             {% trans "Все фильмы" %}
         </a>
+        {% comment %} Счётчик рядом с «Сериалами» убран: ключ category_counts не задавала
+           ни одна вьюха, поэтому бейдж не показывался никогда. Считать его
+           здесь — лишний запрос на каждой странице каталога ради одной цифры;
+           количества по разделам появятся вместе с расширенными фильтрами. {% endcomment %}
         <a class="sidebar-category__link {% if request.GET.type == 'series' %}sidebar-category__link--active{% endif %}" href="{% url 'catalog:title_list' %}?type=series">
             {% trans "Сериалы" %}
-            {% if category_counts.series %}<span class="sidebar-category__count">{{ category_counts.series }}</span>{% endif %}
         </a>
     </div>
     <div class="sidebar-category">

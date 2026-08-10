@@ -129,7 +129,9 @@ class TitleDetailResumeTests(TestCase):
     def test_guest_has_no_resume(self):
         response = self.client.get(self.title.get_absolute_url())
         self.assertIsNone(response.context["resume_episode"])
-        self.assertContains(response, self.first.file.url)
+        # Гостю плеер открывает первую серию. Видео теперь приходит
+        # из источника (PlaybackSource), а не из поля серии.
+        self.assertContains(response, self.first.playback_sources.first().src)
 
     def test_user_with_progress_gets_resume_episode(self):
         remember_episode_start(self.user, self.title, self.resume)
@@ -143,7 +145,7 @@ class TitleDetailResumeTests(TestCase):
         response = self.client.get(self.title.get_absolute_url())
 
         self.assertContains(response, "Продолжить с S1E3")
-        self.assertContains(response, self.resume.file.url)
+        self.assertContains(response, self.resume.playback_sources.first().src)
         self.assertContains(response, "player-episode--active")
         self.assertContains(response, "Прорыв")
 

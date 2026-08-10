@@ -1,14 +1,18 @@
 """
-Тесты дополнительных вьюх ядра: serve_public_media и ElidedPaginationMixin.
+Тесты дополнительных вьюх ядра: serve_public_media, ElidedPaginationMixin
+и статические страницы.
 
 Покрывает:
 - serve_public_media — защита приватных медиафайлов
 - ElidedPaginationMixin — структура контекста с пагинацией
+- статические страницы — открываются и подключают свои стили
 """
 
 from django.http import Http404, HttpRequest
 from django.test import TestCase
+from django.urls import reverse
 
+from apps.core.test_factories import create_title
 from apps.core.views import serve_public_media
 
 
@@ -32,15 +36,96 @@ class ServePublicMediaTests(TestCase):
 
 
 class ElidedPaginationMixinTests(TestCase):
-    """ElidedPaginationMixin — структура контекста."""
+    """
+    ElidedPaginationMixin кладёт в контекст готовый диапазон страниц.
 
-    def test_context_contains_ellipsis_with_paginator(self):
-        """Если paginator и page_obj переданы, контекст содержит ellipsis."""
-        from django.core.paginator import Paginator
+    Раньше этот тест собирал Paginator руками и проверял его же вывод —
+    то есть тестировал Django, а не миксин: удали миксин целиком, и тест
+    остался бы зелёным. Теперь запрашиваем настоящую страницу каталога,
+    который на миксине и построен.
+    """
 
-        paginator = Paginator(list(range(50)), 10)
-        page = paginator.get_page(1)
+    @classmethod
+    def setUpTestData(cls):
+        # paginate_by = 24, поэтому 60 записей дают три страницы —
+        # достаточно, чтобы диапазон схлопнулся с многоточием.
+        for number in range(60):
+            create_title(name=f"Фильм пагинации {number}")
 
-        # Проверяем, что get_elided_page_range возвращает ожидаемый формат
-        elided = paginator.get_elided_page_range(page.number, on_each_side=1, on_ends=1)
-        self.assertIn(paginator.ELLIPSIS, elided if hasattr(paginator, 'ELLIPSIS') else [])
+    def test_context_has_elided_range_and_ellipsis(self):
+        response = self.client.get(reverse("catalog:title_list"))
+
+        self.assertIn("elided_page_range", response.context)
+        self.assertIn("ellipsis", response.context)
+        self.assertEqual(response.context["paginator"].num_pages, 3)
+
+    def test_page_numbers_rendered(self):
+        """Без миксина шаблон рисует только «Назад» и «Вперёд», без номеров."""
+        response = self.client.get(reverse("catalog:title_list"))
+
+        self.assertContains(response, "lb-pagination__current")
+        self.assertContains(response, "lb-pagination__link")
+
+
+class TemplateCommentSyntaxTests(TestCase):
+    """
+    Комментарий {# … #} обязан умещаться в одну строку.
+
+    Django распознаёт эту форму только внутри строки: как только между {# и #}
+    попадает перевод строки, текст перестаёт быть комментарием и печатается
+    посетителю как есть. Многострочные пояснения пишутся через
+    {% comment %} … {% endcomment %}.
+
+    Проект уже наступал на это дважды: один раз в шапке с preload шрифтов,
+    второй — в пояснениях к секции плеера, где слова из комментария попали
+    в разметку и сломали проверку «плеера нет у записи без серий». Тест
+    дешевле третьего раза.
+    """
+
+    def test_no_multiline_hash_comments(self):
+        import pathlib
+        import re
+
+        templates_dir = pathlib.Path(__file__).resolve().parents[2] / "templates"
+        offenders = []
+
+        for path in sorted(templates_dir.rglob("*.html")):
+            text = path.read_text(encoding="utf-8-sig")
+            for match in re.finditer(r"\{#", text):
+                start = match.start()
+                close = text.find("#}", start)
+                newline = text.find("\n", start)
+                if close == -1 or (newline != -1 and newline < close):
+                    line = text[:start].count("\n") + 1
+                    offenders.append(f"{path.name}:{line}")
+
+        self.assertEqual(
+            offenders,
+            [],
+            "Многострочный {# #} рендерится как видимый текст. "
+            f"Замените на {{% comment %}}: {', '.join(offenders)}",
+        )
+
+
+class StaticPagesTests(TestCase):
+    """
+    Правовые и справочные страницы: открываются и подключают свои стили.
+
+    Их не покрывал ни один тест, и /faq/ месяцами открывалась неоформленной:
+    классы .legal-* лежат в forms.css, а блок extra_css в шаблоне забыли.
+    Проверяем не только код ответа, но и наличие таблицы стилей — иначе
+    страница снова может «работать» и выглядеть сломанной.
+    """
+
+    LEGAL_PAGES = ["about", "copyright", "advertisers", "privacy", "terms", "contacts", "faq"]
+
+    def test_pages_open(self):
+        for name in self.LEGAL_PAGES:
+            with self.subTest(page=name):
+                self.assertEqual(self.client.get(reverse(name)).status_code, 200)
+
+    def test_pages_load_their_stylesheet(self):
+        for name in self.LEGAL_PAGES:
+            with self.subTest(page=name):
+                response = self.client.get(reverse(name))
+                self.assertContains(response, "css/forms.css")

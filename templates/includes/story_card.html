@@ -128,7 +128,9 @@
             {% endif %}
 
             <div class="lb-shortstory__footer">
-                <a class="lb-watch" href="{{ title.get_absolute_url }}" title="{% blocktranslate %}Смотреть {{ title.name }} онлайн{% endblocktranslate %}">
+                {% comment %} name через with: точечная переменная внутри blocktranslate
+                   не резолвится и название пропадало из подсказки. {% endcomment %}
+                <a class="lb-watch" href="{{ title.get_absolute_url }}" title="{% blocktranslate with name=title.name %}Смотреть {{ name }} онлайн{% endblocktranslate %}">
                     {% icon "play" size=14 %} {% trans "Смотреть онлайн" %}
                 </a>
                 {% if character %}

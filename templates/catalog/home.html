@@ -19,7 +19,9 @@
                 </div>
                 {% if lb_carousel %}
                     <div class="lb-promo__posters">
-                        {% for title in lb_carousel|slice:":4" %}
+                        {% comment %} Срез не нужен: вьюха отдаёт ровно столько постеров,
+                           сколько рисует промо (PROMO_POSTERS). {% endcomment %}
+                        {% for title in lb_carousel %}
                             <a class="lb-promo__poster" href="{{ title.get_absolute_url }}" title="{{ title.name }}">
                                 {% if title.poster %}
                                     <img src="{{ title.poster|webp_url }}" width="104" height="154" alt="{{ title.name }}" loading="lazy">
@@ -37,11 +39,19 @@
         <div class="lb-xsort-area">
             <span class="lb-xsort-label">{% trans "Сортировать:" %}</span>
 
+            {% comment %} Подпись описывает состав ленты главной: сначала популярное за
+               неделю, затем топ по рейтингу и новинки (см. HomeView.home_titles).
+
+               Ни один пункт не помечен текущим — и это осознанно. Все они ведут
+               на /catalog/?sort=…, то есть уводят со страницы, а значит на самой
+               главной ни одна из этих сортировок не применена. Раньше здесь
+               стояло `forloop.counter == 3`, и текущей всегда числилась
+               «по комментариям» — просто третья по счёту. {% endcomment %}
             <div class="lb-xsort-div lb-xsort-div--active" data-lb-dropdown>
-                <div class="lb-xsort-selected">{% trans "топ за неделю" %}</div>
+                <div class="lb-xsort-selected">{% trans "популярное за неделю" %}</div>
                 <ul class="lb-xsort-ul">
                     {% for label, url in lb_sort_links %}
-                        <li class="lb-xsort-option{% if forloop.counter == 3 %} lb-xsort-option--current{% endif %}">
+                        <li class="lb-xsort-option">
                             <a href="{{ url }}">{{ label }}</a>
                         </li>
                     {% endfor %}
@@ -111,8 +121,12 @@
         {# ---------- SEO-текст (footerText) ---------- #}
         <div class="lb-seo">
             <h2>{% trans "LumiBox — фильмы и сериалы онлайн" %}</h2>
-            <p>{% blocktranslate %}Рады приветствовать на LumiBox всех любителей интересного и качественного кино!
-                У нас более {{ statistics.movies_count }} фильмов и {{ statistics.series_count }} сериалов онлайн.
+            {% comment %} movies/series вынесены через with: внутри blocktranslate
+               Django ищет плейсхолдер по имени верхнего уровня, и переменная
+               с точкой ({{ statistics.movies_count }}) не находится — вместо
+               числа подставлялась пустая строка. {% endcomment %}
+            <p>{% blocktranslate with movies=statistics.movies_count series=statistics.series_count %}Рады приветствовать на LumiBox всех любителей интересного и качественного кино!
+                У нас более {{ movies }} фильмов и {{ series }} сериалов онлайн.
                 Вы любите кинематограф так же, как мы? Постоянно следите за выходом новинок?
                 Тогда заходите к нам чаще — мы каждый день пополняем каталог свежими премьерами.
                 Удобный поиск, фильтры по жанрам, годам и странам, персональные рекомендации и избранное —

@@ -13,9 +13,11 @@ from apps.catalog.models import (
     Genre,
     Participation,
     Person,
+    PlaybackSource,
     Studio,
     Title,
     TitleAward,
+    VoiceOver,
 )
 from apps.core.cache import invalidate_for_model
 
@@ -53,6 +55,30 @@ class GenreAdmin(ReferenceAdmin):
 @admin.register(Country)
 class CountryAdmin(ReferenceAdmin):
     pass
+
+
+@admin.register(VoiceOver)
+class VoiceOverAdmin(admin.ModelAdmin):
+    """
+    Справочник озвучек.
+
+    Не наследует ReferenceAdmin: тот считает фильмы через связь titles,
+    которой у озвучки нет — она связана с записями через источники видео.
+    search_fields обязателен: на него опирается автодополнение в инлайне
+    источников.
+    """
+
+    list_display = ["name", "slug", "sources_count"]
+    search_fields = ["name"]
+    ordering = ["name"]
+    prepopulated_fields = {"slug": ["name"]}
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).annotate(_sources_count=Count("sources"))
+
+    @admin.display(description="Источников", ordering="_sources_count")
+    def sources_count(self, voice):
+        return voice._sources_count
 
 
 @admin.register(Person)
@@ -118,11 +144,29 @@ class EpisodeInline(admin.TabularInline):
     перетаскивание требует стороннего пакета, а числа решают ту же
     задачу штатными средствами. Уникальность пары «сезон + серия»
     проверяет сама база.
+
+    Видео здесь нет: у серии бывает несколько озвучек, и все они лежат
+    в «Источниках видео» — отдельным блоком ниже.
     """
 
     model = Episode
     extra = 0
-    fields = ["season_number", "episode_number", "name", "file", "duration_minutes"]
+    fields = ["season_number", "episode_number", "name", "duration_minutes"]
+
+
+class PlaybackSourceInline(admin.TabularInline):
+    """
+    Источники видео записи: файлы и внешние плееры.
+
+    Один блок на всё: и фильм целиком (серия не выбрана), и каждая серия
+    со своей озвучкой. Раньше файл серии редактировался в одном месте,
+    альтернативный плеер — в другом, а выбрать озвучку было негде.
+    """
+
+    model = PlaybackSource
+    extra = 0
+    fields = ["episode", "voice", "kind", "file", "url", "quality", "order"]
+    autocomplete_fields = ["voice"]
 
 
 class CollectionItemInline(admin.TabularInline):
@@ -170,7 +214,7 @@ class CollectionAdmin(admin.ModelAdmin):
 class TitleAdmin(admin.ModelAdmin):
     """Админка фильмов и сериалов — основное рабочее место редактора."""
 
-    inlines = [ParticipationInline, FrameInline, TitleAwardInline, EpisodeInline]
+    inlines = [ParticipationInline, FrameInline, TitleAwardInline, EpisodeInline, PlaybackSourceInline]
 
     # Похожие вручную ищутся автодополнением: список из тысяч фильмов
     # в обычном multi-select нерабочий.
@@ -269,13 +313,13 @@ class TitleAdmin(admin.ModelAdmin):
             },
         ),
         (
-            "Видео",
+            "Трейлер",
             {
-                "fields": ["trailer_url", "trailer_file", "player_url_2"],
+                "fields": ["trailer_url", "trailer_file"],
                 "description": (
-                    "Трейлер: заполните ОДИН вариант — ссылку или свой видеофайл. "
-                    "player_url_2 — альтернативный источник (вкладка «Плеер 2»), "
-                    "например iframe стороннего кинотеатра."
+                    "Заполните ОДИН вариант — ссылку или свой видеофайл. "
+                    "Само видео для просмотра добавляется ниже, "
+                    "в блоке «Источники видео»."
                 ),
             },
         ),

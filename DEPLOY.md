@@ -17,8 +17,16 @@ HTTPS, следит за здоровьем и перезапускает упа
    ```
 
 2. **Render → New → Blueprint** → выберите репозиторий. Render найдёт
-   `render.yaml` и покажет, что создаст: `lumibox-web`, `lumibox-worker`,
-   `lumibox-db`, `lumibox-redis`.
+   `render.yaml` и покажет, что создаст: `lumibox-web` и `lumibox-db`.
+
+   Это бесплатный вариант: Redis в нём нет намеренно. Без `REDIS_URL` кэш
+   работает в памяти процесса, а фоновые задачи выполняются прямо в запросе
+   (`CELERY_TASK_ALWAYS_EAGER`), поэтому отдельный воркер не нужен.
+
+   Нужен постоянно работающий сайт с Redis и воркером — переименуйте
+   `render.paid.yaml` в `render.yaml` перед подключением Blueprint. Тогда
+   Render создаст четыре сервиса: `lumibox-web`, `lumibox-worker`,
+   `lumibox-db` и `lumibox-redis`, плюс диск на 1 ГБ под медиа.
 
 3. **Заполните переменные** (помечены как «требует значения») и нажмите **Apply**:
    | Переменная | Значение |

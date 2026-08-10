@@ -27,12 +27,17 @@
 
         function setStars(value) {
             stars.forEach(function (star) {
-                var isActive = parseInt(star.dataset.value, 10) <= value;
-                star.classList.toggle('star-rating__star--active', isActive);
+                var starValue = parseInt(star.dataset.value, 10);
+                // Закрашены все звёзды до выбранной включительно.
+                star.classList.toggle('star-rating__star--active', starValue <= value);
                 // Для скринридеров шкала ведёт себя как радиогруппа:
                 // состояние хранит настоящий input[type=radio] внутри label.
+                // Отмечен ровно один — именно выбранный. Раньше здесь стояло
+                // `checked = starValue <= value`, то есть true присваивался
+                // всем звёздам до выбранной; сходилось лишь потому, что радио
+                // одной группы гасят друг друга и последним оставался нужный.
                 var input = star.querySelector('input[type="radio"]');
-                if (input) input.checked = isActive;
+                if (input) input.checked = starValue === value;
             });
         }
 
@@ -183,10 +188,14 @@
         var currentLabel = section ? section.querySelector('[data-player-label]') : null;
         var titleSlug = section ? section.dataset.titleSlug : '';
 
-        /* Прогресс просмотра: анонимно не пишем — сервер сам откажет,
-           но и лишний запрос от гостя ни к чему. */
+        /* Прогресс просмотра: анонимно не пишем — сервер всё равно ответит 403.
+           Раньше в комментарии это было обещано, а в коде проверки не было,
+           и каждое переключение серии гостем давало отказ в консоли и в логах.
+           Признак входа приходит из разметки: base.html ставит его на <body>. */
+        var isAuthenticated = document.body.dataset.authenticated === '1';
+
         function reportProgress(episodeId) {
-            if (!episodeId || !titleSlug) return;
+            if (!isAuthenticated || !episodeId || !titleSlug) return;
             var xhr = new XMLHttpRequest();
             xhr.open('POST', '/api/v1/titles/' + titleSlug + '/watch/');
             xhr.setRequestHeader('Content-Type', 'application/json');
@@ -243,13 +252,12 @@
                 var isActive = pane.dataset.playerPane === name;
                 pane.hidden = !isActive;
             });
-            /* Переключение источника у видео-панели: при возврате на
-               «Плеер 1» восстанавливаем выбранную серию. */
-            if (name === 'player1') {
-                var videoPane = document.querySelector('[data-player-pane="player1"]');
-                var video = videoPane ? videoPane.querySelector('video') : null;
-                if (video) video.load();
-            }
+            /* Ничего не перезагружаем. Панель всего лишь скрывается атрибутом
+               hidden — элемент video остаётся в DOM вместе со своим временем
+               и выбранной серией. Здесь стоял video.load() «для восстановления
+               серии», но он сбрасывал позицию на ноль: зритель уходил на вкладку
+               с трейлером, возвращался — и смотрел серию заново с начала.
+               Источник меняет только setEpisode, там load() уместен. */
         }
 
         tabButtons.forEach(function (btn, index) {

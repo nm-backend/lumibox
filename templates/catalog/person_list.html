@@ -2,7 +2,9 @@
 {% load static i18n catalog_filters %}
 
 {% block page_title %}{% blocktranslate with heading=page_heading %}{{ heading }} — LumiBox{% endblocktranslate %}{% endblock %}
-{% block page_description %}{% blocktranslate with heading=page_heading %}Список {{ heading|lower }} на LumiBox: фильмография, роли и биографии.{% endblocktranslate %}{% endblock %}
+{% comment %} lower применяем в with: фильтр внутри blocktranslate не выполняется,
+   и в описании страницы вместо раздела зияла дыра — «Список  на LumiBox». {% endcomment %}
+{% block page_description %}{% blocktranslate with heading=page_heading|lower %}Список {{ heading }} на LumiBox: фильмография, роли и биографии.{% endblocktranslate %}{% endblock %}
 
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'css/catalog.css' %}?v={{ static_version }}">

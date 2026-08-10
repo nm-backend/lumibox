@@ -18,11 +18,11 @@ from apps.catalog.models import (
     Collection,
     CollectionItem,
     Country,
-    Episode,
     Frame,
     Genre,
     Participation,
     Person,
+    PlaybackSource,
     Studio,
     Title,
     TitleAward,
@@ -128,8 +128,13 @@ def delete_title_files(sender, instance, **kwargs):
     delete_media_files(instance, ["poster", "backdrop", "logo", "trailer_file"])
 
 
-@receiver(post_delete, sender=Episode)
-def delete_episode_file(sender, instance, **kwargs):
+@receiver(post_delete, sender=PlaybackSource)
+def delete_playback_file(sender, instance, **kwargs):
+    """
+    Видео удаляется вместе с источником, а не с серией: файл теперь висит
+    на PlaybackSource. Каскад от Title и Episode доходит сюда сам —
+    post_delete срабатывает на каждой удалённой строке.
+    """
     from apps.core.storage_cleanup import delete_media_files
 
     delete_media_files(instance, ["file"])

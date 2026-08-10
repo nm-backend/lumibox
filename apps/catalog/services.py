@@ -281,15 +281,14 @@ def get_home_sections():
     # больше не грузится несколько раз.
     base = Title.objects.published()
 
+    # Здесь считались ещё четыре секции — featured, hero_titles, movies, series.
+    # Ни одну из них не читал ни один шаблон: главная собирает ленту из
+    # trending + top_rated + new_titles. То есть на каждом холодном кэше
+    # выполнялись четыре запроса, результат которых сразу отправлялся в мусор.
     raw = {
         # list() обязателен: QuerySet ленивый, в кэш попал бы объект запроса,
         # и каждый читатель кэша ходил бы в базу заново.
-        "featured": list(base.exclude(description="").order_by(F("published_at").desc(nulls_last=True))[:1]),
-        # Герои для авто-ротации: топ-6 по рейтингу с описанием
-        "hero_titles": list(base.exclude(description="").order_by(F("rating_average").desc(nulls_last=True))[:6]),
         "new_titles": list(base.order_by(F("published_at").desc(nulls_last=True))[:12]),
-        "movies": list(base.movies()[:6]),
-        "series": list(base.series()[:6]),
         "top_rated": list(base.top_rated()[:6]),
     }
 
@@ -304,8 +303,6 @@ def get_home_sections():
         name: [loaded[item.pk] for item in group if item.pk in loaded]
         for name, group in raw.items()
     }
-    # Баннер — одна запись, а не список: шаблон ждёт объект.
-    sections["featured"] = sections["featured"][0] if sections["featured"] else None
 
     cache.set(HOME_CACHE_KEY, sections, settings.CACHE_TTL_HOME)
     return sections

@@ -429,10 +429,23 @@
     margin-bottom: var(--space-2);
 }
 
+/*
+  Шкала 1–10. Порядок в разметке совпадает с визуальным: первая звезда
+  слева — единица.
+
+  Здесь стоял `direction: rtl` вместе с правилом `:hover ~ .star-rating__star`,
+  и вдвоём они красили шкалу в разные стороны: CSS подсвечивал соседей ПОСЛЕ
+  наведённой звезды (при rtl это всё, что левее), а JS вешал --active на
+  значения НЕ БОЛЬШЕ наведённого (всё, что правее). Наведение на пятёрку
+  зажигало все десять. Заодно rtl переворачивал шкалу — единица оказывалась
+  справа.
+
+  Теперь подсветку целиком ведёт JS (setStars): один источник правды.
+  За CSS остаётся только увеличение самой звезды под курсором.
+*/
 .star-rating {
     display: inline-flex;
     gap: 4px;
-    direction: rtl;
 }
 
 .star-rating__star {
@@ -442,9 +455,7 @@
     transition: color 0.15s ease, transform 0.15s ease;
 }
 
-.star-rating__star:hover,
-.star-rating__star:hover ~ .star-rating__star {
-    color: var(--color-accent);
+.star-rating__star:hover {
     transform: scale(1.15);
 }
 
