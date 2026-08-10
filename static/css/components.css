@@ -342,10 +342,29 @@
     margin-bottom: var(--space-5);
     overflow-x: auto;
     scrollbar-width: none;
+    /* Палец останавливает прокрутку на границе вкладки, а не посередине
+       названия — иначе непонятно, обрезано слово или так и задумано. */
+    scroll-snap-type: x proximity;
+    /* Затемнение у правого края видно только когда справа есть непрокрученное
+       содержимое: фон в двух слоях, второй «прилипает» к краю ленты, и при
+       прокрутке до конца тень уезжает вместе с ним. Скроллбар здесь скрыт,
+       и без этого признака вкладки за краем найти было нечем. */
+    background:
+        linear-gradient(to right, var(--color-bg) 30%, rgba(0, 0, 0, 0)) left center,
+        linear-gradient(to left, var(--color-bg) 30%, rgba(0, 0, 0, 0)) right center,
+        radial-gradient(farthest-side at 0 50%, rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0)) left center,
+        radial-gradient(farthest-side at 100% 50%, rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0)) right center;
+    background-repeat: no-repeat;
+    background-size: 32px 100%, 32px 100%, 14px 100%, 14px 100%;
+    background-attachment: local, local, scroll, scroll;
 }
 
 .tabs::-webkit-scrollbar {
     display: none;
+}
+
+.tab {
+    scroll-snap-align: start;
 }
 
 .tab {
@@ -497,9 +516,13 @@
     .bottom-nav {
         display: flex;
     }
+
+    /* Отступ под нижнюю панель считаем от её реальной высоты, а не от числа:
+       зашито было 72px при фактических 76px, и панель накрывала последние
+       строки страницы — на подвале это съедало ссылку. Держать число вручную
+       в синхронизации с вёрсткой панели всё равно не получалось. */
     body {
-        padding-bottom: 72px;
-        padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px));
+        padding-bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom, 0px));
     }
 }
 

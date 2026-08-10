@@ -3,10 +3,17 @@
 <article class="card" itemscope itemtype="{% if title.is_series %}https://schema.org/TVSeries{% else %}https://schema.org/Movie{% endif %}">
     <div class="card__poster">
         {% if title.poster %}
+            {% comment %} width/height обязательны, хотя размер задаёт CSS: без них
+               браузер не знает пропорций до загрузки файла и рисует карточку
+               нулевой высоты, а потом раздвигает вёрстку. На телефоне с медленной
+               сетью список фильмов из-за этого прыгал под пальцем. 2:3 — те же
+               пропорции, что и у постеров в story_card. {% endcomment %}
             <img class="card__image"
                  src="{{ title.poster.url }}"
+                 width="200" height="300"
                  alt="{% blocktranslate with name=title.name %}Постер: {{ name }}{% endblocktranslate %}"
                  loading="lazy"
+                 decoding="async"
                  itemprop="image">
         {% else %}
             <span class="card__placeholder" aria-hidden="true">{{ title.name|first }}</span>

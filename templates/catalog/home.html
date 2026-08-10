@@ -21,10 +21,17 @@
                     <div class="lb-promo__posters">
                         {% comment %} Срез не нужен: вьюха отдаёт ровно столько постеров,
                            сколько рисует промо (PROMO_POSTERS). {% endcomment %}
+                        {% comment %} Постеры промо стоят на первом экране, поэтому
+                           грузятся сразу: loading="lazy" здесь означал «отложи
+                           ровно то, что зритель видит первым», и на телефоне
+                           карусель дорисовывалась уже после появления страницы.
+                           fetchpriority="high" — первым трём, дальше карусель
+                           всё равно уезжает за край экрана. {% endcomment %}
                         {% for title in lb_carousel %}
                             <a class="lb-promo__poster" href="{{ title.get_absolute_url }}" title="{{ title.name }}">
                                 {% if title.poster %}
-                                    <img src="{{ title.poster|webp_url }}" width="104" height="154" alt="{{ title.name }}" loading="lazy">
+                                    <img src="{{ title.poster|webp_url }}" width="104" height="154" alt="{{ title.name }}"
+                                         decoding="async"{% if forloop.counter <= 3 %} fetchpriority="high"{% else %} loading="lazy"{% endif %}>
                                 {% else %}
                                     <img src="{% static 'img/favicon.svg' %}" width="104" height="154" alt="{{ title.name }}" loading="lazy">
                                 {% endif %}

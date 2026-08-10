@@ -1,0 +1,109 @@
+"""
+Разметка, от которой зависит мобильный вид.
+
+Сами размеры и брейкпоинты живут в CSS, и Django-тест их не проверит.
+Зато он стережёт то, на чём мобильные правки держатся: какие ссылки лежат
+в выдвижном меню, свёрнута ли панель фильтров, есть ли якорь у плеера.
+Каждая из этих мелочей уже ломалась, и каждая стоила зрителю с телефона
+экрана прокрутки или целого раздела.
+"""
+
+from django.test import TestCase
+from django.urls import reverse
+
+from apps.catalog.tests.test_episodes import create_source
+from apps.core.test_factories import create_genre, create_title
+
+
+class MobileDrawerLinksTests(TestCase):
+    """Выдвижное меню — единственная навигация на телефоне и планшете."""
+
+    def setUp(self):
+        self.response = self.client.get(reverse("catalog:home"))
+        self.html = self.response.content.decode()
+
+    def test_shows_showcase_pages_not_sort_shortcuts(self):
+        """
+        «Новинки» вели из меню на каталог с сортировкой по дате, а из строки
+        разделов — на страницу /new/. Один ярлык на два адреса, и сами витрины
+        с телефона были недостижимы.
+        """
+        drawer = self._drawer()
+
+        self.assertIn(reverse("catalog:new"), drawer)
+        self.assertIn(reverse("catalog:premieres"), drawer)
+        self.assertIn(reverse("catalog:top"), drawer)
+
+    def test_covers_every_type_from_the_top_navigation(self):
+        """
+        На ≤900px строка разделов скрыта, и её пункты обязаны быть здесь:
+        иначе тип фильма перестаёт существовать для телефона.
+        """
+        drawer = self._drawer()
+
+        for value in ("movie", "series", "cartoon", "tv_show"):
+            with self.subTest(type=value):
+                self.assertIn(f"?type={value}", drawer)
+
+    def test_has_no_anime(self):
+        self.assertNotIn("anime", self._drawer())
+
+    def _drawer(self):
+        """Кусок разметки с выдвижным меню — по нему и сверяем ссылки."""
+        start = self.html.index('id="mobile-nav"')
+        end = self.html.index("</nav>", start)
+        return self.html[start:end]
+
+
+class CatalogFiltersCollapsedTests(TestCase):
+    """
+    Панель фильтров стояла раскрытой всегда: на телефоне двенадцать полей
+    отодвигали первую карточку фильма на 1809-й пиксель.
+    """
+
+    def setUp(self):
+        self.url = reverse("catalog:title_list")
+        create_title(name="Какой-нибудь фильм", genres=[create_genre()])
+
+    def test_panel_is_collapsed_by_default(self):
+        response = self.client.get(self.url)
+
+        self.assertContains(response, '<details class="filters">')
+
+    def test_panel_stays_collapsed_when_filter_applied(self):
+        response = self.client.get(self.url, {"type": "series"})
+
+        self.assertContains(response, '<details class="filters">')
+
+    def test_applied_filters_are_visible_outside_the_panel(self):
+        """
+        Свернуть панель можно только потому, что отбор виден и без неё.
+        Если плашки уедут обратно внутрь <details>, зритель перестанет
+        понимать, почему в каталоге три фильма вместо пятнадцати.
+        """
+        html = self.client.get(self.url, {"type": "series"}).content.decode()
+
+        chips = html.index('class="filters__active"')
+        panel = html.index('<details class="filters">')
+        self.assertLess(chips, panel)
+
+
+class PlayerAnchorTests(TestCase):
+    """Кнопка «Смотреть онлайн» в шапке карточки ведёт к плееру якорем."""
+
+    def test_anchor_and_button_exist_together(self):
+        title = create_title(name="Фильм с плеером")
+        create_source(title=title)
+
+        response = self.client.get(title.get_absolute_url())
+
+        self.assertContains(response, 'id="player"')
+        self.assertContains(response, 'href="#player"')
+
+    def test_no_dead_anchor_without_playback(self):
+        """Без источников секции плеера нет — значит, и ссылки на неё быть не должно."""
+        title = create_title(name="Фильм без источников")
+
+        response = self.client.get(title.get_absolute_url())
+
+        self.assertNotContains(response, 'href="#player"')
