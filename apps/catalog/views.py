@@ -442,7 +442,45 @@ class TitleDetailView(DetailView):
             else None
         )
         context.update(self.get_playback(episodes))
+        context.update(self.get_comments())
         return context
+
+    def get_comments(self):
+        """
+        Лента обсуждения: верхний уровень с прегруженными ответами.
+
+        Два запроса вместо N+1: корневые комментарии и один prefetch ответов.
+        Скрытые модератором не попадают ни туда, ни туда — ответ на скрытый
+        комментарий читается как обрывок разговора.
+
+        Счётчик считаем в памяти: объекты уже здесь, отдельный COUNT был бы
+        третьим запросом ради числа, которое и так известно.
+        """
+        from django.db.models import Prefetch
+
+        from apps.reviews.forms import CommentForm
+        from apps.reviews.models import Comment
+
+        comments = list(
+            Comment.objects.published()
+            .roots()
+            .with_author()
+            .filter(title=self.object)
+            .prefetch_related(
+                Prefetch(
+                    "replies",
+                    queryset=Comment.objects.published().select_related("user"),
+                    to_attr="visible_replies",
+                )
+            )
+        )
+        total = len(comments) + sum(len(comment.visible_replies) for comment in comments)
+
+        return {
+            "comments": comments,
+            "comments_count": total,
+            "comment_form": CommentForm(),
+        }
 
     def get_playback(self, episodes):
         """

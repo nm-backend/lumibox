@@ -304,6 +304,7 @@ SPECTACULAR_SETTINGS = {
     "TAGS": [
         {"name": "titles", "description": "Фильмы и сериалы: список, карточка, похожее, избранное"},
         {"name": "reviews", "description": "Отзывы с оценкой по десятибалльной шкале"},
+        {"name": "comments", "description": "Обсуждение записи: комментарии и ответы"},
         {"name": "collections", "description": "Тематические подборки"},
         {"name": "genres", "description": "Справочник жанров"},
         {"name": "countries", "description": "Справочник стран"},

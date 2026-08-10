@@ -4,9 +4,9 @@ from django.shortcuts import get_object_or_404, redirect
 from django.views.generic import View
 
 from apps.catalog.models import Title
-from apps.reviews.forms import ReviewForm
-from apps.reviews.models import Review
-from apps.reviews.services import save_review
+from apps.reviews.forms import CommentForm, ReviewForm
+from apps.reviews.models import Comment, Review
+from apps.reviews.services import save_comment, save_review
 
 
 class ReviewCreateOrUpdateView(LoginRequiredMixin, View):
@@ -55,3 +55,49 @@ class ReviewDeleteView(LoginRequiredMixin, View):
         review.delete()
         messages.success(request, "Отзыв удалён.")
         return redirect(title_url + "#reviews")
+
+
+class CommentCreateView(LoginRequiredMixin, View):
+    """
+    Добавляет комментарий или ответ.
+
+    Только POST: GET не должен менять данные. Черновик комментировать
+    нельзя — запись ищем среди опубликованных.
+    """
+
+    def post(self, request, slug):
+        title = get_object_or_404(Title.objects.published(), slug=slug)
+        form = CommentForm(request.POST)
+
+        if not form.is_valid():
+            messages.error(request, "Комментарий не может быть пустым.")
+            return redirect(title.get_absolute_url() + "#comments")
+
+        # Родителя берём из POST, но обязательно сверяем с записью:
+        # сам сервис отбросит чужого и схлопнет ответ на ответ.
+        parent = None
+        parent_id = request.POST.get("parent")
+        if parent_id:
+            parent = Comment.objects.published().filter(pk=parent_id).first()
+
+        save_comment(
+            user=request.user,
+            title=title,
+            text=form.cleaned_data["text"],
+            parent=parent,
+        )
+        messages.success(request, "Комментарий добавлен.")
+        return redirect(title.get_absolute_url() + "#comments")
+
+
+class CommentDeleteView(LoginRequiredMixin, View):
+    """Удаление своего комментария. Ответы уходят каскадом вместе с ним."""
+
+    def post(self, request, pk):
+        # Фильтр по user обязателен: без него любой вошедший удалил бы
+        # чужой комментарий, подставив его номер.
+        comment = get_object_or_404(Comment, pk=pk, user=request.user)
+        title_url = comment.title.get_absolute_url()
+        comment.delete()
+        messages.success(request, "Комментарий удалён.")
+        return redirect(title_url + "#comments")

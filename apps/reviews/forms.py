@@ -1,6 +1,6 @@
 from django import forms
 
-from apps.reviews.models import MAX_RATING, MIN_RATING, Review
+from apps.reviews.models import MAX_RATING, MIN_RATING, Comment, Review
 
 
 class ReviewForm(forms.ModelForm):
@@ -16,3 +16,21 @@ class ReviewForm(forms.ModelForm):
             "text": forms.Textarea(attrs={"rows": 4, "placeholder": "Что вы думаете об этом фильме?"}),
         }
         labels = {"rating": "Ваша оценка", "text": "Отзыв"}
+
+
+class CommentForm(forms.ModelForm):
+    """
+    Форма комментария и ответа.
+
+    Одно поле: автора, запись и родителя проставляет сервер. Приди они
+    из формы — можно было бы написать от чужого имени или подвесить ответ
+    к чужому фильму.
+    """
+
+    class Meta:
+        model = Comment
+        fields = ["text"]
+        widgets = {
+            "text": forms.Textarea(attrs={"rows": 3, "placeholder": "Написать комментарий…"}),
+        }
+        labels = {"text": ""}

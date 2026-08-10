@@ -395,6 +395,9 @@
                     <button class="tab" data-tab="gallery" type="button">{% trans "Галерея" %}</button>
                 {% endif %}
                 <button class="tab" data-tab="reviews" type="button">{% trans "Отзывы" %}</button>
+                <button class="tab" data-tab="comments" type="button">
+                    {% trans "Комментарии" %}{% if comments_count %} <span class="tab__count">{{ comments_count }}</span>{% endif %}
+                </button>
             </div>
 
             {# Tab: About #}
@@ -556,6 +559,10 @@
         {# Tab: Reviews #}
         <div class="tab-content" data-tab-content="reviews">
             {% include "includes/reviews.html" %}
+        </div>
+
+        <div class="tab-content" data-tab-content="comments">
+            {% include "includes/comments.html" %}
         </div>
     </div>
 

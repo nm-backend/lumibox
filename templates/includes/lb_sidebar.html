@@ -139,18 +139,18 @@
                 {% endif %}
 
                 {# ---------- Последние комментарии ---------- #}
-                {% if latest_reviews %}
+                {% if latest_comments %}
                     <div class="lb-aheader">{% trans "Последние комментарии" %}</div>
                     <div class="lb-lastcomments">
-                        {% for review in latest_reviews %}
+                        {% for comment in latest_comments %}
                             <div class="lb-lastcomment">
-                                <a class="lb-lastcomment__title" href="{{ review.title.get_absolute_url }}">
-                                    <span class="lb-lastcomment__avatar" aria-hidden="true">{{ review.user.initial }}</span>
-                                    {{ review.title.name }}
+                                <a class="lb-lastcomment__title" href="{{ comment.title.get_absolute_url }}#comments">
+                                    <span class="lb-lastcomment__avatar" aria-hidden="true">{{ comment.user.initial }}</span>
+                                    {{ comment.title.name }}
                                 </a>
                                 <div class="lb-lastcomment__text">
-                                    <span>{{ review.user.display_name }}</span>
-                                    {{ review.text|truncatewords:14 }}
+                                    <span>{{ comment.user.display_name }}</span>
+                                    {{ comment.text|truncatewords:14 }}
                                 </div>
                             </div>
                         {% endfor %}

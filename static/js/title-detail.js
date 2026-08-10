@@ -341,6 +341,40 @@
         });
     }
 
+    /* ---------- 5. Ответ на комментарий ---------- */
+
+    var commentForm = document.querySelector('[data-comment-form]');
+    if (commentForm) {
+        var parentInput = commentForm.querySelector('[data-comment-parent]');
+        var replyingBox = commentForm.querySelector('[data-comment-replying]');
+        var replyingText = commentForm.querySelector('[data-comment-replying-text]');
+        var cancelReply = commentForm.querySelector('[data-comment-cancel]');
+        var commentField = commentForm.querySelector('textarea');
+
+        function setReplyTarget(id, label) {
+            if (!parentInput) return;
+            parentInput.value = id || '';
+            if (replyingBox) replyingBox.hidden = !id;
+            /* Подпись приходит из разметки: перевод делает шаблон, а не
+               скрипт. Тот же приём, что в поиске по актёрам. */
+            if (replyingText) replyingText.textContent = label || '';
+            if (id && commentField) commentField.focus();
+        }
+
+        document.addEventListener('click', function (event) {
+            var replyBtn = event.target.closest('[data-reply-to]');
+            if (replyBtn) {
+                setReplyTarget(replyBtn.dataset.replyTo, replyBtn.dataset.replyLabel);
+                return;
+            }
+            if (event.target.closest('[data-comment-cancel]')) {
+                setReplyTarget('', '');
+            }
+        });
+
+        if (cancelReply) cancelReply.setAttribute('aria-label', cancelReply.textContent);
+    }
+
     /* ---------- 10. Событие view_item (просмотр тайтла) ---------- */
     var trackSection = document.querySelector('[data-title-slug]');
     if (trackSection && window.lbTrack) {

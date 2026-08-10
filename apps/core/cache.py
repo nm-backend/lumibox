@@ -101,6 +101,10 @@ CACHE_INVALIDATORS: dict[str, list[Callable[[], None]]] = {
     "catalog.titleaward": [_clear_home_collections_similar],
     # Отзывы
     "reviews.review": [_clear_all_title_caches],
+    # Комментарии. Рейтинг они не меняют, поэтому похожее и рекомендации
+    # трогать незачем — достаточно сайдбара «Последние комментарии»,
+    # который живёт в общем блоке главной.
+    "reviews.comment": [_clear_home_and_collections],
 }
 
 

@@ -217,12 +217,12 @@ def get_featured_collections(limit=4):
 def get_home_sidebar():
     """
     Данные сайдбара главной: страны, обновления сериалов,
-    последние отзывы.
+    последние комментарии.
 
     Кэшируются одним куском вместе с get_home_sections: меняются редко,
     а отдельными запросами на каждый заход стоили бы четыре запроса.
     """
-    from apps.reviews.models import Review
+    from apps.reviews.models import Comment
 
     cached = cache.get(HOME_SIDEBAR_CACHE_KEY)
     if cached is not None:
@@ -240,10 +240,11 @@ def get_home_sidebar():
         "series_updates": list(
             published.series().with_related().order_by(F("published_at").desc(nulls_last=True))[:6]
         ),
-        "latest_reviews": list(
-            Review.objects.filter(status=Review.Status.PUBLISHED)
-            .select_related("user", "title")
-            .order_by("-created_at")[:4]
+        # Блок сайдбара называется «Последние комментарии» и теперь показывает
+        # именно их. Раньше туда шли отзывы — то есть оценки, по одной
+        # на пользователя: вёрстка обещала обсуждение, которого не было.
+        "latest_comments": list(
+            Comment.objects.published().with_author().order_by("-created_at")[:4]
         ),
         # Топ популярного за всё время — для блока «Популярное» сайдбара.
         # Кэш живёт столько же, сколько и остальной сайдбар: счётчик

@@ -18,6 +18,7 @@ from rest_framework.views import APIView
 from apps.api.permissions import IsAuthorOrReadOnly
 from apps.api.v1.serializers import (
     CollectionSerializer,
+    CommentSerializer,
     CountrySerializer,
     GenreSerializer,
     ReviewSerializer,
@@ -27,7 +28,8 @@ from apps.api.v1.serializers import (
 from apps.catalog.models import Collection, Country, Episode, Genre, Person, Title
 from apps.catalog.services import get_similar_titles
 from apps.library.services import remember_progress, toggle_favorite, toggle_watchlist
-from apps.reviews.models import Review
+from apps.reviews.models import Comment, Review
+from apps.reviews.services import save_comment
 
 
 class StableOrderingFilter(filters.OrderingFilter):
@@ -466,6 +468,80 @@ class ReviewViewSet(
             # проходят её оба, и второй упирается в unique_review_per_user.
             # Без этого перехвата гонка оборачивалась бы для клиента 500.
             raise serializers.ValidationError("Вы уже оставили отзыв на эту запись.")
+
+
+@extend_schema_view(
+    list=extend_schema(
+        summary="Комментарии к записи",
+        description=(
+            "Только прошедшие модерацию, верхний уровень с ответами внутри. "
+            "Если запись снята с публикации — `404`."
+        ),
+        tags=["comments"],
+    ),
+    create=extend_schema(
+        summary="Оставить комментарий",
+        description=(
+            "Автор и запись проставляются сервером. Чтобы ответить, передайте "
+            "`parent` — номер комментария верхнего уровня. Ответ на ответ "
+            "прикрепится к той же ветке: глубина ленты ровно два уровня."
+        ),
+        tags=["comments"],
+    ),
+    destroy=extend_schema(
+        summary="Удалить свой комментарий",
+        description="Чужой удалить нельзя — вернётся `403`. Ответы уходят вместе с ним.",
+        tags=["comments"],
+    ),
+)
+class CommentViewSet(
+    mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    mixins.DestroyModelMixin,
+    viewsets.GenericViewSet,
+):
+    """Обсуждение записи: /api/v1/titles/<slug>/comments/"""
+
+    serializer_class = CommentSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsAuthorOrReadOnly]
+
+    # Нужно генератору схемы: он определяет модель по атрибуту класса,
+    # а get_queryset вызвать не может — при сборке схемы нет title_slug.
+    queryset = Comment.objects.none()
+
+    def get_title(self):
+        return get_object_or_404(Title.objects.published(), slug=self.kwargs["title_slug"])
+
+    def get_queryset(self):
+        # Отбираем через get_title(), а не по title__slug: published() у
+        # комментария проверяет статус КОММЕНТАРИЯ, но не статус записи.
+        from django.db.models import Prefetch
+
+        return (
+            Comment.objects.published()
+            .roots()
+            .with_author()
+            .filter(title=self.get_title())
+            .prefetch_related(
+                Prefetch(
+                    "replies",
+                    queryset=Comment.objects.published().select_related("user"),
+                    to_attr="visible_replies",
+                )
+            )
+        )
+
+    def perform_create(self, serializer):
+        # Родителя проверяет сервис: чужую запись отбросит, ответ на ответ
+        # схлопнет к верхнему уровню.
+        parent = serializer.validated_data.get("parent")
+        comment = save_comment(
+            user=self.request.user,
+            title=self.get_title(),
+            text=serializer.validated_data["text"],
+            parent=parent,
+        )
+        serializer.instance = comment
 
 
 @extend_schema(

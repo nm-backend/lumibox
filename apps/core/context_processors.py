@@ -115,7 +115,7 @@ def lb_sidebar(request):
     return {
         "countries": from_sidebar("countries"),
         "series_updates": from_sidebar("series_updates"),
-        "latest_reviews": from_sidebar("latest_reviews"),
+        "latest_comments": from_sidebar("latest_comments"),
         "genres": SimpleLazyObject(lambda: _get_cached_genre_chip_list(50)),
         "collections": SimpleLazyObject(get_featured_collections),
         "lb_years": SimpleLazyObject(

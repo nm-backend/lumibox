@@ -1,0 +1,119 @@
+{% load i18n catalog_filters %}
+{% comment %} Лента обсуждения записи.
+
+   Отдельно от отзывов: отзыв — это оценка, одна на пользователя,
+   а здесь разговор, где отвечают друг другу. Вложенность ровно одна:
+   комментарий и ответы на него. {% endcomment %}
+
+<section class="section lb-comments" id="comments">
+    <h2 class="section__title">
+        {% trans "Комментарии" %}
+        {% if comments_count %}<span class="section__count">{{ comments_count }}</span>{% endif %}
+    </h2>
+
+    {% if user.is_authenticated %}
+        <form class="lb-comment-form" method="post" action="{% url 'reviews:comment_add' title.slug %}" data-comment-form>
+            {% csrf_token %}
+            {% comment %} Родителя заполняет кнопка «Ответить». Пусто — обычный
+               комментарий верхнего уровня; сервер всё равно сверяет, что
+               родитель относится к этой же записи. {% endcomment %}
+            <input type="hidden" name="parent" value="" data-comment-parent>
+            <p class="lb-comment-form__replying" data-comment-replying hidden>
+                <span data-comment-replying-text></span>
+                <button type="button" class="lb-comment-form__cancel" data-comment-cancel>{% trans "отменить" %}</button>
+            </p>
+            {% include "includes/form_fields.html" with form=comment_form %}
+            <div class="lb-comment-form__actions">
+                <button class="button button--primary" type="submit">{% trans "Отправить" %}</button>
+            </div>
+        </form>
+    {% else %}
+        {% url 'users:login' as login_url %}
+        {% with next_path=request.path %}
+            <p class="lb-comments__login">
+                {% blocktranslate trimmed %}
+                    <a href="{{ login_url }}?next={{ next_path }}">Войдите</a>, чтобы оставить комментарий.
+                {% endblocktranslate %}
+            </p>
+        {% endwith %}
+    {% endif %}
+
+    {% if comments %}
+        <ul class="lb-comment-list">
+            {% for comment in comments %}
+                <li class="lb-comment">
+                    <div class="avatar">
+                        {% if comment.user.avatar %}
+                            <img class="avatar__image" src="{{ comment.user.avatar.url }}" alt="" loading="lazy" decoding="async">
+                        {% else %}
+                            <span aria-hidden="true">{{ comment.user.initial }}</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="lb-comment__body">
+                        <div class="lb-comment__head">
+                            <span class="lb-comment__author">{{ comment.user.display_name }}</span>
+                            <time class="lb-comment__date" datetime="{{ comment.created_at|date:'c' }}">
+                                {{ comment.created_at|lb_posted }}
+                            </time>
+                        </div>
+                        <p class="lb-comment__text">{{ comment.text|linebreaksbr }}</p>
+
+                        <div class="lb-comment__actions">
+                            {% if user.is_authenticated %}
+                                <button class="lb-comment__reply" type="button"
+                                        data-reply-to="{{ comment.pk }}"
+                                        data-reply-label="{% blocktranslate with name=comment.user.display_name %}Ответ для {{ name }}{% endblocktranslate %}">{% trans "Ответить" %}</button>
+                            {% endif %}
+                            {% if comment.user_id == user.id %}
+                                <form method="post" action="{% url 'reviews:comment_delete' comment.pk %}"
+                                      data-confirm="{% trans 'Удалить комментарий?' %}">
+                                    {% csrf_token %}
+                                    <button class="lb-comment__delete" type="submit">{% trans "Удалить" %}</button>
+                                </form>
+                            {% endif %}
+                        </div>
+
+                        {% if comment.visible_replies %}
+                            <ul class="lb-comment-replies">
+                                {% for reply in comment.visible_replies %}
+                                    <li class="lb-comment lb-comment--reply">
+                                        <div class="avatar avatar--small">
+                                            {% if reply.user.avatar %}
+                                                <img class="avatar__image" src="{{ reply.user.avatar.url }}" alt="" loading="lazy" decoding="async">
+                                            {% else %}
+                                                <span aria-hidden="true">{{ reply.user.initial }}</span>
+                                            {% endif %}
+                                        </div>
+                                        <div class="lb-comment__body">
+                                            <div class="lb-comment__head">
+                                                <span class="lb-comment__author">{{ reply.user.display_name }}</span>
+                                                <time class="lb-comment__date" datetime="{{ reply.created_at|date:'c' }}">
+                                                    {{ reply.created_at|lb_posted }}
+                                                </time>
+                                            </div>
+                                            <p class="lb-comment__text">{{ reply.text|linebreaksbr }}</p>
+                                            {% if reply.user_id == user.id %}
+                                                <div class="lb-comment__actions">
+                                                    <form method="post" action="{% url 'reviews:comment_delete' reply.pk %}"
+                                                          data-confirm="{% trans 'Удалить комментарий?' %}">
+                                                        {% csrf_token %}
+                                                        <button class="lb-comment__delete" type="submit">{% trans "Удалить" %}</button>
+                                                    </form>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        {% trans "Комментариев пока нет" as empty_title %}
+        {% trans "Начните обсуждение — вас прочитают." as empty_desc %}
+        {% include "includes/empty_state.html" with empty_small=True empty_title=empty_title empty_desc=empty_desc %}
+    {% endif %}
+</section>

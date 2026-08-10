@@ -17,8 +17,13 @@ router.register("collections", views.CollectionViewSet, basename="collection")
 reviews = views.ReviewViewSet.as_view({"get": "list", "post": "create"})
 review_detail = views.ReviewViewSet.as_view({"put": "update", "patch": "partial_update", "delete": "destroy"})
 
+comments = views.CommentViewSet.as_view({"get": "list", "post": "create"})
+comment_detail = views.CommentViewSet.as_view({"delete": "destroy"})
+
 urlpatterns = [
     path("", include(router.urls)),
+    path("titles/<slug:title_slug>/comments/", comments, name="title-comments"),
+    path("titles/<slug:title_slug>/comments/<int:pk>/", comment_detail, name="title-comment-detail"),
     path("titles/<slug:title_slug>/reviews/", reviews, name="title-reviews"),
     path("titles/<slug:title_slug>/reviews/<int:pk>/", review_detail, name="title-review-detail"),
     path("titles/<slug:title_slug>/rate/", views.RateTitleView.as_view(), name="title-rate"),

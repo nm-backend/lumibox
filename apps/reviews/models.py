@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
@@ -82,3 +83,85 @@ class Review(TimeStampedModel):
 
     def __str__(self):
         return f"{self.user} о «{self.title.name}»: {self.rating}"
+
+
+class CommentQuerySet(models.QuerySet):
+    def published(self):
+        return self.filter(status=self.model.Status.PUBLISHED)
+
+    def roots(self):
+        """Только верхний уровень: ответы приходят к ним префетчем."""
+        return self.filter(parent__isnull=True)
+
+    def with_author(self):
+        # Автор нужен каждой строке ленты; title — сайдбару «Последние
+        # комментарии», который ссылается на страницу записи.
+        return self.select_related("user", "title")
+
+
+class Comment(TimeStampedModel):
+    """
+    Комментарий к записи каталога.
+
+    Отдельная сущность от Review, и это осознанно: Review — это оценка
+    (одна на пользователя, 1–10, влияет на рейтинг), а здесь обсуждение,
+    где один зритель пишет сколько хочет и отвечает другим.
+
+    Вложенность ровно одна: комментарий и ответы на него. Дерево
+    произвольной глубины на кинопортале превращается в нечитаемую лесенку,
+    а стоит рекурсивных запросов при выводе. Ограничение проверяет clean().
+    """
+
+    class Status(models.TextChoices):
+        PUBLISHED = "published", "Опубликован"
+        HIDDEN = "hidden", "Скрыт"
+
+    title = models.ForeignKey(
+        "catalog.Title",
+        verbose_name="Фильм или сериал",
+        on_delete=models.CASCADE,
+        related_name="comments",
+    )
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        verbose_name="Автор",
+        on_delete=models.CASCADE,
+        related_name="comments",
+    )
+    parent = models.ForeignKey(
+        "self",
+        verbose_name="Ответ на",
+        on_delete=models.CASCADE,
+        related_name="replies",
+        null=True,
+        blank=True,
+    )
+    text = models.TextField("Комментарий", max_length=2000)
+    status = models.CharField(
+        "Статус",
+        max_length=10,
+        choices=Status.choices,
+        default=Status.PUBLISHED,
+    )
+
+    objects = CommentQuerySet.as_manager()
+
+    class Meta:
+        verbose_name = "Комментарий"
+        verbose_name_plural = "Комментарии"
+        ordering = ["created_at"]
+        indexes = [
+            # Лента записи: только опубликованные, в порядке добавления.
+            models.Index(fields=["title", "status", "created_at"], name="comment_title_status_idx"),
+            # Сайдбар «Последние комментарии» берёт свежие без привязки к записи.
+            models.Index(fields=["-created_at"], name="comment_created_idx"),
+        ]
+
+    def __str__(self):
+        return f"{self.user} к «{self.title.name}»"
+
+    def clean(self):
+        """Ответ на ответ запрещаем: глубина ленты ровно два уровня."""
+        super().clean()
+        if self.parent_id and self.parent.parent_id:
+            raise ValidationError({"parent": "Отвечать можно только на комментарий верхнего уровня."})

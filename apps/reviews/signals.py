@@ -15,7 +15,7 @@ from django.dispatch import receiver
 
 from apps.catalog.services import update_title_rating
 from apps.core.cache import invalidate_for_model
-from apps.reviews.models import Review
+from apps.reviews.models import Comment, Review
 
 
 @receiver(post_save, sender=Review)
@@ -28,3 +28,13 @@ def update_rating_on_save(sender, instance, **kwargs):
 def update_rating_on_delete(sender, instance, **kwargs):
     update_title_rating(instance.title)
     invalidate_for_model("reviews.review")
+
+
+@receiver(post_save, sender=Comment)
+@receiver(post_delete, sender=Comment)
+def reset_cache_on_comment_change(sender, instance, **kwargs):
+    """
+    Рейтинг комментарий не трогает — сбрасываем только блок сайдбара
+    «Последние комментарии», который кэшируется вместе с главной.
+    """
+    invalidate_for_model("reviews.comment")

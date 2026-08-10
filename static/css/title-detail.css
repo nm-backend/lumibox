@@ -903,3 +903,144 @@
         padding: var(--space-2);
     }
 }
+
+/* ---------- Комментарии ---------- */
+
+/*
+  Лента обсуждения. Отдельно от отзывов: отзыв — это оценка в шапке,
+  а здесь разговор с ответами. Вложенность ровно одна, поэтому и стилей
+  всего два уровня — лесенка глубже читалась бы как обрывки.
+*/
+
+.lb-comment-form {
+    margin-bottom: var(--space-6);
+}
+
+.lb-comment-form__actions {
+    margin-top: var(--space-3);
+}
+
+.lb-comment-form__replying {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin-bottom: var(--space-2);
+    font-size: var(--text-sm);
+    color: var(--color-text-muted);
+}
+
+.lb-comment-form__cancel {
+    background: none;
+    border: 0;
+    padding: 0;
+    color: var(--color-accent);
+    cursor: pointer;
+    font: inherit;
+    text-decoration: underline;
+}
+
+.lb-comments__login {
+    margin-bottom: var(--space-5);
+    color: var(--color-text-muted);
+}
+
+.lb-comment-list,
+.lb-comment-replies {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.lb-comment {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: var(--space-3);
+    padding: var(--space-4) 0;
+    border-top: 1px solid var(--color-border);
+}
+
+.lb-comment-list > .lb-comment:first-child {
+    border-top: 0;
+}
+
+.lb-comment__head {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-bottom: var(--space-1);
+}
+
+.lb-comment__author {
+    font-weight: 600;
+    color: var(--color-text);
+}
+
+.lb-comment__date {
+    font-size: var(--text-xs);
+    color: var(--color-text-dim);
+}
+
+.lb-comment__text {
+    margin: 0;
+    color: var(--color-text-soft);
+    max-width: 68ch;
+}
+
+.lb-comment__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin-top: var(--space-2);
+}
+
+.lb-comment__reply,
+.lb-comment__delete {
+    background: none;
+    border: 0;
+    padding: 0;
+    font: inherit;
+    font-size: var(--text-xs);
+    color: var(--color-text-dim);
+    cursor: pointer;
+}
+
+.lb-comment__reply:hover,
+.lb-comment__delete:hover {
+    color: var(--color-accent);
+}
+
+/* Ответы: сдвиг и полоса слева вместо второй рамки — так ветка читается
+   как продолжение разговора, а не как отдельный блок. */
+.lb-comment-replies {
+    margin-top: var(--space-3);
+    padding-left: var(--space-4);
+    border-left: 2px solid var(--color-border);
+}
+
+.lb-comment--reply {
+    border-top: 0;
+    padding: var(--space-3) 0 0;
+}
+
+.avatar--small {
+    width: 28px;
+    height: 28px;
+    font-size: var(--text-xs);
+}
+
+.tab__count {
+    display: inline-block;
+    margin-left: 4px;
+    padding: 0 6px;
+    border-radius: var(--radius-full);
+    background: var(--color-surface-2);
+    font-size: var(--text-2xs);
+    color: var(--color-text-dim);
+}
+
+@media (max-width: 720px) {
+    .lb-comment-replies {
+        padding-left: var(--space-3);
+    }
+}

@@ -1,7 +1,8 @@
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
 from apps.catalog.models import Collection, Country, Genre, Participation, Person, Title
-from apps.reviews.models import Review
+from apps.reviews.models import Comment, Review
 
 
 class ReferenceSerializer(serializers.ModelSerializer):
@@ -134,3 +135,37 @@ class ReviewSerializer(serializers.ModelSerializer):
         model = Review
         fields = ["id", "author", "title_slug", "rating", "text", "created_at"]
         read_only_fields = ["id", "author", "title_slug", "created_at"]
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    """
+    Комментарий с ответами.
+
+    Автора и запись проставляет сервер. parent приходит от клиента, но
+    вьюха сверяет его с записью и схлопывает ответ на ответ: глубина
+    ленты ровно два уровня.
+    """
+
+    author = serializers.CharField(source="user.display_name", read_only=True)
+    replies = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Comment
+        fields = ["id", "author", "parent", "text", "created_at", "replies"]
+        read_only_fields = ["id", "author", "created_at", "replies"]
+
+    @extend_schema_field(serializers.ListField(child=serializers.DictField()))
+    def get_replies(self, comment):
+        """Ответы отдаём только у корневых: у ответа их по определению нет."""
+        replies = getattr(comment, "visible_replies", None)
+        if not replies:
+            return []
+        return [
+            {
+                "id": reply.pk,
+                "author": reply.user.display_name,
+                "text": reply.text,
+                "created_at": reply.created_at,
+            }
+            for reply in replies
+        ]

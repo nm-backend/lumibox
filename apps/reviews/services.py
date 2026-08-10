@@ -5,7 +5,7 @@
 переписать второй раз для API — а вместе с ним и защиту от гонки.
 """
 
-from apps.reviews.models import Review
+from apps.reviews.models import Comment, Review
 
 
 def save_review(user, title, rating, text=""):
@@ -29,3 +29,27 @@ def save_review(user, title, rating, text=""):
         title=title,
         defaults={"rating": rating, "text": text},
     )
+
+
+def save_comment(user, title, text, parent=None):
+    """
+    Добавляет комментарий или ответ на него.
+
+    Принимает: пользователя, запись, текст и, для ответа, родительский
+    комментарий. Возвращает созданный комментарий.
+
+    Ответ на ответ схлопываем к верхнему уровню, а не отклоняем: зритель
+    нажал «Ответить» под чужим ответом, и ронять его текст ошибкой из-за
+    внутреннего правила о глубине — худшее, что можно сделать. Комментарий
+    попадёт в ту же ветку, где человек и отвечал.
+
+    Родитель обязан относиться к той же записи: иначе ответ уехал бы
+    в ленту чужого фильма.
+    """
+    if parent is not None:
+        if parent.title_id != title.pk:
+            parent = None
+        elif parent.parent_id:
+            parent = parent.parent
+
+    return Comment.objects.create(user=user, title=title, text=text, parent=parent)
