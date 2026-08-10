@@ -324,17 +324,9 @@
 }
 
 /* Subtle light reflection sweep on frame hover */
-.frames__item::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 50%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
-    transition: left 0.5s ease;
-    pointer-events: none;
-}
+/* Здесь был световой блик .frames__item::after. Правило инертно:
+   псевдоэлементы не рендерятся на заменяемых элементах, а .frames__item —
+   это <img>. Вдобавок у него нет position: relative. */
 
 .frames__item:hover::after {
     left: 150%;

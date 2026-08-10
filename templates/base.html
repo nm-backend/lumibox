@@ -5,6 +5,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="color-scheme" content="dark light">
+    {% comment %} theme-color красит адресную строку браузера в цвет фона —
+       страница перестаёт выглядеть вклеенной в чужой интерфейс. {% endcomment %}
+    <meta name="theme-color" content="#07080d" media="(prefers-color-scheme: dark)">
+    <meta name="theme-color" content="#f2f4f8" media="(prefers-color-scheme: light)">
+
+    {% comment %} Тема — до первой отрисовки.
+
+       Атрибут data-theme читает и ставит app.js, но он подключён с defer,
+       то есть выполняется после разбора документа. Пользователь светлой
+       темы успевал увидеть тёмную страницу и её перерисовку — и так на
+       каждой навигации. Этот скрипт синхронный и стоит в <head> именно
+       поэтому: три строки в обмен на отсутствие вспышки. {% endcomment %}
+    <script>
+        (function () {
+            try {
+                var stored = localStorage.getItem('lumibox-theme');
+                if (stored) document.documentElement.dataset.theme = stored;
+            } catch (e) { /* приватный режим — остаёмся на теме по умолчанию */ }
+        })();
+    </script>
 
     <title>{% block page_title %}{% trans "LumiBox — каталог фильмов и сериалов" %}{% endblock %}</title>
     <meta name="description" content="{% block page_description %}{% trans "Каталог фильмов и сериалов: поиск, фильтры, подборки." %}{% endblock %}">

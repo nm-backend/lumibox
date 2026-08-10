@@ -258,15 +258,10 @@ img[data-loaded] {
     animation: fadeInLoaded 0.4s ease both;
 }
 
-/* Prevent FOUC: hide content until JS removes data-loading */
-body[data-loading] .site-main {
-    opacity: 0;
-}
-
-body:not([data-loading]) .site-main {
-    opacity: 1;
-    transition: opacity 0.3s ease;
-}
+/* Здесь пряталась страница до снятия атрибута data-loading. Атрибут
+   не ставил никто, поэтому первое правило не срабатывало никогда, а второе
+   применялось всегда. Вспышку темы теперь снимает синхронный скрипт
+   в <head> (base.html) — до первой отрисовки, а не после неё. */
 
 /* ---------- Пустое состояние ---------- */
 
