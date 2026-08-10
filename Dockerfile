@@ -79,6 +79,6 @@ RUN DJANGO_SECRET_KEY=build-only-not-a-secret \
 EXPOSE 8000
 # gthread и увеличенный таймаут — потому что видео раздаёт сам Django,
 # пока не настроен R2. Долгая раздача файла занимала синхронный воркер
-# целиком и получала SIGKILL по таймауту. Подробнее — в scripts/start.sh.
+# целиком и получала SIGKILL по таймауту. Подробнее — в scripts/run_web.sh.
 CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8000", \
      "--worker-class", "gthread", "--workers", "3", "--threads", "4", "--timeout", "300"]

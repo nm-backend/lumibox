@@ -5,15 +5,15 @@
     "dockerfilePath": "Dockerfile"
   },
   "deploy": {
-    "startCommand": "/app/scripts/start.sh",
+    "startCommand": "/app/scripts/run_web.sh",
     "healthcheckPath": "/healthz/",
     "healthcheckTimeout": 100,
     "env": {
-      "AWS_ACCESS_KEY_ID": null,
-      "AWS_SECRET_ACCESS_KEY": null,
-      "AWS_STORAGE_BUCKET_NAME": null,
-      "AWS_S3_ENDPOINT_URL": null,
-      "AWS_S3_REGION_NAME": "auto",
+      "CLOUDFLARE_R2_ACCESS_KEY_ID": null,
+      "CLOUDFLARE_R2_SECRET_ACCESS_KEY": null,
+      "CLOUDFLARE_R2_BUCKET_NAME": null,
+      "CLOUDFLARE_R2_ENDPOINT_URL": null,
+      "CLOUDFLARE_R2_REGION_NAME": "auto",
       "CLOUDFLARE_R2_PUBLIC_URL": null
     },
     "restartPolicyType": "ON_FAILURE",

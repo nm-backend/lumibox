@@ -1,4 +1,7 @@
 #!/bin/sh
+# ЛОКАЛЬНЫЙ запуск через docker compose (macOS/Linux): поднимает базу,
+# Redis и сайт на localhost. Это НЕ точка входа продакшена — там
+# работает scripts/run_web.sh, который запускает gunicorn.
 # LumiBox — запуск проекта одной командой (macOS, Linux).
 # Windows-версия: start.bat
 #

@@ -17,7 +17,7 @@ db.sqlite3
 staticfiles/
 
 # Freebuff desktop runtime files
-.freebuff/*.db*
+.freebuff/
 
 # Загруженные пользователями файлы: в репозитории им не место,
 # но сама папка нужна — поэтому храним только .gitkeep внутри неё.
@@ -35,4 +35,3 @@ Thumbs.db
 .coverage
 
 # Freebuff worktrees (embedded git repos)
-.freebuff/worktrees/

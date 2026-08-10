@@ -104,8 +104,8 @@ pg_dump "$DATABASE_URL" > lumibox-$(date +%F).sql
 Хранилище медиа (пока не задано — файлы лежат на диске контейнера и
 теряются при пересоздании):
 
-`AWS_STORAGE_BUCKET_NAME`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`,
-`AWS_S3_ENDPOINT_URL`, `AWS_S3_REGION_NAME=auto`, `CLOUDFLARE_R2_PUBLIC_URL`.
+`CLOUDFLARE_R2_BUCKET_NAME`, `CLOUDFLARE_R2_ACCESS_KEY_ID`, `CLOUDFLARE_R2_SECRET_ACCESS_KEY`,
+`CLOUDFLARE_R2_ENDPOINT_URL`, `CLOUDFLARE_R2_REGION_NAME=auto`, `CLOUDFLARE_R2_PUBLIC_URL`.
 
 Почта (без неё сброс пароля не отправит письмо):
 `EMAIL_HOST`, `EMAIL_PORT=587`, `EMAIL_USE_TLS=True`, `EMAIL_HOST_USER`,
@@ -126,7 +126,7 @@ pg_dump "$DATABASE_URL" > lumibox-$(date +%F).sql
 
 1. Завести PostgreSQL и Redis, забрать их строки подключения.
 2. Прописать переменные из таблицы выше.
-3. Выкатить образ. `scripts/start.sh` сам применит миграции, наполнит
+3. Выкатить образ. `scripts/run_web.sh` сам применит миграции, наполнит
    витрину демоданными (если каталог пуст) и создаст администратора.
 4. Подключить домен, дождаться сертификата.
 5. Проверить: `https://lumibox.com/healthz/` отдаёт

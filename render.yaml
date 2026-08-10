@@ -41,7 +41,7 @@ services:
     # Жёстко обязательны только миграции: без схемы сайт нерабочий. Наполнение
     # демоданными обёрнуто в «|| echo» намеренно: любой его сбой (например,
     # недоступный источник картинок) не должен мешать сайту подняться.
-    dockerCommand: /app/scripts/start.sh
+    dockerCommand: /app/scripts/run_web.sh
     envVars:
       - key: DJANGO_SETTINGS_MODULE
         value: config.settings.production
@@ -71,15 +71,15 @@ services:
       # --- Cloudflare R2 (опционально) ---
       # Без R2 медиа-файлы хранятся локально и сбрасываются при перезапуске.
       # Заполни эти переменные вручную в Dashboard Render после деплоя.
-      - key: AWS_ACCESS_KEY_ID
+      - key: CLOUDFLARE_R2_ACCESS_KEY_ID
         sync: false
-      - key: AWS_SECRET_ACCESS_KEY
+      - key: CLOUDFLARE_R2_SECRET_ACCESS_KEY
         sync: false
-      - key: AWS_STORAGE_BUCKET_NAME
+      - key: CLOUDFLARE_R2_BUCKET_NAME
         sync: false
-      - key: AWS_S3_ENDPOINT_URL
+      - key: CLOUDFLARE_R2_ENDPOINT_URL
         sync: false
-      - key: AWS_S3_REGION_NAME
+      - key: CLOUDFLARE_R2_REGION_NAME
         value: auto
       - key: CLOUDFLARE_R2_PUBLIC_URL
         sync: false

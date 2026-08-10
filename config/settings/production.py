@@ -6,6 +6,8 @@
 браузер просто не откроет сайт.
 """
 
+from django.core.exceptions import ImproperlyConfigured
+
 from .base import *  # noqa: F401,F403
 
 DEBUG = False
@@ -42,9 +44,39 @@ SECURE_REDIRECT_EXEMPT = [r"^healthz/?$"]
 # быстрее отдаст он, и эту строку можно будет убрать.
 MIDDLEWARE.insert(1, "whitenoise.middleware.WhiteNoiseMiddleware")  # noqa: F405
 
-# Обязателен ли R2 для продакшена — проверяем по наличию бакета.
-# Если R2 не настроен, работаем на локальной файловой системе (эфимерной на Render).
-_USE_R2 = bool(env("AWS_STORAGE_BUCKET_NAME", default=""))
+# ─── Хранилище медиа (Cloudflare R2 или любое S3-совместимое) ────────
+#
+# Имена переменных — CLOUDFLARE_R2_*. Раньше пять из шести назывались
+# AWS_*, а шестая CLOUDFLARE_R2_PUBLIC_URL: одна группа настроек с двумя
+# разными префиксами. При заполнении панели хостинга это ровно тот случай,
+# когда половину переменных задают, половину забывают, и хранилище молча
+# не включается.
+#
+# Старые AWS_* читаются как запасной вариант: если кто-то уже прописал их
+# на сервере, выкладка не сломается.
+def _storage_setting(name, default=None):
+    """Значение из CLOUDFLARE_R2_<name>, иначе из старого AWS_<name>."""
+    legacy = {
+        "ACCESS_KEY_ID": "AWS_ACCESS_KEY_ID",
+        "SECRET_ACCESS_KEY": "AWS_SECRET_ACCESS_KEY",
+        "BUCKET_NAME": "AWS_STORAGE_BUCKET_NAME",
+        "ENDPOINT_URL": "AWS_S3_ENDPOINT_URL",
+        "REGION_NAME": "AWS_S3_REGION_NAME",
+    }
+    value = env(f"CLOUDFLARE_R2_{name}", default="")
+    if not value and name in legacy:
+        value = env(legacy[name], default="")
+    if not value and default is None:
+        raise ImproperlyConfigured(
+            f"CLOUDFLARE_R2_{name} не задан, а хранилище включено "
+            f"(задан CLOUDFLARE_R2_BUCKET_NAME)."
+        )
+    return value or default
+
+
+# Хранилище включается наличием бакета: остальные переменные без него
+# бессмысленны, а с ним — обязательны.
+_USE_R2 = bool(_storage_setting("BUCKET_NAME", default=""))
 
 # Статика по-прежнему отдаётся через whitenoise из контейнера.
 # Не кладём её в R2 — так быстрее: не нужен лишний HTTP к R2 на каждый CSS.
@@ -54,11 +86,11 @@ _STATICFILES_STORAGE = {
 
 if _USE_R2:
     _R2_OPTIONS = {
-        "access_key": env("AWS_ACCESS_KEY_ID"),
-        "secret_key": env("AWS_SECRET_ACCESS_KEY"),
-        "bucket_name": env("AWS_STORAGE_BUCKET_NAME"),
-        "region_name": env("AWS_S3_REGION_NAME", default="auto"),
-        "endpoint_url": env("AWS_S3_ENDPOINT_URL"),
+        "access_key": _storage_setting("ACCESS_KEY_ID"),
+        "secret_key": _storage_setting("SECRET_ACCESS_KEY"),
+        "bucket_name": _storage_setting("BUCKET_NAME"),
+        "region_name": _storage_setting("REGION_NAME", default="auto"),
+        "endpoint_url": _storage_setting("ENDPOINT_URL"),
         "signature_version": "s3v4",
         # Не перезаписывать файлы — каждый новый файл получает уникальное имя.
         "file_overwrite": False,
