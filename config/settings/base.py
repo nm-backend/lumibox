@@ -7,6 +7,7 @@
 """
 
 from pathlib import Path
+from typing import Any
 
 import environ
 
@@ -376,7 +377,10 @@ MEDIA_ROOT = BASE_DIR / "media"
 DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024
 FILE_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024
 
-STORAGES = {
+# Тип объявлен явно: у боевых настроек внутри лежит ещё и вложенный OPTIONS,
+# и без аннотации mypy выводит по здешнему словарю тип «строки» и считает
+# production.py ошибкой.
+STORAGES: dict[str, dict[str, Any]] = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
     "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
 }
