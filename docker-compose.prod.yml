@@ -41,7 +41,8 @@ services:
     command: >
       sh -c "python manage.py migrate --noinput &&
              python manage.py collectstatic --noinput &&
-             gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 3"
+             gunicorn config.wsgi:application --bind 0.0.0.0:8000
+             --worker-class gthread --workers 3 --threads 4 --timeout 300"
     environment:
       DJANGO_SETTINGS_MODULE: config.settings.production
       DATABASE_URL: postgres://${POSTGRES_USER:-lumibox}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-lumibox}
