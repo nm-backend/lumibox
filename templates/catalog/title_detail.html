@@ -614,6 +614,32 @@
     </section>
 {% endif %}
 
+{% comment %}«Все части» франшизы. Отдельно от «Похожего» и намеренно:
+   похожее — вкусовая рекомендация, франшиза — факт, поэтому и порядок
+   здесь по годам выхода, а не по совпадению жанров.{% endcomment %}
+{% if franchise_titles %}
+    <section class="similar-section" aria-label="{% trans 'Все части' %}">
+        <h2 class="section__title">
+            {% blocktranslate with name=title.franchise.name %}Все части: {{ name }}{% endblocktranslate %}
+        </h2>
+        <div class="similar-carousel">
+            {% for part in franchise_titles %}
+                <a class="similar-card" href="{{ part.get_absolute_url }}" title="{{ part.name }}">
+                    <span class="similar-card__poster">
+                        {% if part.poster %}
+                            <img class="similar-card__image" src="{{ part.poster|webp_url }}" alt="" loading="lazy" decoding="async">
+                        {% else %}
+                            <span class="similar-card__placeholder">{{ part.name|first }}</span>
+                        {% endif %}
+                    </span>
+                    <span class="similar-card__name">{{ part.name }}</span>
+                </a>
+            {% endfor %}
+        </div>
+        <a class="similar-section__more" href="{{ title.franchise.get_absolute_url }}">{% trans "Вся франшиза" %} →</a>
+    </section>
+{% endif %}
+
 {% include "includes/ad_slot.html" %}
 
 {% if title.trailer_source %}

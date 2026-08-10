@@ -7,11 +7,21 @@ from django.db.models import Count, F, Max, Q
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
+from django.utils.translation import gettext
 from django.views.generic import DetailView, ListView, TemplateView
 
-from apps.catalog.forms import CatalogFilterForm
+from apps.catalog.forms import QUICK_SORTS, CatalogFilterForm
 from apps.catalog.managers import story_card_prefetches
-from apps.catalog.models import Award, Collection, Country, Genre, Person, Studio, Title
+from apps.catalog.models import (
+    Award,
+    Collection,
+    Country,
+    Franchise,
+    Genre,
+    Person,
+    Studio,
+    Title,
+)
 from apps.catalog.models.person import Participation
 from apps.catalog.services import (
     REFERENCE_COUNTRY_CACHE_KEY,
@@ -40,6 +50,44 @@ GENRE_CHIPS_CACHE_KEY = "catalog:genre_chips:v2"
 # по месту: шаблон и вьюха должны договориться об одном значении, иначе
 # снова начнём прегружать карточки, которые никто не увидит.
 PROMO_POSTERS = 4
+
+
+def build_sort_links(request, base_url=None):
+    """
+    Ссылки быстрой сортировки: текущие фильтры + новая сортировка.
+
+    Возвращает список (подпись, url, активна_ли). Активность считаем здесь,
+    а не в шаблоне: у сортировки по умолчанию sort-параметра нет, и
+    сравнение строк в шаблоне получилось бы хрупким.
+
+    Базой служит request.path, а не reverse('catalog:title_list'): панель
+    рендерится и на страницах жанра, страны и раздела, где путь сам несёт
+    фильтр (/genres/drama/), который в GET не попадёт — reverse() выбросил
+    бы его, уводя на весь каталог. base_url задаёт другую базу явно: она
+    нужна главной, где панель уводит в каталог.
+
+    Раньше эта функция была методом каталога, а главная строила свои ссылки
+    отдельным списком другой формы — из-за чего шаблоны распаковывали то
+    двойки, то тройки.
+    """
+    catalog_url = base_url or request.path
+    base = request.GET.copy()
+    base.pop("page", None)
+    # Сортировку по умолчанию каталог применяет и при явном
+    # sort=-published_at (переход из «Новинок») — считаем их равнозначными.
+    current = request.GET.get("sort", "")
+
+    links = []
+    for sort, label in QUICK_SORTS:
+        query = base.copy()
+        if sort:
+            query["sort"] = sort
+        else:
+            query.pop("sort", None)
+        url = f"{catalog_url}?{query.urlencode()}" if query else catalog_url
+        is_active = current == sort or (sort == "" and current == "-published_at")
+        links.append((label, url, is_active))
+    return links
 
 
 def _dedup_titles(*groups):
@@ -120,16 +168,10 @@ class HomeView(TemplateView):
         from apps.catalog.forms import get_year_choices
         context["lb_years"] = [int(year) for year, _ in get_year_choices() if year]
 
-        # Выпадающий список «Сортировать» панели xSort.
-        # «топ за неделю» тут нет: тренды считаются отдельным механизмом
-        # (см. get_trending_titles), и сортировки каталога с таким именем
-        # не существует — обещание, которое каталог не выполняет.
-        context["lb_sort_links"] = [
-            ("по дате", f"{catalog_url}?sort=-published_at"),
-            ("по рейтингу", f"{catalog_url}?sort=-rating_average"),
-            ("по комментариям", f"{catalog_url}?sort=-rating_count"),
-            ("по году", f"{catalog_url}?sort=-release_year"),
-        ]
+        # Выпадающий список «Сортировать» панели xSort. Тот же источник, что
+        # и у панели каталога, только база ссылки — каталог: с главной эти
+        # пункты уводят именно туда.
+        context["lb_sort_links"] = build_sort_links(self.request, base_url=catalog_url)
 
         # Лента главной: популярное за неделю, затем топ по рейтингу,
         # добитый новинками. Карусель: популярное за неделю, добитое новинками.
@@ -206,50 +248,50 @@ class TitleListView(ElidedPaginationMixin, ListView):
         context["active_filters"] = self.build_active_filters(form)
         context["page_heading"] = self.page_heading
         context["page_subtitle"] = self.page_subtitle
-        # Genre chips for quick filter navigation
         context["genres"] = _get_cached_genre_chip_list()
+        context["genre_chips"] = self.build_genre_chips()
 
         # Панель быстрых сортировок — сохраняем уже
         # применённые фильтры (жанр, страна, тип), меняя только sort.
         context["lb_sort_links"] = self._sort_links()
         return context
 
-    def _sort_links(self):
-        """Ссылки быстрой сортировки: текущий фильтр + новая сортировка.
-
-        Возвращает список (подпись, url, активна_ли). Активность считаем
-        здесь, а не в шаблоне: у сортировки «по дате» sort-параметра нет
-        (это значение по умолчанию), и сравнение строк в шаблоне
-        получилось бы хрупким.
-
-        Базой ссылки служит request.path, а не reverse('catalog:title_list'):
-        панель рендерится и на страницах жанра/страны, и там путь несёт
-        фильтр (/genres/drama/), который в GET не попадёт — reverse()
-        выбрасывал бы его, уводя на весь каталог.
+    def build_genre_chips(self):
         """
-        catalog_url = self.request.path
+        Чипы жанров, сохраняющие остальные фильтры.
+
+        Возвращает список (название, url, активен_ли); первый элемент —
+        «Все» со сброшенным жанром.
+
+        Раньше чип вёл на /catalog/?genre=drama и только: выбранные тип,
+        страна, год и сортировка молча слетали. Панель быстрых сортировок
+        рядом делала правильно — это расхождение и чинится здесь.
+
+        Базой всегда служит адрес каталога, а не request.path: на странице
+        /genres/drama/ жанр сидит в пути, и дописать к нему ?genre=comedy
+        значило бы попросить оба жанра сразу и показать пустоту.
+        """
+        catalog_url = reverse("catalog:title_list")
         base = self.request.GET.copy()
+        base.pop("genre", None)
         base.pop("page", None)
-        # Сортировку по умолчанию («по дате обновления») каталог применяет
-        # и при явном sort=-published_at (из «Новинок») — считаем обе
-        # равнозначными активному состоянию панели.
-        current = self.request.GET.get("sort", "")
-        links = []
-        for sort, label in (
-            ("", "По дате обновления"),
-            ("-views_count", "По просмотрам"),
-            ("-rating_average", "По рейтингу"),
-            ("-release_year", "По году"),
-        ):
+
+        # Активным считаем и жанр из GET, и жанр из пути (страница жанра).
+        current = self.request.GET.get("genre") or self.kwargs.get("slug", "")
+
+        def link(slug=None):
             query = base.copy()
-            if sort:
-                query["sort"] = sort
-            else:
-                query.pop("sort", None)
-            url = f"{catalog_url}?{query.urlencode()}" if query else catalog_url
-            is_active = current == sort or (sort == "" and current == "-published_at")
-            links.append((label, url, is_active))
-        return links
+            if slug:
+                query["genre"] = slug
+            return f"{catalog_url}?{query.urlencode()}" if query else catalog_url
+
+        chips = [(gettext("Все"), link(), not current)]
+        for genre in _get_cached_genre_chip_list():
+            chips.append((genre.name, link(genre.slug), current == genre.slug))
+        return chips
+
+    def _sort_links(self):
+        return build_sort_links(self.request)
 
     def build_active_filters(self, form):
         """
@@ -272,6 +314,69 @@ class TitleListView(ElidedPaginationMixin, ListView):
             })
 
         return filters
+
+
+class NewTitlesView(TitleListView):
+    """Новинки: /new/ — свежие публикации."""
+
+    page_heading = "Новинки"
+    page_subtitle = "Раздел"
+
+    def get_base_queryset(self):
+        return super().get_base_queryset().order_by(F("published_at").desc(nulls_last=True), "pk")
+
+
+class PopularTitlesView(TitleListView):
+    """Популярное: /popular/ — по числу просмотров за всё время."""
+
+    page_heading = "Популярное"
+    page_subtitle = "Раздел"
+
+    def get_base_queryset(self):
+        return super().get_base_queryset().most_viewed()
+
+
+class TopRatedTitlesView(TitleListView):
+    """Топ: /top/ — только оценённое, по средней оценке."""
+
+    page_heading = "Топ по рейтингу"
+    page_subtitle = "Раздел"
+
+    def get_base_queryset(self):
+        return super().get_base_queryset().top_rated()
+
+
+class PremieresView(TitleListView):
+    """
+    Премьеры: /premieres/ — то, что ещё не вышло.
+
+    Отбираем по точной дате выхода: год для этого не годится, фильм
+    текущего года мог выйти как вчера, так и через полгода.
+    """
+
+    page_heading = "Скоро на экранах"
+    page_subtitle = "Раздел"
+
+    def get_base_queryset(self):
+        from django.utils import timezone
+
+        return (
+            super()
+            .get_base_queryset()
+            .filter(release_date__gt=timezone.localdate())
+            .order_by("release_date", "pk")
+        )
+
+
+class YearTitleListView(TitleListView):
+    """Каталог за один год: /year/2024/"""
+
+    page_subtitle = "Год"
+
+    def get_base_queryset(self):
+        year = self.kwargs["year"]
+        self.page_heading = str(year)
+        return super().get_base_queryset().filter(release_year=year)
 
 
 class GenreTitleListView(TitleListView):
@@ -443,6 +548,17 @@ class TitleDetailView(DetailView):
         )
         context.update(self.get_playback(episodes))
         context.update(self.get_comments())
+
+        # «Все части» — остальные произведения франшизы. Запрос делаем
+        # только когда франшиза задана: у большинства записей её нет.
+        if self.object.franchise_id:
+            context["franchise_titles"] = list(
+                Title.objects.published()
+                .filter(franchise_id=self.object.franchise_id)
+                .exclude(pk=self.object.pk)
+                .only("name", "slug", "release_year", "poster", "type")
+                .order_by("release_year", "pk")[:12]
+            )
         return context
 
     def get_comments(self):
@@ -686,6 +802,50 @@ class StudioDetailView(ElidedPaginationMixin, ListView):
         context = super().get_context_data(**kwargs)
         context["entity"] = self.studio
         context["entity_label"] = "Студия"
+        return context
+
+
+class FranchiseListView(ListView):
+    """Все франшизы, у которых есть опубликованные части."""
+
+    template_name = "catalog/reference_list.html"
+    context_object_name = "references"
+
+    def get_queryset(self):
+        return (
+            Franchise.objects.annotate(titles_count=Count("titles", filter=PUBLISHED_TITLES))
+            .filter(titles_count__gt=0)
+            .order_by("name")
+        )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["page_heading"] = "Франшизы"
+        context["detail_url_name"] = "catalog:franchise_detail"
+        return context
+
+
+class FranchiseDetailView(ElidedPaginationMixin, ListView):
+    """Части одной франшизы — в порядке выхода."""
+
+    template_name = "catalog/industry_detail.html"
+    context_object_name = "titles"
+    paginate_by = 24
+
+    def get_queryset(self):
+        self.franchise = get_object_or_404(Franchise, slug=self.kwargs["slug"])
+        return (
+            Title.objects.published()
+            .with_related()
+            .with_progress(self.request.user)
+            .filter(franchise=self.franchise)
+            .order_by("release_year", "pk")
+        )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["entity"] = self.franchise
+        context["entity_label"] = "Франшиза"
         return context
 
 

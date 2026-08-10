@@ -34,6 +34,7 @@ class Title(SeoModel, TimeStampedModel):
         SERIES = "series", "Сериал"
         CARTOON = "cartoon", "Мультфильм"
         TV_SHOW = "tv_show", "ТВ-шоу"
+        ANIME = "anime", "Аниме"
 
     class VoiceActing(models.TextChoices):
         """Типовые варианты озвучки/перевода.
@@ -170,6 +171,18 @@ class Title(SeoModel, TimeStampedModel):
         blank=True,
         validators=[validate_image_file],
         help_text="Название фильма картинкой на прозрачном фоне (PNG). Показывается в шапке вместо текста.",
+    )
+
+    # Франшиза: «все части» на странице записи. Обычный внешний ключ,
+    # а не связь многие-ко-многим: часть принадлежит одной серии фильмов.
+    franchise = models.ForeignKey(
+        "catalog.Franchise",
+        verbose_name="Франшиза",
+        on_delete=models.SET_NULL,
+        related_name="titles",
+        null=True,
+        blank=True,
+        help_text="Серия связанных фильмов: все части, приквелы, спин-оффы.",
     )
 
     # Ручные рекомендации: редактор сам решает, что показать рядом.

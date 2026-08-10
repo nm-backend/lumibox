@@ -2,7 +2,16 @@ from django.contrib.sitemaps import Sitemap
 from django.db.models import Model
 from django.urls import reverse
 
-from apps.catalog.models import Award, Collection, Country, Genre, Person, Studio, Title
+from apps.catalog.models import (
+    Award,
+    Collection,
+    Country,
+    Franchise,
+    Genre,
+    Person,
+    Studio,
+    Title,
+)
 
 
 class TitleSitemap(Sitemap):
@@ -57,6 +66,34 @@ class AwardSitemap(ReferenceSitemap):
     url_name = "catalog:award_detail"
 
 
+class FranchiseSitemap(ReferenceSitemap):
+    model = Franchise
+    url_name = "catalog:franchise_detail"
+
+
+class YearSitemap(Sitemap):
+    """
+    Страницы годов: /year/2024/.
+
+    Берём только годы, которые реально есть в каталоге, — ссылка на пустой
+    год ведёт робота в тупик. Тот же список, что и в фильтре и в сайдбаре.
+    """
+
+    changefreq = "weekly"
+    priority = 0.5
+
+    def items(self):
+        return list(
+            Title.objects.published()
+            .values_list("release_year", flat=True)
+            .distinct()
+            .order_by("-release_year")
+        )
+
+    def location(self, year):
+        return reverse("catalog:year_titles", args=[year])
+
+
 class PersonSitemap(Sitemap):
     """Персоны: актёры, режиссёры и прочая съёмочная группа."""
 
@@ -94,11 +131,18 @@ class StaticSitemap(Sitemap):
         return [
             "catalog:home",
             "catalog:title_list",
+            # Разделы-витрины: у каждого свой адрес, а значит и своё место
+            # в выдаче — их нужно отдать роботу так же, как каталог.
+            "catalog:new",
+            "catalog:popular",
+            "catalog:top",
+            "catalog:premieres",
             "catalog:genre_list",
             "catalog:country_list",
             "catalog:actor_list",
             "catalog:director_list",
             "catalog:studio_list",
+            "catalog:franchise_list",
             "catalog:award_list",
         ]
 
@@ -113,6 +157,8 @@ sitemaps = {
     "genres": GenreSitemap,
     "countries": CountrySitemap,
     "studios": StudioSitemap,
+    "franchises": FranchiseSitemap,
+    "years": YearSitemap,
     "awards": AwardSitemap,
     "persons": PersonSitemap,
     "collections": CollectionSitemap,

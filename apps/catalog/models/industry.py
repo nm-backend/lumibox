@@ -5,6 +5,36 @@ from apps.core.models import SeoModel, TimeStampedModel
 from apps.core.validators import validate_image_file
 
 
+class Franchise(SeoModel, TimeStampedModel):
+    """
+    Франшиза: серия связанных произведений — все части, спин-оффы, приквелы.
+
+    Отличается от подборки (Collection) тем, что это свойство самого
+    произведения, а не редакторская витрина: часть принадлежит франшизе
+    всегда, а в подборку её кладут и убирают. Поэтому связь — обычный
+    внешний ключ у Title, и блок «Все части» на странице собирается без
+    промежуточной таблицы.
+
+    От «Похожих вручную» (Title.related_titles) отличается смыслом:
+    похожее — вкусовая рекомендация, франшиза — факт.
+    """
+
+    name = models.CharField("Название", max_length=180, unique=True)
+    slug = models.SlugField("Адрес", max_length=200, unique=True)
+    description = models.TextField("Описание", blank=True)
+
+    class Meta:
+        verbose_name = "Франшиза"
+        verbose_name_plural = "Франшизы"
+        ordering = ["name"]
+
+    def __str__(self) -> str:
+        return self.name
+
+    def get_absolute_url(self) -> str:
+        return reverse("catalog:franchise_detail", kwargs={"slug": self.slug})
+
+
 class Studio(SeoModel, TimeStampedModel):
     """Студия, лейбл или правообладатель контента в каталоге."""
 

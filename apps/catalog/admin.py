@@ -10,6 +10,7 @@ from apps.catalog.models import (
     Country,
     Episode,
     Frame,
+    Franchise,
     Genre,
     Participation,
     Person,
@@ -218,7 +219,7 @@ class TitleAdmin(admin.ModelAdmin):
 
     # Похожие вручную ищутся автодополнением: список из тысяч фильмов
     # в обычном multi-select нерабочий.
-    autocomplete_fields = ["related_titles"]
+    autocomplete_fields = ["related_titles", "franchise"]
 
     list_display = ["poster_thumb", "name", "type", "release_year", "views_count", "status", "rating_display"]
     list_display_links = ["poster_thumb", "name"]
@@ -305,11 +306,14 @@ class TitleAdmin(admin.ModelAdmin):
             },
         ),
         (
-            "Похожие",
+            "Связи",
             {
-                "fields": ["related_titles"],
+                "fields": ["franchise", "related_titles"],
                 "classes": ["collapse"],
-                "description": "Оставьте пустым — похожее подберётся само по совпадению жанров.",
+                "description": (
+                    "Франшиза — серия связанных частей, показывается блоком «Все части». "
+                    "Похожие оставьте пустыми, и подбор пойдёт сам по совпадению жанров."
+                ),
             },
         ),
         (
@@ -426,6 +430,23 @@ class TitleAdmin(admin.ModelAdmin):
         updated = queryset.update(status=Title.Status.DRAFT)
         invalidate_for_model("catalog.title")
         self.message_user(request, f"Снято с публикации: {updated}")
+
+
+@admin.register(Franchise)
+class FranchiseAdmin(admin.ModelAdmin):
+    """Франшизы. search_fields нужен автодополнению в карточке записи."""
+
+    list_display = ["name", "titles_count"]
+    search_fields = ["name"]
+    prepopulated_fields = {"slug": ["name"]}
+    readonly_fields = ["created_at", "updated_at"]
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).annotate(_titles_count=Count("titles"))
+
+    @admin.display(description="Частей", ordering="_titles_count")
+    def titles_count(self, franchise):
+        return franchise._titles_count
 
 
 @admin.register(Studio)

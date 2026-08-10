@@ -9,7 +9,7 @@
 from apps.catalog.models.collection import Collection, CollectionItem
 from apps.catalog.models.episode import Episode
 from apps.catalog.models.frame import Frame
-from apps.catalog.models.industry import Award, Studio, TitleAward
+from apps.catalog.models.industry import Award, Franchise, Studio, TitleAward
 from apps.catalog.models.person import Participation, Person
 from apps.catalog.models.playback import PlaybackSource
 from apps.catalog.models.reference import Country, Genre, VoiceOver
@@ -21,6 +21,7 @@ __all__ = [
     "Country",
     "Episode",
     "Frame",
+    "Franchise",
     "Genre",
     "Award",
     "Participation",

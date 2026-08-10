@@ -28,11 +28,14 @@
                         </ul>
                     </div>
                     <div class="lb-navsort">
+                        {% comment %} Годы ведут в собственный раздел /year/2024/,
+                           а не в каталог с «?year=». У раздела есть заголовок,
+                           свой адрес и место в карте сайта. {% endcomment %}
                         <div class="lb-byyear">
                             <i class="lb-accent lb-accent--star">{% trans "По году" %}</i>
                             <ul>
                                 {% for year in lb_years|slice:":9" %}
-                                    <li><a href="{% url 'catalog:title_list' %}?year={{ year }}" title="{% blocktranslate %}Фильмы и сериалы {{ year }} года{% endblocktranslate %}">{{ year }} {% trans "года" %}</a></li>
+                                    <li><a href="{% url 'catalog:year_titles' year %}" title="{% blocktranslate %}Фильмы и сериалы {{ year }} года{% endblocktranslate %}">{{ year }} {% trans "года" %}</a></li>
                                 {% endfor %}
                             </ul>
                         </div>

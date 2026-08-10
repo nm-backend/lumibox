@@ -10,6 +10,15 @@ urlpatterns = [
     path("catalog/", views.TitleListView.as_view(), name="title_list"),
     path("title/<slug:slug>/", views.TitleDetailView.as_view(), name="title_detail"),
 
+    # Разделы-витрины. Каждый — тот же каталог с суженной выборкой, поэтому
+    # фильтры, сортировка и пагинация работают в них без единой лишней строки:
+    # все наследуют TitleListView и трогают только get_base_queryset().
+    path("new/", views.NewTitlesView.as_view(), name="new"),
+    path("popular/", views.PopularTitlesView.as_view(), name="popular"),
+    path("top/", views.TopRatedTitlesView.as_view(), name="top"),
+    path("premieres/", views.PremieresView.as_view(), name="premieres"),
+    path("year/<int:year>/", views.YearTitleListView.as_view(), name="year_titles"),
+
     path("genres/", views.GenreListView.as_view(), name="genre_list"),
     path("genres/<slug:slug>/", views.GenreTitleListView.as_view(), name="genre_titles"),
 
@@ -22,6 +31,8 @@ urlpatterns = [
 
     path("studios/", views.StudioListView.as_view(), name="studio_list"),
     path("studios/<slug:slug>/", views.StudioDetailView.as_view(), name="studio_detail"),
+    path("franchises/", views.FranchiseListView.as_view(), name="franchise_list"),
+    path("franchises/<slug:slug>/", views.FranchiseDetailView.as_view(), name="franchise_detail"),
     path("awards/", views.AwardListView.as_view(), name="award_list"),
     path("awards/<slug:slug>/", views.AwardDetailView.as_view(), name="award_detail"),
 

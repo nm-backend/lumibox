@@ -26,12 +26,15 @@
         <div class="lb-main" id="lb-content" data-testid="results">
 
             {# Quick filter genre chips #}
-            {% if genres %}
+            {% comment %} Чипы жанров. Адреса собирает вьюха (build_genre_chips):
+               они сохраняют уже выбранные тип, страну, год и сортировку.
+               Раньше чип вёл на «?genre=…» и только, молча сбрасывая всё
+               остальное — при том что панель сортировок рядом всё сохраняла. {% endcomment %}
+            {% if genre_chips %}
                 <nav class="genre-chips" aria-label="{% trans 'Быстрая фильтрация по жанрам' %}">
-                    <a class="genre-chip {% if not request.GET.genre %}genre-chip--active{% endif %}" href="{% url 'catalog:title_list' %}">{% trans "Все" %}</a>
-                    {% for genre in genres %}
-                        <a class="genre-chip {% if request.GET.genre == genre.slug %}genre-chip--active{% endif %}"
-                           href="{% url 'catalog:title_list' %}?genre={{ genre.slug }}">{{ genre.name }}</a>
+                    {% for name, url, is_active in genre_chips %}
+                        <a class="genre-chip{% if is_active %} genre-chip--active{% endif %}"
+                           href="{{ url }}">{{ name }}</a>
                     {% endfor %}
                 </nav>
             {% endif %}

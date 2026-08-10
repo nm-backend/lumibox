@@ -64,13 +64,20 @@ def lb_topnav(request):
     catalog_url = reverse("catalog:title_list")
     url_name = getattr(request.resolver_match, "url_name", "")
     get = request.GET
+    def by_type(label, value):
+        return (label, f"{catalog_url}?type={value}", get.get("type") == str(value))
+
     links = [
         (_("Главная"), reverse("catalog:home"), url_name == "home"),
-        (_("Фильмы"), f"{catalog_url}?type={Title.Type.MOVIE}", get.get("type") == str(Title.Type.MOVIE)),
-        (_("Сериалы"), f"{catalog_url}?type={Title.Type.SERIES}", get.get("type") == str(Title.Type.SERIES)),
-        (_("Мультфильмы"), f"{catalog_url}?type={Title.Type.CARTOON}", get.get("type") == str(Title.Type.CARTOON)),
-        (_("ТВ-шоу"), f"{catalog_url}?type={Title.Type.TV_SHOW}", get.get("type") == str(Title.Type.TV_SHOW)),
-        (_("Новинки"), f"{catalog_url}?sort=-published_at", get.get("sort") == "-published_at"),
+        by_type(_("Фильмы"), Title.Type.MOVIE),
+        by_type(_("Сериалы"), Title.Type.SERIES),
+        by_type(_("Мультфильмы"), Title.Type.CARTOON),
+        by_type(_("Аниме"), Title.Type.ANIME),
+        by_type(_("ТВ-шоу"), Title.Type.TV_SHOW),
+        # Новинки и премьеры — собственные разделы, а не сортировка каталога:
+        # у раздела свой адрес, заголовок и место в поиске.
+        (_("Новинки"), reverse("catalog:new"), url_name == "new"),
+        (_("Скоро"), reverse("catalog:premieres"), url_name == "premieres"),
         (_("Подборки"), reverse("catalog:collection_list"),
          url_name in ("collection_list", "collection_detail")),
     ]
@@ -159,14 +166,20 @@ def _curated_country_links(countries):
 
 
 def _series_links():
-    """Ссылки блока «Сериалы» сайдбара."""
+    """
+    Ссылки блока «Сериалы» сайдбара.
+
+    Подписи проходят через gettext: раньше это были обычные строки Python,
+    и на английской с кыргызской версиях блок оставался русским.
+    """
     from django.urls import reverse
 
     catalog_url = reverse("catalog:title_list")
     return [
-        ("Все сериалы", f"{catalog_url}?type=series"),
-        ("Мультфильмы", f"{catalog_url}?type=cartoon"),
-        ("ТВ-шоу", f"{catalog_url}?type=tv_show"),
-        ("Фильмы", f"{catalog_url}?type=movie"),
-        ("Подборки", reverse("catalog:collection_list")),
+        (_("Все сериалы"), f"{catalog_url}?type=series"),
+        (_("Мультфильмы"), f"{catalog_url}?type=cartoon"),
+        (_("Аниме"), f"{catalog_url}?type=anime"),
+        (_("ТВ-шоу"), f"{catalog_url}?type=tv_show"),
+        (_("Фильмы"), f"{catalog_url}?type=movie"),
+        (_("Подборки"), reverse("catalog:collection_list")),
     ]

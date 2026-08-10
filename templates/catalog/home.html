@@ -50,8 +50,8 @@
             <div class="lb-xsort-div lb-xsort-div--active" data-lb-dropdown>
                 <div class="lb-xsort-selected">{% trans "популярное за неделю" %}</div>
                 <ul class="lb-xsort-ul">
-                    {% for label, url in lb_sort_links %}
-                        <li class="lb-xsort-option">
+                    {% for label, url, is_active in lb_sort_links %}
+                        <li class="lb-xsort-option{% if is_active %} lb-xsort-option--current{% endif %}">
                             <a href="{{ url }}">{{ label }}</a>
                         </li>
                     {% endfor %}
