@@ -251,18 +251,70 @@
     const hamburger = document.querySelector('[data-hamburger]');
     const mobileNav = document.querySelector('[data-mobile-nav]');
     if (hamburger && mobileNav) {
+        /* Меню занимает весь экран под шапкой, то есть ведёт себя как диалог.
+           Раньше оно только меняло класс: фон под ним продолжал прокручиваться
+           (палец «проваливался» в страницу), Esc не закрывал, фокус оставался
+           на странице позади, а вернуться к гамбургеру с клавиатуры было
+           нельзя. Дальше — минимальный набор, который делает его диалогом. */
+        const setOpen = function (open) {
+            if (open) {
+                /* Низ шапки — фактический, а не из переменной: над шапкой есть
+                   промо-полоса, которая уезжает при прокрутке, поэтому одно
+                   зашитое число всегда было бы неверным на половине экранов. */
+                const header = document.querySelector('.site-header');
+                if (header) {
+                    const bottom = Math.max(0, Math.round(header.getBoundingClientRect().bottom));
+                    document.documentElement.style.setProperty('--lb-drawer-top', bottom + 'px');
+                }
+            }
+            mobileNav.classList.toggle('mobile-nav--open', open);
+            hamburger.classList.toggle('hamburger--active', open);
+            hamburger.setAttribute('aria-expanded', open ? 'true' : 'false');
+            /* Прокрутку блокируем на <html>: на iOS overflow:hidden у body
+               не удерживает страницу, а класс на корне переживает и смену
+               темы, и перерисовку. */
+            document.documentElement.classList.toggle('nav-open', open);
+            if (open) {
+                const first = mobileNav.querySelector('a, button');
+                if (first) first.focus();
+            }
+        };
+
+        const isOpen = function () {
+            return mobileNav.classList.contains('mobile-nav--open');
+        };
+
         hamburger.addEventListener('click', function () {
-            const isOpen = mobileNav.classList.toggle('mobile-nav--open');
-            hamburger.classList.toggle('hamburger--active', isOpen);
-            hamburger.setAttribute('aria-expanded', isOpen);
+            setOpen(!isOpen());
         });
 
         mobileNav.querySelectorAll('a').forEach(function (link) {
             link.addEventListener('click', function () {
-                mobileNav.classList.remove('mobile-nav--open');
-                hamburger.classList.remove('hamburger--active');
-                hamburger.setAttribute('aria-expanded', 'false');
+                setOpen(false);
             });
+        });
+
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape' && isOpen()) {
+                setOpen(false);
+                hamburger.focus();
+            }
+        });
+
+        /* Тап мимо меню — привычный способ его закрыть. Гамбургер исключаем:
+           его собственный обработчик уже переключает состояние, иначе меню
+           закрылось бы и тут же открылось снова. */
+        document.addEventListener('click', function (event) {
+            if (!isOpen()) return;
+            if (mobileNav.contains(event.target) || hamburger.contains(event.target)) return;
+            setOpen(false);
+        });
+
+        /* Поворот телефона или переход на планшетную ширину: если гамбургер
+           уехал из вёрстки, открытое меню осталось бы висеть поверх страницы
+           без кнопки закрытия. */
+        window.addEventListener('resize', function () {
+            if (isOpen() && getComputedStyle(hamburger).display === 'none') setOpen(false);
         });
     }
 

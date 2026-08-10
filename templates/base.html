@@ -266,7 +266,15 @@
         {% endfor %}
     </nav>
 
-    {# Mobile drawer nav #}
+    {% comment %} Выдвижное меню — полный список разделов. Нижняя панель
+       (bottom-nav) даёт четыре самых частых адреса под большой палец,
+       а сюда попадает всё остальное: типы, витрины, случайный фильм.
+
+       Раньше «Новинки» отсюда вели на каталог с сортировкой по дате, а тот же
+       пункт в верхней строке разделов — на собственную страницу /new/. Один
+       ярлык, два разных адреса: страницы витрин с телефона были недостижимы
+       вовсе. Теперь ссылка одна и та же в обоих меню.
+    {% endcomment %}
     <nav id="mobile-nav" class="mobile-nav" data-mobile-nav aria-label="{% trans 'Мобильная навигация' %}">
         <a class="mobile-nav__link" href="{% url 'catalog:home' %}">{% trans "Главная" %}</a>
         <a class="mobile-nav__link" href="{% url 'catalog:title_list' %}">{% trans "Весь каталог" %}</a>
@@ -276,8 +284,9 @@
         <a class="mobile-nav__link" href="{% url 'catalog:title_list' %}?type=tv_show">{% trans "ТВ-шоу" %}</a>
         <a class="mobile-nav__link" href="{% url 'catalog:genre_list' %}">{% trans "Жанры" %}</a>
         <a class="mobile-nav__link" href="{% url 'catalog:collection_list' %}">{% trans "Подборки" %}</a>
-        <a class="mobile-nav__link" href="{% url 'catalog:title_list' %}?sort=-rating_average">{% trans "Высокий рейтинг" %}</a>
-        <a class="mobile-nav__link" href="{% url 'catalog:title_list' %}?sort=-published_at">{% trans "Новинки" %}</a>
+        <a class="mobile-nav__link" href="{% url 'catalog:top' %}">{% trans "Высокий рейтинг" %}</a>
+        <a class="mobile-nav__link" href="{% url 'catalog:new' %}">{% trans "Новинки" %}</a>
+        <a class="mobile-nav__link" href="{% url 'catalog:premieres' %}">{% trans "Скоро" %}</a>
         <a class="mobile-nav__link" href="{% url 'catalog:random_title' %}">{% trans "Случайный фильм" %}</a>
         {% if user.is_authenticated %}
             <hr class="mobile-nav__divider">
