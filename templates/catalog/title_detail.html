@@ -194,8 +194,23 @@
             {% endif %}
 
             <div class="film-hero__actions">
+                {% comment %} Переход к плееру — первое действие карточки.
+                   Сам плеер лежит примерно на 1000-м пикселе (на телефоне это
+                   больше экрана), и до этой ссылки главной кнопкой страницы
+                   про фильм была «Смотреть трейлер»: зритель, пришедший
+                   смотреть кино, первым делом видел предложение посмотреть
+                   рекламу этого кино. Обычная якорная ссылка, без скрипта:
+                   работает и до загрузки js, и при открытии в новой вкладке.
+                {% endcomment %}
+                {% if has_playback %}
+                    <a class="button button--primary button--large" href="#player">
+                        {% icon "play" size=14 %}
+                        {% trans "Смотреть онлайн" %}
+                    </a>
+                {% endif %}
+
                 {% if title.trailer_source %}
-                    <button class="button button--primary button--large" type="button" data-trailer-open>
+                    <button class="button {% if has_playback %}button--ghost{% else %}button--primary{% endif %} button--large" type="button" data-trailer-open>
                         {% icon "play" size=14 %}
                         {% trans "Смотреть трейлер" %}
                     </button>
@@ -304,6 +319,7 @@
            player_url_2: теперь любой дополнительный источник — просто ещё
            одна строка в той же таблице.{% endcomment %}
         <section class="player-section"
+                 id="player"
                  data-title-slug="{{ title.slug }}"
                  data-resume-position="{{ resume_position|default:0 }}"
                  aria-label="{% trans 'Смотреть онлайн' %}">

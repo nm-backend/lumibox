@@ -28,7 +28,30 @@
     </div>
 </nav>
 
-<details class="filters" open>
+{% comment %} Применённые фильтры вынесены из <details> наружу: показывать,
+   что именно отобрано, нужно всегда, а разворачивать ради этого форму
+   на двенадцать полей — нет. Раньше плашки лежали внутри панели, и увидеть
+   их можно было только вместе со всей формой.
+{% endcomment %}
+{% if active_filters %}
+    <div class="filters__active">
+        {% for filter in active_filters %}
+            <span class="chip">
+                {{ filter.label }}
+                <a class="chip__remove" href="{{ filter.remove_url }}" aria-label="{% blocktranslate with label=filter.label %}Убрать фильтр «{{ label }}»{% endblocktranslate %}">×</a>
+            </span>
+        {% endfor %}
+        <a class="chip chip--clear" href="{{ request.path }}">{% trans "Очистить" %}</a>
+    </div>
+{% endif %}
+
+{% comment %} Панель свёрнута: зритель пришёл смотреть кино, а не заполнять
+   форму. Раньше атрибут open стоял безусловно, и на телефоне двенадцать полей
+   вытягивались в колонку на 972px — первая карточка фильма оказывалась
+   на 1809-м пикселе, две с половиной прокрутки экрана. Счётчик рядом
+   с заголовком и плашки выше показывают отбор и в свёрнутом виде.
+{% endcomment %}
+<details class="filters">
     <summary class="filters__summary">
         {% icon "filter" size=16 %}
         <span>{% trans "Фильтры" %}</span>
@@ -36,18 +59,6 @@
             <span class="filters__count">{{ active_filters|length }}</span>
         {% endif %}
     </summary>
-
-    {% if active_filters %}
-        <div class="filters__active">
-            {% for filter in active_filters %}
-                <span class="chip">
-                    {{ filter.label }}
-                    <a class="chip__remove" href="{{ filter.remove_url }}" aria-label="{% blocktranslate with label=filter.label %}Убрать фильтр «{{ label }}»{% endblocktranslate %}">×</a>
-                </span>
-            {% endfor %}
-            <a class="chip chip--clear" href="{{ request.path }}">{% trans "Очистить" %}</a>
-        </div>
-    {% endif %}
 
     <form class="filters__body" action="{{ request.path }}" method="get">
         {% for field in filter_form %}
