@@ -64,9 +64,10 @@ if exist ".env" (
     >> .env echo POSTGRES_DB=lumibox
     >> .env echo.
     >> .env echo # Admin account is created on first start. Change the password after login.
+    for /f %%p in ('docker run --rm python:3.13-slim python -c "import secrets;print(secrets.token_urlsafe(18))"') do set "ADMINPASS=%%p"
     >> .env echo DJANGO_SUPERUSER_EMAIL=admin@lumibox.local
     >> .env echo DJANGO_SUPERUSER_USERNAME=admin
-    >> .env echo DJANGO_SUPERUSER_PASSWORD=lumibox-admin-2026
+    >> .env echo DJANGO_SUPERUSER_PASSWORD=%ADMINPASS%
 
     echo   [OK] .env created
 )

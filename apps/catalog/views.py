@@ -952,7 +952,16 @@ class SearchView(ElidedPaginationMixin, ListView):
         self.query = self.request.GET.get("q", "").strip()
         # Ограничение снимаем: на своей странице зритель ждёт полную выдачу,
         # а не шесть подсказок. Пагинация дальше сама режет её на страницы.
-        return search_titles(self.query, limit=None)
+        #
+        # with_related/with_progress обязательны: выдача рисуется той же
+        # карточкой, что и каталог, и без префетчей она добирала жанры,
+        # страны и прогресс по одному на запись — тридцать результатов
+        # стоили под сотню запросов.
+        return (
+            search_titles(self.query, limit=None)
+            .with_related()
+            .with_progress(self.request.user)
+        )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

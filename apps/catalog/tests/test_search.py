@@ -8,7 +8,9 @@
 """
 
 from django.core.cache import cache
+from django.db import connection
 from django.test import TestCase
+from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
 
 from apps.catalog.models import Participation, Studio, Title
@@ -159,6 +161,50 @@ class SearchPageTests(TestCase):
         response = self.client.get(reverse("catalog:home"))
 
         self.assertContains(response, f'action="{self.url}"')
+
+    def test_query_count_does_not_grow_with_results(self):
+        """
+        Выдача рисуется той же карточкой, что и каталог, и требует тех же
+        префетчей. Без них страница добирала жанры, страны и прогресс
+        по одному на запись: тридцать результатов стоили под сотню
+        запросов, и это росло линейно вместе с каталогом.
+
+        Сравниваем два размера выдачи, а не фиксируем магическое число:
+        точное количество запросов зависит от блоков сайдбара и меняется
+        при их правке, а вот расти от числа найденных записей оно
+        не должно.
+        """
+        self._fill(3)
+        few = self._measure()
+
+        self._fill(15)
+        many = self._measure()
+
+        self.assertEqual(len(few), len(many))
+
+    def _measure(self):
+        """
+        Считает запросы одной страницы выдачи на прогретом кэше.
+
+        Прогрев обязателен перед каждым замером: добавление записей шлёт
+        сигналы, те сбрасывают кэш сайдбара, и холодный запрос стоит
+        дороже горячего. Без прогрева мы сравнивали бы состояние кэша,
+        а не количество результатов.
+        """
+        self.client.get(self.url, {"q": "Космос"})
+        with CaptureQueriesContext(connection) as ctx:
+            self.client.get(self.url, {"q": "Космос"})
+        return ctx
+
+    def _fill(self, count):
+        genre, country = create_genre(), create_country()
+        for number in range(count):
+            create_title(
+                name=f"Космос {number}",
+                genres=[genre],
+                countries=[country],
+                description="Фильм про космос",
+            )
 
 
 class SearchSuggestApiTests(TestCase):

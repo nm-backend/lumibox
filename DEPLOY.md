@@ -78,3 +78,71 @@ pg_dump "$DATABASE_URL" > lumibox-$(date +%F).sql
 - **Другие хостинги.** `render.yaml` заточен под Render, но образ обычный
   Docker — тот же `Dockerfile` разворачивается на Railway, Fly.io, Hetzner
   и т.п. Отличаются только способ задать переменные и подключить базу/Redis.
+
+---
+
+## Выкладка на собственный домен (lumibox.com)
+
+Ниже — то, что нужно сделать руками. Код к домену готов: `ALLOWED_HOSTS`
+читается из переменной, `CSRF_TRUSTED_ORIGINS` собирается из неё сама
+и уже с `https://`, редирект на HTTPS и HSTS включены, `/healthz/`
+из редиректа исключён.
+
+### 1. Переменные окружения
+
+| Переменная | Значение |
+|---|---|
+| `DJANGO_SETTINGS_MODULE` | `config.settings.production` |
+| `DJANGO_SECRET_KEY` | сгенерировать: `python -c "import secrets; print(secrets.token_urlsafe(50))"` |
+| `DJANGO_ALLOWED_HOSTS` | `lumibox.com,www.lumibox.com` |
+| `DJANGO_NUM_PROXIES` | `1` — за одним доверенным прокси (Render, Railway, свой Nginx) |
+| `DATABASE_URL` | строка подключения к боевой PostgreSQL |
+| `REDIS_URL` | строка Redis; без неё кэш в памяти процесса, а задачи выполняются на месте |
+| `DJANGO_SUPERUSER_EMAIL` | почта администратора |
+| `DJANGO_SUPERUSER_PASSWORD` | **задаёте вы**; в репозитории пароля нет и быть не должно |
+
+Хранилище медиа (пока не задано — файлы лежат на диске контейнера и
+теряются при пересоздании):
+
+`AWS_STORAGE_BUCKET_NAME`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`,
+`AWS_S3_ENDPOINT_URL`, `AWS_S3_REGION_NAME=auto`, `CLOUDFLARE_R2_PUBLIC_URL`.
+
+Почта (без неё сброс пароля не отправит письмо):
+`EMAIL_HOST`, `EMAIL_PORT=587`, `EMAIL_USE_TLS=True`, `EMAIL_HOST_USER`,
+`EMAIL_HOST_PASSWORD`, `DEFAULT_FROM_EMAIL`.
+
+По желанию: `SENTRY_DSN`, `GA_MEASUREMENT_ID`.
+
+### 2. DNS
+
+Апекс `lumibox.com` и `www` направить на хостинг — конкретные записи
+покажет панель (у Render это `ALIAS`/`A` для апекса и `CNAME` для `www`).
+Сертификат выпускается автоматически после того, как записи разойдутся.
+
+Домен и DNS настраиваете вы: у проекта нет и не должно быть доступа
+к вашему регистратору.
+
+### 3. Порядок выкладки
+
+1. Завести PostgreSQL и Redis, забрать их строки подключения.
+2. Прописать переменные из таблицы выше.
+3. Выкатить образ. `scripts/start.sh` сам применит миграции, наполнит
+   витрину демоданными (если каталог пуст) и создаст администратора.
+4. Подключить домен, дождаться сертификата.
+5. Проверить: `https://lumibox.com/healthz/` отдаёт
+   `{"status": "ok", "database": "ok", "cache": "ok"}`.
+
+### 4. Что проверить после первого выката
+
+- `https://lumibox.com/` открывается, `http://` уводит на `https://`;
+- вход в `/admin/` под созданным администратором;
+- добавление фильма и сериала с сериями и источниками видео;
+- воспроизведение и перемотка (плеер шлёт `Range`, сервер отвечает `206`);
+- `/sitemap.xml` и `/robots.txt` отдают 200.
+
+### 5. Резервные копии
+
+`scripts/backup_db.sh` снимает дамп и хранит последние 14 штук;
+`scripts/restore_db.sh` восстанавливает. На платных планах Render есть
+собственные ежедневные бэкапы — они не отменяют своих: держите копию
+там, куда хостинг не дотянется.

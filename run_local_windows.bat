@@ -81,14 +81,15 @@ echo [5/6] Loading demo data ^(movies, cast, collections, posters^)...
 rem --- 6. Admin user (only if none exists) ---
 set "DJANGO_SUPERUSER_EMAIL=admin@lumibox.local"
 set "DJANGO_SUPERUSER_USERNAME=admin"
-set "DJANGO_SUPERUSER_PASSWORD=admin12345"
-"%VPY%" manage.py createsuperuser --noinput >nul 2>&1
+for /f %%p in ('"%VPY%" -c "import secrets;print(secrets.token_urlsafe(18))"') do set "DJANGO_SUPERUSER_PASSWORD=%%p"
+"%VPY%" manage.py bootstrap_admin >nul 2>&1
+echo    Admin: admin@lumibox.local / %DJANGO_SUPERUSER_PASSWORD%
 echo.
 echo ============================================
 echo   Ready.
 echo   Site:  http://127.0.0.1:8000/
 echo   Admin: http://127.0.0.1:8000/admin/
-echo   Login: admin@lumibox.local  /  admin12345
+echo   Login: admin@lumibox.local  (password printed above)
 echo.
 echo   Keep this window open. Press Ctrl+C to stop.
 echo ============================================

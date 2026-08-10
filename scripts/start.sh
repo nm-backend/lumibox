@@ -17,6 +17,13 @@ python manage.py migrate --noinput
 # недоступный источник картинок) не повод не поднимать сайт.
 python manage.py ensure_demo_data || echo "ensure_demo_data failed - continuing"
 
+# Администратор. Создаётся только если владелец задал DJANGO_SUPERUSER_EMAIL
+# и DJANGO_SUPERUSER_PASSWORD в панели хостинга — пароля в репозитории нет
+# и быть не должно. Повторные выкладки существующего админа не трогают
+# и пароль ему не сбрасывают. Сбой не должен ронять запуск: сайт обязан
+# подняться даже с непонятной переменной, иначе одна опечатка кладёт всё.
+python manage.py bootstrap_admin || echo "bootstrap_admin failed - continuing"
+
 # exec — чтобы gunicorn стал главным процессом и получал сигналы остановки
 # напрямую, иначе платформа гасит контейнер по таймауту вместо мягкого
 # завершения. PORT задаёт платформа; WEB_CONCURRENCY Render выставляет сам,

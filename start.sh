@@ -44,10 +44,11 @@ POSTGRES_USER=lumibox
 POSTGRES_PASSWORD=$DBPASS
 POSTGRES_DB=lumibox
 
-# Администратор создастся сам при первом запуске. Смените пароль после входа.
+# Администратор создастся при первом запуске. Пароль сгенерирован случайно
+# и лежит только в этом файле (.env в .gitignore) — в репозиторий он не попадает.
 DJANGO_SUPERUSER_EMAIL=admin@lumibox.local
 DJANGO_SUPERUSER_USERNAME=admin
-DJANGO_SUPERUSER_PASSWORD=lumibox-admin-2026
+DJANGO_SUPERUSER_PASSWORD=$ADMINPASS
 EOF
     echo "  [OK] Файл .env создан"
 fi

@@ -38,17 +38,13 @@ python manage.py migrate --noinput
 echo "→ Проверяю каталог..."
 python manage.py ensure_demo_data || echo "  ensure_demo_data не отработал — продолжаю запуск."
 
-# Администратор создаётся, только если заданы переменные окружения.
-# Если он уже есть, createsuperuser вернёт ошибку — она ожидаема,
-# поэтому гасим её и продолжаем старт.
-if [ -n "$DJANGO_SUPERUSER_EMAIL" ] && [ -n "$DJANGO_SUPERUSER_PASSWORD" ]; then
-    echo "→ Проверяю администратора..."
-    if python manage.py createsuperuser --noinput 2>/dev/null; then
-        echo "  Администратор создан: $DJANGO_SUPERUSER_EMAIL"
-    else
-        echo "  Администратор уже существует — пропускаю."
-    fi
-fi
+# Администратор. bootstrap_admin вместо createsuperuser --noinput: тот при
+# существующем пользователе падал с ошибкой, и её приходилось гасить
+# перенаправлением — вместе с настоящими ошибками. bootstrap_admin сам
+# знает, что делать при повторном запуске, и пароль существующему
+# администратору не меняет.
+echo "→ Проверяю администратора..."
+python manage.py bootstrap_admin
 
 echo "→ Готово. Запускаю сервер."
 exec "$@"
