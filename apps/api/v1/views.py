@@ -1,5 +1,5 @@
 from django.db import IntegrityError
-from django.db.models import F, Q
+from django.db.models import F
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import (
@@ -25,8 +25,8 @@ from apps.api.v1.serializers import (
     TitleDetailSerializer,
     TitleListSerializer,
 )
-from apps.catalog.models import Collection, Country, Episode, Genre, Person, Title
-from apps.catalog.services import get_similar_titles
+from apps.catalog.models import Collection, Country, Episode, Genre, Title
+from apps.catalog.services import get_similar_titles, search_persons, search_titles
 from apps.library.services import remember_progress, toggle_favorite, toggle_watchlist
 from apps.reviews.models import Comment, Review
 from apps.reviews.services import save_comment
@@ -87,6 +87,10 @@ class SearchResultSerializer(serializers.Serializer):
     name = serializers.CharField()
     slug = serializers.SlugField()
     type = serializers.CharField()
+    # Подпись типа считает сервер: раньше её собирал скрипт, и всё,
+    # что не «movie», подписывалось «Сериал» — мультфильмы, ТВ-шоу и аниме
+    # в подсказках выглядели сериалами.
+    type_display = serializers.CharField()
     release_year = serializers.IntegerField()
     poster = serializers.SerializerMethodField()
     url = serializers.CharField(source="get_absolute_url", read_only=True)
@@ -190,45 +194,41 @@ class TitleViewSet(viewsets.ReadOnlyModelViewSet):
     )
     @action(detail=False, methods=["get"])
     def search(self, request):
-        q = request.query_params.get("q", "").strip()
+        # Отбор делает apps.catalog.services — та же функция, что и на
+        # странице /search/. Раньше здесь жила своя копия icontains,
+        # искавшая только по названию: подсказки и страница находили
+        # разное по одному и тому же запросу.
         limit = self._parse_limit(request.query_params.get("limit"))
-        results = []
-        if len(q) >= 2:
-            titles = (
-                Title.objects.published()
-                .filter(Q(name__icontains=q) | Q(original_name__icontains=q))
-                .only("id", "name", "slug", "type", "release_year", "poster")
-                .order_by("-release_year")[:limit]
-            )
-            results = [
-                {
-                    "id": t.id,
-                    "name": t.name,
-                    "slug": t.slug,
-                    "type": t.type,
-                    "release_year": t.release_year,
-                    "poster": t.poster.url if t.poster else None,
-                    "url": t.get_absolute_url(),
-                }
-                for t in titles
-            ]
-            persons = (
-                Person.objects.filter(
-                    Q(name__icontains=q) | Q(original_name__icontains=q)
-                )
-                .only("id", "name", "slug", "photo")
-                .order_by("name")[:3]
-            )
-            for p in persons:
-                results.append({
-                    "id": p.id,
-                    "name": p.name,
-                    "slug": p.slug,
-                    "type": "person",
-                    "release_year": None,
-                    "poster": p.photo.url if p.photo else None,
-                    "url": p.get_absolute_url(),
-                })
+        query = request.query_params.get("q", "")
+
+        results = [
+            {
+                "id": title.id,
+                "name": title.name,
+                "slug": title.slug,
+                "type": title.type,
+                "type_display": title.get_type_display(),
+                "release_year": title.release_year,
+                "poster": title.poster.url if title.poster else None,
+                "url": title.get_absolute_url(),
+            }
+            for title in search_titles(query, limit=limit)
+        ]
+
+        # Людей отдаём не более трёх: подсказки — это ярлык к записи,
+        # а не полноценная выдача.
+        for person in search_persons(query, limit=3):
+            results.append({
+                "id": person.id,
+                "name": person.name,
+                "slug": person.slug,
+                "type": "person",
+                "type_display": "Персона",
+                "release_year": None,
+                "poster": person.photo.url if person.photo else None,
+                "url": person.get_absolute_url(),
+            })
+
         return Response(results)
 
     # Значения по умолчанию и границы держим рядом с разбором,

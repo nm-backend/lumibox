@@ -163,7 +163,10 @@
             {% endcomment %}
 
             <div class="search-wrapper site-header__search">
-                <form class="search" action="{% url 'catalog:title_list' %}" method="get" role="search" data-search-form>
+                {% comment %} Отправка ведёт на страницу поиска, а не в каталог:
+                   каталог искал только по названию, а здесь зритель ждёт, что
+                   найдутся и жанр, и студия, и человек. {% endcomment %}
+                <form class="search" action="{% url 'catalog:search' %}" method="get" role="search" data-search-form>
                     <label class="visually-hidden" for="search-input">{% trans "Поиск по каталогу" %}</label>
                     <input class="search__input"
                            id="search-input"
@@ -175,7 +178,10 @@
                            data-search-input>
                     <button class="search__submit" type="submit" aria-label="{% trans 'Найти' %}">{% icon "search" size=16 %}</button>
                 </form>
-                <div class="search__dropdown" data-search-dropdown></div>
+                {% comment %} data-empty-msg — подпись пустой выдачи. Через
+                   разметку, а не строкой в скрипте: перевод умеет шаблон. {% endcomment %}
+                <div class="search__dropdown" data-search-dropdown
+                     data-empty-msg="{% trans 'Ничего не найдено' %}"></div>
             </div>
 
             <button class="search-toggle" type="button" data-search-toggle aria-label="{% trans 'Поиск' %}" aria-expanded="false">{% icon "search" size=18 %}</button>

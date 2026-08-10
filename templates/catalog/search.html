@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% load static i18n catalog_filters %}
+
+{% block page_title %}{% if query %}{% blocktranslate %}Поиск: {{ query }} — LumiBox{% endblocktranslate %}{% else %}{% trans "Поиск — LumiBox" %}{% endif %}{% endblock %}
+{% block page_description %}{% trans "Поиск фильмов, сериалов и людей в каталоге LumiBox." %}{% endblock %}
+
+{% comment %} Страница поиска не должна попадать в индекс: запросов бесконечно
+   много, и каждый дал бы поисковику отдельный почти пустой адрес. {% endcomment %}
+{% block extra_meta %}<meta name="robots" content="noindex, follow">{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/catalog.css' %}?v={{ static_version }}">
+{% endblock %}
+
+{% block content %}
+    {% trans "Поиск" as search_label %}
+    {% include "includes/breadcrumbs.html" with current=search_label %}
+
+    <div class="page-header">
+        <h1 class="page-title">
+            {% if query %}
+                {% blocktranslate %}Поиск: {{ query }}{% endblocktranslate %}
+            {% else %}
+                {% trans "Поиск" %}
+            {% endif %}
+        </h1>
+    </div>
+
+    <div class="lb-contentwrap">
+        <div class="lb-main" id="lb-content" data-testid="results">
+
+            <form class="search search--page" action="{% url 'catalog:search' %}" method="get" role="search">
+                <label class="visually-hidden" for="search-page-input">{% trans "Поиск по каталогу" %}</label>
+                <input class="search__input" id="search-page-input" type="search" name="q"
+                       value="{{ query }}" placeholder="{% trans 'Название, жанр, страна, человек…' %}">
+                <button class="button button--primary" type="submit">{% trans "Найти" %}</button>
+            </form>
+
+            {% if too_short %}
+                <p class="catalog__count">{% trans "Запрос слишком короткий — введите хотя бы два символа." %}</p>
+            {% elif query %}
+                <p class="catalog__count">
+                    {% blocktranslate with count=paginator.count %}Найдено: {{ count }}{% endblocktranslate %}
+                </p>
+
+                {% if persons %}
+                    <section class="section">
+                        <h2 class="section__title">{% trans "Люди" %}</h2>
+                        <div class="crew-list">
+                            {% for person in persons %}
+                                <a class="crew" href="{{ person.get_absolute_url }}">
+                                    <span class="avatar">
+                                        {% if person.photo %}
+                                            <img class="avatar__image" src="{{ person.photo|webp_url }}" alt="" loading="lazy" decoding="async">
+                                        {% else %}
+                                            <span aria-hidden="true">{{ person.initial }}</span>
+                                        {% endif %}
+                                    </span>
+                                    <span class="crew__body">
+                                        <span class="crew__name">{{ person.name }}</span>
+                                        <span class="crew__character">
+                                            {{ person.published_works }} {{ person.published_works|ru_plural:"проект,проекта,проектов" }}
+                                        </span>
+                                    </span>
+                                </a>
+                            {% endfor %}
+                        </div>
+                    </section>
+                {% endif %}
+
+                {% if titles %}
+                    <h2 class="visually-hidden">{% trans "Найденные фильмы и сериалы" %}</h2>
+                    {% for title in titles %}
+                        {% include "includes/story_card.html" %}
+                    {% endfor %}
+                    {% include "includes/pagination.html" %}
+                {% elif not persons %}
+                    {% url 'catalog:title_list' as empty_href %}
+                    {% trans "Открыть весь каталог" as empty_label %}
+                    {% trans "Проверьте орфографию или попробуйте более общий запрос." as empty_desc %}
+                    {% include "includes/empty_state.html" with empty_icon="search" empty_q=query empty_desc=empty_desc empty_href=empty_href empty_label=empty_label %}
+                {% endif %}
+            {% else %}
+                <p class="catalog__count">{% trans "Введите запрос — найдём фильмы, сериалы и людей." %}</p>
+            {% endif %}
+        </div>
+
+        {% include "includes/ad_slot.html" %}
+        {% include "includes/lb_sidebar.html" %}
+    </div>
+{% endblock %}

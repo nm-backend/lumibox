@@ -412,3 +412,84 @@ def clear_reference_cache():
         REFERENCE_COUNTRY_CACHE_KEY,
         GENRE_CHIPS_CACHE_KEY,
     ])
+
+
+# ─── Поиск ──────────────────────────────────────────────────────────
+
+# Сколько символов должно быть в запросе, чтобы искать. Один символ
+# находит половину каталога и ничего не сообщает зрителю.
+SEARCH_MIN_LENGTH = 2
+
+
+def search_titles(query, limit=None):
+    """
+    Ищет записи каталога по одному запросу.
+
+    Единственная реализация на весь проект: до неё одинаковый icontains
+    жил в трёх местах — в подсказках шапки, в фильтре каталога и в поиске
+    по актёрам, — и расширить область поиска значило вспомнить про все три.
+
+    Область: название, оригинальное название и описания. Жанр, страна и
+    студия ищутся по своим справочникам, поэтому запрос «драма» находит
+    и фильм с этим словом в названии, и фильмы жанра «Драма».
+
+    Пустой или слишком короткий запрос возвращает пустую выборку, а не
+    весь каталог: показывать всё в ответ на случайный символ — обманывать.
+
+    Про регистр. icontains уходит в ILIKE на PostgreSQL — там «начало»
+    находит «Начало». На SQLite тот же icontains превращается в LIKE,
+    а он регистронезависим только для латиницы: «начало» не найдёт
+    «Начало», зато «incep» найдёт «Inception». Бой и docker-compose
+    работают на PostgreSQL, так что зрителя это не касается; знать об этом
+    нужно тому, кто запускает проект локально на SQLite
+    (run_local_windows.bat) и удивляется пустой выдаче.
+    """
+    query = (query or "").strip()
+    if len(query) < SEARCH_MIN_LENGTH:
+        return Title.objects.none()
+
+    found = (
+        Title.objects.published()
+        .filter(
+            Q(name__icontains=query)
+            | Q(original_name__icontains=query)
+            | Q(short_description__icontains=query)
+            | Q(description__icontains=query)
+            | Q(genres__name__icontains=query)
+            | Q(countries__name__icontains=query)
+            | Q(studios__name__icontains=query)
+        )
+        # distinct() обязателен: запись с двумя подходящими жанрами иначе
+        # придёт в выдачу дважды.
+        .distinct()
+    )
+    # limit=None — вернуть всё: на странице поиска дальше работает пагинация,
+    # а срез сделал бы её бессмысленной.
+    return found[:limit] if limit else found
+
+
+def search_persons(query, limit=12):
+    """
+    Ищет людей — по имени и по имени в оригинале.
+
+    Отдаём только тех, у кого есть опубликованные работы: карточка персоны
+    с пустой фильмографией уводит зрителя в тупик.
+    """
+    from apps.catalog.models import Person
+
+    query = (query or "").strip()
+    if len(query) < SEARCH_MIN_LENGTH:
+        return Person.objects.none()
+
+    return (
+        Person.objects.filter(Q(name__icontains=query) | Q(original_name__icontains=query))
+        .annotate(
+            published_works=Count(
+                "participations",
+                filter=Q(participations__title__status=Title.Status.PUBLISHED),
+                distinct=True,
+            )
+        )
+        .filter(published_works__gt=0)
+        .order_by("name")
+    )[:limit]

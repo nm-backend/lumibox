@@ -26,11 +26,14 @@ from apps.catalog.models.person import Participation
 from apps.catalog.services import (
     REFERENCE_COUNTRY_CACHE_KEY,
     REFERENCE_GENRE_CACHE_KEY,
+    SEARCH_MIN_LENGTH,
     get_crew_by_role,
     get_featured_collections,
     get_home_sections,
     get_recommendations,
     get_similar_titles,
+    search_persons,
+    search_titles,
 )
 from apps.core.views import ElidedPaginationMixin
 from apps.library.models import Favorite, WatchHistory, Watchlist
@@ -928,6 +931,34 @@ class AwardDetailView(ElidedPaginationMixin, ListView):
         context = super().get_context_data(**kwargs)
         context["entity"] = self.award
         context["entity_label"] = "Премия"
+        return context
+
+
+class SearchView(ElidedPaginationMixin, ListView):
+    """
+    Общий поиск: /search/?q=…
+
+    Записи каталога с пагинацией плюс найденные люди отдельным блоком.
+    Раньше «показать все результаты» вести было некуда: подсказки в шапке
+    отдавали шесть строк, а дальше зритель попадал в каталог, который искал
+    только по названию.
+    """
+
+    template_name = "catalog/search.html"
+    context_object_name = "titles"
+    paginate_by = 24
+
+    def get_queryset(self):
+        self.query = self.request.GET.get("q", "").strip()
+        # Ограничение снимаем: на своей странице зритель ждёт полную выдачу,
+        # а не шесть подсказок. Пагинация дальше сама режет её на страницы.
+        return search_titles(self.query, limit=None)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["query"] = self.query
+        context["persons"] = search_persons(self.query) if self.query else []
+        context["too_short"] = bool(self.query) and len(self.query) < SEARCH_MIN_LENGTH
         return context
 
 

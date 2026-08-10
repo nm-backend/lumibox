@@ -54,6 +54,48 @@
             if (this.value.trim().length >= 2) dropdown.classList.add('search__dropdown--open');
         });
 
+        /* Подписи берём из разметки: перевод делает шаблон, а не скрипт.
+           Тот же приём уже применён в поиске по актёрам. */
+        function emptyMessage() {
+            return dropdown.dataset.emptyMsg || '';
+        }
+
+        /* Клавиатура в подсказках. Без неё список открывался, но дойти
+           до него можно было только мышью: стрелки просто двигали курсор
+           внутри поля ввода. */
+        searchInput.addEventListener('keydown', function (event) {
+            const items = Array.from(dropdown.querySelectorAll('.search__suggestion'));
+            if (!items.length || !dropdown.classList.contains('search__dropdown--open')) return;
+
+            const current = items.indexOf(document.activeElement);
+            if (event.key === 'ArrowDown') {
+                event.preventDefault();
+                items[Math.min(current + 1, items.length - 1)].focus();
+            } else if (event.key === 'ArrowUp') {
+                event.preventDefault();
+                if (current <= 0) searchInput.focus();
+                else items[current - 1].focus();
+            } else if (event.key === 'Escape') {
+                dropdown.classList.remove('search__dropdown--open');
+            }
+        });
+
+        dropdown.addEventListener('keydown', function (event) {
+            const items = Array.from(dropdown.querySelectorAll('.search__suggestion'));
+            const current = items.indexOf(document.activeElement);
+            if (event.key === 'ArrowDown') {
+                event.preventDefault();
+                items[Math.min(current + 1, items.length - 1)].focus();
+            } else if (event.key === 'ArrowUp') {
+                event.preventDefault();
+                if (current <= 0) searchInput.focus();
+                else items[current - 1].focus();
+            } else if (event.key === 'Escape') {
+                dropdown.classList.remove('search__dropdown--open');
+                searchInput.focus();
+            }
+        });
+
         async function fetchSuggestions(q) {
             if (searchController) searchController.abort();
             const controller = new AbortController();
@@ -91,7 +133,7 @@
         function renderSuggestions(items) {
             dropdown.replaceChildren();
             if (!items || items.length === 0) {
-                dropdown.appendChild(element('div', 'search__no-results', 'Ничего не найдено'));
+                dropdown.appendChild(element('div', 'search__no-results', emptyMessage()));
                 dropdown.classList.add('search__dropdown--open');
                 return;
             }
@@ -131,13 +173,14 @@
                 const body = element('span', 'search__suggestion-body');
                 body.appendChild(element('span', 'search__suggestion-name', name));
 
-                if (item.type === 'person') {
-                    body.appendChild(element('span', 'search__suggestion-meta', 'Персона'));
-                } else {
-                    const kind = item.type === 'movie' ? 'Фильм' : 'Сериал';
-                    const meta = [item.release_year || '', kind].filter(Boolean).join(' · ');
-                    body.appendChild(element('span', 'search__suggestion-meta', meta));
-                }
+                /* Подпись типа приходит с сервера (type_display). Раньше
+                   скрипт решал сам: всё, что не «movie», подписывалось
+                   «Сериал» — мультфильмы, ТВ-шоу и аниме выглядели
+                   сериалами, и перевести это было негде. */
+                const meta = [item.release_year || '', item.type_display || '']
+                    .filter(Boolean)
+                    .join(' · ');
+                body.appendChild(element('span', 'search__suggestion-meta', meta));
 
                 link.appendChild(body);
                 list.appendChild(link);
