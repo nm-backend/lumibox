@@ -75,38 +75,60 @@ class MediaServingTests(TestCase):
     """
     Раздача медиа: Range-запросы и защита путей.
 
-    Здесь отключён обработчик close_old_connections, и без него тесты
-    не работают на PostgreSQL.
+    Здесь отключён close_old_connections, и без этого тесты не работают
+    на PostgreSQL.
 
-    Раздача отдаёт FileResponse. Когда такой ответ закрывается — явно
-    или сборщиком мусора, — Django шлёт сигнал request_finished, а его
-    штатный обработчик закрывает соединения с базой. Для настоящего
-    запроса это правильно: соединение и должно освободиться в конце.
-    Но внутри теста TestCase держит открытую транзакцию, и закрытое
-    соединение обрывает её — дальнейшие обращения к базе (в том числе
-    откат в tearDown) падают с «the connection is closed».
+    Раздача отдаёт FileResponse. Закрываясь — явно или руками сборщика
+    мусора, — такой ответ шлёт request_finished, а штатный обработчик
+    закрывает соединения с базой. Для настоящего запроса это правильно:
+    соединение и должно освободиться в конце. Внутри теста TestCase
+    держит открытую транзакцию, и закрытое соединение обрывает её.
 
-    На SQLite этого не видно: соединение там переживает закрытие,
-    и локальный прогон оставался зелёным, пока CI на PostgreSQL
-    валился шестью ошибками. Отключаем обработчик только на время
-    этого класса — поведение боевой раздачи не меняется.
+    Коварство в отложенности: непрочитанный ответ переживал свой тест
+    и добирался сборщиком уже во время следующего — тот падал на первом
+    же обращении к базе, в setUp, хотя сам ничего не нарушал. Поэтому
+    обработчик снимаем на весь класс, а не на отдельный тест: к моменту
+    setUp соединение бывало закрыто заранее.
+
+    Вторая половина решения — закрывать каждый ответ (см. _drain).
+    Тогда ни один FileResponse не доживает до чужого теста.
+
+    На SQLite ничего этого не видно: соединение переживает закрытие,
+    и локальный прогон оставался зелёным, пока CI на PostgreSQL валился
+    шестью ошибками. Боевая раздача не меняется.
     """
 
-    def setUp(self):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
         request_finished.disconnect(close_old_connections)
+
+    @classmethod
+    def tearDownClass(cls):
+        request_finished.connect(close_old_connections)
+        super().tearDownClass()
+
+    def setUp(self):
         self.title = create_title()
         self.title.poster.save("poster.png", make_png(600, 900), save=True)
         self.url = self.title.poster.url
 
     def tearDown(self):
         self.title.poster.delete(save=False)
-        request_finished.connect(close_old_connections)
+
+    def _drain(self, response):
+        """Читает тело потокового ответа и закрывает его.
+
+        Закрыть обязательно: иначе дескриптор файла и сам ответ доживают
+        до следующего теста и рвут ему соединение с базой.
+        """
+        body = b"".join(response.streaming_content)
+        response.close()
+        return body
 
     def test_media_response_has_cache_control(self):
         response = self.client.get(self.url)
-        # FileResponse — потоковый: читаем тело, чтобы закрыть дескриптор файла.
-        list(response.streaming_content)
-        response.close()
+        self._drain(response)
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response["Cache-Control"], "public, max-age=86400")
@@ -127,8 +149,7 @@ class MediaServingTests(TestCase):
         self.assertIn("bytes 0-99/", response["Content-Range"])
         self.assertEqual(response["Content-Length"], "100")
 
-        body = b"".join(response.streaming_content)
-        self.assertEqual(len(body), 100)
+        self.assertEqual(len(self._drain(response)), 100)
 
     def test_open_ended_range(self):
         response = self.client.get(self.url, HTTP_RANGE="bytes=100-")
@@ -136,13 +157,11 @@ class MediaServingTests(TestCase):
         self.assertEqual(response.status_code, 206)
         self.assertIn("bytes 100-", response["Content-Range"])
 
-        body = b"".join(response.streaming_content)
-        self.assertGreater(len(body), 0)
+        self.assertGreater(len(self._drain(response)), 0)
 
     def test_suffix_range(self):
         response = self.client.get(self.url, HTTP_RANGE="bytes=-50")
-        body = b"".join(response.streaming_content)
-        response.close()
+        body = self._drain(response)
 
         self.assertEqual(response.status_code, 206)
         self.assertEqual(len(body), 50)
