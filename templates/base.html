@@ -135,7 +135,10 @@
 {% comment %} data-authenticated — признак входа для скриптов. Полностраничного
    кэша в проекте нет, поэтому атрибут всегда соответствует текущему посетителю.
    Нужен, чтобы гость не слал запросы, на которые сервер заведомо ответит 403. {% endcomment %}
-<body class="{% block body_class %}{% endblock %}" data-authenticated="{{ user.is_authenticated|yesno:"1,0" }}">
+<body class="{% block body_class %}{% endblock %}"
+      data-authenticated="{{ user.is_authenticated|yesno:"1,0" }}"
+      data-ui-close="{% trans 'Закрыть' %}"
+      data-ui-scroll-top="{% trans 'Наверх' %}">
     {% comment %} Два декоративных слоя фона. Стили для них в проекте уже были,
        а разметки не было — то есть правила лежали мёртвым грузом.
 
@@ -206,7 +209,10 @@
 
             <button class="search-toggle" type="button" data-search-toggle aria-label="{% trans 'Поиск' %}" aria-expanded="false">{% icon "search" size=18 %}</button>
 
-            <button class="theme-toggle" type="button" data-theme-toggle aria-label="{% trans 'Toggle theme' %}">{% icon "moon" class_name="theme-moon" %}{% icon "sun" class_name="theme-sun" %}</button>
+            <button class="theme-toggle" type="button" data-theme-toggle
+                    aria-label="{% trans 'Переключить тему' %}"
+                    data-label-dark="{% trans 'Тёмная тема' %}"
+                    data-label-light="{% trans 'Светлая тема' %}">{% icon "moon" class_name="theme-moon" %}{% icon "sun" class_name="theme-sun" %}</button>
 
             <a class="telegram-header-link" href="https://t.me/lumiboxxx" target="_blank" rel="noopener noreferrer" aria-label="{% trans 'Telegram' %}">
                 {% icon "send" size=18 %}

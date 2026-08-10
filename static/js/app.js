@@ -3,6 +3,15 @@
 (function () {
     'use strict';
 
+    /* Подписи для элементов, которые скрипт создаёт сам (тост, кнопка
+       «наверх»). Строки лежат на <body> в data-ui-*: перевод делает шаблон,
+       а gettext до скрипта не достаёт. Пустая строка вместо русского
+       текста по умолчанию — чтобы забытая подпись была видна на проверке
+       доступности, а не притворялась переводом. */
+    function uiLabel(name) {
+        return document.body.dataset['ui' + name.charAt(0).toUpperCase() + name.slice(1)] || '';
+    }
+
     /* -----------------------------------------------
        1. Theme toggle (dark/light)
     ----------------------------------------------- */
@@ -11,8 +20,13 @@
     const stored = localStorage.getItem('lumibox-theme');
     if (stored) html.dataset.theme = stored;
     if (themeToggle) {
+        // Подписи приходят из разметки: gettext до скрипта не достаёт,
+        // и зашитые здесь строки оставались русскими на en и ky.
         const setAriaLabel = () => {
-            themeToggle.setAttribute('aria-label', html.dataset.theme === 'light' ? 'Тёмная тема' : 'Светлая тема');
+            const label = html.dataset.theme === 'light'
+                ? themeToggle.dataset.labelDark
+                : themeToggle.dataset.labelLight;
+            if (label) themeToggle.setAttribute('aria-label', label);
         };
         setAriaLabel();
         themeToggle.addEventListener('click', () => {
@@ -438,7 +452,7 @@
         const closeBtn = document.createElement('button');
         closeBtn.type = 'button';
         closeBtn.className = 'toast__close';
-        closeBtn.setAttribute('aria-label', 'Закрыть');
+        closeBtn.setAttribute('aria-label', uiLabel('close'));
         closeBtn.appendChild(svgFromString(TOAST_CLOSE_ICON));
         closeBtn.addEventListener('click', () => {
             toast.style.animation = 'toastOut 0.25s ease both';
@@ -469,7 +483,7 @@
         const btn = document.createElement('button');
         btn.className = 'scroll-top';
         btn.setAttribute('data-scroll-top', '');
-        btn.setAttribute('aria-label', 'Наверх');
+        btn.setAttribute('aria-label', uiLabel('scrollTop'));
         btn.innerHTML = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>';
         document.body.appendChild(btn);
         btn.addEventListener('click', () => {

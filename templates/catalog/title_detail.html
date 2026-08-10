@@ -201,8 +201,16 @@
                     </button>
                 {% endif %}
 
+                {% comment %} Подписи и тексты уведомлений передаём через data-*:
+                   перевод делает шаблон, а не скрипт. До этого восемь строк
+                   были зашиты в favorite.js и на английской с кыргызской
+                   версиями оставались русскими. {% endcomment %}
                 {% if user.is_authenticated %}
-                    <form method="post" action="{% url 'library:toggle_favorite' title.slug %}" data-favorite-form>
+                    <form method="post" action="{% url 'library:toggle_favorite' title.slug %}" data-favorite-form
+                          data-label-on="{% trans 'В избранном' %}"
+                          data-label-off="{% trans 'В избранное' %}"
+                          data-toast-on="{% trans 'Добавлено в избранное' %}"
+                          data-toast-off="{% trans 'Убрано из избранного' %}">
                         {% csrf_token %}
                         <input type="hidden" name="next" value="{{ request.path }}">
                         <button class="button button--ghost {% if is_favorite %}button--active{% endif %}" type="submit" data-favorite-button>
@@ -211,7 +219,11 @@
                         </button>
                     </form>
 
-                    <form method="post" action="{% url 'library:toggle_watchlist' title.slug %}" data-watchlist-form>
+                    <form method="post" action="{% url 'library:toggle_watchlist' title.slug %}" data-watchlist-form
+                          data-label-on="{% trans 'В списке' %}"
+                          data-label-off="{% trans 'Смотреть позже' %}"
+                          data-toast-on="{% trans 'Добавлено в «Смотреть позже»' %}"
+                          data-toast-off="{% trans 'Убрано из «Смотреть позже»' %}">
                         {% csrf_token %}
                         <input type="hidden" name="next" value="{{ request.path }}">
                         <button class="button button--ghost {% if is_watchlist %}button--active{% endif %}" type="submit" data-watchlist-button>

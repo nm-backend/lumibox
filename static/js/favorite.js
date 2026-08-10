@@ -5,8 +5,13 @@
   с выключенным JavaScript. Скрипт лишь перехватывает отправку.
   Если он не загрузится, сайт останется полностью рабочим.
 
-  Обе кнопки устроены одинаково, отличаются только словами и ключом
-  ответа — поэтому настройки собраны в один объект.
+  Обе кнопки устроены одинаково, отличаются только ключом ответа —
+  поэтому настройки собраны в один объект.
+
+  Подписи и тексты уведомлений сюда не входят: они приходят из разметки
+  через data-*. Раньше восемь русских строк были зашиты прямо здесь, и на
+  английской с кыргызской версиями кнопка после нажатия отвечала
+  по-русски — gettext до скрипта не достаёт.
 */
 
 const BUTTON_KINDS = {
@@ -14,19 +19,11 @@ const BUTTON_KINDS = {
         formSelector: "[data-favorite-form]",
         buttonSelector: "[data-favorite-button]",
         responseKey: "is_favorite",
-        activeLabel: "В избранном",
-        inactiveLabel: "В избранное",
-        toastOn: "Добавлено в избранное",
-        toastOff: "Убрано из избранного",
     },
     watchlist: {
         formSelector: "[data-watchlist-form]",
         buttonSelector: "[data-watchlist-button]",
         responseKey: "is_watchlist",
-        activeLabel: "В списке",
-        inactiveLabel: "Смотреть позже",
-        toastOn: "Добавлено в «Смотреть позже»",
-        toastOff: "Убрано из «Смотреть позже»",
     },
 };
 
@@ -68,14 +65,16 @@ document.addEventListener("submit", async (event) => {
 
         button.classList.toggle("button--active", isActive);
 
+        // Подписи берём из разметки — там их перевёл шаблон.
         const label = button.querySelector("[data-button-label]");
         if (label) {
-            label.textContent = isActive ? config.activeLabel : config.inactiveLabel;
+            const next = isActive ? form.dataset.labelOn : form.dataset.labelOff;
+            if (next) label.textContent = next;
         }
 
-        // Toast notification
         if (typeof window.showToast === 'function') {
-            window.showToast(isActive ? config.toastOn : config.toastOff, isActive ? 'success' : 'info');
+            const toast = isActive ? form.dataset.toastOn : form.dataset.toastOff;
+            if (toast) window.showToast(toast, isActive ? 'success' : 'info');
         }
     } catch {
         // Что-то пошло не так — отправляем форму обычным способом.
