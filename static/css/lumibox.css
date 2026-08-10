@@ -1941,7 +1941,7 @@
     color: transparent;
 }
 
-/* ---------- Кинго-рейтинг в карточке ----------
+/* ---------- Звёздный рейтинг в карточке ----------
    Звёзды (5-балльная шкала рейтинга) показываются только на мобильной
    версии: десктопный вид карточки не меняется. Заполнение идёт от
    10-балльного rating_average через widthratio в шаблоне. */
@@ -1970,18 +1970,22 @@
 }
 
 /* =====================================================================
-   МОБИЛЬНАЯ ВЕРСИЯ В СТИЛЕ KINOGO (≤599px)
+   РАСКЛАДКА КАРТОЧЕК НА ТЕЛЕФОНЕ (≤599px)
 
-   Внешний вид кинго-карточек по дампу главной референсного сайта:
-   тёмно-серая палитра (#1d1d1d карточки, #404040 рамки), красный
-   акцент #F44336, жёлтые заголовки секций #ffc107, звёздный рейтинг,
-   красная кнопка «Смотреть онлайн» на всю ширину карточки,
-   карусель постеров вместо текстовой промо-зоны.
+   Здесь меняется только устройство карточки под узкий экран: заголовок
+   и рейтинг переезжают над постером, мета-данные встают колонкой,
+   кнопка просмотра растягивается на всю ширину, промо-зона превращается
+   в карусель постеров.
+
+   Цвета — только из токенов variables.css. Раньше блок был написан
+   отдельной палитрой в жёстких hex, и на телефоне сайт жил по своей
+   дизайн-системе: светлая тема ниже 599px не применялась, названия
+   фильмов оставались почти белыми на белом фоне.
    ===================================================================== */
 
 /* ---------- Шапка карточки (sHead + hRating) ----------
-   Заголовок и звёздный рейтинг над постером — так устроена карточка
-   на референсном сайте. Базовое правило (десктоп): блок скрыт, потому
+   Заголовок и звёздный рейтинг над постером: на узком экране
+   info-колонка слишком тесная, чтобы держать их рядом с постером. Базовое правило (десктоп): блок скрыт, потому
    что заголовок и рейтинг живут в info-колонке. В мобильном блоке
    ниже (≤599px) шапка показывается, а дубли в info-колонке прячутся.
    Базовое правило стоит ДО медиазапроса, иначе display:none перебил
@@ -2033,7 +2037,7 @@
        темы работают везде. Отличия мобильной вёрстки остались ниже — они
        касаются размеров и раскладки, а не цвета. */
 
-    /* --- Карточка: кинго-плашка #1d1d1d, прямые углы, лёгкая тень --- */
+    /* --- Карточка: плотная плашка с малым радиусом --- */
     .lb-shortstory {
         border-radius: 6px;
         padding: 14px;
@@ -2045,10 +2049,10 @@
 
     .lb-shortstory__original {
         font-size: 12px;
-        color: #909090;
+        color: var(--color-text-dim);
     }
 
-    /* Мета-данные колонкой, как у референса: строки с жирной подписью */
+    /* Мета-данные колонкой: в строку они на узком экране не помещались */
     .lb-shortstory__meta {
         flex-direction: column;
         align-items: flex-start;
@@ -2066,40 +2070,40 @@
 
     .lb-shortstory__label {
         display: inline;
-        color: #f5f5f5;
+        color: var(--color-text-strong);
         font-weight: 700;
     }
 
 .lb-shortstory__year a,
 .lb-shortstory__genres a,
 .lb-shortstory__country a {
-    color: #c8c8c8;
+    color: var(--color-text-soft);
     font-size: 12px;
 }
 
     .lb-shortstory__year a:hover,
     .lb-shortstory__genres a:hover,
     .lb-shortstory__country a:hover {
-        color: #ffc107;
+        color: var(--color-accent);
     }
 
     .lb-shortstory__duration {
-        color: #b8b8b8;
+        color: var(--color-text-muted);
         font-size: 12px;
     }
 
     .lb-shortstory__quality {
-        border-color: #555555;
-        color: #dddddd;
+        border-color: var(--color-border-strong);
+        color: var(--color-text-soft);
         font-size: 11px;
     }
 
     .lb-shortstory__external {
-        color: #c0c0c0;
+        color: var(--color-text-soft);
         font-size: 12px;
     }
 
-    /* Рейтинг: жёлтые кинго-звёзды без плашки */
+    /* Рейтинг: звёзды без плашки — на узком экране плашка съедала строку */
     .lb-shortstory__rating {
         background: none;
         border: 0;
@@ -2120,12 +2124,12 @@
     }
 
     .lb-rating-value {
-        color: #ffc107;
+        color: var(--color-accent);
         font-weight: 700;
     }
 
     .lb-shortstory__rating-count {
-        color: #909090;
+        color: var(--color-text-dim);
         font-size: 11px;
     }
 
@@ -2138,16 +2142,16 @@
     }
 
     .lb-shortstory__head-title {
-        color: #f5f5f5;
+        color: var(--color-text-strong);
         font-size: 1.05rem;
     }
 
     .lb-shortstory__head-title a {
-        color: #f5f5f5;
+        color: var(--color-text-strong);
     }
 
     .lb-shortstory__head-original {
-        color: #909090;
+        color: var(--color-text-dim);
     }
 
     .lb-shortstory__info .lb-shortstory__title,
@@ -2156,9 +2160,10 @@
         display: none;
     }
 
-    /* Кнопка «Смотреть онлайн»: на всю ширину, как у референса.
-       Заливка — общий градиент кнопки (var(--btn-fill)), тот же,
-       что на десктопе: раньше здесь был жёсткий красный #f44336. */
+    /* Кнопка «Смотреть онлайн» на всю ширину: на телефоне это главное
+       действие карточки, и попадать в него надо не целясь. Заливка —
+       общий градиент кнопки (var(--btn-fill)), тот же, что на десктопе:
+       раньше здесь был жёсткий красный из чужой палитры. */
     .lb-shortstory__footer {
         gap: 4px;
         margin-top: 12px;
@@ -2187,19 +2192,19 @@
         margin-left: 0;
         width: 100%;
         text-align: center;
-        color: #909090;
+        color: var(--color-text-dim);
         font-size: 11px;
     }
 
     .lb-shortstory__excerpt {
         font-size: 12px;
-        color: #b8b8b8;
+        color: var(--color-text-muted);
     }
 
-    /* --- Промо-зона → кинго-карусель постеров (topSlider) --- */
+    /* --- Промо-зона: карусель постеров вместо текстового блока --- */
     .lb-promo {
-        background: #111111;
-        border-bottom: 1px solid #404040;
+        background: var(--color-surface-deep);
+        border-bottom: 1px solid var(--color-border);
     }
 
     .lb-promo__inner {
@@ -2234,7 +2239,7 @@
         width: 118px;
         height: 174px;
         border-radius: 4px;
-        border: 1px solid #404040;
+        border: 1px solid var(--color-border);
         box-shadow: none;
     }
 
@@ -2243,30 +2248,30 @@
         box-shadow: none;
     }
 
-    /* --- Сортировка (xSort): кинго-плашки с красным активным --- */
+    /* --- Сортировка: плашки, активная выделена акцентом --- */
     .lb-xsort-area {
-        background: #161616;
+        background: var(--color-card);
     }
 
     .lb-xsort-label {
-        color: #a0a0a0;
+        color: var(--color-text-muted);
     }
 
     .lb-xsort-div {
         height: 36px;
         line-height: 36px;
-        border: 1px solid #404040;
+        border: 1px solid var(--color-border);
         border-radius: 3px;
-        background: #1d1d1d;
+        background: var(--color-surface);
     }
 
     .lb-xsort-div:hover {
-        border-color: #525252;
+        border-color: var(--color-border-strong);
     }
 
     .lb-xsort-div--active {
         border-color: var(--color-accent);
-        background: #1d1d1d;
+        background: var(--color-surface);
         box-shadow: none;
     }
 
@@ -2275,11 +2280,11 @@
     }
 
     .lb-xsort-selected {
-        color: #e6e6e6;
+        color: var(--color-text-bright);
     }
 
     .lb-xsort-selected:after {
-        border-top-color: #777777;
+        border-top-color: var(--color-border-strong);
     }
 
     .lb-xsort-ul {
@@ -2290,7 +2295,7 @@
     }
 
     .lb-xsort-option {
-        color: #e6e6e6;
+        color: var(--color-text-bright);
         border-bottom: 1px solid rgba(255, 255, 255, 0.12);
     }
 
@@ -2301,89 +2306,89 @@
     .lb-xsort-option--current {
         box-shadow: none;
         background: rgba(57, 57, 57, 0.73);
-        color: #ffffff;
+        color: var(--color-text-strong);
     }
 
     .lb-xsort-option--current a {
-        color: #ffffff;
+        color: var(--color-text-strong);
     }
 
     .lb-xsort-clearall {
-        border: 1px solid #404040;
-        background: #1d1d1d;
+        border: 1px solid var(--color-border);
+        background: var(--color-surface);
         border-radius: 3px;
     }
 
-    /* --- Сайдбар: жёлтые кинго-заголовки --- */
+    /* --- Сайдбар: выделенные заголовки блоков --- */
     .site-header {
         background-color: rgba(22, 22, 22, 0.97);
     }
 
     .lb-aheader {
-        color: #ffc107;
+        color: var(--color-accent);
         font-size: 1rem;
         padding: 10px 0;
-        border-bottom: 1px solid #404040;
+        border-bottom: 1px solid var(--color-border);
         margin-bottom: 8px;
     }
 
     .lb-aheader--row a {
-        color: #a0a0a0;
+        color: var(--color-text-muted);
     }
 
     .lb-aheader--row a:hover {
-        color: #ffc107;
+        color: var(--color-accent);
     }
 
     .lb-accent {
-        color: #ffc107;
+        color: var(--color-accent);
     }
 
     .lb-mainnav li a {
-        color: #d0d0d0;
+        color: var(--color-text-soft);
     }
 
     .lb-mainnav li a:hover {
-        color: #ffc107;
+        color: var(--color-accent);
     }
 
     .lb-count {
-        color: #777777;
+        color: var(--color-text-dim);
     }
 
     .lb-lastupdates__title {
-        color: #909090;
+        color: var(--color-text-dim);
     }
 
     .lb-soon__title {
-        color: #cccccc;
+        color: var(--color-text-soft);
     }
 
     .lb-soon__title:hover {
-        color: #ffc107;
+        color: var(--color-accent);
     }
 
     .lb-franchise__title {
-        color: #cccccc;
+        color: var(--color-text-soft);
     }
 
     .lb-franchise__title:hover {
-        color: #ffc107;
+        color: var(--color-accent);
     }
 
     .lb-lastcomment__title,
     .lb-lastcomment__text span {
-        color: #cccccc;
+        color: var(--color-text-soft);
     }
 
     .lb-lastcomment__title:hover {
-        color: #ffc107;
+        color: var(--color-accent);
     }
 
     /* --- Пагинация: «Раньше»/«Позже» красными кнопками, цифры в плашках --- */
     .lb-pagination {
         background: transparent;
-        border-top: 1px solid #404040;
+        border-top: 1px solid var(--color-border);
         gap: 6px;
         padding: 14px 0 20px;
     }
@@ -2391,7 +2396,7 @@
     .lb-pagination__prev,
     .lb-pagination__next {
         background: var(--color-accent);
-        color: #ffffff;
+        color: var(--color-text-strong);
         padding: 10px 18px;
         border-radius: 3px;
         font-weight: 600;
@@ -2401,7 +2406,7 @@
     .lb-pagination__prev:hover,
     .lb-pagination__next:hover {
         background: var(--color-accent-hover);
-        color: #ffffff;
+        color: var(--color-text-strong);
     }
 
     .lb-pagination__link,
@@ -2411,27 +2416,27 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        border: 1px solid #404040;
+        border: 1px solid var(--color-border);
         border-radius: 3px;
-        color: #cccccc;
+        color: var(--color-text-soft);
         font-size: 13px;
-        background: #1d1d1d;
+        background: var(--color-surface);
     }
 
     .lb-pagination__link:hover {
-        color: #ffc107;
-        border-color: #555555;
+        color: var(--color-accent);
+        border-color: var(--color-border-strong);
     }
 
     .lb-pagination__current {
         background: var(--color-accent);
         border-color: var(--color-accent);
-        color: #ffffff;
+        color: var(--color-text-strong);
         font-weight: 700;
     }
 
     .lb-pagination__gap {
-        color: #777777;
+        color: var(--color-text-dim);
     }
 
     /* --- SEO-текст и прочее --- */
@@ -2440,15 +2445,15 @@
     }
 
     .lb-seo h2 {
-        color: #f5f5f5;
+        color: var(--color-text-strong);
     }
 
     .breadcrumbs a {
-        color: #a0a0a0;
+        color: var(--color-text-muted);
     }
 
     .breadcrumbs a:hover {
-        color: #ffc107;
+        color: var(--color-accent);
     }
 }
 
@@ -2523,6 +2528,9 @@
     width: 100%;
     aspect-ratio: 16 / 9;
     border: none;
+    /* Единственный намеренно жёсткий цвет: поле кадра остаётся чёрным
+       в обеих темах. Белая рамка вокруг видео в светлой теме слепит
+       и выдаёт границы кадра там, где их не должно быть видно. */
     background: #000;
 }
 

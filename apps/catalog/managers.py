@@ -20,7 +20,7 @@ def story_card_prefetches(prefix="", user=None):
     """
     from django.db.models import Prefetch
 
-    # Страны нужны карточке каталога: кинго-карточка показывает строку
+    # Страны нужны карточке каталога: она показывает строку
     # «Год / Страна / Жанр», и без prefetch каждая страна шла бы в базу
     # отдельным запросом на каждую карточку.
     prefetches = [f"{prefix}genres", f"{prefix}countries"]
