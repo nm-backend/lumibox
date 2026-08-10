@@ -41,6 +41,23 @@
     {% endif %}
     {% if title.poster %}
     "image": "{% absolute_url title.poster.url %}",{% endif %}
+    {% comment %}Жанры, страны и съёмочная группа: поисковик показывает их
+       в расширенном сниппете, а брать ему их больше неоткуда. Данные уже
+       в памяти (with_detail), новых запросов разметка не делает.{% endcomment %}
+    {% if title.genres.all %}
+    "genre": [{% for genre in title.genres.all %}"{{ genre.name|escapejs }}"{% if not forloop.last %}, {% endif %}{% endfor %}],{% endif %}
+    {% if title.countries.all %}
+    "countryOfOrigin": [{% for country in title.countries.all %}{"@type": "Country", "name": "{{ country.name|escapejs }}"}{% if not forloop.last %}, {% endif %}{% endfor %}],{% endif %}
+    {% for role_label, participations in crew_by_role %}
+        {% if role_label == "Режиссёр" %}
+    "director": [{% for item in participations %}{"@type": "Person", "name": "{{ item.person.name|escapejs }}"}{% if not forloop.last %}, {% endif %}{% endfor %}],
+        {% elif role_label == "Актёр" %}
+    "actor": [{% for item in participations|slice:":10" %}{"@type": "Person", "name": "{{ item.person.name|escapejs }}"}{% if not forloop.last %}, {% endif %}{% endfor %}],
+        {% endif %}
+    {% endfor %}
+    {% if title.is_series and episode_stats %}
+    "numberOfSeasons": {{ episode_stats.seasons }},
+    "numberOfEpisodes": {{ episode_stats.count }},{% endif %}
     "@id": "{{ request.build_absolute_uri }}"
 }
 </script>
@@ -285,24 +302,45 @@
                 {% endif %}
             </div>
 
+            {% comment %}Обе оболочки в разметке сразу: у записи бывают источники
+               обоих типов (свой файл и внешний плеер), и переключение озвучки
+               может менять тип. Пересобирать элемент скриптом дороже и рискованнее,
+               чем спрятать один и показать другой. Адрес внешнего плеера
+               подставляется по надобности — пустой iframe ничего не грузит.{% endcomment %}
             <div class="player" data-player-pane="player1">
-                {% if primary_source.kind == "file" %}
-                    <video class="player__video" controls preload="none"
-                           {% if title.backdrop %}poster="{{ title.backdrop.url }}"{% endif %}
-                           data-player-video>
-                        <source src="{{ primary_source.src }}" type="video/mp4" data-player-source>
-                    </video>
-                {% elif primary_source %}
-                    <iframe class="player__frame player__frame--embed"
-                            src="{{ primary_source.src }}"
-                            title="{% blocktranslate with name=title.name %}Смотреть: {{ name }}{% endblocktranslate %}"
-                            loading="lazy"
-                            referrerpolicy="strict-origin-when-cross-origin"
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; picture-in-picture"
-                            allowfullscreen
-                            data-player-frame></iframe>
-                {% endif %}
+                <video class="player__video" controls preload="none"
+                       {% if title.backdrop %}poster="{{ title.backdrop.url }}"{% endif %}
+                       data-player-video
+                       {% if primary_source.kind != "file" %}hidden{% endif %}>
+                    <source {% if primary_source.kind == "file" %}src="{{ primary_source.src }}"{% endif %}
+                            type="video/mp4" data-player-source>
+                </video>
+                <iframe class="player__frame player__frame--embed"
+                        {% if primary_source.kind == "embed" %}src="{{ primary_source.src }}"{% endif %}
+                        title="{% blocktranslate with name=title.name %}Смотреть: {{ name }}{% endblocktranslate %}"
+                        loading="lazy"
+                        referrerpolicy="strict-origin-when-cross-origin"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; picture-in-picture"
+                        allowfullscreen
+                        data-player-frame
+                        {% if primary_source.kind != "embed" %}hidden{% endif %}></iframe>
             </div>
+
+            {% comment %}Выбор озвучки. Показываем только когда есть из чего
+               выбирать: одна кнопка «Дубляж» без альтернативы — шум.{% endcomment %}
+            {% if playback_voices|length > 1 %}
+                <div class="player-voices" role="group" aria-label="{% trans 'Озвучка' %}">
+                    <span class="player-voices__label">{% trans "Озвучка:" %}</span>
+                    {% for voice in playback_voices %}
+                        <button class="player-voices__item{% if voice.pk == primary_source.voice_id %} player-voices__item--active{% endif %}"
+                                type="button"
+                                data-voice="{{ voice.pk }}"
+                                aria-pressed="{% if voice.pk == primary_source.voice_id %}true{% else %}false{% endif %}">{{ voice.name }}</button>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            {{ playback_data|json_script:"playback-data" }}
 
             {% if title.trailer_source %}
                 <div class="player" data-player-pane="trailer" hidden>
@@ -402,36 +440,17 @@
 
             {# Tab: About #}
             <div class="tab-content tab-content--active" data-tab-content="about">
-                {% if title.trailer_source %}
-                    <section class="section" id="trailer">
-                        <h2 class="section__title">{% trans "Трейлер" %}</h2>
-                        {% if title.trailer_source == "file" %}
-                            <div class="player">
-                                <video class="player__frame" controls preload="metadata"
-                                       {% if title.backdrop %}poster="{{ title.backdrop.url }}"{% endif %}>
-                                    <source src="{{ title.trailer_file.url }}">
-                                    {% trans "Ваш браузер не умеет проигрывать видео." %}
-                                    <a href="{{ title.trailer_file.url }}">{% trans "Скачать файл" %}</a>.
-                                </video>
-                            </div>
-                        {% elif title.trailer_embed_url %}
-                            <div class="player">
-                                <iframe class="player__frame"
-                                        src="{{ title.trailer_embed_url }}"
-                                        title="{% blocktranslate with name=title.name %}Трейлер: {{ name }}{% endblocktranslate %}"
-                                        loading="lazy"
-                                        referrerpolicy="strict-origin-when-cross-origin"
-                                        allow="accelerometer; clipboard-write; encrypted-media; picture-in-picture"
-                                        allowfullscreen></iframe>
-                            </div>
-                        {% else %}
-                            <p class="player-fallback">
-                                {% trans "Трейлер размещён на стороннем сервисе." %}
-                                <a class="button button--ghost" href="{{ title.trailer_url }}"
-                                   target="_blank" rel="noopener noreferrer">{% trans "Открыть трейлер" %}</a>
-                            </p>
-                        {% endif %}
-                    </section>
+                {% comment %}Трейлер отсюда убран. Он рендерился на странице трижды:
+                   вкладкой плеера, здесь и в модальном окне — три <video>/<iframe>
+                   на один и тот же ролик. Остались два осмысленных места: вкладка
+                   рядом с основным видео и модалка по кнопке в шапке. Для хостов
+                   вне белого списка кнопка ведёт наружу — этот случай ниже.{% endcomment %}
+                {% if title.trailer_source == "url" and not title.trailer_embed_url %}
+                    <p class="player-fallback">
+                        {% trans "Трейлер размещён на стороннем сервисе." %}
+                        <a class="button button--ghost" href="{{ title.trailer_url }}"
+                           target="_blank" rel="noopener noreferrer">{% trans "Открыть трейлер" %}</a>
+                    </p>
                 {% endif %}
 
                 <section class="section">

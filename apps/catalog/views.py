@@ -642,7 +642,34 @@ class TitleDetailView(DetailView):
             "title_sources": title_sources,
             "primary_source": primary,
             "has_playback": bool(sources),
+            "playback_data": self._playback_data(sources),
         }
+
+    @staticmethod
+    def _playback_data(sources):
+        """
+        Плоский список источников для скрипта плеера.
+
+        Отдаём через json_script — экранирование берёт на себя Django.
+        Плоский список, а не вложенный словарь: искать по паре
+        «серия + озвучка» скрипту всё равно перебором, а плоскую структуру
+        проще читать в отладчике.
+
+        Источники без адреса (недоверенный хост у внешнего плеера) сюда
+        не попадают: кнопка озвучки, которая ничего не включает, хуже
+        отсутствующей кнопки.
+        """
+        return [
+            {
+                "episode": source.episode_id,
+                "voice": source.voice_id,
+                "kind": source.kind,
+                "src": source.src,
+                "quality": source.quality,
+            }
+            for source in sources
+            if source.src
+        ]
 
     def get_user_review(self):
         """Отзыв текущего пользователя, если он уже есть."""

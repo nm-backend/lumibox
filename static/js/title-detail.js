@@ -175,6 +175,30 @@
         });
         document.addEventListener('keydown', function (event) {
             if (event.key === 'Escape' && !modal.hidden) closeModal();
+            if (event.key !== 'Tab' || modal.hidden) return;
+
+            /* Фокус-ловушка. Без неё Tab из модалки уходил на страницу под
+               ней: для зрячего это незаметно (окно перекрывает всё), а тот,
+               кто ходит клавиатурой, оказывался в невидимом контенте и не
+               понимал, куда попал. aria-modal о таком браузеру не сообщает —
+               удержать фокус должен скрипт. */
+            var focusable = modal.querySelectorAll(
+                'button, [href], input, select, textarea, iframe, video, [tabindex]:not([tabindex="-1"])'
+            );
+            var visible = Array.prototype.filter.call(focusable, function (node) {
+                return !node.hidden && node.offsetParent !== null;
+            });
+            if (!visible.length) return;
+
+            var first = visible[0];
+            var last = visible[visible.length - 1];
+            if (event.shiftKey && document.activeElement === first) {
+                event.preventDefault();
+                last.focus();
+            } else if (!event.shiftKey && document.activeElement === last) {
+                event.preventDefault();
+                first.focus();
+            }
         });
     }
 
@@ -229,19 +253,84 @@
             });
         }
 
+        /* ---------- Источники: серия × озвучка ----------
+
+           Плоский список приходит из разметки (json_script). Ищем в нём
+           источник для текущей пары и подставляем: файл — в <video>,
+           внешний плеер — в <iframe>. Обе оболочки уже в DOM, поэтому
+           переключение типа сводится к показу одной и скрытию другой. */
+        var playerFrame = section ? section.querySelector('[data-player-frame]') : null;
+        var voiceButtons = section ? section.querySelectorAll('[data-voice]') : [];
+        var currentVoiceId = null;
+        var playbackData = [];
+
+        var dataNode = document.getElementById('playback-data');
+        if (dataNode) {
+            try {
+                playbackData = JSON.parse(dataNode.textContent) || [];
+            } catch (e) {
+                playbackData = [];
+            }
+        }
+
+        function findSource(episodeId, voiceId) {
+            var episode = episodeId ? Number(episodeId) : null;
+            var voice = voiceId ? Number(voiceId) : null;
+            var forEpisode = playbackData.filter(function (item) {
+                return (item.episode || null) === episode;
+            });
+            if (!forEpisode.length) return null;
+            var exact = forEpisode.filter(function (item) {
+                return (item.voice || null) === voice;
+            });
+            /* Нужной озвучки у этой серии может не быть — тогда включаем
+               первую доступную, а не оставляем зрителя перед пустым плеером. */
+            return exact.length ? exact[0] : forEpisode[0];
+        }
+
+        function applySource(item) {
+            if (!item) return;
+            if (item.kind === 'file') {
+                if (source) source.src = item.src;
+                if (playerFrame) {
+                    playerFrame.hidden = true;
+                    playerFrame.removeAttribute('src');
+                }
+                playerVideo.hidden = false;
+                playerVideo.load();
+                playerVideo.play().catch(function () {});
+            } else if (playerFrame) {
+                playerVideo.pause();
+                playerVideo.hidden = true;
+                playerFrame.hidden = false;
+                playerFrame.src = item.src;
+            }
+            currentVoiceId = item.voice || null;
+            voiceButtons.forEach(function (btn) {
+                var isActive = Number(btn.dataset.voice) === currentVoiceId;
+                btn.classList.toggle('player-voices__item--active', isActive);
+                btn.setAttribute('aria-pressed', String(isActive));
+            });
+        }
+
+        voiceButtons.forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                applySource(findSource(currentEpisodeId, btn.dataset.voice));
+            });
+        });
+
         function setEpisode(btn) {
             buttons.forEach(function (b) {
                 b.classList.remove('player-episode--active');
             });
             btn.classList.add('player-episode--active');
-            if (source && btn.dataset.episodeFile) {
-                source.src = btn.dataset.episodeFile;
-            }
-            playerVideo.load();
-            playerVideo.play().catch(function () {});
+            currentEpisodeId = btn.dataset.episodeId || null;
+            // Озвучку сохраняем между сериями: зритель выбрал её один раз.
+            applySource(findSource(currentEpisodeId, currentVoiceId));
             if (currentLabel && btn.dataset.episodeLabel) {
                 currentLabel.textContent = btn.dataset.episodeLabel;
             }
+            lastSent = 0;
             reportProgress(btn.dataset.episodeId);
         }
 
@@ -258,6 +347,11 @@
             currentLabel.textContent = active.dataset.episodeLabel;
         }
         if (active) currentEpisodeId = active.dataset.episodeId || null;
+
+        // Начальную озвучку берём из уже отрисованной кнопки: разметка
+        // и скрипт должны стартовать из одного состояния.
+        var activeVoice = section ? section.querySelector('.player-voices__item--active') : null;
+        if (activeVoice) currentVoiceId = Number(activeVoice.dataset.voice);
 
         /* Продолжение с сохранённой секунды.
 

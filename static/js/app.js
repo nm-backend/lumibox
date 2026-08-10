@@ -290,19 +290,49 @@
         // Контент вкладок лежит рядом с контейнером, а не внутри него:
         // в шаблонах это соседние <div class="tab-content">. Ищем в родителе.
         const scope = container.parentElement || document;
-        const tabs = scope.querySelectorAll('[data-tab]');
+        const tabs = Array.from(scope.querySelectorAll('[data-tab]'));
         const contents = scope.querySelectorAll('[data-tab-content]');
+        if (!tabs.length) return;
 
-        tabs.forEach(function (tab) {
+        /* Роли и клавиатура. У вкладок плеера всё это было, а у контентных —
+           нет: скринридер объявлял их обычными кнопками, а стрелки не
+           работали. Проставляем здесь, чтобы шаблоны не дублировали
+           одни и те же атрибуты на каждой вкладке. */
+        container.setAttribute('role', 'tablist');
+
+        function select(tab, moveFocus) {
+            tabs.forEach(function (item) {
+                const isActive = item === tab;
+                item.classList.toggle('tab--active', isActive);
+                item.setAttribute('role', 'tab');
+                item.setAttribute('aria-selected', String(isActive));
+                item.tabIndex = isActive ? 0 : -1;
+            });
+            contents.forEach(function (content) {
+                const isActive = content.dataset.tabContent === tab.dataset.tab;
+                content.classList.toggle('tab-content--active', isActive);
+                content.setAttribute('role', 'tabpanel');
+            });
+            if (moveFocus) tab.focus();
+        }
+
+        tabs.forEach(function (tab, index) {
             tab.addEventListener('click', function () {
-                const target = this.dataset.tab;
-                tabs.forEach(t => t.classList.remove('tab--active'));
-                contents.forEach(c => c.classList.remove('tab-content--active'));
-                this.classList.add('tab--active');
-                const content = scope.querySelector(`[data-tab-content="${target}"]`);
-                if (content) content.classList.add('tab-content--active');
+                select(tab, false);
+            });
+            tab.addEventListener('keydown', function (event) {
+                let next = null;
+                if (event.key === 'ArrowRight') next = tabs[(index + 1) % tabs.length];
+                else if (event.key === 'ArrowLeft') next = tabs[(index - 1 + tabs.length) % tabs.length];
+                else if (event.key === 'Home') next = tabs[0];
+                else if (event.key === 'End') next = tabs[tabs.length - 1];
+                if (!next) return;
+                event.preventDefault();
+                select(next, true);
             });
         });
+
+        select(tabs.find(t => t.classList.contains('tab--active')) || tabs[0], false);
     });
 
     /* -----------------------------------------------
