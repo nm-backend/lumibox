@@ -3,8 +3,6 @@
 import io
 
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.core.signals import request_finished
-from django.db import close_old_connections
 from django.test import TestCase
 from PIL import Image
 
@@ -75,38 +73,23 @@ class MediaServingTests(TestCase):
     """
     Раздача медиа: Range-запросы и защита путей.
 
-    Здесь отключён close_old_connections, и без этого тесты не работают
-    на PostgreSQL.
+    Ответ здесь читают, но НЕ закрывают руками — и это принципиально.
 
-    Раздача отдаёт FileResponse. Закрываясь — явно или руками сборщика
-    мусора, — такой ответ шлёт request_finished, а штатный обработчик
-    закрывает соединения с базой. Для настоящего запроса это правильно:
-    соединение и должно освободиться в конце. Внутри теста TestCase
-    держит открытую транзакцию, и закрытое соединение обрывает её.
+    Раздача отдаёт FileResponse. Тест-клиент Django оборачивает его тело
+    в closing_iterator_wrapper: дочитав итератор, обёртка сама закрывает
+    ответ, предварительно сняв обработчик close_old_connections и вернув
+    его на место (django/test/client.py). То есть закрытие уже сделано
+    и сделано безопасно.
 
-    Коварство в отложенности: непрочитанный ответ переживал свой тест
-    и добирался сборщиком уже во время следующего — тот падал на первом
-    же обращении к базе, в setUp, хотя сам ничего не нарушал. Поэтому
-    обработчик снимаем на весь класс, а не на отдельный тест: к моменту
-    setUp соединение бывало закрыто заранее.
+    Явный response.close() после этого шлёт request_finished второй раз,
+    когда обработчик уже возвращён, — и тот закрывает соединение с базой.
+    TestCase держит открытую транзакцию, она обрывается, а падает при этом
+    не текущий тест, а следующий: на первом же обращении к базе в setUp.
 
-    Вторая половина решения — закрывать каждый ответ (см. _drain).
-    Тогда ни один FileResponse не доживает до чужого теста.
-
-    На SQLite ничего этого не видно: соединение переживает закрытие,
-    и локальный прогон оставался зелёным, пока CI на PostgreSQL валился
-    шестью ошибками. Боевая раздача не меняется.
+    На SQLite ничего не видно — соединение переживает закрытие. На
+    PostgreSQL это стоило шести ошибок в CI при полностью зелёном
+    локальном прогоне.
     """
-
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        request_finished.disconnect(close_old_connections)
-
-    @classmethod
-    def tearDownClass(cls):
-        request_finished.connect(close_old_connections)
-        super().tearDownClass()
 
     def setUp(self):
         self.title = create_title()
@@ -117,14 +100,14 @@ class MediaServingTests(TestCase):
         self.title.poster.delete(save=False)
 
     def _drain(self, response):
-        """Читает тело потокового ответа и закрывает его.
+        """Дочитывает тело потокового ответа.
 
-        Закрыть обязательно: иначе дескриптор файла и сам ответ доживают
-        до следующего теста и рвут ему соединение с базой.
+        Закрывать не нужно и нельзя: обёртка тест-клиента закроет ответ
+        сама, как только итератор кончится, и сделает это безопасно для
+        соединения с базой. Лишний response.close() поверх — как раз то,
+        что роняло CI на PostgreSQL.
         """
-        body = b"".join(response.streaming_content)
-        response.close()
-        return body
+        return b"".join(response.streaming_content)
 
     def test_media_response_has_cache_control(self):
         response = self.client.get(self.url)
