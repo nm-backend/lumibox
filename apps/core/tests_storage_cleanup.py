@@ -3,6 +3,8 @@
 import io
 
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.core.signals import request_finished
+from django.db import close_old_connections
 from django.test import TestCase
 from PIL import Image
 
@@ -70,13 +72,35 @@ class PostDeleteCleanupTests(TestCase):
 
 
 class MediaServingTests(TestCase):
+    """
+    Раздача медиа: Range-запросы и защита путей.
+
+    Здесь отключён обработчик close_old_connections, и без него тесты
+    не работают на PostgreSQL.
+
+    Раздача отдаёт FileResponse. Когда такой ответ закрывается — явно
+    или сборщиком мусора, — Django шлёт сигнал request_finished, а его
+    штатный обработчик закрывает соединения с базой. Для настоящего
+    запроса это правильно: соединение и должно освободиться в конце.
+    Но внутри теста TestCase держит открытую транзакцию, и закрытое
+    соединение обрывает её — дальнейшие обращения к базе (в том числе
+    откат в tearDown) падают с «the connection is closed».
+
+    На SQLite этого не видно: соединение там переживает закрытие,
+    и локальный прогон оставался зелёным, пока CI на PostgreSQL
+    валился шестью ошибками. Отключаем обработчик только на время
+    этого класса — поведение боевой раздачи не меняется.
+    """
+
     def setUp(self):
+        request_finished.disconnect(close_old_connections)
         self.title = create_title()
         self.title.poster.save("poster.png", make_png(600, 900), save=True)
         self.url = self.title.poster.url
 
     def tearDown(self):
         self.title.poster.delete(save=False)
+        request_finished.connect(close_old_connections)
 
     def test_media_response_has_cache_control(self):
         response = self.client.get(self.url)
