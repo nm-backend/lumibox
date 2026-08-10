@@ -193,14 +193,40 @@
            и каждое переключение серии гостем давало отказ в консоли и в логах.
            Признак входа приходит из разметки: base.html ставит его на <body>. */
         var isAuthenticated = document.body.dataset.authenticated === '1';
+        var currentEpisodeId = null;
 
-        function reportProgress(episodeId) {
-            if (!isAuthenticated || !episodeId || !titleSlug) return;
+        function sendProgress(payload) {
+            if (!isAuthenticated || !titleSlug) return;
             var xhr = new XMLHttpRequest();
             xhr.open('POST', '/api/v1/titles/' + titleSlug + '/watch/');
             xhr.setRequestHeader('Content-Type', 'application/json');
             xhr.setRequestHeader('X-CSRFToken', getCsrfToken());
-            xhr.send(JSON.stringify({ episode: episodeId }));
+            xhr.send(JSON.stringify(payload));
+        }
+
+        function reportProgress(episodeId) {
+            currentEpisodeId = episodeId || currentEpisodeId;
+            sendProgress({ episode: currentEpisodeId ? Number(currentEpisodeId) : null, position: 0 });
+        }
+
+        /* Позицию шлём не на каждый кадр таймкода, а раз в POSITION_INTERVAL
+           секунд: timeupdate срабатывает несколько раз в секунду, и без
+           ограничения плеер устроил бы серверу поток из сотен запросов
+           на одного зрителя. */
+        var POSITION_INTERVAL = 15;
+        var lastSent = 0;
+
+        function savePosition(force) {
+            if (!isAuthenticated || !playerVideo) return;
+            var position = Math.floor(playerVideo.currentTime || 0);
+            if (!force && position - lastSent < POSITION_INTERVAL && position >= lastSent) return;
+            lastSent = position;
+            var duration = playerVideo.duration;
+            sendProgress({
+                episode: currentEpisodeId ? Number(currentEpisodeId) : null,
+                position: position,
+                duration: isFinite(duration) ? Math.floor(duration) : undefined,
+            });
         }
 
         function setEpisode(btn) {
@@ -231,6 +257,37 @@
         if (active && currentLabel && active.dataset.episodeLabel) {
             currentLabel.textContent = active.dataset.episodeLabel;
         }
+        if (active) currentEpisodeId = active.dataset.episodeId || null;
+
+        /* Продолжение с сохранённой секунды.
+
+           Перематываем один раз, на первых загруженных метаданных: делать
+           это на каждый loadedmetadata значило бы возвращать зрителя назад
+           после каждого переключения серии. */
+        var resumeAt = parseInt(section ? section.dataset.resumePosition : '0', 10) || 0;
+        if (resumeAt > 0) {
+            playerVideo.addEventListener('loadedmetadata', function seekOnce() {
+                playerVideo.removeEventListener('loadedmetadata', seekOnce);
+                // За пару секунд до остановки: так легче поймать нить сцены.
+                var target = Math.max(0, resumeAt - 2);
+                if (!playerVideo.duration || target < playerVideo.duration) {
+                    playerVideo.currentTime = target;
+                    lastSent = target;
+                }
+            });
+        }
+
+        playerVideo.addEventListener('timeupdate', function () {
+            savePosition(false);
+        });
+        // Пауза и уход со страницы — те моменты, когда позицию важно
+        // записать точно, не дожидаясь очередного интервала.
+        playerVideo.addEventListener('pause', function () {
+            savePosition(true);
+        });
+        window.addEventListener('pagehide', function () {
+            savePosition(true);
+        });
     }
 
     /* ---------- 4. Вкладки мультиплеера (Плеер 1 | Плеер 2 | Трейлер) ---------- */

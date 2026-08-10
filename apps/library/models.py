@@ -76,6 +76,20 @@ class WatchHistory(UserTitleRelation):
         help_text="Серия, с которой пользователь начал смотреть. Пусто — страницу только открывали.",
     )
 
+    # Позиция внутри видео. Без неё «продолжить просмотр» открывало серию
+    # с нуля: мы знали, ЧТО человек смотрел, но не знали, где остановился.
+    # Секунды целым числом — доли секунды в интерфейсе не нужны.
+    position_seconds = models.PositiveIntegerField(
+        "Позиция, сек",
+        default=0,
+    )
+    duration_seconds = models.PositiveIntegerField(
+        "Длительность, сек",
+        null=True,
+        blank=True,
+        help_text="Приходит от плеера. Нужна, чтобы отличить досмотренное от брошенного.",
+    )
+
     class Meta:
         verbose_name = "История просмотров"
         verbose_name_plural = "История просмотров"

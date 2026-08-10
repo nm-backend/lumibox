@@ -53,17 +53,44 @@ def remember_view(user, title):
     WatchHistory.objects.update_or_create(user=user, title=title)
 
 
-def remember_episode_start(user, title, episode):
+def remember_progress(user, title, episode=None, position=0, duration=None):
     """
-    Запоминает, с какой серии пользователь начал смотреть.
+    Запоминает, где именно остановился зритель.
 
-    Та же запись, что и в истории просмотров: страницу фильма открыли —
-    remember_view, начали смотреть серию — этот сервис. Серия кладётся
-    в ту же строку, а не в отдельную таблицу: один фильм — одна строка.
+    Принимает: пользователя, запись, необязательную серию, позицию в секундах
+    и полную длительность (её сообщает плеер, из модели её не взять —
+    duration_minutes у серии заполняет редактор и часто не заполняет).
+
+    Та же строка, что и в истории просмотров: один фильм — одна запись,
+    и позиция живёт в ней же. Отдельная таблица прогресса дала бы историю
+    «серия за серией», но за неё пришлось бы платить на каждом кадре
+    таймкода, а показываем мы всё равно только последнее место.
+
+    Отрицательную позицию и мусор от клиента приводим к нулю: значение
+    приходит из браузера, то есть ему нельзя верить.
     """
     if not user.is_authenticated:
-        return
+        return None
 
-    WatchHistory.objects.update_or_create(
-        user=user, title=title, defaults={"episode": episode}
+    defaults = {"position_seconds": max(0, int(position or 0))}
+    # Серию перезаписываем только когда её прислали: обычный просмотр
+    # страницы не должен стирать «остановился на третьей».
+    if episode is not None:
+        defaults["episode"] = episode
+    if duration:
+        defaults["duration_seconds"] = max(0, int(duration))
+
+    history, _ = WatchHistory.objects.update_or_create(
+        user=user, title=title, defaults=defaults
     )
+    return history
+
+
+def remember_episode_start(user, title, episode):
+    """
+    Отмечает начало просмотра серии — позиция сбрасывается в ноль.
+
+    Тонкая обёртка над remember_progress: её зовут плеер и API, когда
+    зритель переключил серию, а не продолжил ту же.
+    """
+    return remember_progress(user, title, episode=episode, position=0)

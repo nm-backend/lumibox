@@ -429,6 +429,7 @@ class TitleDetailView(DetailView):
         context["is_favorite"] = self.is_favorite()
         context["is_watchlist"] = self.is_watchlist()
         context["resume_episode"] = self.get_resume_episode()
+        context["resume_position"] = self.get_resume_position()
 
         # Серии уже подтянуты prefetch'ем (with_episodes): обращения к БД
         # здесь нет. Один список эпизодов даёт и секцию плеера, и метаданные
@@ -510,27 +511,42 @@ class TitleDetailView(DetailView):
             return False
         return Watchlist.objects.filter(user=self.request.user, title=self.object).exists()
 
-    def get_resume_episode(self):
+    def get_history(self):
         """
-        Последняя серия, с которой пользователь начал смотреть.
+        Строка истории просмотра текущего пользователя, если она есть.
 
-        Возвращает: Episode или None. Один запрос к истории: единственная
-        строка на пару «пользователь — запись» (unique_watch_history).
-        Результат запоминаем — его спрашивают и контекст, и раскладка
-        источников, а ходить в базу дважды за одним и тем же незачем.
+        Один запрос: строка на пару «пользователь — запись» единственная
+        (unique_watch_history). Результат запоминаем — его спрашивают и
+        серия для продолжения, и позиция, и раскладка источников.
         """
-        if hasattr(self, "_resume_episode"):
-            return self._resume_episode
+        if hasattr(self, "_history"):
+            return self._history
 
         if not self.request.user.is_authenticated:
-            self._resume_episode = None
+            self._history = None
             return None
 
-        history = WatchHistory.objects.filter(
-            user=self.request.user, title=self.object, episode__isnull=False
-        ).first()
-        self._resume_episode = history.episode if history else None
-        return self._resume_episode
+        self._history = (
+            WatchHistory.objects.select_related("episode")
+            .filter(user=self.request.user, title=self.object)
+            .first()
+        )
+        return self._history
+
+    def get_resume_episode(self):
+        """Серия, с которой продолжаем. None — смотреть не начинали."""
+        history = self.get_history()
+        return history.episode if history else None
+
+    def get_resume_position(self):
+        """
+        Секунда, с которой продолжаем.
+
+        Ноль отдаём и когда прогресса нет, и когда он в самом начале:
+        для плеера это одно и то же — играть сначала.
+        """
+        history = self.get_history()
+        return history.position_seconds if history else 0
 
 
 class PersonDetailView(DetailView):

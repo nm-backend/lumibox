@@ -274,7 +274,10 @@
            озвучек залил редактор. Вкладка «Плеер 2» исчезла вместе с полем
            player_url_2: теперь любой дополнительный источник — просто ещё
            одна строка в той же таблице.{% endcomment %}
-        <section class="player-section" data-title-slug="{{ title.slug }}" aria-label="{% trans 'Смотреть онлайн' %}">
+        <section class="player-section"
+                 data-title-slug="{{ title.slug }}"
+                 data-resume-position="{{ resume_position|default:0 }}"
+                 aria-label="{% trans 'Смотреть онлайн' %}">
             <div class="player-tabs" data-player-tabs role="tablist" aria-label="{% trans 'Источники видео' %}">
                 <button class="player-tabs__tab player-tabs__tab--active" type="button" data-player-tab="player1" role="tab" aria-selected="true">{% trans "Смотреть" %}</button>
                 {% if title.trailer_source %}
@@ -331,7 +334,7 @@
                 </p>
                 {% if resume_episode %}
                     <p class="player-panel__resume">
-                        {% blocktranslate with s=resume_episode.season_number e=resume_episode.episode_number %}Продолжить с S{{ s }}E{{ e }}{% endblocktranslate %}
+                        {% blocktranslate with s=resume_episode.season_number e=resume_episode.episode_number %}Продолжить с S{{ s }}E{{ e }}{% endblocktranslate %}{% if resume_position %}{% blocktranslate with t=resume_position|lb_timecode %}, с {{ t }}{% endblocktranslate %}{% endif %}
                     </p>
                 {% endif %}
 

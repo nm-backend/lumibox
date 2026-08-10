@@ -6,6 +6,7 @@ from django.test import TestCase
 from django.urls import reverse
 
 from apps.catalog.models import Title
+from apps.catalog.templatetags.catalog_filters import lb_timecode
 from apps.catalog.tests.test_episodes import create_episode
 from apps.core.test_factories import create_title, create_user
 from apps.library.models import WatchHistory
@@ -249,3 +250,125 @@ class HomeResumeBadgeTests(TestCase):
         self.client.force_login(self.user)
         response = self.client.get(self.home_url)
         self.assertNotIn("Смотреть с S3E1", response.content.decode("utf-8"))
+
+
+class TimecodeFilterTests(TestCase):
+    """Фильтр lb_timecode: секунды в подпись «Продолжить с 12:34»."""
+
+    def test_formats(self):
+        cases = [
+            (0, "0:00"),
+            (9, "0:09"),
+            (754, "12:34"),
+            (3600, "1:00:00"),
+            (3723, "1:02:03"),
+        ]
+        for seconds, expected in cases:
+            with self.subTest(seconds=seconds):
+                self.assertEqual(lb_timecode(seconds), expected)
+
+    def test_garbage_gives_empty_string(self):
+        """Значение приходит из базы и из шаблона — падать оно не должно."""
+        for value in [None, "", "abc", -1]:
+            with self.subTest(value=value):
+                self.assertEqual(lb_timecode(value), "")
+
+
+class WatchPositionTests(TestCase):
+    """
+    Продолжение с секунды, а не с начала серии.
+
+    До появления позиции история знала только, ЧТО зритель смотрел.
+    «Продолжить» открывало серию с нуля, а для фильма без серий прогресс
+    не сохранялся вовсе.
+    """
+
+    def setUp(self):
+        self.user = create_user()
+        self.series = create_title(type=Title.Type.SERIES, name="Сериал с позицией")
+        self.episode = create_episode(self.series, season=1, episode=1)
+        self.movie = create_title(type=Title.Type.MOVIE, name="Фильм с позицией")
+        self.client.force_login(self.user)
+
+    def _post(self, title, payload):
+        return self.client.post(
+            watch_url(title.slug), data=json.dumps(payload), content_type="application/json"
+        )
+
+    def test_position_saved_for_episode(self):
+        response = self._post(self.series, {"episode": self.episode.pk, "position": 754})
+
+        self.assertEqual(response.status_code, 200)
+        history = WatchHistory.objects.get(user=self.user, title=self.series)
+        self.assertEqual(history.position_seconds, 754)
+        self.assertEqual(history.episode, self.episode)
+
+    def test_duration_saved_when_player_reports_it(self):
+        self._post(self.series, {"episode": self.episode.pk, "position": 10, "duration": 2400})
+
+        history = WatchHistory.objects.get(user=self.user, title=self.series)
+        self.assertEqual(history.duration_seconds, 2400)
+
+    def test_movie_saves_progress_without_episode(self):
+        """У фильма серий нет, и требовать их значило бы запретить ему прогресс."""
+        response = self._post(self.movie, {"position": 120})
+
+        self.assertEqual(response.status_code, 200)
+        history = WatchHistory.objects.get(user=self.user, title=self.movie)
+        self.assertEqual(history.position_seconds, 120)
+        self.assertIsNone(history.episode)
+
+    def test_series_still_requires_episode(self):
+        response = self._post(self.series, {"position": 120})
+
+        self.assertEqual(response.status_code, 400)
+
+    def test_legacy_body_without_position_still_accepted(self):
+        """Старое тело {"episode": id} означает «начал смотреть с начала»."""
+        response = self._post(self.series, {"episode": self.episode.pk})
+
+        self.assertEqual(response.status_code, 200)
+        history = WatchHistory.objects.get(user=self.user, title=self.series)
+        self.assertEqual(history.position_seconds, 0)
+
+    def test_negative_position_rejected(self):
+        response = self._post(self.series, {"episode": self.episode.pk, "position": -5})
+
+        self.assertEqual(response.status_code, 400)
+
+    def test_guest_cannot_save_position(self):
+        self.client.logout()
+        response = self._post(self.series, {"episode": self.episode.pk, "position": 30})
+
+        self.assertEqual(response.status_code, 403)
+
+    def test_detail_page_offers_resume_from_position(self):
+        self._post(self.series, {"episode": self.episode.pk, "position": 754})
+
+        response = self.client.get(self.series.get_absolute_url())
+
+        self.assertEqual(response.context["resume_position"], 754)
+        self.assertContains(response, 'data-resume-position="754"')
+        # 754 секунды — это 12:34.
+        self.assertContains(response, "12:34")
+
+    def test_switching_episode_resets_position(self):
+        """Новая серия начинается с нуля, а не с секунды предыдущей."""
+        second = create_episode(self.series, season=1, episode=2)
+        self._post(self.series, {"episode": self.episode.pk, "position": 754})
+
+        self._post(self.series, {"episode": second.pk, "position": 0})
+
+        history = WatchHistory.objects.get(user=self.user, title=self.series)
+        self.assertEqual(history.episode, second)
+        self.assertEqual(history.position_seconds, 0)
+
+    def test_other_user_position_not_leaked(self):
+        other = create_user()
+        self.client.force_login(other)
+        self._post(self.series, {"episode": self.episode.pk, "position": 900})
+
+        self.client.force_login(self.user)
+        response = self.client.get(self.series.get_absolute_url())
+
+        self.assertEqual(response.context["resume_position"], 0)

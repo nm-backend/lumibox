@@ -26,7 +26,7 @@ from apps.api.v1.serializers import (
 )
 from apps.catalog.models import Collection, Country, Episode, Genre, Person, Title
 from apps.catalog.services import get_similar_titles
-from apps.library.services import remember_episode_start, toggle_favorite, toggle_watchlist
+from apps.library.services import remember_progress, toggle_favorite, toggle_watchlist
 from apps.reviews.models import Review
 
 
@@ -66,9 +66,17 @@ class RateRequestSerializer(serializers.Serializer):
 
 
 class EpisodeWatchRequestSerializer(serializers.Serializer):
-    """Номер серии, которую пользователь начал смотреть."""
+    """
+    Прогресс просмотра, который присылает плеер.
 
-    episode = serializers.IntegerField()
+    Все поля необязательные: у фильма нет серии, а первый запрос при старте
+    приходит без позиции. Проверку «серия обязательна для сериала» делает
+    вьюха — только она знает, есть ли у записи серии.
+    """
+
+    episode = serializers.IntegerField(required=False, allow_null=True)
+    position = serializers.IntegerField(required=False, min_value=0)
+    duration = serializers.IntegerField(required=False, min_value=0)
 
 
 class SearchResultSerializer(serializers.Serializer):
@@ -494,9 +502,13 @@ class RateTitleView(APIView):
 @extend_schema(
     summary="Сохранить прогресс просмотра",
     description=(
-        "Плеер шлёт запрос, когда пользователь начинает смотреть серию. "
-        "Записывается последняя серия — карточка каталога покажет "
-        "«Продолжить с S1E3». Повторный вызов перезаписывает серию."
+        "Плеер шлёт запрос, когда зритель начинает смотреть и дальше раз "
+        "в несколько секунд по ходу воспроизведения.\n\n"
+        "`episode` обязателен для сериала и не нужен фильму без серий. "
+        "`position` — позиция в секундах, по ней страница предложит "
+        "продолжить с того же места. `duration` плеер сообщает сам.\n\n"
+        "Тело `{\"episode\": id}` без позиции по-прежнему допустимо: "
+        "оно означает «начал смотреть с начала»."
     ),
     request=EpisodeWatchRequestSerializer,
     responses={
@@ -517,19 +529,30 @@ class TitleWatchProgressView(APIView):
 
         serializer = EpisodeWatchRequestSerializer(data=request.data)
         if not serializer.is_valid():
-            return Response({"detail": "Укажите номер серии."}, status=400)
+            return Response({"detail": "Проверьте номер серии и позицию."}, status=400)
 
-        # Серия должна принадлежать именно этой записи: иначе прогресс
-        # одной страницы писался бы в историю другой.
-        episode = (
-            Episode.objects.filter(
-                pk=serializer.validated_data["episode"], title=title
-            )
-            .only("pk")
-            .first()
+        data = serializer.validated_data
+        episode_id = data.get("episode")
+
+        # Номер серии обязателен, только если серии у записи вообще есть.
+        # У фильма их нет, и требовать их значило бы не давать фильму
+        # сохранять прогресс вовсе.
+        if episode_id is None:
+            if title.episodes.exists():
+                return Response({"detail": "Укажите номер серии."}, status=400)
+            episode = None
+        else:
+            # Серия должна принадлежать именно этой записи: иначе прогресс
+            # одной страницы писался бы в историю другой.
+            episode = Episode.objects.filter(pk=episode_id, title=title).only("pk").first()
+            if episode is None:
+                return Response({"detail": "Серия не найдена."}, status=404)
+
+        remember_progress(
+            request.user,
+            title,
+            episode=episode,
+            position=data.get("position") or 0,
+            duration=data.get("duration"),
         )
-        if episode is None:
-            return Response({"detail": "Серия не найдена."}, status=404)
-
-        remember_episode_start(request.user, title, episode)
         return Response({"ok": True})

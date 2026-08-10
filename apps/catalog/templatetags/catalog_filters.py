@@ -61,6 +61,28 @@ def lb_posted(value):
 
 
 @register.filter
+def lb_timecode(value):
+    """
+    Секунды в вид «12:34» или «1:02:03».
+
+    Нужен подписи «Продолжить с 12:34». Часы показываем только когда они
+    есть: «0:12:34» на серии в двадцать минут выглядит бюрократично.
+    """
+    try:
+        total = int(value)
+    except (TypeError, ValueError):
+        return ""
+    if total < 0:
+        return ""
+
+    hours, remainder = divmod(total, 3600)
+    minutes, seconds = divmod(remainder, 60)
+    if hours:
+        return f"{hours}:{minutes:02d}:{seconds:02d}"
+    return f"{minutes}:{seconds:02d}"
+
+
+@register.filter
 def ru_plural(value, forms):
     """Русские плюральные формы: «1 произведение, 2 произведения, 5 произведений».
 
