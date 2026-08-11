@@ -1824,8 +1824,11 @@
     color: var(--color-text-muted);
 }
 
+/* Кнопка баннера была 26px высотой — вдвое ниже тач-цели, и это
+   единственное действие во всём баннере. */
 .cookie-consent__accept {
     flex-shrink: 0;
+    min-height: var(--touch-target);
 }
 
 /* ============================================================
@@ -1843,10 +1846,21 @@
 .poster-grid {
     display: grid;
     /* auto-fill, а не auto-fit: при трёх найденных фильмах карточки
-       остаются нормального размера, а не растягиваются на всю ширину. */
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: var(--space-5) var(--space-4);
+       остаются нормального размера, а не растягиваются на всю ширину.
+
+       Минимум 132px, а не 150: на экране 320px при 150px в строку
+       помещалась одна колонка, и каталог превращался в ленту огромных
+       постеров по одному. Две колонки по 136px — привычный вид телефона. */
+    grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
+    gap: var(--space-5) var(--space-3);
     margin-bottom: var(--space-6);
+}
+
+@media (min-width: 480px) {
+    .poster-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: var(--space-5) var(--space-4);
+    }
 }
 
 @media (min-width: 768px) {

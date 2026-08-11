@@ -250,15 +250,17 @@ button {
     height: 80vmax;
     pointer-events: none;
     z-index: -1;
-    will-change: opacity, transform;
-    transform: translateZ(0);
     background: radial-gradient(
         ellipse at 50% 100%,
         var(--color-accent-glow) 0%,
         transparent 60%
     );
-    opacity: 0.6;
-    animation: glowPulse 6s ease-in-out infinite alternate;
+    /* Свечение статичное. Раньше здесь крутилась бесконечная анимация на
+       шесть секунд, менявшая opacity и scale полноэкранного градиента:
+       браузер перерисовывал слой во весь экран всё время, пока страница
+       открыта, — на телефоне это работа впустую и расход батареи ради
+       эффекта, которого никто сознательно не замечает. */
+    opacity: 0.5;
 }
 
 /* ---------- Film-grain texture overlay (premium cinema feel) ---------- */
@@ -279,12 +281,6 @@ button {
     .grain-overlay {
         display: none;
     }
-}
-
-@keyframes glowPulse {
-    0% { opacity: 0.35; transform: scale(0.95) translateZ(0); }
-    50% { opacity: 0.55; }
-    100% { opacity: 0.7; transform: scale(1.05) translateZ(0); }
 }
 
 /* ---------- Blur-up image loading (progressive enhancement) ---------- */

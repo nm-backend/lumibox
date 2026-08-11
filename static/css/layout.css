@@ -279,25 +279,20 @@
 
 /* ---------- Телефоны ---------- */
 
-/* Планшетная шапка (721–900): кнопка входа и лупа поиска ниже
-   тач-таргета — поднимаем до 44px, пока они ещё текстовые. */
-@media (min-width: 721px) and (max-width: 900px) {
-    .site-header__login {
-        min-height: 44px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        padding-top: var(--space-2);
-        padding-bottom: var(--space-2);
-    }
-
+/* Лупа поиска: 32px хватает мыши, но не пальцу. Условие по указателю,
+   а не по ширине — планшет с клавиатурой и сенсорный ноутбук бывают
+   любой ширины, а раньше правило действовало только до 900px. */
+@media (pointer: coarse) {
     .search__submit {
-        width: 44px;
-        height: 44px;
+        width: var(--touch-target);
+        height: var(--touch-target);
     }
 }
 
-@media (max-width: 720px) {
+/* Компактная шапка действует до границы навигации (1024px), а не до 720:
+   между ними телефон в ландшафте и планшет в портрете, где подпись «Войти»
+   и переключатель языка в шапку уже не помещаются. */
+@media (max-width: 1023px) {
     .site-header__inner {
         flex-wrap: nowrap;
         padding-top: var(--space-2);

@@ -8,8 +8,11 @@
 .film-hero {
     position: relative;
     overflow: hidden;
-    margin-top: calc(var(--space-6) * -1);
-    padding: var(--space-8) 0 var(--space-6);
+    /* Отрицательный отступ убран: он подтягивал шапку фильма под навигацию,
+       пока над ней ничего не было. Теперь выше стоят хлебные крошки, и шапка
+       наезжала на них — строка пути пропадала под тёмным фоном. */
+    margin-top: var(--space-4);
+    padding: var(--space-7) 0 var(--space-6);
     background-color: var(--color-surface);
 }
 
@@ -82,27 +85,21 @@
     transform: scale(1.03);
 }
 
+/* Каскад входных анимаций убран.
+
+   Название, подзаголовок, мета, описание и кнопки появлялись по очереди
+   с задержками 0,2 → 0,3 → 0,35 → 0,45 → 0,55 с поверх общего проявления
+   страницы: содержимое шапки дорисовывалось около 1,25 секунды. Всё это
+   время зритель смотрел на пустое место там, где уже лежал готовый текст,
+   а на медленном телефоне анимация ещё и накладывалась на саму загрузку.
+   Страница целиком проявляется одним движением (base.css) — этого хватает. */
 .film-hero__name {
     font-size: clamp(1.9rem, 4vw, 3rem);
     line-height: 1.1;
     letter-spacing: -0.03em;
     text-wrap: balance;
     /* Text reveal animation — clip from bottom to top */
-    animation: textReveal 0.7s 0.2s cubic-bezier(0.4, 0, 0.2, 1) both;
     text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
-}
-
-@keyframes textReveal {
-    from {
-        opacity: 0;
-        transform: translateY(16px);
-        filter: blur(4px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-        filter: blur(0);
-    }
 }
 
 .film-hero__name--logo {
@@ -123,7 +120,6 @@
     font-weight: 500;
     line-height: 1.4;
     text-wrap: balance;
-    animation: fadeUp 0.6s 0.3s cubic-bezier(0.4, 0, 0.2, 1) both;
     text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
 }
 
@@ -141,7 +137,6 @@
     margin-top: var(--space-4);
     color: var(--color-text-muted);
     font-size: var(--text-sm);
-    animation: fadeUp 0.6s 0.35s cubic-bezier(0.4, 0, 0.2, 1) both;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
@@ -165,7 +160,6 @@
     max-width: 62ch;
     color: var(--color-text-muted);
     line-height: 1.7;
-    animation: fadeUp 0.6s 0.45s cubic-bezier(0.4, 0, 0.2, 1) both;
     text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
@@ -174,7 +168,6 @@
     flex-wrap: wrap;
     gap: var(--space-3);
     margin-top: var(--space-5);
-    animation: fadeUp 0.6s 0.55s cubic-bezier(0.4, 0, 0.2, 1) both;
 }
 
 .film-hero__specs {
