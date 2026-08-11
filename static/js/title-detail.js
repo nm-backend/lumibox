@@ -207,7 +207,13 @@
     var playerVideo = document.querySelector('[data-player-video]');
     if (playerVideo) {
         var source = playerVideo.querySelector('[data-player-source]');
-        var section = playerVideo.closest('.player-section');
+        /* Секция ищется по data-атрибуту: на этой одной строке держатся выбор
+           серии, выбор озвучки, сохранение прогресса и продолжение с секунды.
+           Пока здесь стоял класс оформления, переименование .player-section при
+           правке стилей выключило бы все четыре механики разом и молча.
+           Класс оставлен вторым вариантом — на случай кэша старой разметки. */
+        var section = playerVideo.closest('[data-player-section]') ||
+            playerVideo.closest('.player-section');
         var buttons = section ? section.querySelectorAll('[data-episode]') : [];
         var currentLabel = section ? section.querySelector('[data-player-label]') : null;
         var titleSlug = section ? section.dataset.titleSlug : '';
