@@ -47,6 +47,26 @@ from django.utils.text import slugify
 
 from apps.catalog.models import Country, Episode, Genre, Studio, Title
 
+# Кириллица → латиница для адресов.
+#
+# Адреса в маршрутах описаны как <slug:...>, а этот преобразователь принимает
+# только [-a-zA-Z0-9_]. Кириллический адрес формально сохраняется в базу, но
+# ссылку на такую запись собрать уже нельзя: reverse() падает с NoReverseMatch,
+# и страница со списком, где эта запись попадается, перестаёт открываться
+# целиком. Поэтому русские названия транслитерируем, а не оставляем как есть.
+TRANSLIT = {
+    "а": "a", "б": "b", "в": "v", "г": "g", "д": "d", "е": "e", "ё": "e",
+    "ж": "zh", "з": "z", "и": "i", "й": "y", "к": "k", "л": "l", "м": "m",
+    "н": "n", "о": "o", "п": "p", "р": "r", "с": "s", "т": "t", "у": "u",
+    "ф": "f", "х": "h", "ц": "ts", "ч": "ch", "ш": "sh", "щ": "sch",
+    "ъ": "", "ы": "y", "ь": "", "э": "e", "ю": "yu", "я": "ya",
+}
+
+
+def transliterate(text: str) -> str:
+    """Русский текст латиницей: «Тьма» → «tma»."""
+    return "".join(TRANSLIT.get(char, TRANSLIT.get(char.lower(), char)) for char in text.lower())
+
 
 class Command(BaseCommand):
     help = "Загружает фильмы и сериалы из JSON-файла. Идемпотентна."
@@ -114,14 +134,15 @@ class Command(BaseCommand):
         Адрес записи. Год в хвосте — чтобы ремейк не занял адрес оригинала:
         «Дюна» 1984 и 2021 иначе схлопнулись бы в одну запись.
 
-        Для названия без латиницы берём кириллический адрес, а не заглушку
-        «title»: раньше все русскоязычные фильмы одного года получали один
-        и тот же адрес и затирали друг друга при импорте.
+        Название без латиницы транслитерируем: раньше все русскоязычные
+        фильмы одного года получали адрес-заглушку «title» и затирали друг
+        друга при импорте. Кириллица в адресе тоже не подходит — маршруты
+        описаны как <slug:...>, и ссылку на такую запись собрать нельзя.
         """
         if item.get("slug"):
             return item["slug"]
         source = item.get("original_name") or item["name"]
-        base = slugify(source, allow_unicode=False) or slugify(source, allow_unicode=True)
+        base = slugify(source, allow_unicode=False) or slugify(transliterate(source))
         if not base:
             base = "title"
         year = item.get("release_year")
@@ -195,7 +216,7 @@ class Command(BaseCommand):
         дать один адрес — в обоих случаях запись не создалась бы. Добавляем
         числовой хвост, пока адрес не окажется свободным.
         """
-        base = slugify(name, allow_unicode=False) or slugify(name, allow_unicode=True) or "item"
+        base = slugify(name, allow_unicode=False) or slugify(transliterate(name)) or "item"
         slug, suffix = base, 2
         while model.objects.filter(slug=slug).exists():
             slug = f"{base}-{suffix}"

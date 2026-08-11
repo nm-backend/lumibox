@@ -13,6 +13,7 @@ from pathlib import Path
 
 from django.core.management import CommandError, call_command
 from django.test import TestCase
+from django.urls import reverse
 
 from apps.catalog.models import Country, Episode, Genre, Title
 
@@ -83,6 +84,38 @@ class ImportTitlesTests(TestCase):
         slugs = set(Title.objects.values_list("slug", flat=True))
         self.assertEqual(len(slugs), 2)
         self.assertEqual(Title.objects.count(), 2)
+
+    def test_address_is_usable_in_urls(self):
+        """
+        Адрес обязан подходить под маршрут <slug:...>, то есть быть латиницей.
+
+        Кириллический адрес сохраняется в базу, но ссылку на такую запись
+        собрать нельзя: reverse() падает с NoReverseMatch, и любая страница
+        со списком, где эта запись попадается, перестаёт открываться целиком.
+        Проверяем не вид адреса, а именно то, ради чего он нужен, — что по
+        нему собирается ссылка и страница отвечает.
+        """
+        path = write_json([{"name": "Тьма", "release_year": 2017}])
+        call_command("import_titles", path)
+
+        title = Title.objects.get()
+        self.assertRegex(title.slug, r"^[-a-zA-Z0-9_]+$")
+
+        response = self.client.get(title.get_absolute_url())
+        self.assertEqual(response.status_code, 200)
+
+    def test_reference_address_is_usable_in_urls(self):
+        """Жанру нужен пригодный адрес по той же причине — маршрут жанра."""
+        path = write_json([{"name": "Фильм", "genres": ["Мистика"]}])
+        call_command("import_titles", path)
+
+        genre = Genre.objects.get(name="Мистика")
+        self.assertRegex(genre.slug, r"^[-a-zA-Z0-9_]+$")
+
+        response = self.client.get(
+            reverse("catalog:genre_titles", args=[genre.slug])
+        )
+        self.assertEqual(response.status_code, 200)
 
     def test_second_run_updates_and_does_not_duplicate(self):
         path = write_json([{

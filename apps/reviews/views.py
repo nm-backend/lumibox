@@ -2,6 +2,7 @@ from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404, redirect
 from django.template.response import TemplateResponse
+from django.utils.translation import gettext as _
 from django.views.generic import View
 
 from apps.catalog.models import Title
@@ -68,7 +69,7 @@ class ReviewCreateOrUpdateView(LoginRequiredMixin, View):
             rating=form.cleaned_data["rating"],
             text=form.cleaned_data["text"],
         )
-        messages.success(request, "Отзыв сохранён.")
+        messages.success(request, _("Отзыв сохранён."))
 
         return redirect(title.get_absolute_url() + "#reviews")
 
@@ -82,7 +83,7 @@ class ReviewDeleteView(LoginRequiredMixin, View):
         review = get_object_or_404(Review, pk=pk, user=request.user)
         title_url = review.title.get_absolute_url()
         review.delete()
-        messages.success(request, "Отзыв удалён.")
+        messages.success(request, _("Отзыв удалён."))
         return redirect(title_url + "#reviews")
 
 
@@ -114,7 +115,7 @@ class CommentCreateView(LoginRequiredMixin, View):
             text=form.cleaned_data["text"],
             parent=parent,
         )
-        messages.success(request, "Комментарий добавлен.")
+        messages.success(request, _("Комментарий добавлен."))
         return redirect(title.get_absolute_url() + "#comments")
 
 
@@ -127,5 +128,5 @@ class CommentDeleteView(LoginRequiredMixin, View):
         comment = get_object_or_404(Comment, pk=pk, user=request.user)
         title_url = comment.title.get_absolute_url()
         comment.delete()
-        messages.success(request, "Комментарий удалён.")
+        messages.success(request, _("Комментарий удалён."))
         return redirect(title_url + "#comments")

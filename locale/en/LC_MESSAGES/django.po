@@ -28,9 +28,6 @@ msgstr "All"
 msgid "Фильмы"
 msgstr "Movies"
 
-msgid "Фильмы в подборке"
-msgstr "Movies in this collection"
-
 msgid "Сериалы"
 msgstr "Series"
 
@@ -97,12 +94,6 @@ msgstr "Quick navigation"
 msgid "Каталог"
 msgstr "Catalog"
 
-msgid "Реклама"
-msgstr "Ad"
-
-msgid "Рекламный баннер"
-msgstr "Ad banner"
-
 msgid "Фильтры"
 msgstr "Filters"
 
@@ -115,18 +106,6 @@ msgstr "Reset"
 msgid "%(count)s в подборке"
 msgstr[0] "%(count)s in collection"
 msgstr[1] "%(count)s in collection"
-
-msgid "Продолжить просмотр"
-msgstr "Continue watching"
-
-msgid "серия"
-msgstr "episode"
-
-msgid "Осталось %(sec)s сек."
-msgstr "%(sec)s sec. left"
-
-msgid "Следующая серия через"
-msgstr "Next episode in"
 
 msgid ""
 "Каталог фильмов и сериалов с поиском, фильтрами, подборками и личной "
@@ -524,99 +503,6 @@ msgstr[1] "Total %(count)s in history"
 msgid "История просмотров пуста."
 msgstr "Watch history is empty."
 
-msgid "Смотреть %(name)s — LumiBox"
-msgstr "Watch %(name)s — LumiBox"
-
-msgid "Просмотр %(name)s на LumiBox."
-msgstr "Watching %(name)s on LumiBox."
-
-msgid "%(season)s, серия %(number)s"
-msgstr "%(season)s, episode %(number)s"
-
-msgid "Плеер: %(name)s, %(episode_name)s"
-msgstr "Player: %(name)s, %(episode_name)s"
-
-msgid "Воспроизвести"
-msgstr "Play"
-
-msgid "Пропустить рекап"
-msgstr "Skip recap"
-
-msgid "Пропустить заставку"
-msgstr "Skip intro"
-
-msgid "сек."
-msgstr "sec."
-
-msgid "Отмена"
-msgstr "Cancel"
-
-msgid "Горячие клавиши"
-msgstr "Keyboard shortcuts"
-
-msgid "Воспроизвести / Пауза"
-msgstr "Play / Pause"
-
-msgid "Назад / Вперёд 10 сек"
-msgstr "Back / Forward 10 sec"
-
-msgid "Громкость + / −"
-msgstr "Volume + / −"
-
-msgid "Полный экран"
-msgstr "Full screen"
-
-msgid "Картинка в картинке"
-msgstr "Picture in picture"
-
-msgid "Выключить звук"
-msgstr "Mute"
-
-msgid "Скриншот кадра"
-msgstr "Take screenshot"
-
-msgid "Это окно"
-msgstr "This window"
-
-msgid "Позиция воспроизведения"
-msgstr "Playback position"
-
-msgid "Назад на 10 секунд"
-msgstr "Back 10 seconds"
-
-msgid "Вперёд на 10 секунд"
-msgstr "Forward 10 seconds"
-
-msgid "Громкость"
-msgstr "Volume"
-
-msgid "Скриншот"
-msgstr "Screenshot"
-
-msgid "Скорость воспроизведения"
-msgstr "Playback speed"
-
-msgid "Качество"
-msgstr "Quality"
-
-msgid "Субтитры"
-msgstr "Subtitles"
-
-msgid "Субтитры: выкл."
-msgstr "Subtitles: off"
-
-msgid "Подготовка плеера…"
-msgstr "Preparing player…"
-
-msgid "Скачать"
-msgstr "Download"
-
-msgid "О фильме"
-msgstr "About"
-
-msgid "Пробел — пауза, ←/→ — 10 секунд, F — полный экран, ? — все клавиши"
-msgstr "Space — pause, ←/→ — 10 sec, F — fullscreen, ? — all keys"
-
 msgid "Страница не найдена (404) — LumiBox"
 msgstr "Page not found (404) — LumiBox"
 
@@ -643,3 +529,39 @@ msgid ""
 "обновить страницу позже."
 msgstr ""
 "We are aware of this error and are working on a fix. Please try again later."
+
+msgid "Популярное"
+msgstr "Popular"
+
+msgid "Топ по рейтингу"
+msgstr "Top rated"
+
+msgid "Скоро на экранах"
+msgstr "Coming soon"
+
+msgid "Актёры"
+msgstr "Actors"
+
+msgid "Режиссёры"
+msgstr "Directors"
+
+msgid "Раздел"
+msgstr "Section"
+
+msgid "Жанр"
+msgstr "Genre"
+
+msgid "Страна"
+msgstr "Country"
+
+msgid "Отзыв сохранён."
+msgstr "Review saved."
+
+msgid "Отзыв удалён."
+msgstr "Review deleted."
+
+msgid "Комментарий добавлен."
+msgstr "Comment added."
+
+msgid "Комментарий удалён."
+msgstr "Comment deleted."

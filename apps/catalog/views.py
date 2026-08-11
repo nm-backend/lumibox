@@ -8,6 +8,7 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
 from django.utils.translation import gettext
+from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView, ListView, TemplateView
 
 from apps.catalog.forms import QUICK_SORTS, CatalogFilterForm
@@ -227,7 +228,7 @@ class TitleListView(ElidedPaginationMixin, ListView):
     context_object_name = "titles"
     paginate_by = 24
 
-    page_heading = "Каталог"
+    page_heading = _("Каталог")
     page_subtitle = ""
 
     def get_filter_form(self):
@@ -322,8 +323,8 @@ class TitleListView(ElidedPaginationMixin, ListView):
 class NewTitlesView(TitleListView):
     """Новинки: /new/ — свежие публикации."""
 
-    page_heading = "Новинки"
-    page_subtitle = "Раздел"
+    page_heading = _("Новинки")
+    page_subtitle = _("Раздел")
 
     def get_base_queryset(self):
         return super().get_base_queryset().order_by(F("published_at").desc(nulls_last=True), "pk")
@@ -332,8 +333,8 @@ class NewTitlesView(TitleListView):
 class PopularTitlesView(TitleListView):
     """Популярное: /popular/ — по числу просмотров за всё время."""
 
-    page_heading = "Популярное"
-    page_subtitle = "Раздел"
+    page_heading = _("Популярное")
+    page_subtitle = _("Раздел")
 
     def get_base_queryset(self):
         return super().get_base_queryset().most_viewed()
@@ -342,8 +343,8 @@ class PopularTitlesView(TitleListView):
 class TopRatedTitlesView(TitleListView):
     """Топ: /top/ — только оценённое, по средней оценке."""
 
-    page_heading = "Топ по рейтингу"
-    page_subtitle = "Раздел"
+    page_heading = _("Топ по рейтингу")
+    page_subtitle = _("Раздел")
 
     def get_base_queryset(self):
         return super().get_base_queryset().top_rated()
@@ -357,8 +358,8 @@ class PremieresView(TitleListView):
     текущего года мог выйти как вчера, так и через полгода.
     """
 
-    page_heading = "Скоро на экранах"
-    page_subtitle = "Раздел"
+    page_heading = _("Скоро на экранах")
+    page_subtitle = _("Раздел")
 
     def get_base_queryset(self):
         from django.utils import timezone
@@ -374,7 +375,7 @@ class PremieresView(TitleListView):
 class YearTitleListView(TitleListView):
     """Каталог за один год: /year/2024/"""
 
-    page_subtitle = "Год"
+    page_subtitle = _("Год")
 
     def get_base_queryset(self):
         year = self.kwargs["year"]
@@ -385,7 +386,7 @@ class YearTitleListView(TitleListView):
 class GenreTitleListView(TitleListView):
     """Каталог, суженный до одного жанра: /genres/drama/"""
 
-    page_subtitle = "Жанр"
+    page_subtitle = _("Жанр")
 
     def get_base_queryset(self):
         genre = get_object_or_404(Genre, slug=self.kwargs["slug"])
@@ -396,7 +397,7 @@ class GenreTitleListView(TitleListView):
 class CountryTitleListView(TitleListView):
     """Каталог, суженный до одной страны: /countries/yaponiya/"""
 
-    page_subtitle = "Страна"
+    page_subtitle = _("Страна")
 
     def get_base_queryset(self):
         country = get_object_or_404(Country, slug=self.kwargs["slug"])
@@ -439,7 +440,7 @@ class ReferenceListView(ListView):
 
 class GenreListView(ReferenceListView):
     model = Genre
-    page_heading = "Жанры"
+    page_heading = _("Жанры")
     detail_url_name = "catalog:genre_titles"
 
     def get_queryset(self):
@@ -461,7 +462,7 @@ class GenreListView(ReferenceListView):
 
 class CountryListView(ReferenceListView):
     model = Country
-    page_heading = "Страны"
+    page_heading = _("Страны")
     detail_url_name = "catalog:country_titles"
 
     def get_queryset(self):
@@ -773,7 +774,7 @@ class PersonDirectoryView(ListView):
     template_name = "catalog/person_list.html"
     context_object_name = "persons"
     role = Participation.Role.ACTOR
-    page_heading = "Актёры"
+    page_heading = _("Актёры")
 
     def get_queryset(self):
         published_role = Q(
@@ -794,12 +795,12 @@ class PersonDirectoryView(ListView):
 
 class ActorListView(PersonDirectoryView):
     role = Participation.Role.ACTOR
-    page_heading = "Актёры"
+    page_heading = _("Актёры")
 
 
 class DirectorListView(PersonDirectoryView):
     role = Participation.Role.DIRECTOR
-    page_heading = "Режиссёры"
+    page_heading = _("Режиссёры")
 
 
 class StudioListView(ListView):
