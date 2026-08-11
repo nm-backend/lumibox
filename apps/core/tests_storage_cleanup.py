@@ -28,9 +28,9 @@ class DeleteFieldFileTests(TestCase):
     def test_removes_file_and_webp_copy(self):
         storage = self.title.poster.storage
 
-        from apps.catalog.webp import _get_webp_path
+        from apps.catalog.webp import webp_name as make_webp_name
 
-        webp_name = _get_webp_path(self.poster_name)
+        webp_name = make_webp_name(self.poster_name)
         storage.save(webp_name, io.BytesIO(b"fake-webp"))
 
         delete_field_file(self.title.poster)

@@ -1,29 +1,48 @@
 """Фильтры шаблонов каталога для главной страницы."""
 
-import functools
 from datetime import timedelta
 
 from django import template
+from django.core.cache import cache
 from django.utils import timezone
 from django.utils.translation import gettext
 
 register = template.Library()
 
+# Наличие WebP-копии меняется только при загрузке новой картинки, поэтому
+# держим ответ сутки.
+WEBP_CHECK_TTL = 60 * 60 * 24
 
-@functools.lru_cache(maxsize=1024)
+
 def _has_webp(storage, name: str) -> bool:
-    """Проверяет существование WebP-копии рядом с оригиналом.
+    """
+    Есть ли WebP-копия рядом с оригиналом.
 
-    Кэшируется по имени файла: на странице каталога 17 постеров, и без
-    кэша каждый рендер делал бы по два похода в storage на карточку.
+    Ответ кладём в общий кэш, а не в lru_cache процесса. Два повода.
+
+    Первый: на бакете storage.exists — это сетевой запрос. В сетке каталога
+    восемнадцать постеров, и на холодном процессе страница стоила бы
+    восемнадцати обращений к R2 ещё до первого байта ответа. Общий кэш
+    делит их между всеми воркерами и переживает перезапуск.
+
+    Второй: lru_cache ключевался в том числе объектом хранилища. У бакета
+    экземпляр storage создаётся заново, и ключ не совпадал — кэш промахивался
+    на каждом запросе, то есть не работал именно там, где был нужен.
     """
     if not name:
         return False
     base, _ = name.rsplit(".", 1) if "." in name else (name, "")
+    target = f"{base}.webp"
+    key = f"webp:{target}"
+    cached = cache.get(key)
+    if cached is not None:
+        return cached
     try:
-        return storage.exists(f"{base}.webp")
+        found = storage.exists(target)
     except (OSError, NotImplementedError):
-        return False
+        found = False
+    cache.set(key, found, WEBP_CHECK_TTL)
+    return found
 
 
 @register.filter
