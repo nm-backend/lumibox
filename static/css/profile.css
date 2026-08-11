@@ -251,3 +251,11 @@
     margin-bottom: var(--space-4);
     font-size: var(--font-title);
 }
+
+/* Счётчик над списком истории. Раньше он носил класс пустого состояния —
+   то есть подпись «Всего 12 в истории» была размечена как «здесь пусто». */
+.profile-tab__count {
+    margin-bottom: var(--space-3);
+    color: var(--color-text-dim);
+    font-size: var(--text-sm);
+}

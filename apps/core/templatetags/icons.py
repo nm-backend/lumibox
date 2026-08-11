@@ -15,6 +15,8 @@ from django import template
 from django.templatetags.static import static
 from django.utils.safestring import mark_safe
 
+from apps.core.context_processors import static_version_value
+
 register = template.Library()
 
 
@@ -35,7 +37,11 @@ def icon(name, class_name="", size=20):
     if class_name:
         classes += f" {class_name}"
 
-    sprite_url = static("img/icons.svg")
+    # Версия в адресе, как у остальных ассетов. Без неё спрайт был
+    # единственным файлом без cache-busting: браузер держит его в кэше,
+    # и добавленная иконка не доходила до вернувшегося посетителя —
+    # на её месте оставалась пустая рамка.
+    sprite_url = f'{static("img/icons.svg")}?v={static_version_value()}'
 
     return mark_safe(
         f'<svg class="{classes}" width="{size}" height="{size}" '

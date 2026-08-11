@@ -22,9 +22,19 @@ def static_version(request):
     (lru_cache): ассеты меняются только при деплое, и все воркеры одного
     деплоя отдают одинаковую версию.
     """
+    return {"static_version": static_version_value()}
+
+
+def static_version_value() -> str:
+    """
+    Та же версия, но как значение — её просит и шаблонный тег иконок.
+
+    В разработке считаем на каждый запрос: правка CSS/JS должна быть видна
+    сразу, без перезапуска сервера. В продакшене — один раз на процесс.
+    """
     if settings.DEBUG:
-        return {"static_version": _scan_static_version()}
-    return {"static_version": _cached_static_version()}
+        return _scan_static_version()
+    return _cached_static_version()
 
 
 @lru_cache(maxsize=1)

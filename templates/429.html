@@ -7,9 +7,24 @@
 {% block error_code %}429{% endblock %}
 {% block error_subtitle %}{% trans "Слишком много попыток" %}{% endblock %}
 {% block error_title %}{% trans "Касса перегрелась, попробуйте позже" %}{% endblock %}
-{% block error_text %}{% trans "С этого адреса за последний час было создано слишком много аккаунтов. Подождите немного и попробуйте снова — или войдите, если у вас уже есть аккаунт." %}{% endblock %}
+{% block error_text %}{% trans "С этого адреса за последний час было создано слишком много аккаунтов. Ограничение снимается через час — или войдите, если аккаунт у вас уже есть." %}{% endblock %}
 
 {% block error_actions %}
     <a class="button button--primary" href="{% url 'catalog:home' %}">{% icon "home" size=14 %} {% trans "На главную" %}</a>
     <a class="button button--ghost" href="{% url 'users:login' %}">{% icon "user" size=14 %} {% trans "Войти" %}</a>
+{% endblock %}
+
+{% block error_extra %}
+    <div class="error-page__search">
+        {% comment %} Поиск на странице ошибки — самый короткий путь обратно
+           к делу: человек искал фильм, а попал сюда. Форма ведёт на страницу
+           поиска, как и поле в шапке: раньше здесь и на 500 она уходила
+           в каталог, где ищется только по названию. {% endcomment %}
+        <form class="search" action="{% url 'catalog:search' %}" method="get" role="search">
+            <label class="visually-hidden" for="search-error-429">{% trans "Поиск по каталогу" %}</label>
+            <input class="search__input" id="search-error-429" type="search" name="q"
+                   placeholder="{% trans 'Название, жанр, человек…' %}" autocomplete="off">
+            <button class="search__submit" type="submit" aria-label="{% trans 'Найти' %}">{% icon "search" size=16 %}</button>
+        </form>
+    </div>
 {% endblock %}

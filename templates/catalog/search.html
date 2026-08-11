@@ -41,7 +41,9 @@
             </form>
 
             {% if too_short %}
-                <p class="search-page__hint">{% trans "Запрос слишком короткий — введите хотя бы два символа." %}</p>
+                {% trans "Запрос слишком короткий" as empty_title %}
+                {% trans "Введите хотя бы два символа — по одному найдётся слишком многое." as empty_desc %}
+                {% include "includes/empty_state.html" with empty_icon="search" empty_small=True empty_title=empty_title empty_desc=empty_desc %}
             {% elif query %}
                 <p class="search-page__hint">
                     {% blocktranslate with count=paginator.count %}Найдено: {{ count }}{% endblocktranslate %}
@@ -87,7 +89,9 @@
                     {% include "includes/empty_state.html" with empty_icon="search" empty_q=query empty_desc=empty_desc empty_href=empty_href empty_label=empty_label %}
                 {% endif %}
             {% else %}
-                <p class="search-page__hint">{% trans "Введите запрос — найдём фильмы, сериалы и людей." %}</p>
+                {% trans "Что ищем?" as empty_title %}
+                {% trans "Название, жанр, страна, студия или человек — найдём по любому из них." as empty_desc %}
+                {% include "includes/empty_state.html" with empty_icon="search" empty_small=True empty_title=empty_title empty_desc=empty_desc %}
             {% endif %}
         </div>
 

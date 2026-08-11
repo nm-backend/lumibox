@@ -114,10 +114,19 @@ class SearchPageTests(TestCase):
         cache.clear()
 
     def test_page_opens_without_query(self):
+        """
+        Страница поиска без запроса объясняет, что тут можно найти.
+
+        Раньше это была служебная строка «Введите запрос — найдём фильмы,
+        сериалы и людей» тем же классом, что и счётчик результатов. Теперь
+        это обычное пустое состояние, как на остальных страницах сайта,
+        поэтому проверяем его, а не конкретную формулировку.
+        """
         response = self.client.get(self.url)
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Введите запрос")
+        self.assertContains(response, "empty-state")
+        self.assertContains(response, "Что ищем?")
 
     def test_short_query_explains_itself(self):
         response = self.client.get(self.url, {"q": "а"})

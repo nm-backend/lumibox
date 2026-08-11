@@ -12,6 +12,19 @@
         return document.body.dataset['ui' + name.charAt(0).toUpperCase() + name.slice(1)] || '';
     }
 
+    /* Прокрутка с оглядкой на настройку системы.
+
+       В CSS отказ от анимаций учитывался (scroll-behavior: auto), но
+       программная прокрутка с behavior: 'smooth' это правило игнорирует —
+       опция в вызове сильнее. Человек, отключивший анимации из-за
+       чувствительности к движению, всё равно получал плавный проезд
+       через всю страницу по кнопке «наверх». */
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+    function scrollBehavior() {
+        return reduceMotion.matches ? 'auto' : 'smooth';
+    }
+
     /* -----------------------------------------------
        1. Theme toggle (dark/light)
     ----------------------------------------------- */
@@ -110,10 +123,30 @@
             }
         });
 
+        /* Заглушки на время запроса. Единственное место в проекте, где
+           содержимое действительно приезжает после отрисовки страницы —
+           и до этого правки оно молчало: на медленной сети список просто
+           оставался пустым, и отличить «ищем» от «ничего нет» было нельзя. */
+        function renderLoading() {
+            dropdown.replaceChildren();
+            for (let i = 0; i < 3; i++) {
+                const row = element('div', 'search__suggestion search__suggestion--loading');
+                row.appendChild(element('span', 'skeleton search__suggestion-poster'));
+                const body = element('div', 'search__suggestion-body');
+                body.appendChild(element('span', 'skeleton search__skeleton-line'));
+                body.appendChild(element('span', 'skeleton search__skeleton-line search__skeleton-line--short'));
+                row.appendChild(body);
+                dropdown.appendChild(row);
+            }
+            dropdown.setAttribute('aria-busy', 'true');
+            dropdown.classList.add('search__dropdown--open');
+        }
+
         async function fetchSuggestions(q) {
             if (searchController) searchController.abort();
             const controller = new AbortController();
             searchController = controller;
+            renderLoading();
             try {
                 const response = await fetch(`/api/v1/titles/search/?q=${encodeURIComponent(q)}&limit=6`, {
                     headers: { 'X-Requested-With': 'XMLHttpRequest' },
@@ -125,8 +158,14 @@
                 renderSuggestions(data.results || data);
             } catch (error) {
                 if (error && error.name === 'AbortError') return;
-                dropdown.classList.remove('search__dropdown--open');
+                /* Ошибку сети показываем словами. Раньше список молча
+                   закрывался, и это выглядело как «ничего не найдено» —
+                   человек делал вывод, что фильма на сайте нет. */
+                dropdown.replaceChildren();
+                dropdown.appendChild(element('div', 'search__no-results', dropdown.dataset.errorMsg || ''));
+                dropdown.classList.add('search__dropdown--open');
             } finally {
+                dropdown.removeAttribute('aria-busy');
                 if (searchController === controller) searchController = null;
             }
         }
@@ -145,6 +184,7 @@
         }
 
         function renderSuggestions(items) {
+            dropdown.removeAttribute('aria-busy');
             dropdown.replaceChildren();
             if (!items || items.length === 0) {
                 dropdown.appendChild(element('div', 'search__no-results', emptyMessage()));
@@ -229,13 +269,13 @@
 
         if (prevBtn) {
             prevBtn.addEventListener('click', function () {
-                track.scrollBy({ left: -scrollAmount(), behavior: 'smooth' });
+                track.scrollBy({ left: -scrollAmount(), behavior: scrollBehavior() });
                 updateButtons();
             });
         }
         if (nextBtn) {
             nextBtn.addEventListener('click', function () {
-                track.scrollBy({ left: scrollAmount(), behavior: 'smooth' });
+                track.scrollBy({ left: scrollAmount(), behavior: scrollBehavior() });
                 updateButtons();
             });
         }
@@ -355,19 +395,37 @@
     const lightboxClose = document.querySelector('[data-lightbox-close]');
 
     if (lightbox && lightboxImg && lightboxClose) {
+        /* Лайтбокс — диалог, и вести себя должен как диалог. Раньше он только
+           показывался: фокус оставался на странице позади, Tab уходил в
+           содержимое под ним, а после закрытия возвращаться было некуда.
+           Обработчик Esc при этом висел всегда и на каждое нажатие сбрасывал
+           overflow у body — конфликтуя с модалкой трейлера на той же странице. */
+        let lightboxOpener = null;
+
+        const isLightboxOpen = function () {
+            return lightbox.classList.contains('lightbox--open');
+        };
+
         document.querySelectorAll('[data-lightbox-trigger]').forEach(function (trigger) {
             trigger.addEventListener('click', function () {
                 const src = this.dataset.lightboxTrigger || this.src;
+                lightboxOpener = this;
                 lightboxImg.src = src;
                 lightbox.classList.add('lightbox--open');
                 document.body.style.overflow = 'hidden';
+                lightboxClose.focus();
             });
         });
 
         const closeLightbox = function () {
+            if (!isLightboxOpen()) return;
             lightbox.classList.remove('lightbox--open');
             document.body.style.overflow = '';
             lightboxImg.removeAttribute('src');
+            /* Возвращаем фокус на тот кадр, с которого открыли: иначе
+               обход продолжится с начала страницы. */
+            if (lightboxOpener) lightboxOpener.focus();
+            lightboxOpener = null;
         };
 
         lightboxClose.addEventListener('click', closeLightbox);
@@ -375,7 +433,18 @@
             if (e.target === lightbox) closeLightbox();
         });
         document.addEventListener('keydown', function (e) {
-            if (e.key === 'Escape') closeLightbox();
+            if (!isLightboxOpen()) return;
+            if (e.key === 'Escape') {
+                closeLightbox();
+                return;
+            }
+            /* Внутри открытого диалога фокусируемый элемент один — кнопка
+               закрытия, поэтому ловушка сводится к тому, чтобы Tab не уводил
+               наружу. */
+            if (e.key === 'Tab') {
+                e.preventDefault();
+                lightboxClose.focus();
+            }
         });
     }
 
@@ -554,7 +623,7 @@
         btn.innerHTML = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>';
         document.body.appendChild(btn);
         btn.addEventListener('click', () => {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            window.scrollTo({ top: 0, behavior: scrollBehavior() });
         });
     }
 

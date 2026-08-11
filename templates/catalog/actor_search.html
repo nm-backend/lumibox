@@ -81,7 +81,8 @@
                                     </div>
                                 </div>
                             {% else %}
-                                <p class="actor-group__empty">{% trans "Нет опубликованных проектов." %}</p>
+                                {% trans "Нет опубликованных проектов" as empty_title %}
+                                {% include "includes/empty_state.html" with empty_inline=True empty_title=empty_title %}
                             {% endif %}
                         </section>
                     {% endfor %}

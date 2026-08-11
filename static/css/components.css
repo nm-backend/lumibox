@@ -86,11 +86,54 @@
     }
 }
 
-/* ---------- Skeleton / Placeholder ---------- */
+/* ---------- Скелетоны ----------
+   Заглушки на время загрузки. Анимация shimmer жила в файле без единого
+   применения: состояний загрузки в проекте не было вовсе — ни у одной
+   сетки, ни у одной кнопки. На медленной сети страница просто оставалась
+   пустой, и отличить «грузится» от «ничего нет» было нельзя.
+
+   Скелетон повторяет форму того, что появится: постер 2:3 и две строки
+   под ним. Ставить на его место спиннер значило бы сдвинуть вёрстку,
+   когда придут настоящие карточки. */
 
 @keyframes shimmer {
     0% { background-position: -200% 0; }
     100% { background-position: 200% 0; }
+}
+
+.skeleton {
+    background: linear-gradient(
+        90deg,
+        var(--color-surface) 25%,
+        var(--color-surface-hover) 37%,
+        var(--color-surface) 63%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.4s ease-in-out infinite;
+    border-radius: var(--radius-sm);
+}
+
+/* Тем, кто отключил анимации, показываем ровную заливку: мерцание во весь
+   экран — ровно то движение, от которого они и отказались. */
+@media (prefers-reduced-motion: reduce) {
+    .skeleton {
+        animation: none;
+        background: var(--color-surface);
+    }
+}
+
+.skeleton-card__poster {
+    aspect-ratio: 2 / 3;
+    border-radius: var(--radius-md);
+}
+
+.skeleton-card__line {
+    height: 12px;
+    margin-top: var(--space-2);
+}
+
+.skeleton-card__line--short {
+    width: 55%;
 }
 
 /* ---------- Glass card ---------- */
@@ -1339,11 +1382,6 @@
     line-height: 1.6;
 }
 
-.review-empty {
-    color: var(--color-text-dim);
-    font-size: var(--text-sm);
-}
-
 .button--active {
     border-color: var(--color-accent);
     color: var(--color-accent);
@@ -2007,4 +2045,24 @@
 
 .poster-card__link:focus-visible .poster-card__frame {
     box-shadow: var(--focus-ring);
+}
+
+/* Строка-заглушка в подсказках поиска, пока идёт запрос. */
+.search__suggestion--loading {
+    pointer-events: none;
+}
+
+.search__skeleton-line {
+    display: block;
+    height: 10px;
+    border-radius: var(--radius-sm);
+}
+
+.search__skeleton-line + .search__skeleton-line {
+    margin-top: var(--space-2);
+    width: 60%;
+}
+
+.search__skeleton-line--short {
+    width: 60%;
 }

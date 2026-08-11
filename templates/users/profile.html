@@ -110,7 +110,11 @@
                             {% endfor %}
                         </div>
                     {% else %}
-                        <p class="review-empty">{% trans "Нет добавленных фильмов." %}</p>
+                        {% trans "В избранном пусто" as empty_title %}
+                        {% trans "Открывайте фильмы и жмите «В избранное» — они соберутся здесь." as empty_desc %}
+                        {% url 'catalog:title_list' as empty_href %}
+                        {% trans "Открыть каталог" as empty_label %}
+                        {% include "includes/empty_state.html" with empty_icon="heart" empty_small=True empty_ghost=True empty_title=empty_title empty_desc=empty_desc empty_href=empty_href empty_label=empty_label %}
                     {% endif %}
                 </section>
             </div>
@@ -131,7 +135,11 @@
                             {% endfor %}
                         </div>
                     {% else %}
-                        <p class="review-empty">{% trans "Список «Смотреть позже» пуст." %}</p>
+                        {% trans "Список «Смотреть позже» пуст" as empty_title %}
+                        {% trans "Отложите то, до чего сейчас не доходят руки." as empty_desc %}
+                        {% url 'catalog:title_list' as empty_href %}
+                        {% trans "Открыть каталог" as empty_label %}
+                        {% include "includes/empty_state.html" with empty_icon="clock" empty_small=True empty_ghost=True empty_title=empty_title empty_desc=empty_desc empty_href=empty_href empty_label=empty_label %}
                     {% endif %}
                 </section>
             </div>
@@ -146,9 +154,13 @@
                         {% endif %}
                     </div>
                     {% if history_count %}
-                        <p class="review-empty">{% blocktranslate with count=history_count %}Всего {{ count }} в истории{% endblocktranslate %}</p>
+                        <p class="profile-tab__count">{% blocktranslate with count=history_count %}Всего {{ count }} в истории{% endblocktranslate %}</p>
                     {% else %}
-                        <p class="review-empty">{% trans "История просмотров пуста." %}</p>
+                        {% trans "История пуста" as empty_title %}
+                        {% trans "Здесь появится то, что вы открывали." as empty_desc %}
+                        {% url 'catalog:title_list' as empty_href %}
+                        {% trans "Открыть каталог" as empty_label %}
+                        {% include "includes/empty_state.html" with empty_icon="play" empty_small=True empty_ghost=True empty_title=empty_title empty_desc=empty_desc empty_href=empty_href empty_label=empty_label %}
                     {% endif %}
                 </section>
             </div>

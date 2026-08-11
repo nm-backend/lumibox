@@ -16,7 +16,7 @@
 
 {% block error_extra %}
     <div class="error-page__search">
-        <form class="search" action="{% url 'catalog:title_list' %}" method="get" role="search">
+        <form class="search" action="{% url 'catalog:search' %}" method="get" role="search">
             <label class="visually-hidden" for="search-500">{% trans "Поиск по каталогу" %}</label>
             <input class="search__input" id="search-500" type="search" name="q"
                    placeholder="{% trans 'Поиск по названию...' %}" autocomplete="off">

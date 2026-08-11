@@ -52,7 +52,13 @@
         {% endblock %}
     </div>
 
-    <p class="error-page__code" aria-hidden="true">{% block error_code %}{% endblock %}</p>
+    {% comment %} Код виден крупно и раньше был aria-hidden — то есть
+       пользователь скринридера единственного, что однозначно называет
+       ошибку, не слышал. Цифру озвучиваем с подписью, а само крупное
+       начертание остаётся декоративным. {% endcomment %}
+    <p class="error-page__code">
+        <span class="visually-hidden">{% trans "Код ошибки" %}</span>{% block error_code %}{% endblock %}
+    </p>
     <p class="error-page__subtitle">{% block error_subtitle %}{% endblock %}</p>
     <h1 class="error-page__title">{% block error_title %}{% endblock %}</h1>
     <p class="error-page__text">{% block error_text %}{% endblock %}</p>

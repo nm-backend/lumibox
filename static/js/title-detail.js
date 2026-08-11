@@ -51,6 +51,47 @@
 
         if (statusEl) statusEl.setAttribute('aria-live', 'polite');
 
+        /* Отправку вешаем на change самой радиогруппы, а не на клик по label.
+
+           Раньше обработчик стоял на label и отбрасывал всё, что пришло
+           с target=INPUT — иначе клик мышью считался дважды. Но с клавиатуры
+           выбор приходит именно от input: стрелка или пробел на радиокнопке
+           порождают ровно такое событие. В результате звёзды перекрашивались,
+           а оценка не уходила на сервер — с клавиатуры оценить фильм было
+           нельзя вовсе. change срабатывает один раз и на мышь, и на клавиши. */
+        function submitRating(value) {
+            if (!value || value === currentRating) return;
+
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/api/v1/titles/' + slug + '/rate/');
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.setRequestHeader('X-CSRFToken', getCsrfToken());
+            xhr.onload = function () {
+                if (xhr.status === 200) {
+                    currentRating = value;
+                    setStars(value);
+                    flashStatus(savedMsg);
+                } else {
+                    /* Возвращаем прежнюю оценку: без этого на тач-экране
+                       звёзды оставались залитыми до перезагрузки — там нет
+                       mouseleave, который вернул бы их назад. */
+                    setStars(currentRating);
+                    flashStatus(errorMsg);
+                }
+            };
+            xhr.onerror = function () {
+                setStars(currentRating);
+                flashStatus(errorMsg);
+            };
+            xhr.send(JSON.stringify({ rating: value }));
+        }
+
+        ratingContainer.addEventListener('change', function (event) {
+            var input = event.target;
+            if (!input || input.type !== 'radio') return;
+            submitRating(parseInt(input.value, 10));
+        });
+
         stars.forEach(function (star) {
             star.addEventListener('mouseenter', function () {
                 setStars(parseInt(this.dataset.value, 10));
@@ -60,30 +101,12 @@
                 setStars(currentRating);
             });
 
-            star.addEventListener('click', function (event) {
-                // Клик по label с input[type=radio] всплывает дважды:
-                // сначала по label, потом с активированного radio. Второй
-                // вариант — синтетический, с target=INPUT: игнорируем.
-                if (event.target && event.target.tagName === 'INPUT') return;
-                var value = parseInt(this.dataset.value, 10);
-                if (value === currentRating) return;
-
-                var xhr = new XMLHttpRequest();
-                xhr.open('POST', '/api/v1/titles/' + slug + '/rate/');
-                xhr.setRequestHeader('Content-Type', 'application/json');
-                xhr.setRequestHeader('X-CSRFToken', getCsrfToken());
-                xhr.onload = function () {
-                    if (xhr.status === 200) {
-                        currentRating = value;
-                        setStars(value);
-                        flashStatus(savedMsg);
-                    } else {
-                        flashStatus(errorMsg);
-                    }
-                };
-                xhr.onerror = function () { flashStatus(errorMsg); };
-                xhr.send(JSON.stringify({ rating: value }));
+            /* Клавиатурный фокус тоже подсвечивает шкалу: пользователь
+               стрелок должен видеть, какую оценку он сейчас поставит. */
+            star.addEventListener('focusin', function () {
+                setStars(parseInt(this.dataset.value, 10));
             });
+
         });
     }
 

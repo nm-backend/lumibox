@@ -688,12 +688,20 @@
                     <section class="section">
                         <h2 class="section__title">{% trans "Галерея кадров" %}</h2>
                         <div class="frames">
+                            {% comment %} Кнопка, а не голая картинка: кадр открывает
+                               диалог, то есть это действие. Пока это был <img>
+                               с обработчиком клика, галерею нельзя было открыть
+                               с клавиатуры вообще — элемент не получал фокус
+                               и не отвечал на Enter. {% endcomment %}
                             {% for frame in title.frames.all %}
-                                <img class="frames__item"
-                                     src="{{ frame.image.url }}"
-                                     alt="{{ frame.caption|default:title.name }}"
-                                     loading="lazy"
-                                     data-lightbox-trigger="{{ frame.image.url }}">
+                                <button class="frames__item" type="button"
+                                        data-lightbox-trigger="{{ frame.image.url }}"
+                                        aria-label="{% blocktranslate with caption=frame.caption|default:title.name %}Открыть кадр: {{ caption }}{% endblocktranslate %}">
+                                    <img class="frames__image"
+                                         src="{{ frame.image.url }}"
+                                         alt="{{ frame.caption|default:title.name }}"
+                                         loading="lazy" decoding="async">
+                                </button>
                             {% endfor %}
                         </div>
                     </section>

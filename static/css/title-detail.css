@@ -305,12 +305,17 @@
     gap: var(--space-3);
 }
 
+/* Кадр — кнопка, открывающая диалог. Была голой картинкой с обработчиком:
+   с клавиатуры галерея не открывалась вовсе. */
 .frames__item {
+    display: block;
     width: 100%;
+    padding: 0;
     aspect-ratio: 16 / 9;
-    object-fit: cover;
+    overflow: hidden;
     border-radius: var(--radius-md);
     border: 1px solid var(--color-border);
+    background: var(--color-surface);
     transition: transform var(--transition), box-shadow var(--transition),
                 border-color var(--transition-fast);
     cursor: zoom-in;
@@ -318,10 +323,26 @@
     contain-intrinsic-size: 200px;
 }
 
-.frames__item:hover {
-    transform: translateY(-4px) scale(1.02);
-    border-color: var(--color-accent);
-    box-shadow: var(--shadow-card), 0 0 0 1px var(--color-accent-dim), 0 0 20px var(--color-accent-glow);
+.frames__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.frames__item:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+}
+
+/* Подъём только под настоящим курсором: на тач-экране :hover залипает
+   после тапа. Свечение убрано — оно было четвёртым по счёту на странице. */
+@media (hover: hover) {
+    .frames__item:hover {
+        transform: translateY(-2px);
+        border-color: var(--color-accent);
+        box-shadow: var(--shadow-raise);
+    }
 }
 
 /* Subtle light reflection sweep on frame hover */
