@@ -296,3 +296,53 @@ class CommentApiTests(TestCase):
 
         self.assertEqual(response.status_code, 403)
         self.assertEqual(Comment.objects.count(), 1)
+
+
+class InvalidFormKeepsTextTests(TestCase):
+    """
+    Текст, который человек написал, не должен пропадать из-за ошибки формы.
+
+    Обе вьюхи при невалидной форме делали redirect с общим сообщением
+    наверху страницы. Написавший абзац отзыва и промахнувшийся с оценкой
+    возвращался на страницу с пустым полем: текст терялся, а сообщение
+    не говорило, что именно не так.
+    """
+
+    def setUp(self):
+        self.user = create_user()
+        self.title = create_title(name="Фильм для проверки формы")
+        self.client.force_login(self.user)
+
+    def test_comment_form_keeps_text_and_shows_error(self):
+        response = self.client.post(
+            reverse("reviews:comment_add", args=[self.title.slug]),
+            {"text": "   "},
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(Comment.objects.count(), 0)
+        # Форма вернулась на страницу вместе с ошибкой, а не увела с неё.
+        self.assertContains(response, 'class="form__error"', status_code=400)
+
+    def test_review_form_keeps_text_and_shows_error(self):
+        response = self.client.post(
+            reverse("reviews:save", args=[self.title.slug]),
+            {"rating": 42, "text": "Долгий разбор фильма на несколько абзацев"},
+        )
+
+        self.assertEqual(response.status_code, 400)
+        html = response.content.decode("utf-8")
+        # Главное: написанный текст остался в поле, его не надо набирать заново.
+        self.assertIn("Долгий разбор фильма на несколько абзацев", html)
+        self.assertIn('class="form__error"', html)
+
+    def test_valid_submission_still_redirects(self):
+        """Успешная отправка по-прежнему уводит на страницу с якорем."""
+        response = self.client.post(
+            reverse("reviews:comment_add", args=[self.title.slug]),
+            {"text": "Хороший фильм"},
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response.url.endswith("#comments"))
+        self.assertEqual(Comment.objects.count(), 1)

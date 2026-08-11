@@ -1,13 +1,22 @@
+{% load i18n form_aria %}
 {% comment %}
 Поля формы с подписями и ошибками.
 
 Ждёт переменную form. Django умеет рендерить форму сам ({{ form.as_p }}),
 но тогда мы не управляем разметкой и классами. Здесь — свой обход полей:
 одна разметка на все формы проекта, менять её нужно в одном месте.
+
+Ошибки и подсказки связаны с полем через aria-describedby, а само поле
+помечено aria-invalid. Без этого пользователь скринридера слышал только
+«Пароль, поле ввода»: сообщение «Пароли не совпадают» лежало рядом в
+разметке, но с полем связано не было, и прочитать его можно было, только
+уйдя с поля и найдя текст самому.
 {% endcomment %}
 
 {% if form.non_field_errors %}
-    <div class="form__errors">
+    {% comment %} role="alert" — чтобы об ошибке узнали сразу, а не когда
+       дойдут до неё чтением страницы. {% endcomment %}
+    <div class="form__errors" role="alert">
         {% for error in form.non_field_errors %}
             <p>{{ error }}</p>
         {% endfor %}
@@ -15,20 +24,29 @@
 {% endif %}
 
 {% for field in form %}
-    <div class="form__field">
+    <div class="form__field{% if field.errors %} form__field--invalid{% endif %}">
         <label class="form__label" for="{{ field.id_for_label }}">
             {{ field.label }}
-            {% if field.field.required %}<span class="form__required" aria-hidden="true">*</span>{% endif %}
+            {% if field.field.required %}
+                <span class="form__required" aria-hidden="true">*</span>
+                <span class="visually-hidden">{% translate "обязательное поле" %}</span>
+            {% endif %}
         </label>
 
-        {{ field }}
+        {% if field.errors %}
+            {{ field|add_error_aria }}
+        {% elif field.help_text %}
+            {{ field|add_help_aria }}
+        {% else %}
+            {{ field }}
+        {% endif %}
 
         {% if field.help_text %}
-            <p class="form__help">{{ field.help_text }}</p>
+            <p class="form__help" id="{{ field.auto_id }}-help">{{ field.help_text }}</p>
         {% endif %}
 
         {% for error in field.errors %}
-            <p class="form__error">{{ error }}</p>
+            <p class="form__error" id="{{ field.auto_id }}-error{{ forloop.counter }}">{{ error }}</p>
         {% endfor %}
     </div>
 {% endfor %}

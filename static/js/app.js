@@ -726,9 +726,54 @@
         imgObserver.observe(document.body, { childList: true, subtree: true });
     }
 
+    /* -----------------------------------------------
+       19. Отправка формы: состояние и защита от повтора
+
+       Ни одна форма проекта не показывала, что отправка идёт, и не мешала
+       нажать кнопку второй раз. Двойной клик по «Отправить» под комментарием
+       создавал два одинаковых комментария, а на медленной сети человек не
+       понимал, нажалась ли кнопка вообще.
+
+       Делегируем на document: формы приходят и из шаблонов, и из
+       перерисованной страницы с ошибками, и вешать обработчик на каждую
+       по отдельности пришлось бы после каждой такой перерисовки.
+    ----------------------------------------------- */
+    document.addEventListener('submit', function (event) {
+        const form = event.target;
+        if (!(form instanceof HTMLFormElement)) return;
+        /* Формы избранного шлёт favorite.js своим запросом и сам блокирует
+           кнопку — второй блокировщик мешал бы ему вернуть её обратно. */
+        if (form.hasAttribute('data-favorite-form') || form.hasAttribute('data-watchlist-form')) return;
+        if (form.dataset.submitting === '1') {
+            event.preventDefault();
+            return;
+        }
+        form.dataset.submitting = '1';
+
+        const button = form.querySelector('button[type="submit"], input[type="submit"]');
+        if (!button) return;
+        button.setAttribute('aria-busy', 'true');
+        button.classList.add('is-loading');
+        /* disabled ставим после кадра: браузер не отправляет значение
+           отключённой кнопки, и форма потеряла бы имя нажатой кнопки. */
+        requestAnimationFrame(function () {
+            button.disabled = true;
+        });
+    });
+
+    /* Возврат по кнопке «назад» отдаёт страницу из кэша вместе с состоянием
+       DOM: без сброса зритель увидел бы форму с навсегда заблокированной
+       кнопкой. */
+    window.addEventListener('pageshow', function (event) {
+        if (!event.persisted) return;
+        document.querySelectorAll('form[data-submitting="1"]').forEach(function (form) {
+            form.dataset.submitting = '';
+            const button = form.querySelector('button[type="submit"], input[type="submit"]');
+            if (!button) return;
+            button.disabled = false;
+            button.removeAttribute('aria-busy');
+            button.classList.remove('is-loading');
+        });
+    });
+
 })();
-
-
-
-
-

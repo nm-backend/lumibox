@@ -483,6 +483,12 @@ class TitleDetailView(DetailView):
     """Страница фильма или сериала."""
 
     template_name = "catalog/title_detail.html"
+
+    # Формы с ошибками, если страницу перерисовывает POST-вьюха отзыва или
+    # комментария (apps.reviews.views.render_title_page). При обычном
+    # открытии страницы обе пустые, и формы создаются здесь же ниже.
+    bound_review_form = None
+    bound_comment_form = None
     context_object_name = "title"
 
     # Черновик по прямой ссылке отдаёт 404.
@@ -532,7 +538,7 @@ class TitleDetailView(DetailView):
         context["similar_titles"] = get_similar_titles(self.object)
         context["crew_by_role"] = get_crew_by_role(self.object)
         context["reviews"] = self.object.reviews.published().with_author()
-        context["review_form"] = ReviewForm(instance=user_review)
+        context["review_form"] = self.bound_review_form or ReviewForm(instance=user_review)
         context["user_review"] = user_review
         context["is_favorite"] = self.is_favorite()
         context["is_watchlist"] = self.is_watchlist()
@@ -598,7 +604,7 @@ class TitleDetailView(DetailView):
         return {
             "comments": comments,
             "comments_count": total,
-            "comment_form": CommentForm(),
+            "comment_form": self.bound_comment_form or CommentForm(),
         }
 
     def get_playback(self, episodes):

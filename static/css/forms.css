@@ -375,3 +375,31 @@
         padding: var(--space-5) var(--space-4);
     }
 }
+
+/* Кнопка во время отправки. Раньше единственным признаком было затемнение
+   от :disabled — и то лишь у избранного; остальные формы не показывали
+   ничего, и на медленной сети человек не понимал, нажалась ли кнопка. */
+.is-loading {
+    position: relative;
+    color: transparent !important;
+    pointer-events: none;
+}
+
+.is-loading::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 16px;
+    height: 16px;
+    margin: -8px 0 0 -8px;
+    border: 2px solid rgba(255, 255, 255, 0.35);
+    border-top-color: currentColor;
+    border-radius: 50%;
+    color: var(--color-on-accent);
+    animation: form-spin 0.8s linear infinite;
+}
+
+@keyframes form-spin {
+    to { transform: rotate(360deg); }
+}

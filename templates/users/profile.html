@@ -21,7 +21,12 @@
                         {% endif %}
                     </span>
                 </div>
-                <h1 class="profile-card__name">{{ user.display_name }}</h1>
+                {% comment %} Имя — заголовок страницы, но лежит в боковой колонке.
+                   Оставляем его <p>: главный заголовок документа не должен
+                   быть внутри <aside>, иначе структура страницы для
+                   скринридера начинается со вспомогательного блока.
+                   Настоящий h1 стоит в основной колонке ниже. {% endcomment %}
+                <p class="profile-card__name">{{ user.display_name }}</p>
                 {% if user.bio %}
                     <p class="profile-card__bio">{{ user.bio }}</p>
                 {% endif %}
@@ -51,6 +56,12 @@
 
         {# Main content #}
         <div class="profile-main">
+            {% comment %} Заголовок страницы в основной колонке: раньше
+               единственным h1 было имя пользователя внутри <aside>, и обход
+               страницы для скринридера начинался со вспомогательного блока,
+               а сам раздел оставался безымянным. {% endcomment %}
+            <h1 class="profile-main__title">{% trans "Мой профиль" %}</h1>
+
             <div class="tabs" data-tabs>
                 <button class="tab tab--active" data-tab="recent" type="button">{% trans "Недавнее" %}</button>
                 <button class="tab" data-tab="favorites" type="button">{% trans "Избранное" %}</button>

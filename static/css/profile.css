@@ -62,9 +62,11 @@
 }
 
 /* Stats */
+/* auto-fit, а не три колонки: показателей четыре, и четвёртый висел
+   один во второй строке, а на 360px три колонки сжимались до нечитаемых. */
 .profile-stats {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
     gap: 1px;
     overflow: hidden;
     padding: var(--space-4);
@@ -239,6 +241,13 @@
     }
 
     .profile-stats {
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
     }
+}
+
+/* Заголовок страницы профиля. Держим его в общем ритме заголовков разделов:
+   это такая же страница каталога, а не отдельная система. */
+.profile-main__title {
+    margin-bottom: var(--space-4);
+    font-size: var(--font-title);
 }
