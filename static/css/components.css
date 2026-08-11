@@ -1543,7 +1543,23 @@
     overflow-x: auto;
     scrollbar-width: none;
     padding: var(--space-2) 0;
-    margin-bottom: var(--space-5);
+    margin-bottom: var(--space-4);
+    /* Затемнение у края видно, только пока справа осталось непрокрученное:
+       скроллбар здесь скрыт, и без этого признака жанры за краем экрана
+       найти было нечем. Тот же приём, что у ленты вкладок. */
+    scroll-snap-type: x proximity;
+    background:
+        linear-gradient(to right, var(--color-bg) 30%, rgba(0, 0, 0, 0)) left center,
+        linear-gradient(to left, var(--color-bg) 30%, rgba(0, 0, 0, 0)) right center,
+        radial-gradient(farthest-side at 0 50%, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0)) left center,
+        radial-gradient(farthest-side at 100% 50%, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0)) right center;
+    background-repeat: no-repeat;
+    background-size: 32px 100%, 32px 100%, 14px 100%, 14px 100%;
+    background-attachment: local, local, scroll, scroll;
+}
+
+.genre-chip {
+    scroll-snap-align: start;
 }
 
 .genre-chips::-webkit-scrollbar {

@@ -14,10 +14,10 @@
 {% endcomment %}
             <aside class="lb-sidebar">
 
-                <div class="lb-aheader">{% trans "Панель навигации" %}</div>
+                <h2 class="lb-aheader">{% trans "Обзор каталога" %}</h2>
                 <nav class="lb-mainnav" aria-label="{% trans "Навигация по каталогу" %}">
                     <div class="lb-categories">
-                        <i class="lb-accent lb-accent--star">{% trans "Категории" %}</i>
+                        <h3 class="lb-accent">{% trans "Категории" %}</h3>
                         <ul>
                             {% for genre in genres|slice:":22" %}
                                 <li>
@@ -32,7 +32,7 @@
                            а не в каталог с «?year=». У раздела есть заголовок,
                            свой адрес и место в карте сайта. {% endcomment %}
                         <div class="lb-byyear">
-                            <i class="lb-accent lb-accent--star">{% trans "По году" %}</i>
+                            <h3 class="lb-accent">{% trans "По году" %}</h3>
                             <ul>
                                 {% for year in lb_years|slice:":9" %}
                                     <li><a href="{% url 'catalog:year_titles' year %}" title="{% blocktranslate %}Фильмы и сериалы {{ year }} года{% endblocktranslate %}">{{ year }} {% trans "года" %}</a></li>
@@ -41,7 +41,7 @@
                         </div>
                         {% if lb_country_links %}
                         <div class="lb-bycountry">
-                            <i class="lb-accent">{% trans "По странам" %}</i>
+                            <h3 class="lb-accent">{% trans "По странам" %}</h3>
                             <ul>
                                 {% for url, label in lb_country_links %}
                                     <li><a href="{{ url }}">{{ label }}</a></li>
@@ -51,7 +51,7 @@
                         {% endif %}
                         {% if lb_series_links %}
                         <div class="lb-byseries">
-                            <i class="lb-accent">{% trans "Сериалы" %}</i>
+                            <h3 class="lb-accent">{% trans "Сериалы" %}</h3>
                             <ul>
                                 {% for label, url in lb_series_links %}
                                     <li><a href="{{ url }}">{{ label }}</a></li>
@@ -64,7 +64,7 @@
                 {# ---------- Популярное (топ по просмотрам) ---------- #}
                 {% if lb_most_viewed %}
                     <div class="lb-aheader lb-aheader--row">
-                        {% trans "Популярное" %}
+                        <h3>{% trans "Популярное" %}</h3>
                         <a href="{% url 'catalog:title_list' %}?sort=-views_count">{% trans "Все" %}</a>
                     </div>
                     <div class="lb-mostviewed">
@@ -88,7 +88,7 @@
 
                 {# ---------- Рекомендуемое (только для вошедших) ---------- #}
                 {% if user.is_authenticated and recommendations %}
-                    <div class="lb-aheader">{% trans "Вам может понравиться" %}</div>
+                    <div class="lb-aheader"><h3>{% trans "Вам может понравиться" %}</h3></div>
                     <div class="lb-soon">
                         {% for title in recommendations|slice:":4" %}
                             <a class="lb-soon__item" href="{{ title.get_absolute_url }}">
@@ -104,7 +104,7 @@
                 {# ---------- Подборки ---------- #}
                 {% if collections %}
                     <div class="lb-aheader lb-aheader--row">
-                        {% trans "Подборки" %}
+                        <h3>{% trans "Подборки" %}</h3>
                         <a href="{% url 'catalog:collection_list' %}">{% trans "Все" %}</a>
                     </div>
                     <div class="lb-franchises">
@@ -122,7 +122,7 @@
                 {# ---------- Обновления сериалов ---------- #}
                 {% if series_updates %}
                     <div class="lb-aheader lb-aheader--row">
-                        {% trans "Обновления сериалов" %}
+                        <h3>{% trans "Обновления сериалов" %}</h3>
                         <a href="{% url 'catalog:title_list' %}?type=series">{% trans "Все" %}</a>
                     </div>
                     <div class="lb-lastupdates">
@@ -143,7 +143,7 @@
 
                 {# ---------- Последние комментарии ---------- #}
                 {% if latest_comments %}
-                    <div class="lb-aheader">{% trans "Последние комментарии" %}</div>
+                    <div class="lb-aheader"><h3>{% trans "Последние комментарии" %}</h3></div>
                     <div class="lb-lastcomments">
                         {% for comment in latest_comments %}
                             <div class="lb-lastcomment">

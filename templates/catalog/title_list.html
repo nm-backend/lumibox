@@ -35,20 +35,15 @@
                 </nav>
             {% endif %}
 
-            {% include "includes/catalog_filters.html" %}
-
-            {# Панель быстрых сортировок: по дате, популярности, рейтингу, году #}
-            {% if lb_sort_links %}
-                <nav class="lb-quicksort" aria-label="{% trans 'Быстрая сортировка' %}">
-                    {% for label, url, is_active in lb_sort_links %}
-                        <a class="lb-quicksort__link{% if is_active %} lb-quicksort__link--active{% endif %}"
-                           href="{{ url }}">{{ label }}</a>
-                    {% endfor %}
-                </nav>
-            {% endif %}
-
-            <div class="catalog__toolbar">
-                <p class="catalog__count">
+            {% comment %} Одна строка управления: слева сколько нашлось, справа
+               чем сортировать. Раньше здесь стояли друг под другом четыре
+               панели с одинаковой рамкой — «Разделы / Сортировка», «Фильтры»,
+               вторая панель сортировки и счётчик в собственной рамке ради
+               одной строки текста. Две панели рисовали один и тот же список
+               сортировок разной разметкой, а плашки применённых фильтров
+               печатались дважды. {% endcomment %}
+            <div class="catalog-controls">
+                <p class="catalog-controls__count">
                     {% if request.GET.q %}
                         {% blocktranslate with q=request.GET.q count=paginator.count %}По запросу «{{ q }}» найдено: {{ count }}{% endblocktranslate %}
                     {% else %}
@@ -56,13 +51,17 @@
                     {% endif %}
                 </p>
 
-                {% for filter in active_filters %}
-                    <span class="chip">
-                        {{ filter.label }}
-                        <a class="chip__remove" href="{{ filter.remove_url }}" aria-label="{% blocktranslate with label=filter.label %}Убрать фильтр «{{ label }}»{% endblocktranslate %}">×</a>
-                    </span>
-                {% endfor %}
+                {% if lb_sort_links %}
+                    <nav class="catalog-sort" aria-label="{% trans 'Сортировка' %}">
+                        {% for label, url, is_active in lb_sort_links %}
+                            <a class="catalog-sort__link{% if is_active %} catalog-sort__link--active{% endif %}"
+                               href="{{ url }}"{% if is_active %} aria-current="true"{% endif %}>{{ label }}</a>
+                        {% endfor %}
+                    </nav>
+                {% endif %}
             </div>
+
+            {% include "includes/catalog_filters.html" %}
 
             {% comment %} data-testid — якорь для тестов: по нему они вырезают область
                выдачи и проверяют, что отфильтрованное действительно исчезло.

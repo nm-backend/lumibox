@@ -62,22 +62,48 @@
 
 /* ---------- Панель фильтров — горизонтальная, раскрывается как details ---------- */
 
+/* Свёрнутая панель фильтров — это одна строка-переключатель, поэтому
+   в свёрнутом виде у неё нет ни фона, ни рамки. Поверхность появляется
+   только когда панель раскрыта и внутри действительно есть форма. */
 .filters {
-    margin-bottom: var(--space-4);
+    margin-bottom: var(--space-5);
+    border-radius: var(--radius-md);
+    transition: background var(--transition-fast);
+}
+
+.filters[open] {
     padding: var(--space-3) var(--space-4);
     background: var(--color-surface);
     border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
 }
 
 .filters__summary {
-    display: flex;
+    display: inline-flex;
     align-items: center;
     gap: var(--space-2);
+    min-height: var(--touch-target);
+    padding: var(--space-2) var(--space-3);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
     cursor: pointer;
+    font-size: var(--text-sm);
     font-weight: 600;
-    color: var(--color-text);
+    color: var(--color-text-muted);
     list-style: none;
+    transition: border-color var(--transition-fast), color var(--transition-fast);
+}
+
+@media (hover: hover) {
+    .filters__summary:hover {
+        border-color: var(--color-border-strong);
+        color: var(--color-text);
+    }
+}
+
+.filters[open] .filters__summary {
+    border-color: transparent;
+    padding-left: 0;
+    color: var(--color-text);
 }
 
 .filters__summary::-webkit-details-marker {
@@ -87,7 +113,6 @@
 .filters__summary::after {
     content: "▾";
     color: var(--color-text-dim);
-    margin-left: auto;
     transition: transform var(--transition);
 }
 
@@ -201,23 +226,66 @@
 
 /* ---------- Результаты ---------- */
 
-.catalog__toolbar {
+/* ---------- Строка управления каталогом ----------
+   Служебная строка, а не блок контента: без рамки, фона и тени. Панель
+   вокруг счётчика и сортировки делала их по весу равными карточке фильма,
+   и над выдачей стояло четыре одинаковых прямоугольника подряд. */
+
+.catalog-controls {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--space-3);
     align-items: center;
-    margin-bottom: var(--space-5);
-    padding: var(--space-3) var(--space-4);
-    background: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    min-height: 48px;
+    gap: var(--space-3);
+    margin-bottom: var(--space-4);
 }
 
-.catalog__count {
+.catalog-controls__count {
+    margin-right: auto;
     color: var(--color-text-muted);
     font-size: var(--text-sm);
-    margin-right: auto;
+}
+
+/* Сортировка — лента ссылок. На узком экране прокручивается вбок,
+   системный скроллбар скрыт, край подсказывает затемнением. */
+.catalog-sort {
+    display: flex;
+    gap: var(--space-1);
+    max-width: 100%;
+    overflow-x: auto;
+    scrollbar-width: none;
+    scroll-snap-type: x proximity;
+}
+
+.catalog-sort::-webkit-scrollbar {
+    display: none;
+}
+
+.catalog-sort__link {
+    flex: 0 0 auto;
+    scroll-snap-align: start;
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--touch-target);
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-sm);
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
+    white-space: nowrap;
+    transition: color var(--transition-fast), background var(--transition-fast);
+}
+
+@media (hover: hover) {
+    .catalog-sort__link:hover {
+        background: var(--color-surface-hover);
+        color: var(--color-text);
+    }
+}
+
+/* Активная сортировка выделена цветом и весом, а не залитой плашкой:
+   заливка спорила по яркости с кнопкой просмотра на карточках. */
+.catalog-sort__link--active {
+    color: var(--color-accent);
+    font-weight: 600;
 }
 
 /* .chip и .chip__remove переехали в components.css: их использует и подвал,
@@ -512,4 +580,77 @@
 /* Активная категория в светлой теме: глубже янтарь для контраста 4.5+ */
 [data-theme="light"] .sidebar-category__link--active {
     color: var(--color-accent-deep);
+}
+
+/* ---------- Страница поиска ----------
+   Поле поиска здесь главный элемент страницы, поэтому оно крупное и во всю
+   ширину. Кнопка внутри поля, а не рядом: класс .search--page, которым
+   размечалась форма, вообще не имел стилей — форма наследовала оформление
+   поля из шапки, и прямоугольная кнопка вылезала за скруглённый край. */
+
+.search-page-layout {
+    max-width: 900px;
+}
+
+.search-page {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin-bottom: var(--space-4);
+    padding: var(--space-1) var(--space-1) var(--space-1) var(--space-4);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-full);
+    transition: border-color var(--transition-fast);
+}
+
+.search-page:focus-within {
+    border-color: var(--color-accent);
+    box-shadow: var(--focus-ring);
+}
+
+.search-page__input {
+    flex: 1;
+    min-width: 0;
+    min-height: var(--touch-target);
+    padding: 0;
+    background: none;
+    border: 0;
+    color: var(--color-text);
+    font-size: var(--text-md);
+}
+
+.search-page__input:focus-visible {
+    outline: none;
+    box-shadow: none;
+}
+
+.search-page__input::placeholder {
+    color: var(--color-text-dim);
+}
+
+.search-page__submit {
+    flex: 0 0 auto;
+    min-height: var(--touch-target);
+    padding: 0 var(--space-5);
+    border: 0;
+    border-radius: var(--radius-full);
+    background: var(--color-accent);
+    color: var(--color-on-accent);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    cursor: pointer;
+    transition: background var(--transition-fast);
+}
+
+@media (hover: hover) {
+    .search-page__submit:hover {
+        background: var(--color-accent-hover);
+    }
+}
+
+.search-page__hint {
+    margin-bottom: var(--space-5);
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
 }

@@ -512,18 +512,20 @@
     padding-top: var(--space-3);
 }
 
+/* Заголовки блоков сайдбара. Мелкие заглавные вместо оранжевого:
+   акцентом красились «Категории», «По году», «По странам», «Сериалы» —
+   четыре оранжевых пятна в колонке подряд, и ни одно не было действием.
+   Оранжевый в интерфейсе значит «сюда нажать», а это подписи. */
 .lb-accent {
     display: block;
     margin-bottom: var(--space-2);
-    color: var(--color-text);
-    font-size: var(--text-sm);
+    color: var(--color-text-dim);
+    font-size: var(--text-xs);
     font-weight: 700;
     font-style: normal;
-    line-height: 17px;
-}
-
-.lb-accent--star {
-    color: var(--color-accent);
+    line-height: var(--leading-snug);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-wide);
 }
 
 .lb-mainnav ul {
@@ -1874,4 +1876,16 @@
     .logo:hover .logo__mark {
         transform: none;
     }
+}
+
+/* Заголовки блоков сайдбара — настоящие h3. Раньше это были <i> и <div>:
+   для скринридера весь сайдбар выглядел плоским набором ссылок без единого
+   заголовка, и перейти к нужному блоку было нельзя. Размер задаётся здесь,
+   чтобы h3 не унаследовал кегль заголовка карточки. */
+.lb-aheader h3 {
+    margin: 0;
+    font-size: inherit;
+    font-weight: inherit;
+    line-height: inherit;
+    letter-spacing: inherit;
 }

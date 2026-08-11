@@ -26,20 +26,24 @@
         </h1>
     </div>
 
-    <div class="lb-contentwrap">
-        <div class="lb-main" id="lb-content" data-testid="results">
+    <div class="search-page-layout">
+        <div id="lb-content" data-testid="results">
 
-            <form class="search search--page" action="{% url 'catalog:search' %}" method="get" role="search">
+            {% comment %} Кнопка живёт внутри поля, а не рядом с ним: раньше это
+               была отдельная .button внутри контейнера-таблетки, и прямоугольный
+               угол кнопки вылезал за скруглённый край поля. {% endcomment %}
+            <form class="search-page" action="{% url 'catalog:search' %}" method="get" role="search">
                 <label class="visually-hidden" for="search-page-input">{% trans "Поиск по каталогу" %}</label>
-                <input class="search__input" id="search-page-input" type="search" name="q"
-                       value="{{ query }}" placeholder="{% trans 'Название, жанр, страна, человек…' %}">
-                <button class="button button--primary" type="submit">{% trans "Найти" %}</button>
+                <input class="search-page__input" id="search-page-input" type="search" name="q"
+                       value="{{ query }}" placeholder="{% trans 'Название, жанр, страна, человек…' %}"
+                       autocomplete="off">
+                <button class="search-page__submit" type="submit">{% trans "Найти" %}</button>
             </form>
 
             {% if too_short %}
-                <p class="catalog__count">{% trans "Запрос слишком короткий — введите хотя бы два символа." %}</p>
+                <p class="search-page__hint">{% trans "Запрос слишком короткий — введите хотя бы два символа." %}</p>
             {% elif query %}
-                <p class="catalog__count">
+                <p class="search-page__hint">
                     {% blocktranslate with count=paginator.count %}Найдено: {{ count }}{% endblocktranslate %}
                 </p>
 
@@ -83,11 +87,15 @@
                     {% include "includes/empty_state.html" with empty_icon="search" empty_q=query empty_desc=empty_desc empty_href=empty_href empty_label=empty_label %}
                 {% endif %}
             {% else %}
-                <p class="catalog__count">{% trans "Введите запрос — найдём фильмы, сериалы и людей." %}</p>
+                <p class="search-page__hint">{% trans "Введите запрос — найдём фильмы, сериалы и людей." %}</p>
             {% endif %}
         </div>
 
         {% include "includes/ad_slot.html" %}
-        {% include "includes/lb_sidebar.html" %}
+        {% comment %} Сайдбар с категориями и годами здесь не показывается:
+           человек уже сформулировал запрос, и предлагать ему вместо ответа
+           обзор всего каталога — значит уводить от того, зачем он пришёл.
+           Если ничего не нашлось, пустое состояние ниже само предлагает
+           открыть каталог. {% endcomment %}
     </div>
 {% endblock %}

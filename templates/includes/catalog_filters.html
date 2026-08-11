@@ -3,31 +3,14 @@
 Панель фильтров каталога.
 {% endcomment %}
 
-<nav class="catalog-sidebar">
-    <div class="sidebar-category">
-        <div class="sidebar-category__title">{% trans "Разделы" %}</div>
-        <a class="sidebar-category__link {% if request.GET.type == 'movie' or not request.GET.type %}sidebar-category__link--active{% endif %}" href="{% url 'catalog:title_list' %}?type=movie">
-            {% trans "Все фильмы" %}
-        </a>
-        {% comment %} Счётчик рядом с «Сериалами» убран: ключ category_counts не задавала
-           ни одна вьюха, поэтому бейдж не показывался никогда. Считать его
-           здесь — лишний запрос на каждой странице каталога ради одной цифры;
-           количества по разделам появятся вместе с расширенными фильтрами. {% endcomment %}
-        <a class="sidebar-category__link {% if request.GET.type == 'series' %}sidebar-category__link--active{% endif %}" href="{% url 'catalog:title_list' %}?type=series">
-            {% trans "Сериалы" %}
-        </a>
-    </div>
-    <div class="sidebar-category">
-        <div class="sidebar-category__title">{% trans "Сортировка" %}</div>
-        <a class="sidebar-category__link {% if request.GET.sort == '-rating_average' %}sidebar-category__link--active{% endif %}" href="{% url 'catalog:title_list' %}?sort=-rating_average">
-            {% trans "Высокий рейтинг" %}
-        </a>
-        <a class="sidebar-category__link {% if request.GET.sort == '-published_at' %}sidebar-category__link--active{% endif %}" href="{% url 'catalog:title_list' %}?sort=-published_at">
-            {% trans "Новинки" %}
-        </a>
-    </div>
-</nav>
+{% comment %} Панель «Разделы / Сортировка» убрана.
 
+   Она была третьей копией одних и тех же ссылок: типы уже есть в строке
+   разделов и в выдвижном меню, сортировка — в строке над выдачей. Вдобавок
+   её ссылки собирались без текущей строки запроса, то есть клик по «Сериалы»
+   молча сбрасывал выбранный жанр и год — при том что соседняя панель
+   сортировки всё сохраняла.
+{% endcomment %}
 {% comment %} Применённые фильтры вынесены из <details> наружу: показывать,
    что именно отобрано, нужно всегда, а разворачивать ради этого форму
    на двенадцать полей — нет. Раньше плашки лежали внутри панели, и увидеть
