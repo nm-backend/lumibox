@@ -30,11 +30,8 @@ BASE_DARK = (11, 13, 18)
 # Кандидаты шрифтов по платформам: в Docker стоит DejaVu, на Windows — Arial,
 # на macOS — свой Arial. Все три содержат кириллицу. Берём первый найденный,
 # поэтому команда рисует нормальные постеры и без Docker (у заказчика Windows).
-FONT_REGULAR = [
-    "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
-    "C:/Windows/Fonts/arial.ttf",
-    "/System/Library/Fonts/Supplemental/Arial.ttf",
-]
+# Обычное начертание больше не нужно: подписи с постера убраны, осталась
+# только крупная буква водяным знаком.
 FONT_BOLD = [
     "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
     "C:/Windows/Fonts/arialbd.ttf",
@@ -118,19 +115,13 @@ class Command(BaseCommand):
         self._centered(ImageDraw.Draw(overlay), letter, mark_font, (width // 2, height // 2 - 40), (255, 255, 255, 22))
         image = Image.alpha_composite(image, overlay).convert("RGB")
 
-        draw = ImageDraw.Draw(image)
+        # Название и мета в саму картинку больше не впечатываются.
 
-        # Название внизу — главный элемент. Перенос по словам, чтобы не обрезалось.
-        title_font = self._font(FONT_BOLD, 54)
-        lines = self._wrap(title.name, title_font, width - 80, draw)
-        y = height - 56 - len(lines) * 64
-        for line in lines:
-            draw.text((40, y), line, font=title_font, fill=(238, 241, 247))
-            y += 64
-
-        # Тип и год — акцентная строка под названием.
-        meta_font = self._font(FONT_REGULAR, 30)
-        draw.text((42, y + 4), f"{title.get_type_display()} · {title.release_year}", font=meta_font, fill=accent)
+        # Настоящий постер не содержит подписей — их печатает карточка. Пока
+        # заглушка их рисовала, в сетке каталога название читалось дважды:
+        # внутри картинки и строкой под ней, — и это выглядело как ошибка
+        # вёрстки, хотя вёрстка была ни при чём. Заглушка должна вести себя
+        # как постер, иначе по ней нельзя судить о виде каталога.
 
         return image
 
@@ -178,21 +169,6 @@ class Command(BaseCommand):
         # Ни один шрифт не найден — не падаем, берём встроенный.
         # Кириллица будет хуже, но команда отработает.
         return ImageFont.load_default(size)
-
-    def _wrap(self, text, font, max_width, draw):
-        words = text.split()
-        lines, line = [], ""
-        for word in words:
-            candidate = f"{line} {word}".strip()
-            if draw.textlength(candidate, font=font) <= max_width:
-                line = candidate
-            else:
-                if line:
-                    lines.append(line)
-                line = word
-        if line:
-            lines.append(line)
-        return lines or [text]
 
     def _centered(self, draw, text, font, center, fill):
         box = draw.textbbox((0, 0), text, font=font)
