@@ -242,7 +242,8 @@
 /* ---------- Плеер ---------- */
 
 .player {
-    max-width: 900px;
+    /* Ограничение по ширине снято: правая колонка страницы убрана, и упор
+       в 900px оставлял справа полосу пустоты в треть экрана. */
     aspect-ratio: 16 / 9;
     overflow: hidden;
     background-color: var(--color-dark-bg);
@@ -334,24 +335,43 @@
 
 /* ---------- Detail layout: main + sidebar ---------- */
 
+/* Одна колонка. Вторая держала единственный блок «Поделиться», который
+   дублировал кнопку в шапке фильма: ради трёх иконок текст описания и
+   таблица характеристик сжимались на 260px. Читаемая строка важнее. */
 .detail-layout {
-    display: grid;
-    grid-template-columns: 1fr 260px;
-    gap: var(--space-6);
-    align-items: start;
+    display: block;
 }
 
 .detail-layout__main {
     min-width: 0;
 }
 
-.detail-layout__sidebar {
-    position: sticky;
-    top: calc(var(--header-height, 64px) + var(--space-4));
+/* Второстепенные действия под содержимым: поделиться и пожаловаться.
+   Ссылками, а не кнопками — они не равны по весу «Смотреть» и «В избранное»,
+   и рядом с ними в шапке выглядели такими же обычными действиями. */
+.detail-secondary {
     display: flex;
-    flex-direction: column;
-    gap: var(--space-5);
-    min-width: 0;
+    flex-wrap: wrap;
+    gap: var(--space-4);
+    margin: var(--space-6) 0;
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--color-border);
+}
+
+.detail-secondary__link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: var(--touch-target);
+    color: var(--color-text-dim);
+    font-size: var(--text-sm);
+    transition: color var(--transition-fast);
+}
+
+@media (hover: hover) {
+    .detail-secondary__link:hover {
+        color: var(--color-text);
+    }
 }
 
 /* ---------- Sidebar sections ---------- */
@@ -1105,3 +1125,338 @@
     color: var(--color-on-accent);
 }
 
+
+/* ============================================================
+   Свои контролы плеера
+
+   Панель поверх кадра, а не под ним: так она не отнимает высоту у видео
+   и уходит вместе с ним в полный экран. Всё оформление держится на двух
+   переменных, которые пишет player.js: --vplayer-progress (сколько
+   просмотрено) и --vplayer-buffer (сколько загружено).
+   ============================================================ */
+
+.vplayer {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background: #000;
+}
+
+.vplayer:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+}
+
+.vplayer__video {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    background: #000;
+}
+
+/* Пока скрипт не выполнился, своя панель не показывается: у видео в этот
+   момент ещё нативные контролы, и две панели поверх одного кадра — хуже,
+   чем одна чужая. */
+.vplayer:not(.vplayer--ready) .vplayer__controls,
+.vplayer:not(.vplayer--ready) .vplayer__big {
+    display: none;
+}
+
+/* ---------- Крупная кнопка по центру ---------- */
+
+.vplayer__big {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    background: none;
+    color: #fff;
+    cursor: pointer;
+}
+
+.vplayer__big-icon {
+    display: grid;
+    place-items: center;
+    width: 72px;
+    height: 72px;
+    border-radius: var(--radius-full);
+    background: rgba(7, 8, 13, 0.55);
+    backdrop-filter: blur(6px);
+    transition: transform var(--transition-fast), background var(--transition-fast);
+}
+
+@media (hover: hover) {
+    .vplayer__big:hover .vplayer__big-icon {
+        background: var(--color-accent);
+        color: var(--color-on-accent);
+        transform: scale(1.06);
+    }
+}
+
+/* Во время воспроизведения кнопка по центру не нужна: она закрывает кадр.
+   Остаётся только на паузе — там она и есть приглашение продолжить. */
+.vplayer--playing .vplayer__big {
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* ---------- Панель ---------- */
+
+.vplayer__controls {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-5) var(--space-3) var(--space-3);
+    color: #fff;
+    /* Градиент, а не сплошная полоса: под панелью остаётся видно кадр,
+       и низ картинки не срезается прямоугольником. */
+    background: linear-gradient(to top, rgba(7, 8, 13, 0.85), rgba(7, 8, 13, 0));
+    opacity: 1;
+    transition: opacity var(--transition);
+}
+
+/* Панель уходит, когда фильм идёт и зритель ничего не трогает. */
+.vplayer--idle .vplayer__controls {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.vplayer--idle .vplayer__video {
+    cursor: none;
+}
+
+.vplayer__btn {
+    display: grid;
+    place-items: center;
+    flex: 0 0 auto;
+    width: var(--touch-target);
+    height: var(--touch-target);
+    border: 0;
+    border-radius: var(--radius-sm);
+    background: none;
+    color: #fff;
+    cursor: pointer;
+    transition: color var(--transition-fast), background var(--transition-fast);
+}
+
+@media (hover: hover) {
+    .vplayer__btn:hover {
+        background: rgba(255, 255, 255, 0.14);
+    }
+}
+
+.vplayer__btn:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(7, 8, 13, 0.9), 0 0 0 4px var(--color-accent);
+}
+
+/* Иконка показывается ровно одна: пары play/pause, sound/mute и
+   maximize/minimize лежат в разметке рядом, состояние выбирает класс
+   на оболочке. */
+.vplayer__icon--pause,
+.vplayer--playing .vplayer__icon--play,
+.vplayer__icon--mute,
+.vplayer--muted .vplayer__icon--sound,
+.vplayer__icon--exit,
+.vplayer--fullscreen .vplayer__icon--enter {
+    display: none;
+}
+
+.vplayer--playing .vplayer__icon--pause,
+.vplayer--muted .vplayer__icon--mute,
+.vplayer--fullscreen .vplayer__icon--exit {
+    display: block;
+}
+
+.vplayer__time {
+    flex: 0 0 auto;
+    font-size: var(--text-xs);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.vplayer__time-sep {
+    margin: 0 2px;
+    opacity: 0.5;
+}
+
+/* ---------- Полоса перемотки ---------- */
+
+.vplayer__track {
+    position: relative;
+    flex: 1 1 auto;
+    min-width: 60px;
+    height: var(--touch-target);
+    display: flex;
+    align-items: center;
+}
+
+/* Загруженное и просмотренное — два слоя под ползунком. Оба рисуются
+   из переменных, которые обновляет скрипт. */
+.vplayer__track::before,
+.vplayer__buffer,
+.vplayer__track::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 50%;
+    height: 4px;
+    transform: translateY(-50%);
+    border-radius: var(--radius-full);
+    pointer-events: none;
+}
+
+.vplayer__track::before {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.25);
+}
+
+.vplayer__buffer {
+    width: var(--vplayer-buffer, 0%);
+    background: rgba(255, 255, 255, 0.4);
+}
+
+.vplayer__track::after {
+    width: var(--vplayer-progress, 0%);
+    background: var(--color-accent);
+}
+
+.vplayer__seek,
+.vplayer__volume {
+    position: relative;
+    width: 100%;
+    margin: 0;
+    background: none;
+    -webkit-appearance: none;
+    appearance: none;
+    cursor: pointer;
+}
+
+.vplayer__seek {
+    height: var(--touch-target);
+}
+
+.vplayer__seek::-webkit-slider-thumb,
+.vplayer__volume::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 13px;
+    height: 13px;
+    border: 0;
+    border-radius: 50%;
+    background: var(--color-accent);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+}
+
+.vplayer__seek::-moz-range-thumb,
+.vplayer__volume::-moz-range-thumb {
+    width: 13px;
+    height: 13px;
+    border: 0;
+    border-radius: 50%;
+    background: var(--color-accent);
+}
+
+.vplayer__seek:focus-visible,
+.vplayer__volume:focus-visible {
+    outline: none;
+}
+
+.vplayer__seek:focus-visible::-webkit-slider-thumb,
+.vplayer__volume:focus-visible::-webkit-slider-thumb {
+    box-shadow: 0 0 0 3px rgba(7, 8, 13, 0.9), 0 0 0 5px var(--color-accent);
+}
+
+/* ---------- Громкость ---------- */
+
+.vplayer__volume-group {
+    display: flex;
+    align-items: center;
+    flex: 0 0 auto;
+}
+
+.vplayer__volume {
+    width: 0;
+    height: 4px;
+    border-radius: var(--radius-full);
+    background: rgba(255, 255, 255, 0.3);
+    opacity: 0;
+    transition: width var(--transition-fast), opacity var(--transition-fast);
+}
+
+/* Ползунок громкости разворачивается при наведении и при фокусе: на узкой
+   панели он занимал бы место постоянно, а нужен редко. */
+@media (hover: hover) {
+    .vplayer__volume-group:hover .vplayer__volume {
+        width: 72px;
+        opacity: 1;
+        margin-left: var(--space-2);
+    }
+}
+
+.vplayer__volume-group:focus-within .vplayer__volume {
+    width: 72px;
+    opacity: 1;
+    margin-left: var(--space-2);
+}
+
+/* ---------- Загрузка и ошибка ---------- */
+
+.vplayer__spinner {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 44px;
+    height: 44px;
+    margin: -22px 0 0 -22px;
+    border: 3px solid rgba(255, 255, 255, 0.25);
+    border-top-color: var(--color-accent);
+    border-radius: 50%;
+    animation: vplayer-spin 0.9s linear infinite;
+}
+
+@keyframes vplayer-spin {
+    to { transform: rotate(360deg); }
+}
+
+.vplayer__error {
+    position: absolute;
+    inset: auto var(--space-4) 25%;
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-md);
+    background: rgba(7, 8, 13, 0.9);
+    color: #fff;
+    font-size: var(--text-sm);
+    text-align: center;
+}
+
+/* ---------- Узкий экран ---------- */
+
+@media (max-width: 560px) {
+    /* Перемотка на ±10 секунд убирается первой: жест по полосе на телефоне
+       быстрее двух нажатий, а место на панели дороже. */
+    .vplayer__btn--seek {
+        display: none;
+    }
+
+    .vplayer__controls {
+        gap: var(--space-1);
+        padding: var(--space-5) var(--space-2) var(--space-2);
+    }
+}
+
+/* Заголовок секции плеера. Стоит над кадром: подпись под видео объясняла
+   зрителю то, что он уже увидел. */
+.player-section__title {
+    margin-bottom: var(--space-3);
+    font-size: var(--font-heading);
+}

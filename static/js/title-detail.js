@@ -294,6 +294,12 @@
             return exact.length ? exact[0] : forEpisode[0];
         }
 
+        /* Прячем и показываем оболочку плеера целиком, а не сам <video>:
+           вокруг него теперь своя панель контролов, и скрытие одного видео
+           оставило бы висеть кнопки от исчезнувшего кадра. Если оболочки
+           нет (без своих контролов), работаем по-старому с самим элементом. */
+        var videoShell = playerVideo.closest('[data-vplayer]') || playerVideo;
+
         function applySource(item) {
             if (!item) return;
             if (item.kind === 'file') {
@@ -302,12 +308,12 @@
                     playerFrame.hidden = true;
                     playerFrame.removeAttribute('src');
                 }
-                playerVideo.hidden = false;
+                videoShell.hidden = false;
                 playerVideo.load();
                 playerVideo.play().catch(function () {});
             } else if (playerFrame) {
                 playerVideo.pause();
-                playerVideo.hidden = true;
+                videoShell.hidden = true;
                 playerFrame.hidden = false;
                 playerFrame.src = item.src;
             }

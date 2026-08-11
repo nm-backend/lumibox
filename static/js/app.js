@@ -421,11 +421,26 @@
                 const isActive = content.dataset.tabContent === tab.dataset.tab;
                 content.classList.toggle('tab-content--active', isActive);
                 content.setAttribute('role', 'tabpanel');
+                /* hidden, а не только класс: пока панель пряталась одним
+                   оформлением, её содержимое оставалось в дереве доступности
+                   и в порядке обхода Tab. Скринридер читал отзывы, создателей
+                   и комментарии подряд как сплошной текст, а клавиша Tab
+                   уходила в невидимые ссылки. */
+                content.hidden = !isActive;
+                /* Панель должна принимать фокус: со вкладки стрелками
+                   переходят к её содержимому. */
+                content.tabIndex = isActive ? 0 : -1;
+                if (isActive) {
+                    content.setAttribute('aria-labelledby', tab.id || '');
+                }
             });
             if (moveFocus) tab.focus();
         }
 
         tabs.forEach(function (tab, index) {
+            /* id нужен, чтобы панель могла сослаться на свою вкладку через
+               aria-labelledby: иначе скринридер объявляет панель без имени. */
+            if (!tab.id) tab.id = 'tab-' + (tab.dataset.tab || index);
             tab.addEventListener('click', function () {
                 select(tab, false);
             });
