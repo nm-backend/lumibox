@@ -1,11 +1,12 @@
-{% load i18n %}
-<aside class="ad-rail ad-rail--{{ side }}" aria-hidden="true">
-    <div class="ad-rail__inner">
-        <span class="ad-rail__label">{% trans "Реклама" %}</span>
-        <div class="ad-rail__placeholder">
-            <span class="ad-rail__placeholder-title">{% trans "Рекламное место" %}</span>
-            <span class="ad-rail__placeholder-size">160 × 600</span>
-        </div>
-        <span class="ad-rail__disclaimer">{% trans "Здесь будет реклама" %}</span>
-    </div>
-</aside>
+{% comment %}
+   Боковая рекламная колонка (160×600), по одной слева и справа на экранах
+   от 1640px.
+
+   Сейчас не рендерится ничего — по той же причине, что и ad_slot: пустой
+   плейсхолдер с надписью «Реклама» занимал две колонки по краям широкого
+   экрана и выглядел как недоделанная страница.
+
+   Место сохранено: включения в base.html остались, стили .ad-rail* — в
+   static/css/ads.css. Чтобы вернуть колонки, достаточно восстановить
+   разметку в этом файле; параметр side по-прежнему приходит из include.
+{% endcomment %}

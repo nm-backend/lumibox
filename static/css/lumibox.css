@@ -94,32 +94,11 @@
     color: var(--color-accent-hover);
 }
 
-/* ---------- Тёмная шапка — единая на всех страницах ---------- */
-
-.site-header {
-    background: var(--color-card);
-    border-bottom-color: var(--color-border);
-}
-
-.site-header__inner::after {
-    opacity: 0.3;
-}
-
-.logo,
-.logo:hover {
-    color: var(--color-text-strong);
-}
-
-.search {
-    background: var(--color-surface);
-    border-color: var(--color-border);
-    border-radius: var(--radius-full);
-}
-
-.search:focus-within {
-    border-color: var(--color-accent);
-    box-shadow: 0 0 0 3px var(--color-accent-dim);
-}
+/* ---------- Шапка ----------
+   Оформление шапки, логотипа и поиска целиком живёт в layout.css.
+   Здесь было два слоя правил поверх него — «базовый» и «богатый», — и они
+   перебивали друг друга: первый оказался полностью мёртвым, а поправить
+   шапку в одном месте было нельзя. */
 
 .search__input {
     color: var(--color-text);
@@ -1288,12 +1267,6 @@
         min-height: 44px;
     }
 
-    /* На планшетах и телефонах верхний топ-нав дублирует мобильный drawer
-       (mobile-nav) и нижнее меню (bottom-nav) — три навигации на одном
-       экране. Прячем строку: drawer и bottom-nav полностью её заменяют. */
-    .lb-topnav {
-        display: none;
-    }
 
     .lb-contentwrap {
         grid-template-columns: minmax(0, 1fr);
@@ -1480,12 +1453,23 @@
     }
 }
 
+/* ---------- Граница навигации ----------
+   До 1024px строка разделов уступает место гамбургеру: на планшете в портрете
+   она уже не помещается целиком, а меню и нижняя панель её полностью
+   заменяют. Граница одна и та же у обеих навигаций — иначе между ними
+   получается полоса ширин, где нет ни той, ни другой. */
+@media (max-width: 1024px) {
+    .lb-topnav {
+        display: none;
+    }
+}
+
 /* Запасная позиция меню, если скрипт не выполнился: под шапкой вместе
    с промо-полосой над ней (44px + 1px рамки). Точное значение всё равно
    подставит app.js в --lb-drawer-top — оно учитывает и прокрутку, и то,
    что на ≤420px полоса скрыта. Здесь важно лишь одно: без скрипта меню
    не должно накрыть гамбургер, иначе его нечем закрыть. */
-@media (max-width: 900px) {
+@media (max-width: 1024px) {
     .mobile-nav {
         top: var(--lb-drawer-top, calc(var(--header-height) + 45px));
     }
@@ -1743,78 +1727,37 @@
     opacity: 1;
 }
 
-/* Шапка: градиент, янтарная линия-акцент с мерцанием */
+/* Шапка, логотип и поиск: см. layout.css.
 
-.site-header {
-    background: linear-gradient(180deg, var(--color-surface-3) 0%, var(--color-card) 100%);
-    border-bottom-color: rgba(var(--color-accent-rgb), 0.18);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
-}
-
-.site-header__inner::after {
-    opacity: 0.5;
-    background: linear-gradient(90deg, transparent, var(--color-accent-soft) 30%, var(--color-accent) 60%, transparent);
-    box-shadow: 0 1px 10px rgba(var(--color-accent-rgb), 0.4);
-}
-
-/* Логотип: янтарный градиент текста + свечение значка */
-
-.logo,
-.logo:hover {
-    background: linear-gradient(90deg, var(--color-dark-text-bright) 10%, var(--color-accent-soft) 45%, var(--color-accent) 85%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    color: transparent;
-    filter: drop-shadow(0 2px 8px rgba(var(--color-accent-rgb), 0.25));
-}
-
-.logo__mark {
-    background: linear-gradient(135deg, var(--color-accent-soft) 0%, var(--color-accent) 60%, var(--color-accent-deep) 100%);
-    box-shadow: 0 0 16px rgba(var(--color-accent-rgb), 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.4);
-}
-
-.logo__accent {
-    color: transparent;
-}
-
-/* Поиск: объёмное поле, янтарное свечение в фокусе */
-
-.search {
-    background: linear-gradient(180deg, var(--color-surface-2) 0%, var(--color-surface) 100%);
-    border-color: var(--color-border-soft);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 2px 10px rgba(0, 0, 0, 0.35);
-}
-
-.search:focus-within {
-    border-color: var(--color-accent);
-    box-shadow: 0 0 0 3px var(--color-accent-dim), 0 0 20px rgba(var(--color-accent-rgb), 0.22);
-}
+   Здесь лежал второй слой оформления — градиентная заливка шапки, мерцающая
+   янтарная линия под ней, градиентный текст логотипа со свечением и объёмное
+   поле поиска с подсветкой на 20px. Пять источников света в одной полосе
+   высотой 82px, и ни один из них не помогал ничего найти. */
 
 /* Правила кнопки входа сведены к её основному описанию выше — она была
    описана дважды в разных концах файла, как и карточка. */
 
 /* Навигация: активный пункт — янтарная пилюля */
 
+/* Строка разделов. Активный пункт отмечен чертой под ним, а не залитой
+   пилюлей с градиентом и тенью: залитый пункт спорил по весу с кнопкой
+   входа, и на странице оказывалось два «главных» оранжевых пятна. */
+
 .lb-topnav {
-    background: linear-gradient(180deg, var(--color-card-hover) 0%, var(--color-card) 100%);
+    background: var(--color-card);
     border-bottom-color: var(--color-border);
 }
 
 .lb-topnav__link:hover {
-    background: var(--color-accent-dim);
-    color: var(--color-accent);
+    background: transparent;
+    color: var(--color-text-strong);
 }
 
-.lb-topnav__link--active {
-    background: linear-gradient(135deg, var(--color-accent-hover) 0%, var(--color-accent) 55%, var(--color-accent-deep) 100%);
-    color: var(--color-on-accent);
-    box-shadow: 0 2px 14px rgba(var(--color-accent-rgb), 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.35);
-}
-
+.lb-topnav__link--active,
 .lb-topnav__link--active:hover {
-    background: linear-gradient(135deg, var(--color-accent-soft) 0%, var(--color-accent-hover) 60%, var(--color-accent) 100%);
-    color: var(--color-on-accent);
+    background: transparent;
+    color: var(--color-text-strong);
+    box-shadow: inset 0 -2px 0 var(--color-accent);
 }
 
 /* Промо-зона: кинозальный градиент, заголовок-афиша, светящаяся кнопка */
