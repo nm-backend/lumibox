@@ -399,22 +399,19 @@
 
 /* ---------- Лента: одна колонка карточек (как в оригинале) ---------- */
 
+/* Одна колонка. Здесь была сетка «280px сайдбар + контент»: боковая панель
+   дублировала жанры, годы и страны, которые и так есть в фильтрах, и отнимала
+   у выдачи 280px на каждом экране — на 1440px это две колонки постеров. */
 .lb-contentwrap {
-    display: grid;
-    grid-template-columns: 280px minmax(0, 1fr);
-    align-items: start;
-    gap: var(--space-5);
     margin-top: var(--space-3);
 }
 
 .lb-main {
     width: 100%;
     min-width: 0;
-    grid-column: 2;
 }
 
 .lb-contentwrap > .ad-slot {
-    grid-column: 2;
     width: 100%;
 }
 

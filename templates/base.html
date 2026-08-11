@@ -1,27 +1,32 @@
 {% load static i18n lumibox_urls icons %}<!DOCTYPE html>
 {% get_current_language as LANGUAGE_CODE %}
-<html lang="{{ LANGUAGE_CODE }}" data-theme="">
+<html lang="{{ LANGUAGE_CODE }}" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="color-scheme" content="dark light">
     {% comment %} theme-color красит адресную строку браузера в цвет фона —
        страница перестаёт выглядеть вклеенной в чужой интерфейс. {% endcomment %}
-    <meta name="theme-color" content="#07080d" media="(prefers-color-scheme: dark)">
-    <meta name="theme-color" content="#f2f4f8" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+    <meta name="theme-color" content="#f5f5f7" media="(prefers-color-scheme: light)">
 
     {% comment %} Тема — до первой отрисовки.
 
        Атрибут data-theme читает и ставит app.js, но он подключён с defer,
-       то есть выполняется после разбора документа. Пользователь светлой
-       темы успевал увидеть тёмную страницу и её перерисовку — и так на
-       каждой навигации. Этот скрипт синхронный и стоит в <head> именно
-       поэтому: три строки в обмен на отсутствие вспышки. {% endcomment %}
+       то есть выполняется после разбора документа. Без этого скрипта
+       посетитель успевал увидеть страницу в одной теме и её перерисовку
+       в другой — и так на каждой навигации. Скрипт синхронный и стоит
+       в <head> именно поэтому: несколько строк в обмен на отсутствие вспышки.
+
+       Светлая тема — основная, поэтому она стоит в разметке. Пустая строка
+       в хранилище означает тёмную: так сложилось исторически, и переучивать
+       уже сохранённые у посетителей значения нечем — проверка на null
+       отличает «выбрал тёмную» от «ещё не выбирал». {% endcomment %}
     <script>
         (function () {
             try {
                 var stored = localStorage.getItem('lumibox-theme');
-                if (stored) document.documentElement.dataset.theme = stored;
+                if (stored !== null) document.documentElement.dataset.theme = stored;
             } catch (e) { /* приватный режим — остаёмся на теме по умолчанию */ }
         })();
     </script>
@@ -165,12 +170,11 @@
     {% endcomment %}
     <a class="skip-link" href="#main-content">{% trans "К содержанию" %}</a>
 
-    <div class="lb-topbar" role="region" aria-label="{% trans 'Верхняя панель' %}">
-        <div class="lb-topbar__inner">
-            <span class="lb-topbar__text">{% trans "Онлайн-кинотеатр LumiBox — фильмы и сериалы бесплатно" %}</span>
-            <a class="lb-topbar__link" href="{% url 'catalog:title_list' %}?sort=-published_at">{% trans "Новинки" %}</a>
-        </div>
-    </div>
+    {% comment %} Верхняя чёрная полоса убрана. В ней жили рекламная строка
+       «Онлайн-кинотеатр LumiBox — фильмы и сериалы бесплатно» и одна ссылка
+       «Новинки», которая есть в основной навигации строкой ниже. Полоса
+       занимала 45px на каждом экране и была первым, что видел посетитель.
+    {% endcomment %}
 
     <header class="site-header">
         <div class="container site-header__inner">

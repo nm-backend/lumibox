@@ -15,17 +15,17 @@
     /* --- Цвета --- */
 
     /* Фон: кинозал — абсолютный чёрный с микро-оттенком синего */
-    --color-bg: #07080d;
-    --color-surface: #12151e;
-    --color-surface-hover: #1a1f2b;
+    --color-bg: #000000;
+    --color-surface: #1d1d1f;
+    --color-surface-hover: #2c2c2e;
 
     /* Текст: серебро киноплёнки */
-    --color-text: #e8ecf4;
-    --color-text-muted: #8891a8;
-    --color-text-dim: #7c8599;
-    --color-text-soft: #c9d1e4;
-    --color-text-bright: #e6e6e6;
-    --color-text-strong: #f3f3f3;
+    --color-text: #f5f5f7;
+    --color-text-muted: #a1a1a6;
+    --color-text-dim: #86868b;
+    --color-text-soft: #d2d2d7;
+    --color-text-bright: #f5f5f7;
+    --color-text-strong: #ffffff;
     --color-text-faint: #686868;
     --color-text-shadow: rgba(0, 0, 0, 0.6);
 
@@ -65,21 +65,21 @@
     --color-info: #5b9cf5;
 
     /* Карточки и поверхности — градации кинозала */
-    --color-card: #0b0d12;
-    --color-card-hover: #0d1017;
-    --color-surface-2: #161a26;
-    --color-surface-3: #141826;
-    --color-surface-deep: #0a0c11;
+    --color-card: #1d1d1f;
+    --color-card-hover: #2c2c2e;
+    --color-surface-2: #232325;
+    --color-surface-3: #1d1d1f;
+    --color-surface-deep: #000000;
 
     /* Границы */
-    --color-border: #222838;
-    --color-border-soft: #2a2f3d;
-    --color-border-strong: #3a4154;
+    --color-border: rgba(255, 255, 255, 0.1);
+    --color-border-soft: rgba(255, 255, 255, 0.06);
+    --color-border-strong: rgba(255, 255, 255, 0.18);
 
     /* Glass — чуть теплее, чем фон */
-    --glass-bg: rgba(18, 21, 30, 0.78);
-    --glass-border: rgba(34, 40, 56, 0.5);
-    --glass-blur: 18px;
+    --glass-bg: rgba(29, 29, 31, 0.72);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --glass-blur: 20px;
 
     /*
       Зоны «кинозала» — верхняя полоса и промо-зона. Они остаются чёрными
@@ -87,11 +87,11 @@
       их цвета определены здесь и не переопределяются в [data-theme="light"].
     */
     --color-dark-bg: #000;
-    --color-dark-surface: #141826;
-    --color-dark-surface-deep: #0a0c11;
-    --color-dark-text: #8891a8;
-    --color-dark-text-soft: #c9d1e4;
-    --color-dark-text-bright: #f3f3f3;
+    --color-dark-surface: #1d1d1f;
+    --color-dark-surface-deep: #000000;
+    --color-dark-text: #86868b;
+    --color-dark-text-soft: #d2d2d7;
+    --color-dark-text-bright: #f5f5f7;
     --color-dark-border: rgba(255, 255, 255, 0.12);
 
     /*
@@ -99,8 +99,8 @@
       тёмные в обеих темах, как плёнка поверх постера. Не переопределяются
       в [data-theme="light"].
     */
-    --color-overlay: rgba(11, 13, 18, 0.85);
-    --color-overlay-strong: rgba(11, 13, 18, 0.97);
+    --color-overlay: rgba(0, 0, 0, 0.72);
+    --color-overlay-strong: rgba(0, 0, 0, 0.92);
 
     /*
       --- Поверхность карточки ---
@@ -201,11 +201,11 @@
       Старые имена оставлены псевдонимами: они разбросаны по 152 объявлениям,
       и переписывать каждое ради переименования — работа без результата.
     */
-    --radius-sm: 8px;
-    --radius-md: 12px;
+    --radius-sm: 10px;   /* мелкие контролы: чипы, поля, бейджи */
+    --radius-md: 14px;   /* кнопки и небольшие панели */
+    --radius-lg: 20px;   /* карточки и крупные поверхности */
     --radius-full: 999px;
     --radius-xs: var(--radius-sm);
-    --radius-lg: var(--radius-md);
 
     /*
       --- Тени: две ---
@@ -218,8 +218,8 @@
       чипах, кнопках, аватаре и карточках — на главной светились шесть
       элементов сразу, и ни один не был важнее другого.
     */
-    --shadow-raise: 0 2px 8px rgba(0, 0, 0, 0.35), 0 8px 24px rgba(0, 0, 0, 0.25);
-    --shadow-overlay: 0 8px 32px rgba(0, 0, 0, 0.5);
+    --shadow-raise: 0 4px 16px rgba(0, 0, 0, 0.4);
+    --shadow-overlay: 0 12px 40px rgba(0, 0, 0, 0.55);
 
     --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
     --shadow-md: var(--shadow-raise);
@@ -259,8 +259,8 @@
       — переходы 200–300ms (стандарт)
       — выход быстрее входа (exit-faster-than-enter)
     */
-    --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
-    --transition: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-fast: 200ms ease;
+    --transition: 300ms ease;
     --transition-slow: 400ms cubic-bezier(0.4, 0, 0.2, 1);
     --transition-spring: 400ms cubic-bezier(0.34, 1.56, 0.64, 1);
     --transition-exit: 200ms cubic-bezier(0.4, 0, 1, 1);
@@ -284,20 +284,30 @@
     --color-selection-text: inherit;
 }
 
-/* ---------- Светлая тема: кинозал днём ---------- */
+/* ---------- Светлая тема ----------
+
+   Это основной вид сайта: разметка отдаёт data-theme="light" сразу, а тёмная
+   включается переключателем. Механика осталась прежней — светлая тема
+   переопределяет токены, — потому что на ней держатся 34 точечных правила
+   в семи файлах; инвертировать их ради переименования значило бы переписать
+   всё оформление ради ноля видимой разницы.
+
+   Палитра нейтральная: фон #f5f5f7, текст #1d1d1f, вторичный #86868b.
+   Никакого синего подмеса — цвет на странице должен быть только у постера
+   и у главного действия. */
 
 [data-theme="light"] {
-    --color-bg: #f2f4f8;
+    --color-bg: #f5f5f7;
     --color-surface: #ffffff;
-    --color-surface-hover: #e8ebf2;
-    --color-border: #d4d9e3;
-    --color-text: #12141c;
-    --color-text-muted: #5a6278;
-    --color-text-dim: #5f677c;
-    --color-text-soft: #3d4657;
-    --color-text-bright: #232630;
-    --color-text-strong: #0b0d12;
-    --color-text-faint: #9aa3b8;
+    --color-surface-hover: #ebebed;
+    --color-border: rgba(0, 0, 0, 0.08);
+    --color-text: #1d1d1f;
+    --color-text-muted: #6e6e73;
+    --color-text-dim: #86868b;
+    --color-text-soft: #424245;
+    --color-text-bright: #1d1d1f;
+    --color-text-strong: #000000;
+    --color-text-faint: #aeaeb2;
     --color-text-shadow: rgba(255, 255, 255, 0.55);
     /* Тот же оранжевый тон, но затемнённый: #ff8a1f на белом даёт контраст
        около 2:1 и не читается как текст. Затемнённый вариант проходит AA,
@@ -311,14 +321,14 @@
     --color-accent-glow: rgba(var(--color-accent-rgb), 0.06);
     --color-on-accent: #ffffff;
     --color-card: #ffffff;
-    --color-card-hover: #f2f4f8;
-    --color-surface-2: #eef1f6;
-    --color-surface-3: #e8ebf2;
-    --color-surface-deep: #dfe3ec;
-    --color-border-soft: #dfe3ec;
-    --color-border-strong: #c3cad6;
-    --glass-bg: rgba(255, 255, 255, 0.82);
-    --glass-border: rgba(212, 217, 227, 0.6);
+    --color-card-hover: #f5f5f7;
+    --color-surface-2: #ffffff;
+    --color-surface-3: #f5f5f7;
+    --color-surface-deep: #ebebed;
+    --color-border-soft: rgba(0, 0, 0, 0.05);
+    --color-border-strong: rgba(0, 0, 0, 0.16);
+    --glass-bg: rgba(245, 245, 247, 0.72);
+    --glass-border: rgba(0, 0, 0, 0.08);
     /* Тени светлой темы — те же две роли, только мягче: на светлом фоне
        тень той же силы читается как грязь. */
     --shadow-raise: 0 1px 3px rgba(16, 24, 40, 0.06), 0 6px 20px rgba(16, 24, 40, 0.06);

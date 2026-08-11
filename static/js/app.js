@@ -31,7 +31,10 @@
     const themeToggle = document.querySelector('[data-theme-toggle]');
     const html = document.documentElement;
     const stored = localStorage.getItem('lumibox-theme');
-    if (stored) html.dataset.theme = stored;
+    /* Сравнение с null, а не проверка на «истинность»: тёмная тема хранится
+       пустой строкой, и обычная проверка считала её «ничего не выбрано» —
+       выбор тёмной не переживал перезагрузку. */
+    if (stored !== null) html.dataset.theme = stored;
     if (themeToggle) {
         // Подписи приходят из разметки: gettext до скрипта не достаёт,
         // и зашитые здесь строки оставались русскими на en и ky.

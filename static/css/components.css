@@ -2080,3 +2080,229 @@
 .search__skeleton-line--short {
     width: 60%;
 }
+
+/* ---------- Ряд на главной ----------
+   Секция с заголовком и ссылкой «Все» справа. Так на главную вернулось то,
+   что раньше жило в боковой панели пятью строчками с крошечными постерами. */
+
+.home-row {
+    margin-top: var(--space-8);
+}
+
+.home-row__head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-4);
+    margin-bottom: var(--space-4);
+}
+
+.home-row__title {
+    font-size: var(--text-heading);
+    letter-spacing: var(--tracking-tight);
+}
+
+.home-row__more {
+    color: var(--color-text-dim);
+    font-size: var(--text-sm);
+    white-space: nowrap;
+    transition: color var(--transition-fast);
+}
+
+@media (hover: hover) {
+    .home-row__more:hover {
+        color: var(--color-text);
+    }
+}
+
+/* Ряд не переносится на вторую строку: это витрина, а не полный список.
+   Лишнее уезжает вбок вместе с прокруткой. */
+.home-row .poster-grid--row {
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(132px, 1fr);
+    grid-template-columns: none;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+    padding-bottom: var(--space-2);
+}
+
+.home-row .poster-grid--row::-webkit-scrollbar {
+    display: none;
+}
+
+.home-row .poster-grid--row > .poster-card {
+    scroll-snap-align: start;
+}
+
+@media (min-width: 768px) {
+    .home-row .poster-grid--row {
+        grid-auto-columns: minmax(150px, 1fr);
+    }
+}
+
+/* ============================================================
+   Герой главной
+
+   Один фильм крупно, кадром во всю ширину. Раньше здесь была текстовая
+   промо-зона со слоганом и четырьмя постерами по 104px: она сообщала
+   посетителю, что на сайте есть кино, — то есть ровно то, зачем он уже
+   пришёл. Витрина кинотеатра называет фильм, а не себя.
+   ============================================================ */
+
+.hero {
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    min-height: clamp(320px, 42vw, 520px);
+    margin-bottom: var(--space-7);
+    padding: var(--space-7) var(--space-6);
+    overflow: hidden;
+    border-radius: var(--radius-lg);
+    background: var(--color-surface);
+    isolation: isolate;
+}
+
+.hero__backdrop {
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Затемнение снизу и слева: текст ложится на кадр и должен читаться при
+   любой картинке, включая светлую. Два градиента, а не один общий тон —
+   иначе кадр гаснет целиком и незачем было его показывать. */
+.hero__scrim {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background:
+        linear-gradient(180deg, rgba(0, 0, 0, 0.15) 0%, rgba(0, 0, 0, 0.85) 100%),
+        linear-gradient(90deg, rgba(0, 0, 0, 0.75) 0%, rgba(0, 0, 0, 0.1) 70%);
+}
+
+/* Без кадра затемнять нечего: остаётся ровная тёмная поверхность. */
+.hero:not(.hero--with-image) .hero__scrim {
+    background: linear-gradient(135deg, #1d1d1f 0%, #000000 100%);
+}
+
+.hero__body {
+    max-width: 46ch;
+    color: #f5f5f7;
+}
+
+.hero__eyebrow {
+    margin-bottom: var(--space-2);
+    color: rgba(245, 245, 247, 0.7);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-wide);
+}
+
+/* Не h1: заголовок страницы остался прежним ради поиска и лежит рядом
+   скрытым. Здесь название фильма — оно главное для глаза, но не для
+   структуры документа. */
+.hero__title {
+    font-size: var(--text-display);
+    font-weight: 700;
+    line-height: var(--leading-tight);
+    letter-spacing: var(--tracking-tight);
+    text-wrap: balance;
+}
+
+.hero__meta {
+    margin-top: var(--space-3);
+    color: rgba(245, 245, 247, 0.75);
+    font-size: var(--text-sm);
+}
+
+.hero__text {
+    margin-top: var(--space-3);
+    color: rgba(245, 245, 247, 0.8);
+    font-size: var(--text-md);
+    line-height: var(--leading-normal);
+}
+
+.hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-3);
+    margin-top: var(--space-5);
+}
+
+.hero__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: var(--touch-target);
+    padding: 0 var(--space-6);
+    border-radius: var(--radius-full);
+    background: var(--color-accent);
+    color: var(--color-on-accent);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    white-space: nowrap;
+    transition: transform var(--transition), background var(--transition);
+}
+
+/* Вторичное действие — стеклянная кнопка: она лежит поверх кадра, и
+   сплошная заливка спорила бы с главным действием рядом. */
+.hero__link {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--touch-target);
+    padding: 0 var(--space-5);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: var(--radius-full);
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    color: #f5f5f7;
+    font-size: var(--text-sm);
+    font-weight: 500;
+    white-space: nowrap;
+    transition: background var(--transition), border-color var(--transition);
+}
+
+@media (hover: hover) {
+    .hero__cta:hover {
+        background: var(--color-accent-hover);
+        transform: scale(1.03);
+    }
+
+    .hero__link:hover {
+        background: rgba(255, 255, 255, 0.2);
+        border-color: rgba(255, 255, 255, 0.4);
+    }
+}
+
+.hero__cta:focus-visible,
+.hero__link:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.6), 0 0 0 4px var(--color-accent);
+}
+
+@media (max-width: 560px) {
+    .hero {
+        padding: var(--space-5) var(--space-4);
+        min-height: 340px;
+        border-radius: var(--radius-md);
+    }
+
+    /* Кнопки на всю ширину: главное действие первого экрана не должно
+       требовать прицеливания. */
+    .hero__actions {
+        width: 100%;
+    }
+
+    .hero__cta,
+    .hero__link {
+        flex: 1 1 100%;
+        justify-content: center;
+    }
+}
