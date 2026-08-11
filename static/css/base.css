@@ -171,11 +171,41 @@ button {
   используйте padding или дополнительный псевдоэлемент.
 */
 
+/*
+  Одно фокус-кольцо на весь проект.
+
+  Было пять разных: 2px outline здесь и четыре варианта box-shadow в других
+  файлах (1px, 2px с прозрачностью 0.08, 3px двух видов, 4px). Попадание
+  клавиатурой в поле поиска, в кнопку и в карточку выглядело по-разному,
+  будто это три разных сайта.
+
+  Кольцо двойное: сначала цветом фона, потом акцентом. Так оно читается и на
+  тёмной поверхности, и на светлой, и поверх постера, где однослойное
+  сливалось с картинкой. box-shadow вместо outline — чтобы кольцо повторяло
+  скругление элемента, а не рисовало прямоугольник вокруг круглой кнопки.
+*/
 :focus-visible {
-    outline: 2px solid var(--color-accent);
-    outline-offset: 2px;
+    outline: none;
+    box-shadow: var(--focus-ring);
     border-radius: var(--radius-sm);
-    transition: outline-offset var(--transition-fast);
+}
+
+/* Элементы со своим скруглением сохраняют его под кольцом. */
+.button:focus-visible,
+.chip:focus-visible,
+.genre-chip:focus-visible {
+    border-radius: var(--radius-md);
+}
+
+[class*="--pill"]:focus-visible,
+.lb-watch:focus-visible,
+.site-header__login:focus-visible,
+.search-toggle:focus-visible,
+.theme-toggle:focus-visible,
+.telegram-header-link:focus-visible,
+.scroll-top:focus-visible,
+.carousel__btn:focus-visible {
+    border-radius: var(--radius-full);
 }
 
 /* ---------- Skip-to-content link ---------- */
@@ -304,13 +334,6 @@ img[data-loaded] {
 }
 
 .empty-state__desc,
-.empty-state__text {
-    color: var(--color-text-muted);
-    font-size: var(--text-sm);
-    line-height: 1.6;
-    max-width: 36ch;
-    margin: 0 auto;
-}
 
 .empty-state__action {
     margin-top: var(--space-5);
@@ -449,37 +472,6 @@ img[data-loaded] {
     border-color: var(--color-accent-dim);
     color: var(--color-accent);
     background: var(--color-accent-dim);
-}
-
-.error-page__divider {
-    display: flex;
-    align-items: center;
-    gap: var(--space-3);
-    margin: var(--space-5) 0;
-    color: var(--color-text-dim);
-    font-size: var(--text-xs);
-}
-
-.error-page__divider::before,
-.error-page__divider::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: var(--color-border);
-}
-
-.error-page__contact {
-    color: var(--color-text-muted);
-    font-size: var(--text-sm);
-}
-
-.error-page__contact a {
-    color: var(--color-accent);
-    font-weight: 500;
-}
-
-.error-page__contact a:hover {
-    text-decoration: underline;
 }
 
 @media (max-width: 560px) {

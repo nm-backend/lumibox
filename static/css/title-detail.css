@@ -542,12 +542,6 @@
     transform: translateY(-2px);
 }
 
-.similar-card:focus-visible {
-    outline: 2px solid var(--color-accent);
-    outline-offset: 2px;
-    border-radius: var(--radius-sm);
-}
-
 .similar-card__poster {
     aspect-ratio: 2 / 3;
     border-radius: var(--radius-sm);
@@ -570,7 +564,7 @@
 }
 
 .similar-card__placeholder {
-    font-size: 1.5rem;
+    font-size: var(--text-heading);
     font-weight: 700;
     color: var(--color-text-dim);
     text-transform: uppercase;
@@ -1111,7 +1105,3 @@
     color: var(--color-on-accent);
 }
 
-.player-voices__item:focus-visible {
-    outline: 2px solid var(--color-accent);
-    outline-offset: 2px;
-}

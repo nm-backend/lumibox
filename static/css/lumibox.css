@@ -229,7 +229,7 @@
 
 .lb-promo__title {
     margin: 0 0 var(--space-2);
-    font-size: 30px;
+    font-size: var(--text-heading);
     font-weight: 700;
     color: var(--color-dark-text-bright);
     line-height: 1.15;
@@ -489,7 +489,7 @@
     margin: 0;
     min-width: 0;
     color: var(--color-text-strong);
-    font-size: 1.25rem;
+    font-size: var(--text-lg);
     font-weight: 700;
     line-height: 1.25;
     letter-spacing: -0.01em;
@@ -1262,7 +1262,7 @@
 
 .lb-seo h2 {
     color: var(--color-text-bright);
-    font-size: 18px;
+    font-size: var(--text-lg);
     font-weight: 500;
     margin-bottom: var(--space-4);
 }
@@ -1325,9 +1325,6 @@
         height: 225px;
     }
 
-    .lb-shortstory__title {
-        font-size: 1.125rem;
-    }
 
     .lb-promo__inner {
         flex-wrap: wrap;
@@ -1839,7 +1836,7 @@
 */
 .lb-promo__title {
     font-family: var(--font-display);
-    font-size: 30px;
+    font-size: var(--text-heading);
     font-weight: 400;
     text-transform: uppercase;
     letter-spacing: 0.05em;
@@ -1942,15 +1939,17 @@
    старый медиазапрос, поэтому размер задаём здесь, после). */
 
 @media (max-width: 900px) {
+    /* Кегль теперь идёт от --text-heading и уменьшается сам. Здесь
+       остаётся только трекинг: у шрифта афиши на узком экране буквы
+       слипаются. */
     .lb-promo__title {
-        font-size: 20px;
         letter-spacing: 0.03em;
     }
 }
 
 @media (max-width: 420px) {
     .lb-promo__title {
-        font-size: 18px;
+        font-size: var(--text-lg);
     }
 }
 
@@ -2026,7 +2025,7 @@
 
 .lb-shortstory__head-title {
     margin: 0;
-    font-size: 1.05rem;
+    font-size: var(--text-md);
     font-weight: 700;
     line-height: 1.25;
     color: var(--color-text);
@@ -2073,7 +2072,7 @@
     }
 
     .lb-shortstory__title {
-        font-size: 1.05rem;
+        font-size: var(--text-md);
     }
 
     .lb-shortstory__original {
@@ -2172,7 +2171,7 @@
 
     .lb-shortstory__head-title {
         color: var(--color-text-strong);
-        font-size: 1.05rem;
+        font-size: var(--text-md);
     }
 
     .lb-shortstory__head-title a {
@@ -2546,11 +2545,6 @@
     color: var(--color-on-accent);
     background: var(--color-accent);
     border-color: var(--color-accent);
-}
-
-.player-tabs__tab:focus-visible {
-    outline: 2px solid var(--color-accent);
-    outline-offset: 2px;
 }
 
 .player__frame--embed {

@@ -60,17 +60,6 @@
     font-weight: 600;
 }
 
-.sidebar-category__count {
-    font-size: var(--text-xs);
-    color: var(--color-text-muted);
-    background: var(--color-bg);
-    padding: 0 var(--space-1);
-    border-radius: var(--radius-sm);
-    min-width: 20px;
-    text-align: center;
-    line-height: 1.6;
-}
-
 /* ---------- Панель фильтров — горизонтальная, раскрывается как details ---------- */
 
 .filters {
@@ -175,11 +164,11 @@
     appearance: none;
 }
 
-.filters__field select:focus,
-.filters__field input[type="text"]:focus {
+.filters__field select:focus-visible,
+.filters__field input[type="text"]:focus-visible {
     outline: none;
     border-color: var(--color-accent);
-    box-shadow: 0 0 0 3px rgba(var(--color-accent-rgb), 0.15);
+    box-shadow: var(--focus-ring);
 }
 
 .filters__count {
@@ -334,10 +323,10 @@
     transition: border-color var(--transition), box-shadow var(--transition);
 }
 
-.actor-search__input:focus {
+.actor-search__input:focus-visible {
     outline: none;
     border-color: var(--color-accent);
-    box-shadow: 0 0 0 4px var(--color-accent-dim);
+    box-shadow: var(--focus-ring);
 }
 
 .actor-search__input::placeholder {

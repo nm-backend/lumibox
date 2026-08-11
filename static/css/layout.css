@@ -262,21 +262,16 @@
     position: relative;
 }
 
+/* Размер приходит от h1 из variables.css. Здесь стоял литерал 1.625rem,
+   и заголовок раздела не рос вместе с экраном: на мониторе 1920 он был
+   ровно того же кегля, что на телефоне 360. */
 .page-title {
-    font-size: 1.625rem;
-    letter-spacing: normal;
+    letter-spacing: var(--tracking-tight);
 }
 
-/* Subtle accent underline for page titles */
-.page-header .page-title::after {
-    content: "";
-    display: block;
-    width: 48px;
-    height: 3px;
-    margin-top: var(--space-3);
-    background: linear-gradient(90deg, var(--color-accent), var(--color-accent-dim), transparent);
-    border-radius: 2px;
-}
+/* Оранжевая черта под заголовком убрана: она повторяла роль самого
+   заголовка (и так самого крупного текста на странице) и добавляла третий
+   акцентный элемент к кнопке и активному фильтру. Иерархию держит размер. */
 
 .page-subtitle {
     margin-top: var(--space-2);

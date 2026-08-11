@@ -179,7 +179,7 @@
 
 .award-item__icon {
     flex-shrink: 0;
-    font-size: 1.2rem;
+    font-size: var(--text-lg);
 }
 
 .award-item__body {

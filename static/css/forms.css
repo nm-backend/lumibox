@@ -37,12 +37,14 @@
     min-height: 96px;
 }
 
-.form__field input:focus,
-.form__field select:focus,
-.form__field textarea:focus {
+/* Поле в фокусе: рамка акцентом плюс общее кольцо. Здесь было своё
+   кольцо со свечением на 20px — четвёртый вариант фокуса в проекте. */
+.form__field input:focus-visible,
+.form__field select:focus-visible,
+.form__field textarea:focus-visible {
     outline: none;
     border-color: var(--color-accent);
-    box-shadow: 0 0 0 3px rgba(var(--color-accent-rgb), 0.08), 0 0 20px rgba(var(--color-accent-rgb), 0.04);
+    box-shadow: var(--focus-ring);
 }
 
 .form__field input[type="file"] {
@@ -101,7 +103,7 @@
 }
 
 .auth-card__title {
-    font-size: 1.625rem;
+    font-size: var(--text-title);
 }
 
 .auth-card__subtitle {
@@ -346,9 +348,10 @@
 /* ---------- Мобильный вид (≤599px) ---------- */
 
 @media (max-width: 599px) {
+    /* Размер заголовка теперь текучий (--text-2xl), переопределять его
+       здесь больше не нужно — осталось только правило переноса длинных
+       слов вроде «Пользовательское соглашение». */
     .legal-page__title {
-        font-size: 28px;
-        line-height: 1.25;
         overflow-wrap: break-word;
     }
 
