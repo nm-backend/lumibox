@@ -178,16 +178,24 @@ class CatalogCardResumeTests(TestCase):
         self.assertNotIn("lb-shortstory__resume", html)
 
     def test_user_card_shows_resume_badge(self):
+        """
+        Начатый фильм отмечен полосой по низу постера.
+
+        Раньше это была ссылка «Смотреть с S2E4» отдельной строкой под
+        карточкой: она занимала место в сетке и вела туда же, куда и сама
+        карточка. Номер сезона и серии остался — в подписи для скринридера.
+        """
         remember_episode_start(self.user, self.title, self.episode)
         self.client.force_login(self.user)
         response = self.client.get(self.catalog_url)
-        self.assertContains(response, "Смотреть с S2E4")
+        self.assertContains(response, "poster-card__progress")
+        self.assertContains(response, "Начато: сезон 2, серия 4")
 
     def test_other_user_badge_not_shown(self):
         remember_episode_start(create_user(), self.title, self.episode)
         self.client.force_login(self.user)
         response = self.client.get(self.catalog_url)
-        self.assertNotIn("Смотреть с S2E4", response.content.decode("utf-8"))
+        self.assertNotIn("poster-card__progress", response.content.decode("utf-8"))
 
     def test_with_progress_uses_prefetch_not_n1(self):
         remember_episode_start(self.user, self.title, self.episode)
@@ -243,13 +251,13 @@ class HomeResumeBadgeTests(TestCase):
         remember_episode_start(self.user, self.title, self.episode)
         self.client.force_login(self.user)
         response = self.client.get(self.home_url)
-        self.assertContains(response, "Смотреть с S3E1")
+        self.assertContains(response, "Начато: сезон 3, серия 1")
 
     def test_other_user_badge_not_shown_on_home(self):
         remember_episode_start(create_user(), self.title, self.episode)
         self.client.force_login(self.user)
         response = self.client.get(self.home_url)
-        self.assertNotIn("Смотреть с S3E1", response.content.decode("utf-8"))
+        self.assertNotIn("poster-card__progress", response.content.decode("utf-8"))
 
 
 class TimecodeFilterTests(TestCase):

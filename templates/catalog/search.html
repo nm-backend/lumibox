@@ -70,9 +70,11 @@
 
                 {% if titles %}
                     <h2 class="visually-hidden">{% trans "Найденные фильмы и сериалы" %}</h2>
-                    {% for title in titles %}
-                        {% include "includes/story_card.html" %}
-                    {% endfor %}
+                    <div class="poster-grid">
+                        {% for title in titles %}
+                            {% include "includes/story_card.html" %}
+                        {% endfor %}
+                    </div>
                     {% include "includes/pagination.html" %}
                 {% elif not persons %}
                     {% url 'catalog:title_list' as empty_href %}

@@ -74,9 +74,11 @@
 
                             {% if item.participations %}
                                 <div class="lb-main" id="lb-content">
-                                    {% for participation in item.participations %}
-                                        {% include "includes/story_card.html" with title=participation.title %}
-                                    {% endfor %}
+                                    <div class="poster-grid">
+                                        {% for participation in item.participations %}
+                                            {% include "includes/story_card.html" with title=participation.title %}
+                                        {% endfor %}
+                                    </div>
                                 </div>
                             {% else %}
                                 <p class="actor-group__empty">{% trans "Нет опубликованных проектов." %}</p>

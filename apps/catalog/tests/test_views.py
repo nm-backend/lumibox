@@ -387,12 +387,18 @@ class BlockTranslatePlaceholderTests(TestCase):
         self.assertContains(response, "более 1 фильмов")
         self.assertContains(response, "и 1 сериалов")
 
-    def test_story_card_watch_link_keeps_title_name(self):
+    def test_card_title_is_printed(self):
+        """
+        Отдельной ссылки «Смотреть {{ name }} онлайн» на карточке больше нет:
+        вся карточка — одна ссылка. Подстановку внутри blocktranslate теперь
+        стережёт подпись отметки о начатом просмотре (test_progress).
+        Здесь остаётся простое: название фильма на карточке напечатано.
+        """
         create_title(name="Карточка с именем")
 
         response = self.client.get(reverse("catalog:title_list"))
 
-        self.assertContains(response, "Смотреть Карточка с именем онлайн")
+        self.assertContains(response, "Карточка с именем")
 
     def test_person_directory_description_keeps_heading(self):
         create_participation(

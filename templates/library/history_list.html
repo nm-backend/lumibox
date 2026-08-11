@@ -21,9 +21,11 @@
     <div class="lb-contentwrap">
     {% if history %}
         <div class="lb-main" id="lb-content">
-            {% for entry in history %}
-                {% include "includes/story_card.html" with title=entry.title %}
-            {% endfor %}
+            <div class="poster-grid">
+                {% for entry in history %}
+                    {% include "includes/story_card.html" with title=entry.title %}
+                {% endfor %}
+            </div>
 
             {% include "includes/pagination.html" %}
         </div>

@@ -93,7 +93,7 @@
                         {% endif %}
                     </div>
                     {% if recent_favorites %}
-                        <div class="profile-tab-list">
+                        <div class="poster-grid">
                             {% for favorite in recent_favorites %}
                                 {% include "includes/story_card.html" with title=favorite.title %}
                             {% endfor %}
@@ -114,7 +114,7 @@
                         {% endif %}
                     </div>
                     {% if recent_watchlist %}
-                        <div class="profile-tab-list">
+                        <div class="poster-grid">
                             {% for item in recent_watchlist %}
                                 {% include "includes/story_card.html" with title=item.title %}
                             {% endfor %}

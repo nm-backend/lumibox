@@ -6,6 +6,7 @@ from django.test import TestCase
 from django.urls import reverse
 
 from apps.catalog.models import Episode, PlaybackSource, Title
+from apps.catalog.tests.test_views import results_grid_html
 from apps.core.test_factories import create_title
 
 
@@ -140,7 +141,14 @@ class TitleExtraMetaTests(TestCase):
         self.assertNotContains(response, "IMDb")
         self.assertNotContains(response, "Кинопоиск")
 
-    def test_quality_and_ratings_shown_on_catalog_card(self):
+    def test_quality_shown_on_catalog_card(self):
+        """
+        Качество — единственная техническая характеристика на карточке.
+
+        Проверяем по области результатов, а не по всей странице: «BDRip»
+        есть ещё и в выпадающем списке фильтров, и проверка по всему HTML
+        проходила бы, даже если убрать бейдж с карточки совсем.
+        """
         create_title(
             name="Особенный фильм",
             quality=Title.Quality.BDRIP,
@@ -148,16 +156,30 @@ class TitleExtraMetaTests(TestCase):
             kp_rating="8.9",
         )
         response = self.client.get(reverse("catalog:title_list"))
-        html = response.content.decode("utf-8")
-        marker = html.find("Особенный фильм")
-        self.assertNotEqual(marker, -1)
-        self.assertIn("BDRip", html)
-        self.assertIn("КП 8.9", html)
-        self.assertIn("IMDb 9.1", html)
+        results = results_grid_html(response)
+        self.assertIn("Особенный фильм", results)
+        self.assertIn("BDRip", results)
 
-    def test_card_without_extra_meta_stays_clean(self):
-        create_title(name="Обычный фильм")
-        response = self.client.get(reverse("catalog:title_list"))
-        html = response.content.decode("utf-8")
-        self.assertNotIn("IMDb", html)
-        self.assertNotIn("КП ", html)
+    def test_external_ratings_live_on_the_title_page(self):
+        """
+        Оценки КП и IMDb с карточки убраны намеренно.
+
+        Карточка печатала десять полей с подписями, и список фильмов читался
+        как выгрузка из базы. Внешние рейтинги — справочная величина: они
+        нужны на странице фильма, где их есть с чем сравнить, а в сетке
+        постеров отнимают строку у названия.
+        """
+        title = create_title(
+            name="Фильм с оценками",
+            quality=Title.Quality.BDRIP,
+            imdb_rating="9.1",
+            kp_rating="8.9",
+        )
+
+        results = results_grid_html(self.client.get(reverse("catalog:title_list")))
+        self.assertNotIn("IMDb", results)
+        self.assertNotIn("КП ", results)
+
+        page = self.client.get(title.get_absolute_url()).content.decode("utf-8")
+        self.assertIn("9.1", page)
+        self.assertIn("8.9", page)

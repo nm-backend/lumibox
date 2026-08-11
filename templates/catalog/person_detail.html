@@ -75,9 +75,11 @@
             {% for role_group in role_groups %}
                 <div class="crew-group">
                     <p class="crew-group__role">{{ role_group.grouper }} — {{ role_group.list|length }}</p>
-                    {% for participation in role_group.list %}
-                        {% include "includes/story_card.html" with title=participation.title character=participation.character %}
-                    {% endfor %}
+                    <div class="poster-grid">
+                        {% for participation in role_group.list %}
+                            {% include "includes/story_card.html" with title=participation.title character=participation.character %}
+                        {% endfor %}
+                    </div>
                 </div>
             {% endfor %}
         {% else %}

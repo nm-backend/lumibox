@@ -12,9 +12,11 @@
     <div class="lb-contentwrap">
     {% if watchlist %}
         <div class="lb-main" id="lb-content">
-            {% for item in watchlist %}
-                {% include "includes/story_card.html" with title=item.title %}
-            {% endfor %}
+            <div class="poster-grid">
+                {% for item in watchlist %}
+                    {% include "includes/story_card.html" with title=item.title %}
+                {% endfor %}
+            </div>
 
             {% include "includes/pagination.html" %}
         </div>

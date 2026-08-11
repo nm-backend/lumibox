@@ -12,9 +12,11 @@
     <div class="lb-contentwrap">
     {% if favorites %}
         <div class="lb-main" id="lb-content">
-            {% for favorite in favorites %}
-                {% include "includes/story_card.html" with title=favorite.title %}
-            {% endfor %}
+            <div class="poster-grid">
+                {% for favorite in favorites %}
+                    {% include "includes/story_card.html" with title=favorite.title %}
+                {% endfor %}
+            </div>
 
             {% include "includes/pagination.html" %}
         </div>

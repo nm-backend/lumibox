@@ -19,11 +19,7 @@
     </div>
 
     <div class="lb-contentwrap">
-        {% comment %} data-testid — якорь для тестов: по нему они вырезают область результатов
-           и проверяют, что отфильтрованное действительно исчезло. Сайдбар
-           показывает популярное и новинки независимо от фильтров, поэтому
-           проверять по всей странице нельзя. {% endcomment %}
-        <div class="lb-main" id="lb-content" data-testid="results">
+        <div class="lb-main" id="lb-content">
 
             {# Quick filter genre chips #}
             {% comment %} Чипы жанров. Адреса собирает вьюха (build_genre_chips):
@@ -68,11 +64,26 @@
                 {% endfor %}
             </div>
 
+            {% comment %} data-testid — якорь для тестов: по нему они вырезают область
+               выдачи и проверяют, что отфильтрованное действительно исчезло.
+
+               Якорь стоит именно здесь, а не на всей колонке: выше по странице
+               лежит панель фильтров, где значения вроде «BDRip» перечислены
+               в выпадающем списке. Пока якорь охватывал и её, проверки
+               «на карточке есть качество» и «внешних рейтингов на карточке
+               нет» проходили вхолостую — они находили эти строки в фильтрах.
+
+               Обёртка рендерится всегда, в том числе когда ничего не нашлось:
+               иначе помощник в тестах не найдёт якорь и упадёт на пустой
+               выдаче, хотя проверять надо ровно её. {% endcomment %}
+            <div data-testid="results">
             {% if titles %}
                 <h2 class="visually-hidden">{% trans "Найденные фильмы и сериалы" %}</h2>
-                {% for title in titles %}
-                    {% include "includes/story_card.html" %}
-                {% endfor %}
+                <div class="poster-grid">
+                    {% for title in titles %}
+                        {% include "includes/story_card.html" %}
+                    {% endfor %}
+                </div>
 
                 {% include "includes/pagination.html" %}
             {% else %}
@@ -86,6 +97,7 @@
                 {% trans "Открыть весь каталог" as empty_label %}
                 {% include "includes/empty_state.html" with empty_icon="search" empty_q=request.GET.q empty_title=empty_title empty_desc=empty_desc empty_href=empty_href empty_label=empty_label %}
             {% endif %}
+            </div>
         </div>
 
         {% include "includes/ad_slot.html" %}

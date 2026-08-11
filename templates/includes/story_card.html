@@ -1,145 +1,82 @@
 {% load i18n icons catalog_filters %}
+{% comment %}
+   Карточка фильма — постер и три строки под ним.
 
-<article class="lb-shortstory">
-    {% comment %}Шапка карточки (sHead + hRating): заголовок и
-       звёздный рейтинг над постером. Видна только на мобильном ≤599px;
-       на десктопе заголовок и рейтинг остаются в info-колонке, а этот
-       блок скрывается (правило .lb-shortstory__head в lumibox.css).{% endcomment %}
-    <div class="lb-shortstory__head">
-        <h3 class="lb-shortstory__head-title">
-            <a href="{{ title.get_absolute_url }}" title="{{ title.name }}">{{ title.name }}</a>
-        </h3>
-        {% if title.original_name %}
-            <p class="lb-shortstory__head-original">{{ title.original_name }}</p>
-        {% endif %}
-        {% if title.rating_average %}
-            <div class="lb-shortstory__head-rating">
-                <span class="lb-rating-stars" aria-hidden="true">
-                    <span class="lb-rating-stars__bg">★★★★★</span>
-                    <span class="lb-rating-stars__fill" style="width: {% widthratio title.rating_average 10 100 %}%">★★★★★</span>
-                </span>
-                <span class="lb-rating-value">{{ title.rating_average|floatformat:1 }}</span>
-                <span class="lb-shortstory__rating-count">/10 · {{ title.rating_count|default:0 }} {% trans "гол." %}</span>
-            </div>
-        {% endif %}
-    </div>
+   Раньше здесь печаталось до десяти полей с подписями: «Год:», «Страна:»,
+   «Жанр:», «Длительность:», «Качество:», «Озвучка:», «Просмотры:», рейтинг,
+   внешние рейтинги и описание на сорок слов. На широком экране такая карточка
+   занимала всю ширину колонки и была почти пуста, а список фильмов читался
+   как выгрузка из базы. Всё, что убрано, есть на странице фильма — в одном
+   клике и в нормальной вёрстке.
 
-    <div class="lb-shortstory__body">
-        <div class="lb-shortstory__poster">
-            <a href="{{ title.get_absolute_url }}" title="{{ title.name }}">
-                {% if title.poster %}
-                    <picture>
-                        {% if title.poster|webp_url != title.poster.url %}<source type="image/webp" srcset="{{ title.poster|webp_url }}">{% endif %}
-                        <img src="{{ title.poster.url }}" width="200" height="300" alt="{{ title.name }}" loading="lazy">
-                    </picture>
-                {% else %}
-                    <span class="lb-shortstory__poster-fallback" aria-hidden="true">
-                        <svg viewBox="0 0 64 64" width="34" height="34" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                            <rect x="4" y="10" width="56" height="44" rx="6" stroke-opacity="0.5"/>
-                            <path d="M4 22h56" stroke-opacity="0.3"/>
-                            <path d="M24 34l14 8-14 8z" fill="currentColor" fill-opacity="0.35" stroke="none"/>
-                        </svg>
-                        <span class="lb-shortstory__poster-fallback-name">{{ title.name }}</span>
-                    </span>
-                {% endif %}
-                <span class="lb-shortstory__play" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" width="26" height="26" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+   Постер несёт ровно два бейджа: тип и качество (или возраст, если качество
+   не указано). Их было до четырёх, и они закрывали лицо на постере.
+
+   Ссылка одна на всю карточку: две ссылки на один и тот же адрес заставляют
+   скринридер читать название дважды, а Tab — останавливаться на карточке
+   дважды.
+{% endcomment %}
+
+<article class="poster-card">
+    <a class="poster-card__link" href="{{ title.get_absolute_url }}">
+        <span class="poster-card__frame">
+            {% if title.poster %}
+                <picture>
+                    {% if title.poster|webp_url != title.poster.url %}<source type="image/webp" srcset="{{ title.poster|webp_url }}">{% endif %}
+                    <img class="poster-card__image"
+                         src="{{ title.poster.url }}"
+                         width="200" height="300"
+                         alt=""
+                         loading="lazy"
+                         decoding="async">
+                </picture>
+            {% else %}
+                <span class="poster-card__fallback" aria-hidden="true">
+                    {% icon "movie" size=28 %}
                 </span>
-                {% if title.age_rating %}
-                    <span class="lb-badge lb-badge--age">{{ title.age_rating }}</span>
-                {% endif %}
-                <span class="lb-badge lb-badge--type">{{ title.get_type_display }}</span>
-                {% if title.latest_episode_info %}
-                    <span class="lb-badge lb-badge--episode">{{ title.latest_episode_info }}</span>
-                {% endif %}
+            {% endif %}
+
+            <span class="poster-card__play" aria-hidden="true">
+                {% icon "play" size=22 %}
+            </span>
+
+            <span class="poster-card__badges">
+                <span class="poster-card__badge">{{ title.get_type_display }}</span>
                 {% if title.quality %}
-                    <span class="lb-badge lb-badge--quality">{{ title.quality }}</span>
+                    <span class="poster-card__badge poster-card__badge--quality">{{ title.quality }}</span>
+                {% elif title.age_rating %}
+                    <span class="poster-card__badge">{{ title.age_rating }}</span>
                 {% endif %}
-            </a>
+            </span>
+
+            {% if title.latest_episode_info %}
+                <span class="poster-card__episode">{{ title.latest_episode_info }}</span>
+            {% endif %}
+
+            {% comment %} Прогресс просмотра — полоса по низу постера вместо
+               отдельной ссылки «Смотреть с S1E1» под карточкой: та занимала
+               целую строку и уводила на тот же адрес, что и сама карточка. {% endcomment %}
             {% with progress=title.progress_item|first %}
                 {% if progress %}
-                    <a class="lb-shortstory__resume" href="{{ title.get_absolute_url }}">
-                        {% icon "play" size=12 %}
-                        {% blocktranslate with s=progress.episode.season_number e=progress.episode.episode_number %}Смотреть с S{{ s }}E{{ e }}{% endblocktranslate %}
-                    </a>
+                    <span class="poster-card__progress"
+                          role="img"
+                          aria-label="{% blocktranslate with s=progress.episode.season_number e=progress.episode.episode_number %}Начато: сезон {{ s }}, серия {{ e }}{% endblocktranslate %}">
+                        <span class="poster-card__progress-bar"></span>
+                    </span>
                 {% endif %}
             {% endwith %}
-        </div>
+        </span>
 
-        <div class="lb-shortstory__info">
-            <h3 class="lb-shortstory__title">
-                <a href="{{ title.get_absolute_url }}" title="{{ title.name }}">{{ title.name }}</a>
-            </h3>
-            {% if title.original_name %}
-                <p class="lb-shortstory__original">{{ title.original_name }}</p>
-            {% endif %}
+        <h3 class="poster-card__title">{{ title.name }}</h3>
+    </a>
 
-            <div class="lb-shortstory__meta">
-                {% if title.rating_average %}
-                    <span class="lb-shortstory__rating">
-                        {% icon "star" size=12 %}
-                        <span class="lb-rating-stars" aria-hidden="true">
-                            <span class="lb-rating-stars__bg">★★★★★</span>
-                            <span class="lb-rating-stars__fill" style="width: {% widthratio title.rating_average 10 100 %}%">★★★★★</span>
-                        </span>
-                        <span class="lb-rating-value">{{ title.rating_average|floatformat:1 }}</span>
-                        <span class="lb-shortstory__rating-count">/10 · {{ title.rating_count|default:0 }} {% trans "гол." %}</span>
-                    </span>
-                {% endif %}
-                {% if title.release_year %}
-                    <span class="lb-shortstory__year"><span class="lb-shortstory__label">{% trans "Год:" %}</span><a href="{% url 'catalog:title_list' %}?year={{ title.release_year }}">{{ title.release_year }}</a></span>
-                {% endif %}
-                {% if title.countries.all %}
-                    <span class="lb-shortstory__country"><span class="lb-shortstory__label">{% trans "Страна:" %}</span>
-                        {% for country in title.countries.all|slice:":2" %}
-                            <a href="{% url 'catalog:country_titles' country.slug %}">{{ country.name }}</a>{% if not forloop.last %}, {% endif %}
-                        {% endfor %}
-                    </span>
-                {% endif %}
-                {% if title.genres.all %}
-                    <span class="lb-shortstory__genres"><span class="lb-shortstory__label">{% trans "Жанр:" %}</span>
-                        {% for genre in title.genres.all|slice:":3" %}
-                            <a href="{% url 'catalog:genre_titles' genre.slug %}">{{ genre.name }}</a>{% if not forloop.last %}, {% endif %}
-                        {% endfor %}
-                    </span>
-                {% endif %}
-                {% if title.duration_minutes %}
-                    <span class="lb-shortstory__duration"><span class="lb-shortstory__label">{% trans "Длительность:" %}</span>{% icon "clock" size=12 %} {{ title.duration_minutes }} {% trans "мин" %}</span>
-                {% endif %}
-                {% if title.quality %}
-                    <span class="lb-shortstory__quality"><span class="lb-shortstory__label">{% trans "Качество:" %}</span>{{ title.quality }}</span>
-                {% endif %}
-                {% if title.voice_acting %}
-                    <span class="lb-shortstory__quality"><span class="lb-shortstory__label">{% trans "Озвучка:" %}</span>{{ title.get_voice_acting_display }}</span>
-                {% endif %}
-                {% if title.views_count %}
-                    <span class="lb-shortstory__quality"><span class="lb-shortstory__label">{% trans "Просмотры:" %}</span>{{ title.views_count }}</span>
-                {% endif %}
-                {% if title.kp_rating or title.imdb_rating %}
-                    <span class="lb-shortstory__external">
-                        {% if title.kp_rating %}<span>КП {{ title.kp_rating|stringformat:".1f" }}</span>{% endif %}
-                        {% if title.imdb_rating %}<span>IMDb {{ title.imdb_rating|stringformat:".1f" }}</span>{% endif %}
-                    </span>
-                {% endif %}
-            </div>
-
-            {% if title.short_description or title.description %}
-                <p class="lb-shortstory__excerpt">{{ title.short_description|default:title.description|truncatewords:40 }}</p>
-            {% endif %}
-
-            <div class="lb-shortstory__footer">
-                {% comment %} name через with: точечная переменная внутри blocktranslate
-                   не резолвится и название пропадало из подсказки. {% endcomment %}
-                <a class="lb-watch" href="{{ title.get_absolute_url }}" title="{% blocktranslate with name=title.name %}Смотреть {{ name }} онлайн{% endblocktranslate %}">
-                    {% icon "play" size=14 %} {% trans "Смотреть онлайн" %}
-                </a>
-                {% if character %}
-                    <span class="lb-shortstory__character" aria-label="{% blocktranslate %}Роль: {{ character }}{% endblocktranslate %}">{{ character }}</span>
-                {% endif %}
-                {% if title.published_at %}
-                    <time class="lb-shortstory__time" datetime="{{ title.published_at|date:'c' }}">{{ title.published_at|lb_posted }}</time>
-                {% endif %}
-            </div>
-        </div>
-    </div>
+    <p class="poster-card__meta">
+        {% if title.release_year %}<span>{{ title.release_year }}</span>{% endif %}
+        {% if character %}<span class="poster-card__character">{{ character }}</span>{% endif %}
+        {% if title.rating_average %}
+            <span class="poster-card__rating">
+                {% icon "star" size=12 %}{{ title.rating_average|floatformat:1 }}
+            </span>
+        {% endif %}
+    </p>
 </article>

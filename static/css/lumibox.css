@@ -426,421 +426,12 @@
 }
 
 
-/* ---------- Карточка фильма (shortStory) ----------
-
-   Единственное место, где описывается карточка. Все её правила держим
-   здесь: раньше половина лежала на тысячу строк ниже, и правки отменяли
-   друг друга.
-
-   Поверхность собрана из токенов: своя подложка, граница и скругление
-   превращают карточку в отдельный объект. До этого у неё не было ни
-   рамки, ни скругления, а внутренний отступ шёл только по бокам и снизу —
-   заголовок прилипал к верхнему краю, и всё вместе читалось как текст на
-   фоне страницы, а не как карточка.
-*/
-
-.lb-shortstory {
-    position: relative;
-    padding: var(--space-4);
-    border: var(--card-border);
-    border-radius: var(--card-radius);
-    background: var(--card-bg);
-    box-shadow: var(--card-shadow);
-    /* Анимируем только тень, границу и сдвиг. background в переходе не
-       участвует намеренно: анимация градиента заставляет браузер
-       перерисовывать всю площадь карточки на каждом кадре. */
-    transition: transform var(--transition),
-                box-shadow var(--transition),
-                border-color var(--transition);
-}
-
-.lb-shortstory:hover {
-    transform: var(--card-lift);
-    border-color: var(--card-border-hover);
-    box-shadow: var(--card-shadow-hover);
-}
-
-/* Шапка карточки снята: название и мета-данные теперь живут в правой
-   колонке (см. .lb-shortstory__title ниже), иерархия читается сверху вниз:
-   постер → название → рейтинг → год → жанры → длительность → кнопка. */
-
-.lb-shortstory__title {
-    margin: 0;
-    min-width: 0;
-    color: var(--color-text-strong);
-    font-size: var(--text-lg);
-    font-weight: 700;
-    line-height: 1.25;
-    letter-spacing: -0.01em;
-}
-
-.lb-shortstory__title a {
-    color: var(--color-text);
-    text-decoration: none;
-    transition: color var(--transition-fast), text-shadow var(--transition-fast);
-}
-
-.lb-shortstory__title a:hover {
-    color: var(--color-accent);
-    text-shadow: 0 0 16px rgba(var(--color-accent-rgb), 0.5);
-}
-
-.lb-shortstory__original {
-    margin-top: var(--space-1);
-    color: var(--color-text-dim);
-    font-size: var(--text-sm);
-}
-
-/* Мета-строка: рейтинг · год · жанры · длительность в одну линию. */
-.lb-shortstory__meta {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: var(--space-2) var(--space-4);
-    margin-top: var(--space-3);
-}
-
-.lb-shortstory__rating {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-1);
-    padding: var(--space-1) var(--space-2);
-    border-radius: var(--radius-sm);
-    background: var(--color-accent-dim);
-    border: 1px solid rgba(var(--color-accent-rgb), 0.2);
-    color: var(--color-accent);
-    font-size: var(--text-sm);
-    font-weight: 700;
-}
-
-.lb-shortstory__rating-count {
-    color: var(--color-text-muted);
-    font-weight: 400;
-    font-size: var(--text-xs);
-}
-
-.lb-shortstory__year a,
-.lb-shortstory__genres a {
-    color: var(--color-text-soft);
-    font-size: var(--text-sm);
-    text-decoration: none;
-    transition: color 0.12s ease;
-}
-
-.lb-shortstory__year a:hover,
-.lb-shortstory__genres a:hover {
-    color: var(--color-accent);
-}
-
-.lb-shortstory__duration {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-1);
-    color: var(--color-text-muted);
-    font-size: var(--text-sm);
-}
-
-.lb-shortstory__quality {
-    padding: var(--space-1) var(--space-2);
-    border-radius: var(--radius-sm);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    color: var(--color-text-soft);
-    font-size: var(--text-xs);
-    font-weight: 600;
-}
-
-.lb-shortstory__external {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-2);
-    color: var(--color-text-muted);
-    font-size: var(--text-xs);
-}
-
-.lb-shortstory__external span + span::before {
-    content: "·";
-    margin-right: var(--space-2);
-    opacity: 0.5;
-}
-
-.lb-shortstory__body {
-    display: grid;
-    /* Ширина постера в процентах делала его разным в каталоге, избранном
-       и профиле — контейнеры там разной ширины, и карточка выглядела
-       по-разному на каждой странице. clamp даёт постоянный размер с
-       разумными границами: карточка одинакова везде. */
-    grid-template-columns: clamp(140px, 30%, 210px) 1fr;
-    gap: var(--space-5);
-}
-
-.lb-shortstory__poster {
-    position: relative;
-    background: var(--color-card);
-    overflow: hidden;
-    border-radius: var(--radius-md);
-    /* Внутренняя светлая кромка отделяет постер от фона карточки,
-       не добавляя внешней рамки — та утяжелила бы композицию. */
-    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
-}
-
-.lb-shortstory__poster > a {
-    position: relative;
-    display: block;
-}
-
-/*
-  Одно намерение ховера вместо двух. Раньше это правило задавало
-  scale(1.05), а другое, на тысячу строк ниже, — translateY(-2px)
-  для того же селектора. Побеждало последнее, и задуманное увеличение
-  просто не работало. Оставлен подъём: масштабирование внутри
-  overflow: hidden даёт дрожание краёв во время анимации.
-*/
-.lb-shortstory__poster a:hover img {
-    opacity: 1;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.55),
-                0 0 0 2px rgba(var(--color-accent-rgb), 0.4),
-                0 0 22px rgba(var(--color-accent-rgb), 0.25);
-}
-
-.lb-shortstory__poster img {
-    display: block;
-    width: 100%;
-    height: auto;
-    aspect-ratio: 2 / 3;
-    object-fit: cover;
-    object-position: center top;
-    background: var(--color-card);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45);
-    transition: opacity var(--transition), transform var(--transition), box-shadow var(--transition);
-}
-
 /* Затемнение снизу + кнопка воспроизведения при наведении */
-.lb-shortstory__poster a::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(180deg, transparent 50%, rgba(7, 8, 13, 0.6) 100%);
-    opacity: 0;
-    transition: opacity 0.2s ease;
-    pointer-events: none;
-}
-
-.lb-shortstory__poster a:hover::after {
-    opacity: 1;
-}
-
-.lb-shortstory__play {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%) scale(0.5);
-    display: grid;
-    place-items: center;
-    width: 62px;
-    height: 62px;
-    border-radius: 50%;
-    background: rgba(7, 8, 13, 0.72);
-    border: 1px solid rgba(255, 255, 255, 0.22);
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
-    color: var(--color-dark-text-bright);
-    opacity: 0;
-    backdrop-filter: blur(6px);
-    transition: opacity 0.15s ease, transform 0.15s ease;
-    pointer-events: none;
-    z-index: 1;
-}
-
-.lb-shortstory__poster a:hover .lb-shortstory__play {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(1);
-}
-
-.lb-shortstory__poster a:hover .lb-shortstory__play svg {
-    filter: drop-shadow(0 0 8px rgba(var(--color-accent-rgb), 0.8));
-}
-
-/* Бейджи на постере: возрастное ограничение и тип */
-.lb-badge {
-    position: absolute;
-    z-index: 2;
-    padding: var(--space-1) var(--space-2);
-    border-radius: var(--radius-sm);
-    font-size: var(--text-2xs);
-    font-weight: 700;
-    letter-spacing: 0.05em;
-    line-height: 1.6;
-    text-transform: uppercase;
-    pointer-events: none;
-}
-
-.lb-badge--age {
-    top: var(--space-2);
-    left: var(--space-2);
-    color: var(--color-dark-text-bright);
-    background: rgba(7, 8, 13, 0.78);
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    backdrop-filter: blur(4px);
-}
-
-/*
-  Оба бейджа на постере — одна система: тёмное стекло с тонкой рамкой.
-  Тип раньше был сплошной оранжевой плашкой со свечением, и на восьми
-  карточках подряд это давало восемь ярких пятен, спорящих с кнопкой
-  «Смотреть онлайн» — единственным местом, где акцент действительно нужен.
-  Здесь оранжевый остаётся только в тексте и рамке: тип по-прежнему
-  считывается мгновенно, но не кричит.
-*/
-.lb-badge--type {
-    top: var(--space-2);
-    right: var(--space-2);
-    color: var(--color-accent);
-    background: rgba(7, 8, 13, 0.78);
-    border: 1px solid rgba(var(--color-accent-rgb), 0.45);
-    backdrop-filter: blur(4px);
-}
-
-/*
-  «Смотреть с S1E3» — продолжение просмотра поверх постера. Тот же
-  стеклянный стиль, что у бейджей, но это полноценная ссылка, поэтому
-  z-index выше (играет и как кнопка), и фон чуть плотнее — поверх
-  постера текст должен оставаться читаемым.
-*/
-.lb-shortstory__resume {
-    position: absolute;
-    left: var(--space-2);
-    right: var(--space-2);
-    bottom: var(--space-2);
-    z-index: 3;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    padding: var(--space-1) var(--space-2);
-    border-radius: var(--radius-sm);
-    font-size: var(--text-2xs);
-    font-weight: 700;
-    letter-spacing: 0.03em;
-    line-height: 1.6;
-    color: var(--color-dark-text-bright);
-    background: rgba(7, 8, 13, 0.86);
-    border: 1px solid rgba(var(--color-accent-rgb), 0.55);
-    backdrop-filter: blur(6px);
-    transition: background var(--transition-fast), border-color var(--transition-fast);
-}
-
-.lb-shortstory__resume:hover {
-    background: rgba(var(--color-accent-rgb), 0.22);
-    border-color: var(--color-accent);
-}
-
-.lb-shortstory__poster-fallback {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    width: 100%;
-    height: auto;
-    aspect-ratio: 2 / 3;
-    color: var(--color-text-dim);
-    background:
-        radial-gradient(120% 60% at 50% 0%, rgba(var(--color-accent-rgb), 0.08), transparent 65%),
-        linear-gradient(160deg, var(--color-surface-3) 0%, var(--color-card-hover) 60%, var(--color-surface-deep) 100%);
-    border-radius: var(--radius-sm);
-    transition: color var(--transition-fast), box-shadow var(--transition-fast);
-}
-
-.lb-shortstory__poster a:hover .lb-shortstory__poster-fallback {
-    color: var(--color-accent);
-    box-shadow: inset 0 0 0 1px rgba(var(--color-accent-rgb), 0.25);
-}
-
-.lb-shortstory__poster-fallback-name {
-    max-width: 80%;
-    font-size: var(--text-2xs);
-    font-weight: 600;
-    text-align: center;
-    overflow: hidden;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-}
-
-.lb-shortstory__character {
-    color: var(--color-text);
-    font-size: var(--text-xs);
-    line-height: 1.4;
-    max-height: 38px;
-    overflow: hidden;
-}
-
-.lb-shortstory__character::before {
-    content: "★";
-    color: var(--color-accent);
-    margin-right: 6px;
-    font-size: 9px;
-    vertical-align: 1px;
-}
-
-.lb-shortstory__info {
-    font-size: var(--text-sm);
-    min-width: 0;
-    line-height: 1.45;
-}
-
-/* Строки «Оригинальное название», «Страна», «Режиссёр» сняты: всё это
-   есть на странице фильма. В карточке остаётся только иерархия из
-   брифа: название, рейтинг, год, жанры, длительность, описание, CTA. */
-
-.lb-shortstory__excerpt {
-    margin: var(--space-3) 0 0;
-    color: var(--color-text-soft);
-    font-size: var(--text-xs);
-    /* 1.65 вместо 1.55: описание — самый длинный текст в карточке,
-       более просторная строка заметно облегчает его чтение. */
-    line-height: 1.65;
-}
-
-.lb-shortstory__footer {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: var(--space-4);
-    margin-top: var(--space-4);
-}
 
 /* Заливка и тень — из общих значений кнопки (components.css).
    Своих числовых значений здесь больше нет: раньше эта кнопка,
    кнопка входа и кнопка промо-зоны задавали один и тот же градиент
    тремя разными наборами чисел, и правка одного не касалась двух других. */
-.lb-watch {
-    background: var(--btn-fill);
-    border: 0;
-    color: var(--color-on-accent);
-    border-radius: var(--btn-radius-pill);
-    padding: var(--space-2) var(--space-5);
-    text-decoration: none;
-    display: block;
-    width: fit-content;
-    font-size: var(--text-sm);
-    font-weight: 700;
-    box-shadow: var(--btn-shadow);
-    transition: background var(--transition-fast), box-shadow var(--transition-fast), transform var(--transition-fast);
-}
-
-.lb-watch:hover {
-    background: var(--btn-fill-hover);
-    color: var(--color-on-accent);
-    transform: translateY(-1px);
-    box-shadow: var(--btn-shadow-hover);
-}
-
-.lb-shortstory__time {
-    margin-left: auto;
-    color: var(--color-text-muted);
-    font-size: var(--text-xs);
-}
 
 /* ---------- Пагинация (pagiNation) ---------- */
 
@@ -1282,22 +873,6 @@
         max-height: none;
         overflow: visible;
     }
-    .lb-shortstory__body {
-        grid-template-columns: 150px auto;
-        gap: var(--space-3);
-        min-height: 0;
-    }
-
-    .lb-shortstory__poster img {
-        width: 150px;
-        height: 225px;
-    }
-
-    .lb-shortstory__poster-fallback {
-        width: 150px;
-        height: 225px;
-    }
-
 
     .lb-promo__inner {
         flex-wrap: wrap;
@@ -1335,12 +910,6 @@
     /* Тач-таргеты: всё, что в десктопной версии ниже 44px, на мобильной
        поднимаем до стандарта. Кнопка «Смотреть» в карточке, промо-кнопка,
        чипы жанров, ссылки футера. */
-    .lb-watch {
-        min-height: 44px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-    }
 
     .lb-promo__btn {
         min-height: 44px;
@@ -1364,15 +933,6 @@
    остальное (промо, сортировка, пагинация) — на всю ширину. */
 @media (min-width: 600px) and (max-width: 899px) {
     /* В двух колонках постер 150px вытеснил бы текст — возвращаем 130. */
-    .lb-shortstory__body {
-        grid-template-columns: 130px auto;
-    }
-
-    .lb-shortstory__poster img,
-    .lb-shortstory__poster-fallback {
-        width: 130px;
-        height: 195px;
-    }
 
     .lb-main {
         display: grid;
@@ -1385,35 +945,10 @@
         min-width: 0;
     }
 
-    .lb-main > :not(.lb-shortstory) {
-        grid-column: 1 / -1;
-    }
 }
 
 @media (max-width: 420px) {
-    .lb-shortstory__rating-count {
-        display: none;
-    }
 
-    .lb-shortstory__body {
-        grid-template-columns: 120px auto;
-        gap: var(--space-3);
-        min-height: 0;
-    }
-
-    .lb-shortstory__poster img {
-        width: 120px;
-        height: 165px;
-    }
-
-    .lb-shortstory__poster-fallback {
-        width: 120px;
-        height: 165px;
-    }
-
-    .lb-shortstory__footer {
-        gap: 1em;
-    }
 }
 
 /* На самых узких экранах тонкая верхняя полоса — лишняя вертикаль над
@@ -1621,17 +1156,6 @@
         align-items: center;
     }
 
-    .lb-shortstory__title a,
-    .lb-shortstory__year a,
-    .lb-shortstory__genres a,
-    .lb-shortstory__country a {
-        padding-top: 10px;
-        padding-bottom: 10px;
-        min-height: 44px;
-        display: inline-flex;
-        align-items: center;
-    }
-
     .footer-nav__link {
         min-height: 44px;
         display: inline-flex;
@@ -1734,8 +1258,6 @@
    поле поиска с подсветкой на 20px. Пять источников света в одной полосе
    высотой 82px, и ни один из них не помогал ничего найти. */
 
-/* Правила кнопки входа сведены к её основному описанию выше — она была
-   описана дважды в разных концах файла, как и карточка. */
 
 /* Навигация: активный пункт — янтарная пилюля */
 
@@ -1831,10 +1353,6 @@
     box-shadow: inset 2px 0 0 var(--color-accent);
 }
 
-/* Правила карточки, лежавшие здесь, сведены к её основному описанию выше.
-   Раньше один и тот же селектор описывался в двух местах файла, и правки
-   молча отменяли друг друга: постеру задавался scale(1.05) наверху и
-   translateY(-2px) здесь — увеличение не работало вовсе. */
 
 /* Пагинация: текущая страница — светящаяся янтарная пилюля */
 
@@ -1912,47 +1430,6 @@
     color: transparent;
 }
 
-/* ---------- Звёздный рейтинг в карточке ----------
-   Звёзды (5-балльная шкала рейтинга) показываются только на мобильной
-   версии: десктопный вид карточки не меняется. Заполнение идёт от
-   10-балльного rating_average через widthratio в шаблоне. */
-
-.lb-rating-stars {
-    display: none;
-    position: relative;
-    line-height: 1;
-    font-size: 13px;
-    letter-spacing: 2px;
-    white-space: nowrap;
-    color: #555555;
-}
-
-.lb-rating-stars__fill {
-    position: absolute;
-    top: 0;
-    left: 0;
-    overflow: hidden;
-    white-space: nowrap;
-    color: #ffc107;
-}
-
-.lb-shortstory__label {
-    display: none;
-}
-
-/* =====================================================================
-   РАСКЛАДКА КАРТОЧЕК НА ТЕЛЕФОНЕ (≤599px)
-
-   Здесь меняется только устройство карточки под узкий экран: заголовок
-   и рейтинг переезжают над постером, мета-данные встают колонкой,
-   кнопка просмотра растягивается на всю ширину, промо-зона превращается
-   в карусель постеров.
-
-   Цвета — только из токенов variables.css. Раньше блок был написан
-   отдельной палитрой в жёстких hex, и на телефоне сайт жил по своей
-   дизайн-системе: светлая тема ниже 599px не применялась, названия
-   фильмов оставались почти белыми на белом фоне.
-   ===================================================================== */
 
 /* ---------- Шапка карточки (sHead + hRating) ----------
    Заголовок и звёздный рейтинг над постером: на узком экране
@@ -1960,44 +1437,7 @@
    что заголовок и рейтинг живут в info-колонке. В мобильном блоке
    ниже (≤599px) шапка показывается, а дубли в info-колонке прячутся.
    Базовое правило стоит ДО медиазапроса, иначе display:none перебил
-   бы мобильный display:block из-за порядка в файле. */
-
-.lb-shortstory__head {
-    display: none;
-}
-
-.lb-shortstory__head-title {
-    margin: 0;
-    font-size: var(--text-md);
-    font-weight: 700;
-    line-height: 1.25;
-    color: var(--color-text);
-}
-
-.lb-shortstory__head-title a {
-    color: var(--color-text);
-    text-decoration: none;
-}
-
-.lb-shortstory__head-title a:hover {
-    color: var(--color-accent);
-}
-
-.lb-shortstory__head-rating {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    margin-top: 4px;
-    font-size: 13px;
-}
-
-.lb-shortstory__head-original {
-    margin: 2px 0 0;
-    font-size: 12px;
-    color: var(--color-text-dim);
-}
-
-@media (max-width: 599px) {
+   бы мобильный display:block из-за порядка в файле. */@media (max-width: 599px) {
     /* Здесь переопределялись 22 токена :root — своя палитра «для мобильного».
        Из-за этого ниже 599px сайт жил по другой дизайн-системе и, главное,
        переставал слушаться светлой темы: [data-theme="light"] задаёт токены
@@ -2008,171 +1448,7 @@
        темы работают везде. Отличия мобильной вёрстки остались ниже — они
        касаются размеров и раскладки, а не цвета. */
 
-    /* --- Карточка: плотная плашка с малым радиусом --- */
-    .lb-shortstory {
-        border-radius: 6px;
-        padding: 14px;
-    }
-
-    .lb-shortstory__title {
-        font-size: var(--text-md);
-    }
-
-    .lb-shortstory__original {
-        font-size: 12px;
-        color: var(--color-text-dim);
-    }
-
-    /* Мета-данные колонкой: в строку они на узком экране не помещались */
-    .lb-shortstory__meta {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 2px;
-        margin-top: 10px;
-    }
-
-    .lb-shortstory__meta > span {
-        display: inline-flex;
-        align-items: baseline;
-        flex-wrap: wrap;
-        gap: 0 6px;
-        font-size: 12px;
-    }
-
-    .lb-shortstory__label {
-        display: inline;
-        color: var(--color-text-strong);
-        font-weight: 700;
-    }
-
-.lb-shortstory__year a,
-.lb-shortstory__genres a,
-.lb-shortstory__country a {
-    color: var(--color-text-soft);
-    font-size: 12px;
-}
-
-    .lb-shortstory__year a:hover,
-    .lb-shortstory__genres a:hover,
-    .lb-shortstory__country a:hover {
-        color: var(--color-accent);
-    }
-
-    .lb-shortstory__duration {
-        color: var(--color-text-muted);
-        font-size: 12px;
-    }
-
-    .lb-shortstory__quality {
-        border-color: var(--color-border-strong);
-        color: var(--color-text-soft);
-        font-size: 11px;
-    }
-
-    .lb-shortstory__external {
-        color: var(--color-text-soft);
-        font-size: 12px;
-    }
-
-    /* Рейтинг: звёзды без плашки — на узком экране плашка съедала строку */
-    .lb-shortstory__rating {
-        background: none;
-        border: 0;
-        padding: 0;
-        border-radius: 0;
-        gap: 5px;
-        font-size: 13px;
-        margin-bottom: 2px;
-    }
-
-    .lb-shortstory__rating > svg {
-        display: none;
-    }
-
-    .lb-rating-stars {
-        display: inline-flex;
-        vertical-align: -1px;
-    }
-
-    .lb-rating-value {
-        color: var(--color-accent);
-        font-weight: 700;
-    }
-
-    .lb-shortstory__rating-count {
-        color: var(--color-text-dim);
-        font-size: 11px;
-    }
-
-    /* Шапка карточки (sHead + hRating): заголовок и звёзды над постером.
-       В info-колонке заголовок и рейтинг прячем — они переехали сюда,
-       иначе текст дублировался бы дважды. */
-    .lb-shortstory__head {
-        display: block;
-        margin-bottom: 10px;
-    }
-
-    .lb-shortstory__head-title {
-        color: var(--color-text-strong);
-        font-size: var(--text-md);
-    }
-
-    .lb-shortstory__head-title a {
-        color: var(--color-text-strong);
-    }
-
-    .lb-shortstory__head-original {
-        color: var(--color-text-dim);
-    }
-
-    .lb-shortstory__info .lb-shortstory__title,
-    .lb-shortstory__info .lb-shortstory__original,
-    .lb-shortstory__info .lb-shortstory__rating {
-        display: none;
-    }
-
-    /* Кнопка «Смотреть онлайн» на всю ширину: на телефоне это главное
-       действие карточки, и попадать в него надо не целясь. Заливка —
-       общий градиент кнопки (var(--btn-fill)), тот же, что на десктопе:
-       раньше здесь был жёсткий красный из чужой палитры. */
-    .lb-shortstory__footer {
-        gap: 4px;
-        margin-top: 12px;
-        flex-wrap: wrap;
-    }
-
-    .lb-watch {
-        flex: 0 0 100%;
-        width: 100%;
-        min-height: 44px;
-        border-radius: 4px;
-        padding: 12px 16px;
-        background: var(--btn-fill);
-        font-size: 14px;
-        font-weight: 700;
-        box-shadow: var(--btn-shadow);
-    }
-
-    .lb-watch:hover {
-        background: var(--btn-fill-hover);
-        transform: none;
-        box-shadow: var(--btn-shadow-hover);
-    }
-
-    .lb-shortstory__time {
-        margin-left: 0;
-        width: 100%;
-        text-align: center;
-        color: var(--color-text-dim);
-        font-size: 11px;
-    }
-
-    .lb-shortstory__excerpt {
-        font-size: 12px;
-        color: var(--color-text-muted);
-    }
-
-    /* --- Промо-зона: карусель постеров вместо текстового блока --- */
+    /* --- Карточка: плотная плашка с малым радиусом --- */    /* Мета-данные колонкой: в строку они на узком экране не помещались */                /* --- Промо-зона: карусель постеров вместо текстового блока --- */
     .lb-promo {
         background: var(--color-surface-deep);
         border-bottom: 1px solid var(--color-border);
@@ -2428,33 +1704,6 @@
     }
 }
 
-/* =====================================================================
-   Структура: бейдж последней серии, вкладки мультиплеера,
-   панель быстрых сортировок, блок «Популярное» сайдбара.
-   ===================================================================== */
-
-/* Бейдж «10 сезон 5 серия» — под бейджем типа, слева от него. */
-.lb-badge--episode {
-    top: var(--space-2);
-    right: calc(var(--space-2) + 76px);
-    color: var(--color-dark-text-bright);
-    background: rgba(7, 8, 13, 0.78);
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    backdrop-filter: blur(4px);
-}
-
-/* Бейдж качества (WEB-DL 720 и т.п.) — в правом нижнем углу постера,
-   как бейдж quAl. Тот же стеклянный стиль, что у остальных
-   бейджей постера. */
-.lb-badge--quality {
-    bottom: var(--space-2);
-    right: var(--space-2);
-    color: var(--color-dark-text-bright);
-    background: rgba(7, 8, 13, 0.78);
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    backdrop-filter: blur(4px);
-}
-
 
 /* Вкладки мультиплеера: ряд кнопок над плеером. */
 .player-tabs {
@@ -2590,23 +1839,6 @@
     color: var(--color-accent);
 }
 
-/* Светлая тема: бейджи и вкладки читаются на светлом фоне. */
-[data-theme="light"] .lb-badge--age,
-[data-theme="light"] .lb-badge--type,
-[data-theme="light"] .lb-badge--episode {
-    background: rgba(242, 244, 248, 0.9);
-}
-
-[data-theme="light"] .lb-badge--age {
-    color: var(--color-text);
-    border-color: rgba(18, 20, 28, 0.2);
-}
-
-[data-theme="light"] .lb-badge--episode {
-    color: var(--color-text);
-    border-color: rgba(18, 20, 28, 0.2);
-}
-
 /* Панели мультиплеера: атрибут hidden обязан прятать панель, даже если
    авторское правило где-то задаёт display для .player. Без этого обе
    панели (Плеер 1 и Плеер 2) были бы видны одновременно. */
@@ -2626,7 +1858,6 @@
    и помогают, когда телефон подключён к мыши или трекпаду. */
 @media (hover: none) {
     .card:hover,
-    .lb-shortstory:hover,
     .collection-card:hover,
     .reference-card:hover {
         transform: none;

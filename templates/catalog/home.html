@@ -106,13 +106,17 @@
 
                 <h2 class="visually-hidden">{% trans "Каталог фильмов" %}</h2>
 
-                {# ---------- Лента карточек ---------- #}
-                {% for title in home_titles %}
-                    {% include "includes/story_card.html" %}
-                {% empty %}
+                {# ---------- Сетка карточек ---------- #}
+                {% if home_titles %}
+                    <div class="poster-grid">
+                        {% for title in home_titles %}
+                            {% include "includes/story_card.html" %}
+                        {% endfor %}
+                    </div>
+                {% else %}
                     {% trans "Пока нет опубликованных произведений" as empty_title %}
                     {% include "includes/empty_state.html" with empty_inline=True empty_title=empty_title %}
-                {% endfor %}
+                {% endif %}
 
                 {# ---------- Пагинация (pagiNation) ---------- #}
                 {% include "includes/pagination.html" %}

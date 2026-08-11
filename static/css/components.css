@@ -1773,3 +1773,222 @@
 .cookie-consent__accept {
     flex-shrink: 0;
 }
+
+/* ============================================================
+   Карточка-постер и сетка каталога
+
+   Постер — главное, что есть у фильма, и он должен работать как постер:
+   крупно, во весь блок, без обрезки по случайной высоте. Под ним ровно
+   то, что помогает выбрать: название, год и оценка.
+
+   Раньше карточка была горизонтальной и печатала десять полей с подписями;
+   на 1440px одна такая занимала 1024px и была почти пуста, а на экран
+   помещалось полтора фильма. В сетке помещается восемнадцать.
+   ============================================================ */
+
+.poster-grid {
+    display: grid;
+    /* auto-fill, а не auto-fit: при трёх найденных фильмах карточки
+       остаются нормального размера, а не растягиваются на всю ширину. */
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: var(--space-5) var(--space-4);
+    margin-bottom: var(--space-6);
+}
+
+@media (min-width: 768px) {
+    .poster-grid {
+        grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+    }
+}
+
+.poster-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    min-width: 0;
+}
+
+.poster-card__link {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    color: inherit;
+    text-decoration: none;
+    border-radius: var(--radius-md);
+}
+
+/* Рамка постера. Пропорция задана здесь, а не размерами картинки: постеры
+   приходят разной высоты, и без общей пропорции сетка получалась рваной. */
+.poster-card__frame {
+    position: relative;
+    display: block;
+    aspect-ratio: 2 / 3;
+    overflow: hidden;
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-sm);
+    transition: box-shadow var(--transition), transform var(--transition);
+}
+
+.poster-card__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--transition-slow);
+}
+
+.poster-card__fallback {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    color: var(--color-text-dim);
+    background: var(--color-surface-2);
+}
+
+/* Кнопка воспроизведения появляется только под настоящим курсором:
+   на телефоне она висела бы поверх постера постоянно. */
+.poster-card__play {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    color: #fff;
+    background: rgba(7, 8, 13, 0.45);
+    opacity: 0;
+    transition: opacity var(--transition-fast);
+}
+
+.poster-card__badges {
+    position: absolute;
+    top: var(--space-2);
+    left: var(--space-2);
+    z-index: var(--z-raised);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+/* Плашки на постере тёмные в обеих темах: под ними картинка, а не фон
+   страницы, и светлая плашка на светлом кадре исчезает. */
+.poster-card__badge {
+    padding: 2px var(--space-2);
+    border-radius: var(--radius-sm);
+    background: var(--color-overlay);
+    color: var(--color-dark-text-bright);
+    font-size: var(--text-2xs);
+    font-weight: 600;
+    line-height: 1.6;
+    letter-spacing: var(--tracking-normal);
+    backdrop-filter: blur(4px);
+}
+
+.poster-card__badge--quality {
+    color: var(--color-accent-soft);
+}
+
+.poster-card__episode {
+    position: absolute;
+    right: var(--space-2);
+    bottom: var(--space-2);
+    z-index: var(--z-raised);
+    padding: 2px var(--space-2);
+    border-radius: var(--radius-sm);
+    background: var(--color-overlay);
+    color: var(--color-dark-text-bright);
+    font-size: var(--text-2xs);
+    font-weight: 600;
+    backdrop-filter: blur(4px);
+}
+
+/* Начатый фильм отмечен полосой по низу постера. Раньше это была ссылка
+   «Смотреть с S1E1» отдельной строкой под карточкой — она занимала место
+   и вела туда же, куда и сама карточка. */
+.poster-card__progress {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 3px;
+    background: rgba(7, 8, 13, 0.55);
+}
+
+.poster-card__progress-bar {
+    display: block;
+    width: 100%;
+    height: 100%;
+    background: var(--color-accent);
+}
+
+.poster-card__title {
+    font-size: var(--text-sm);
+    font-weight: 600;
+    line-height: var(--leading-snug);
+    letter-spacing: var(--tracking-normal);
+    /* Две строки — потолок: третья ломает ритм сетки, а имя фильма редко
+       требует больше. Остаток обрезается многоточием, а не пропадает. */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.poster-card__meta {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    color: var(--color-text-dim);
+    font-size: var(--text-xs);
+}
+
+.poster-card__rating {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    margin-left: auto;
+    color: var(--color-text-soft);
+    font-weight: 600;
+}
+
+.poster-card__rating .icon {
+    color: var(--color-accent);
+}
+
+.poster-card__character {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Наведение — только там, где есть чем наводить. На тач-экране :hover
+   срабатывает по тапу и остаётся висеть до касания в другом месте. */
+@media (hover: hover) {
+    .poster-card__link:hover .poster-card__frame {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-raise);
+    }
+
+    .poster-card__link:hover .poster-card__image {
+        transform: scale(1.04);
+    }
+
+    .poster-card__link:hover .poster-card__play {
+        opacity: 1;
+    }
+
+    .poster-card__link:hover .poster-card__title {
+        color: var(--color-accent);
+    }
+}
+
+/* Кольцо фокуса рисуем на рамке постера, а не на всей ссылке: иначе оно
+   обводит и подпись, и получается прямоугольник вокруг двух разных блоков. */
+.poster-card__link:focus-visible {
+    outline: none;
+    box-shadow: none;
+}
+
+.poster-card__link:focus-visible .poster-card__frame {
+    box-shadow: var(--focus-ring);
+}
