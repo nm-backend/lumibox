@@ -126,7 +126,7 @@ def convert_field(field, widths: tuple[int, ...] = ()) -> str | None:
             if width >= image.width:
                 continue
             height = round(image.height * width / image.width)
-            resized = image.resize((width, height), Image.LANCZOS)
+            resized = image.resize((width, height), Image.Resampling.LANCZOS)
             storage.save(webp_name(name, width), ContentFile(_encode(resized)))
             logger.debug("WebP %spx создан для %s", width, name)
 
