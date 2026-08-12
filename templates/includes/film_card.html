@@ -2,10 +2,11 @@
 {% comment %}
    Детальная карточка фильма — главный блок ленты главной страницы.
 
-   Строение повторяет пост медиа-портала: шапка с названием и рейтингом,
-   бейджи типа и года, постер с колонкой метаданных (год, страна, жанр,
-   актёры, описание) и строка действий внизу. Постер несёт ровно два
-   бейджа: тип и качество (или возраст), как в компактной карточке.
+   Строение повторяет пост медиа-портала: шапка с названием, годом в скобках
+   и рейтингом (звёзды + число), бейджи типа и качества, постер с колонкой
+   метаданных (год, страна, жанр, режиссёр, актёры, описание) и нижней
+   панелью: дата добавления, просмотры, кнопка «Смотреть». Постер несёт ровно
+   два бейджа: тип и качество (или возраст), как в компактной карточке.
 
    Актёры приходят фильтром lb_crew из prefetch'а participations —
    без новых запросов к базе: вьюха собирает ленту через with_crew().
@@ -15,6 +16,7 @@
     <header class="film-card__head">
         <h3 class="film-card__name">
             <a href="{{ title.get_absolute_url }}">{{ title.name }}</a>
+            {% if title.release_year %}<span class="film-card__year">({{ title.release_year }})</span>{% endif %}
         </h3>
 
         {% if title.rating_average %}
@@ -34,9 +36,6 @@
 
     <p class="film-card__badges">
         <span class="film-card__badge">{{ title.get_type_display }}</span>
-        {% if title.release_year %}
-            <span class="film-card__badge">{{ title.release_year }}</span>
-        {% endif %}
         {% if title.quality %}
             <span class="film-card__badge film-card__badge--quality">{{ title.quality }}</span>
         {% endif %}
@@ -110,6 +109,14 @@
                         <dd>{% for genre in title.genres.all %}{% if not forloop.first %}, {% endif %}{{ genre.name }}{% endfor %}</dd>
                     </div>
                 {% endif %}
+                {% with crew=title|lb_crew:"director" %}
+                    {% if crew %}
+                        <div class="film-card__meta-row">
+                            <dt>{% trans "Режиссёр" %}</dt>
+                            <dd>{{ crew }}</dd>
+                        </div>
+                    {% endif %}
+                {% endwith %}
                 {% with crew=title|lb_crew:"actor" %}
                     {% if crew %}
                         <div class="film-card__meta-row">
@@ -124,6 +131,9 @@
 
     <footer class="film-card__foot">
         <div class="film-card__chips">
+            {% if title.published_at %}
+                <span class="film-card__chip">{% blocktranslate with date=title.published_at|date:"d.m.Y" %}Добавлен: {{ date }}{% endblocktranslate %}</span>
+            {% endif %}
             {% if title.views_count %}
                 <span class="film-card__chip">{{ title.views_count }} {% trans "просм." %}</span>
             {% endif %}

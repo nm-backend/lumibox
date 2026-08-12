@@ -733,6 +733,9 @@ msgstr "To build personal recommendations"
 msgid "Добавлено в «Смотреть позже»"
 msgstr "Added to watch later"
 
+msgid "Добавлен: %(date)s"
+msgstr "Added: %(date)s"
+
 msgid "Добавлено в избранное"
 msgstr "Added to favorites"
 

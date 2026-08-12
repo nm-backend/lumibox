@@ -175,26 +175,41 @@
 .lb-topnav__link {
     display: block;
     flex-shrink: 0;
-    padding: 0 var(--space-2);
+    margin: 4px 0;
+    padding: 0 14px;
     font-size: 0.8125rem;
     font-weight: 600;
-    line-height: 36px;
-    color: var(--color-text);
+    line-height: 30px;
+    color: #fff;
     text-decoration: none;
-    border-radius: 0;
-    background: transparent;
+    border: 1px solid var(--color-border-soft);
+    border-radius: var(--radius-full);
+    background: linear-gradient(180deg, #4a4a4f 0%, #3c3c41 100%);
     white-space: nowrap;
     transition: background var(--transition-fast), color var(--transition-fast);
 }
 
 .lb-topnav__link:hover {
-    background: var(--color-surface-hover);
-    color: var(--color-text);
+    background: linear-gradient(180deg, #55555b 0%, #47474d 100%);
+    color: #fff;
 }
 
-.lb-topnav__link--active {
-    background: transparent;
-    color: var(--color-accent);
+.lb-topnav__link--active,
+.lb-topnav__link--active:hover {
+    border-color: transparent;
+    background: linear-gradient(180deg, #d1362a 0%, #b3271d 100%);
+    color: #fff;
+}
+
+/* Светлая тема: серые пилюли с тёмным текстом, активная — та же красная. */
+[data-theme="light"] .lb-topnav__link {
+    background: linear-gradient(180deg, #e9e9ee 0%, #dcdce2 100%);
+    color: var(--color-text-strong);
+}
+
+[data-theme="light"] .lb-topnav__link:hover {
+    background: linear-gradient(180deg, #dedee4 0%, #d2d2d8 100%);
+    color: var(--color-text-strong);
 }
 
 /* ---------- Промо-зона на месте рекламного баннера ---------- */
@@ -1260,23 +1275,24 @@
    высотой 82px, и ни один из них не помогал ничего найти. */
 
 
-/* Навигация в шапке по центру: активный пункт отмечен чертой под ним.
-   Черта нейтральная, без акцента — цвет на странице только у действия. */
+/* Навигация в шапке по центру: пункты — пилюли с градиентом, активный —
+   красный градиент с белым текстом, остальные — серые, как у кино-портала. */
 
 .lb-topnav {
     background: transparent;
 }
 
 .lb-topnav__link:hover {
-    background: var(--color-surface-hover);
-    color: var(--color-text);
+    background: linear-gradient(180deg, #55555b 0%, #47474d 100%);
+    color: #fff;
 }
 
 .lb-topnav__link--active,
 .lb-topnav__link--active:hover {
-    background: transparent;
-    color: var(--color-text-strong);
-    box-shadow: inset 0 -2px 0 var(--color-border-strong);
+    border-color: transparent;
+    background: linear-gradient(180deg, #d1362a 0%, #b3271d 100%);
+    color: #fff;
+    box-shadow: none;
 }
 
 /* Промо-зона: кинозальный градиент, заголовок-афиша, светящаяся кнопка */

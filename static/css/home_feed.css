@@ -316,6 +316,13 @@
     line-height: var(--leading-snug);
 }
 
+.film-card__year {
+    font-size: 0.95em;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    white-space: nowrap;
+}
+
 .film-card__name a {
     color: var(--color-text-strong);
     text-decoration: none;
@@ -345,13 +352,13 @@
 }
 
 .film-card__star--on {
-    color: var(--color-text-strong);
+    color: var(--color-accent);
 }
 
 .film-card__rating-value {
     font-size: var(--text-md);
     font-weight: 700;
-    color: var(--color-text-strong);
+    color: var(--color-accent);
 }
 
 .film-card__badges {
