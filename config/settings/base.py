@@ -344,12 +344,12 @@ LOGIN_REDIRECT_URL = "catalog:home"
 LOGOUT_REDIRECT_URL = "catalog:home"
 
 
-# Поддерживаемые языки: русский, английский, кыргызский.
+# Поддерживаемые языки: русский, английский. Кыргызский был удалён
+# полностью — переводы, переключатель, каталог локали.
 LANGUAGE_CODE = "ru"
 LANGUAGES = [
     ("ru", "Русский"),
     ("en", "English"),
-    ("ky", "Кыргызча"),
 ]
 LOCALE_PATHS = [BASE_DIR / "locale"]
 

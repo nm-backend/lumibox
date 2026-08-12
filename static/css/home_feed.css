@@ -28,10 +28,11 @@
 
 /* ---------- Сайдбар: стеклянные виджеты ---------- */
 
+/* Блочные панели без blur: blur на двадцати карточках заставляет
+   браузер перерисовывать подложку при каждом кадре прокрутки.
+   Размытие осталось только у шапки и выпадающих окон. */
 .sb-card {
     background: var(--glass-bg);
-    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
-    backdrop-filter: blur(var(--glass-blur)) saturate(180%);
     border: 1px solid var(--glass-border);
     border-radius: var(--radius-lg);
     padding: var(--space-5);
@@ -288,8 +289,6 @@
 
 .film-card {
     background: var(--glass-bg);
-    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
-    backdrop-filter: blur(var(--glass-blur)) saturate(180%);
     border: 1px solid var(--glass-border);
     border-radius: var(--radius-lg);
     padding: var(--space-5) var(--space-6);

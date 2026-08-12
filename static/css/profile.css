@@ -20,7 +20,6 @@
     padding: var(--space-6);
     text-align: center;
     background: var(--glass-bg);
-    backdrop-filter: blur(16px);
     border: 1px solid var(--glass-border);
     border-radius: var(--radius-lg);
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);

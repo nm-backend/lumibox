@@ -40,7 +40,7 @@
 | 28 | Email и сброс пароля | 🟡 | SMTP-бэкенд включается по `EMAIL_HOST`, на проде ждёт credentials |
 | — | R2-хранилище (прод) | 🟡 | Код готов, ждёт `AWS_*` / `CLOUDFLARE_R2_PUBLIC_URL` |
 | — | Sentry (прод) | 🟡 | Интеграция готова, ждёт `SENTRY_DSN` |
-| — | Каталоги переводов | ✅ | `scripts/generate_translations.py` собирает сам, без gettext: 461 запись × ru/en/ky, 0 непереведённых |
+| — | Каталоги переводов | ✅ | `scripts/generate_translations.py` собирает сам, без gettext: 465 записей × ru/en, 0 непереведённых |
 | — | Подписка на сериал, запрос фильма, PWA | ⚪️ | Вне объёма осознанно |
 
 ## Доказательства (последний прогон)
@@ -54,7 +54,7 @@ makemigrations --check --dry-run           → No changes detected
 check --deploy --fail-level WARNING        → System check identified no issues
 scripts/check_branding.py                  → чисто
 scripts/smoke_pages.py                     → все 25 URL отдали 200
-python scripts/generate_translations.py    → ru/en/ky: 461 запись, 0 непереведённых
+python scripts/generate_translations.py    → ru/en: 465 записей, 0 непереведённых
 axe через CDP (4 конфигурации)             → 0 violations: light/dark 1920, light 390, авторизованные
 ```
 

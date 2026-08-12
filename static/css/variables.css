@@ -84,7 +84,7 @@
     --scrollbar-thumb-hover: rgba(255, 255, 255, 0.38);
 
     /* Glass — чуть теплее, чем фон */
-    --glass-bg: rgba(29, 29, 31, 0.72);
+    --glass-bg: rgba(29, 29, 31, 0.94);
     --glass-border: rgba(255, 255, 255, 0.1);
     --glass-blur: 20px;
 
@@ -336,7 +336,7 @@
     --color-border-strong: rgba(0, 0, 0, 0.16);
     --scrollbar-thumb: rgba(0, 0, 0, 0.22);
     --scrollbar-thumb-hover: rgba(0, 0, 0, 0.38);
-    --glass-bg: rgba(245, 245, 247, 0.72);
+    --glass-bg: rgba(245, 245, 247, 0.94);
     --glass-border: rgba(0, 0, 0, 0.08);
     /* Тени светлой темы — те же две роли, только мягче: на светлом фоне
        тень той же силы читается как грязь. */
