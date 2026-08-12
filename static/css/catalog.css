@@ -66,7 +66,7 @@
    в свёрнутом виде у неё нет ни фона, ни рамки. Поверхность появляется
    только когда панель раскрыта и внутри действительно есть форма. */
 .filters {
-    margin-bottom: var(--space-5);
+    margin-bottom: var(--space-4);
     border-radius: var(--radius-md);
     transition: background var(--transition-fast);
 }
@@ -236,7 +236,7 @@
     flex-wrap: wrap;
     align-items: center;
     gap: var(--space-3);
-    margin-bottom: var(--space-4);
+    margin-bottom: var(--space-3);
 }
 
 .catalog-controls__count {
