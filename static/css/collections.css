@@ -75,10 +75,9 @@
 
 .collection-card__fallback-label {
     font-size: var(--text-lg);
-    font-weight: 700;
+    font-weight: 800;
     font-family: var(--font-display);
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
+    letter-spacing: var(--tracking-tight);
     opacity: 0.9;
     position: relative;
     z-index: 1;

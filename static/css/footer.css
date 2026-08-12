@@ -79,16 +79,6 @@
     color: var(--color-text);
 }
 
-.footer-nav__title::after {
-    content: "";
-    display: block;
-    width: 24px;
-    height: 2px;
-    margin-top: var(--space-2);
-    border-radius: 2px;
-    background: linear-gradient(90deg, var(--color-accent), transparent);
-}
-
 .footer-nav__list {
     margin: 0;
     padding: 0;
@@ -101,13 +91,11 @@
     color: var(--color-text-muted);
     font-size: var(--text-sm);
     text-decoration: none;
-    transition: color var(--transition-fast), transform var(--transition-fast), text-shadow var(--transition-fast);
+    transition: color var(--transition-fast);
 }
 
 .footer-nav__link:hover {
     color: var(--color-accent);
-    text-shadow: 0 0 14px rgba(var(--color-accent-rgb), 0.45);
-    transform: translateX(3px);
 }
 
 /* ---------- Реквизиты: разработка и руководитель проекта ---------- */

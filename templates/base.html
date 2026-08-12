@@ -36,13 +36,14 @@
 
     <link rel="stylesheet" href="{% static 'css/fonts.css' %}?v={{ static_version }}">
 
-    {% comment %} Preload критичных шрифтов: Bebas Neue для заголовков и Inter 600 для
-       H1 (LCP-элемент на каталоге). font-display: swap всё равно покажет
+    {% comment %} Preload критичных шрифтов: Inter 600 и 700 — для интерфейса
+       и H1 (LCP-элемент на каталоге). font-display: swap всё равно покажет
        текст fallback-шрифтом, но preload ускоряет замену на шрифт.
        Кириллица нужна для русского текста, поэтому обе подмножества. {% endcomment %}
-    <link rel="preload" href="{% static 'fonts/BebasNeue-400-latin.woff2' %}" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="{% static 'fonts/Inter-600-latin.woff2' %}" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="{% static 'fonts/Inter-600-cyrillic.woff2' %}" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="{% static 'fonts/Inter-700-latin.woff2' %}" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="{% static 'fonts/Inter-700-cyrillic.woff2' %}" as="font" type="font/woff2" crossorigin>
 
     <link rel="stylesheet" href="{% static 'css/variables.css' %}?v={{ static_version }}">
     <link rel="stylesheet" href="{% static 'css/base.css' %}?v={{ static_version }}">

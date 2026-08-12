@@ -64,27 +64,32 @@ html.nav-open body {
     overflow: hidden;
 }
 
-/* Custom scrollbar */
+/* Custom scrollbar — тонкая, нейтральная, без акцента. */
 ::-webkit-scrollbar {
-    width: 8px;
+    width: 10px;
+    height: 10px;
 }
 
 ::-webkit-scrollbar-track {
-    background: var(--color-bg);
+    background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-    background: var(--color-border);
-    border-radius: 4px;
+    background: var(--scrollbar-thumb);
+    border-radius: 999px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: var(--color-accent-dim);
+    background: var(--scrollbar-thumb-hover);
+    background-clip: padding-box;
+    border: 2px solid transparent;
 }
 
 @supports (scrollbar-color: auto) {
     * {
-        scrollbar-color: var(--color-border) var(--color-bg);
+        scrollbar-color: var(--scrollbar-thumb) transparent;
         scrollbar-width: thin;
     }
 }
@@ -260,7 +265,7 @@ button {
        браузер перерисовывал слой во весь экран всё время, пока страница
        открыта, — на телефоне это работа впустую и расход батареи ради
        эффекта, которого никто сознательно не замечает. */
-    opacity: 0.5;
+    opacity: 0.35;
 }
 
 /* ---------- Film-grain texture overlay (premium cinema feel) ---------- */

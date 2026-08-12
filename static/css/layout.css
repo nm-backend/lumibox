@@ -17,9 +17,15 @@
     top: 0;
     z-index: var(--z-header);
 
-    background-color: var(--color-card);
+    /* Стекло: полупрозрачная заливка + размытие 20px. Контент, прокручиваясь
+       под шапкой, мягко размывается — приём iOS, убирающий «линию склейки»
+       между шапкой и страницей. Заливка темозависима через токен --glass-bg. */
+    background-color: var(--glass-bg);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    backdrop-filter: blur(20px) saturate(180%);
     border-bottom: 1px solid var(--color-border);
-    transition: box-shadow var(--transition), border-bottom-color var(--transition);
+    transition: box-shadow var(--transition), border-bottom-color var(--transition),
+                background-color var(--transition);
 }
 
 /* При прокрутке шапка отделяется от контента тенью — это её единственная
@@ -27,16 +33,6 @@
 .site-header--scrolled {
     box-shadow: var(--shadow-raise);
     border-bottom-color: transparent;
-}
-
-/* Светлая тема: без этих двух правил шапка оставалась бы тёмной
-   на светлой странице — в main их не было вовсе. */
-[data-theme="light"] .site-header {
-    background-color: rgba(242, 244, 248, 0.85);
-}
-
-[data-theme="light"] .site-header--scrolled {
-    background-color: rgba(242, 244, 248, 0.97);
 }
 
 .site-header__inner {
@@ -185,8 +181,9 @@
     z-index: 20;
     min-width: 140px;
     padding: var(--space-2);
-    background-color: var(--color-surface);
-    border: 1px solid var(--color-border);
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-card);
 }
@@ -221,7 +218,7 @@
 
 .site-main {
     flex: 1;
-    padding: var(--space-6) 0 var(--space-8);
+    padding: var(--space-7) 0 var(--space-10);
 }
 
 /*
@@ -393,12 +390,12 @@
 
 @media (min-width: 1024px) {
     .container {
-        padding-inline: var(--space-6);
+        padding-inline: var(--space-8);
     }
 }
 
 @media (min-width: 1600px) {
     .container {
-        padding-inline: var(--space-8);
+        padding-inline: var(--space-10);
     }
 }

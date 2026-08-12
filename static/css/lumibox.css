@@ -19,8 +19,8 @@
     background: var(--color-bg);
 }
 
-/* Перебиваем глобальный Bebas Neue + uppercase: в карточках — обычный
-   шрифт и регистр как на сайте. */
+/* На главной заголовки уже единообразные (Inter, без uppercase) —
+   это правило осталось от афишного Bebas и больше ничего не перебивает. */
 
 .lb-home h1,
 .lb-home h2 {
@@ -155,19 +155,21 @@
 
 .lb-topnav {
     display: flex;
+    justify-content: center;
     flex-wrap: wrap;
+    gap: var(--space-1);
     margin-bottom: var(--space-2);
-    background: var(--color-card);
+    background: transparent;
     border-bottom: 1px solid var(--color-border);
     border-radius: 0;
 }
 
 .lb-topnav__link {
     display: block;
-    padding: 0 var(--space-4);
+    padding: var(--space-1) var(--space-4);
     font-size: var(--text-sm);
     font-weight: 600;
-    line-height: 36px;
+    line-height: 34px;
     color: var(--color-text);
     text-decoration: none;
     border-radius: 0;
@@ -176,8 +178,9 @@
 }
 
 .lb-topnav__link:hover {
-    background: var(--color-accent-dim);
-    color: var(--color-accent);
+    background: var(--color-surface-hover);
+    color: var(--color-text);
+    border-radius: var(--radius-full);
 }
 
 .lb-topnav__link--active {
@@ -1248,27 +1251,25 @@
    высотой 82px, и ни один из них не помогал ничего найти. */
 
 
-/* Навигация: активный пункт — янтарная пилюля */
-
-/* Строка разделов. Активный пункт отмечен чертой под ним, а не залитой
-   пилюлей с градиентом и тенью: залитый пункт спорил по весу с кнопкой
-   входа, и на странице оказывалось два «главных» оранжевых пятна. */
+/* Навигация: сегмент-контрол в духе Apple — активный пункт серой пилюлей,
+   а не янтарной чертой. Никакого акцента в навигации: цвет на странице
+   остаётся только у действия. */
 
 .lb-topnav {
-    background: var(--color-card);
-    border-bottom-color: var(--color-border);
+    background: transparent;
 }
 
 .lb-topnav__link:hover {
-    background: transparent;
-    color: var(--color-text-strong);
+    background: var(--color-surface-hover);
+    color: var(--color-text);
 }
 
 .lb-topnav__link--active,
 .lb-topnav__link--active:hover {
-    background: transparent;
+    background: var(--color-surface-2);
     color: var(--color-text-strong);
-    box-shadow: inset 0 -2px 0 var(--color-accent);
+    border-radius: var(--radius-full);
+    box-shadow: none;
 }
 
 /* Промо-зона: кинозальный градиент, заголовок-афиша, светящаяся кнопка */
@@ -1282,18 +1283,17 @@
 }
 
 /*
-  Заголовок промо-зоны — обычный плотный текст, без заливки градиентом.
+  Заголовок промо-зоны — жирный плотный Inter, без заливки градиентом.
   Раньше здесь был background-clip: text с переходом из белого в оранжевый
   и свечением снизу. Такой приём мгновенно читается как шаблон: он тянет
   внимание на себя сильнее, чем сам смысл заголовка, и спорит с кнопкой,
-  которая рядом и тоже оранжевая. Крупный шрифт афиши даёт вес и без него.
+  которая рядом и тоже оранжевая. Вес даёт заголовку силу и без него.
 */
 .lb-promo__title {
     font-family: var(--font-display);
-    font-size: var(--text-heading);
-    font-weight: 400;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+    font-size: var(--text-title);
+    font-weight: 800;
+    letter-spacing: var(--tracking-tight);
     color: var(--color-dark-text-bright);
 }
 
@@ -1302,7 +1302,7 @@
 }
 
 .lb-promo__poster img {
-    border: 1px solid rgba(var(--color-accent-rgb), 0.3);
+    border: 1px solid var(--color-dark-border);
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.03);
 }
 
@@ -1389,11 +1389,10 @@
    старый медиазапрос, поэтому размер задаём здесь, после). */
 
 @media (max-width: 900px) {
-    /* Кегль теперь идёт от --text-heading и уменьшается сам. Здесь
-       остаётся только трекинг: у шрифта афиши на узком экране буквы
-       слипаются. */
+    /* Кегль идёт от --text-title и уменьшается сам. Здесь остаётся
+       только трекинг: на узком экране плотный заголовок слипается. */
     .lb-promo__title {
-        letter-spacing: 0.03em;
+        letter-spacing: 0.01em;
     }
 }
 

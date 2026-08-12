@@ -94,8 +94,8 @@
    а на медленном телефоне анимация ещё и накладывалась на саму загрузку.
    Страница целиком проявляется одним движением (base.css) — этого хватает. */
 .film-hero__name {
-    font-size: clamp(1.9rem, 4vw, 3rem);
-    line-height: 1.1;
+    font-size: clamp(2.25rem, 4.5vw, 3.75rem);
+    line-height: 1.05;
     letter-spacing: -0.03em;
     text-wrap: balance;
     /* Text reveal animation — clip from bottom to top */
@@ -200,7 +200,7 @@
 .button--large {
     padding: var(--space-3) var(--space-6);
     font-size: var(--text-md);
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-full);
 }
 
 /* ---------- Оценка ---------- */

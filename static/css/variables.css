@@ -5,7 +5,9 @@
   Отсюда палитра: глубокий чёрный, тёплый янтарь проекторного луча,
   серебристый отблеск киноплёнки.
 
-  Шрифты: Bebas Neue для заголовков (афиша), Inter для текста (программа).
+  Шрифты: Inter для всего — заголовки жирные (700–800) с плотным
+  межбуквенным интервалом, текст обычный. Единый гротеск в духе SF Pro:
+  вес у заголовков, не шрифт.
 */
 
 /* Шрифты подключаются в base.html с display=swap, чтобы их загрузка
@@ -76,6 +78,11 @@
     --color-border-soft: rgba(255, 255, 255, 0.06);
     --color-border-strong: rgba(255, 255, 255, 0.18);
 
+    /* Скроллбар — нейтрально-серый, без акцента: полоса прокрутки
+       не должна спорить с контентом. */
+    --scrollbar-thumb: rgba(255, 255, 255, 0.22);
+    --scrollbar-thumb-hover: rgba(255, 255, 255, 0.38);
+
     /* Glass — чуть теплее, чем фон */
     --glass-bg: rgba(29, 29, 31, 0.72);
     --glass-border: rgba(255, 255, 255, 0.1);
@@ -127,7 +134,7 @@
     --card-lift: translateY(-2px);
 
     /* --- Типографика --- */
-    --font-display: "Bebas Neue", "Impact", sans-serif;
+    --font-display: "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
     --font-base: "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
     --font-mono: "JetBrains Mono", "Cascadia Code", monospace;
 
@@ -149,13 +156,13 @@
       и правило нужно ровно одно.
     */
     --text-lg: clamp(1.125rem, 1.05rem + 0.35vw, 1.25rem);
-    --text-xl: clamp(1.375rem, 1.2rem + 0.9vw, 1.75rem);
-    --text-2xl: clamp(1.75rem, 1.4rem + 1.6vw, 2.5rem);
-    --text-3xl: clamp(2rem, 1.4rem + 3vw, 3.25rem);
+    --text-xl: clamp(1.5rem, 1.3rem + 1vw, 1.875rem);
+    --text-2xl: clamp(1.875rem, 1.5rem + 1.8vw, 2.75rem);
+    --text-3xl: clamp(2.25rem, 1.6rem + 3.2vw, 3.75rem);
 
     /* Роли, а не ступени. Название фильма в шапке — это --text-display,
        и оно остаётся им на любой ширине; какое число за этим стоит, знает
-       только этот файл. (--font-display выше — это шрифт афиши, не размер.) */
+       только этот файл. */
     --text-display: var(--text-3xl);
     --text-title: var(--text-2xl);
     --text-heading: var(--text-xl);
@@ -327,6 +334,8 @@
     --color-surface-deep: #ebebed;
     --color-border-soft: rgba(0, 0, 0, 0.05);
     --color-border-strong: rgba(0, 0, 0, 0.16);
+    --scrollbar-thumb: rgba(0, 0, 0, 0.22);
+    --scrollbar-thumb-hover: rgba(0, 0, 0, 0.38);
     --glass-bg: rgba(245, 245, 247, 0.72);
     --glass-border: rgba(0, 0, 0, 0.08);
     /* Тени светлой темы — те же две роли, только мягче: на светлом фоне
@@ -343,16 +352,15 @@
 /* ---------- Базовый слой типографики ---------- */
 
 /*
-  Заголовки сайта — рабочий шрифт Inter, без декора. Bebas Neue остаётся
-  только в промо-зоне главной (стиль афиши).
+  Заголовки сайта — рабочий шрифт Inter, без декора. Вес и трекинг делают
+  работу декоративного шрифта: крупные заголовки жирные и плотные.
 
-  Размеры берутся из ролей, а не из чисел: раньше h1 и h2 задавались здесь
-  литералами 1.625rem и 1.25rem — прямо в файле токенов, мимо собственной
-  шкалы, — и на телефоне их приходилось переопределять отдельно.
+  Размеры берутся из ролей, а не из чисел: h1 и h2 наследуют ступени шкалы
+  ниже, и правка кеглей живёт в одном файле.
 */
 h1, h2, h3.section__title, .film-hero__name {
     font-family: var(--font-base);
-    font-weight: 600;
+    font-weight: 700;
     line-height: var(--leading-tight);
     letter-spacing: var(--tracking-tight);
     text-transform: none;

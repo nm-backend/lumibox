@@ -701,16 +701,18 @@
 
     background-color: var(--color-surface);
     border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-lg);
     transition: border-color var(--transition), transform var(--transition),
                 box-shadow var(--transition);
     contain: paint;
 }
 
+/* Наведение — мягкий подъём с лёгким увеличением, без свечений:
+   подпись о взаимодействии делает форма, а не свет. */
 .card:hover .card__poster {
-    border-color: var(--color-accent-dim);
-    transform: translateY(-4px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    border-color: var(--color-border-strong);
+    transform: translateY(-3px) scale(1.015);
+    box-shadow: var(--shadow-raise);
 }
 
 .card__image {
@@ -721,7 +723,7 @@
 }
 
 .card:hover .card__image {
-    transform: scale(1.05);
+    transform: scale(1.03);
 }
 
 /*
@@ -736,7 +738,7 @@
     position: absolute;
     inset: 0;
     z-index: 2;
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-lg);
 }
 
 /*
@@ -774,42 +776,8 @@
     transform: translateY(0);
 }
 
-.card__poster::after {
-    content: "";
-    position: absolute;
-    inset: -1px;
-    border-radius: var(--radius-md);
-    border: 1px solid transparent;
-    background: linear-gradient(135deg, var(--color-accent-dim), transparent 60%) border-box;
-    -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
-    opacity: 0;
-    transition: opacity var(--transition);
-    pointer-events: none;
-}
-
-.card:hover .card__poster::after {
-    opacity: 1;
-}
-
-/* Light reflection sweep on card poster hover */
-.card__poster::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 50%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.04), transparent);
-    transition: left 0.5s ease;
-    pointer-events: none;
-    z-index: 2;
-}
-
-.card:hover .card__poster::before {
-    left: 150%;
-}
+/* Свечение блика убрано — форма карточки и тень и так отвечают на курсор,
+   а лишний свет на странице спорил с постерами. */
 
 /*
   :has(), а не соседний селектор: ссылка лежит после постера, и «~» до
@@ -1027,7 +995,7 @@
     position: relative;
     overflow: hidden;
 
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-full);
     font-size: var(--text-sm);
     font-weight: 600;
     white-space: nowrap;
@@ -1240,7 +1208,7 @@
 
 /* Subtle section divider with cinema beam effect */
 .section {
-    margin-bottom: var(--space-8);
+    margin-bottom: var(--space-10);
     position: relative;
     content-visibility: auto;
     contain-intrinsic-size: 400px;
@@ -1249,7 +1217,7 @@
 .section::after {
     content: "";
     position: absolute;
-    bottom: calc(-1 * var(--space-8) / 2);
+    bottom: calc(-1 * var(--space-10) / 2);
     left: 10%;
     right: 10%;
     height: 1px;
@@ -1894,7 +1862,7 @@
     gap: var(--space-2);
     color: inherit;
     text-decoration: none;
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-lg);
 }
 
 /* Рамка постера. Пропорция задана здесь, а не размерами картинки: постеры
@@ -1904,7 +1872,7 @@
     display: block;
     aspect-ratio: 2 / 3;
     overflow: hidden;
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-lg);
     background: var(--color-surface);
     box-shadow: var(--shadow-sm);
     transition: box-shadow var(--transition), transform var(--transition);
@@ -2045,20 +2013,16 @@
    срабатывает по тапу и остаётся висеть до касания в другом месте. */
 @media (hover: hover) {
     .poster-card__link:hover .poster-card__frame {
-        transform: translateY(-2px);
+        transform: translateY(-3px) scale(1.015);
         box-shadow: var(--shadow-raise);
     }
 
     .poster-card__link:hover .poster-card__image {
-        transform: scale(1.04);
+        transform: scale(1.03);
     }
 
     .poster-card__link:hover .poster-card__play {
         opacity: 1;
-    }
-
-    .poster-card__link:hover .poster-card__title {
-        color: var(--color-accent);
     }
 }
 
@@ -2098,7 +2062,7 @@
    что раньше жило в боковой панели пятью строчками с крошечными постерами. */
 
 .home-row {
-    margin-top: var(--space-8);
+    margin-top: var(--space-10);
 }
 
 .home-row__head {
@@ -2166,9 +2130,9 @@
     position: relative;
     display: flex;
     align-items: flex-end;
-    min-height: clamp(320px, 42vw, 520px);
-    margin-bottom: var(--space-7);
-    padding: var(--space-7) var(--space-6);
+    min-height: clamp(360px, 46vw, 580px);
+    margin-bottom: var(--space-8);
+    padding: var(--space-8) var(--space-8);
     overflow: hidden;
     border-radius: var(--radius-lg);
     background: var(--color-surface);
@@ -2220,7 +2184,7 @@
    структуры документа. */
 .hero__title {
     font-size: var(--text-display);
-    font-weight: 700;
+    font-weight: 800;
     line-height: var(--leading-tight);
     letter-spacing: var(--tracking-tight);
     text-wrap: balance;
@@ -2302,8 +2266,8 @@
 @media (max-width: 560px) {
     .hero {
         padding: var(--space-5) var(--space-4);
-        min-height: 340px;
-        border-radius: var(--radius-md);
+        min-height: 360px;
+        border-radius: var(--radius-lg);
     }
 
     /* Кнопки на всю ширину: главное действие первого экрана не должно

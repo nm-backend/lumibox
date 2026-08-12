@@ -208,10 +208,11 @@
 
 .legal-section__title {
     font-size: var(--text-lg);
+    font-weight: 700;
     margin-bottom: var(--space-3);
     color: var(--color-text);
     font-family: var(--font-display);
-    letter-spacing: 0.02em;
+    letter-spacing: var(--tracking-tight);
 }
 
 .legal-section__text {
