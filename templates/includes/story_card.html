@@ -20,9 +20,20 @@
 <article class="poster-card">
     <a class="poster-card__link" href="{{ title.get_absolute_url }}">
         <span class="poster-card__frame">
+            {% comment %} sizes описывает, сколько места постер занимает на самом
+               деле, а не сколько весит файл: браузер по нему выбирает копию
+               из srcset ещё до того, как посчитает вёрстку. Значения повторяют
+               сетку каталога — две колонки на телефоне, дальше фиксированная
+               ширина карточки. {% endcomment %}
             {% if title.poster %}
+                {% with srcset=title.poster|webp_srcset %}
                 <picture>
-                    {% if title.poster|webp_url != title.poster.url %}<source type="image/webp" srcset="{{ title.poster|webp_url }}">{% endif %}
+                    {% if title.poster|webp_url != title.poster.url %}
+                        <source type="image/webp"
+                                {% if srcset %}srcset="{{ srcset }}"
+                                sizes="(min-width: 1280px) 200px, (min-width: 768px) 180px, 45vw"
+                                {% else %}srcset="{{ title.poster|webp_url }}"{% endif %}>
+                    {% endif %}
                     <img class="poster-card__image"
                          src="{{ title.poster.url }}"
                          width="200" height="300"
@@ -30,6 +41,7 @@
                          loading="lazy"
                          decoding="async">
                 </picture>
+                {% endwith %}
             {% else %}
                 <span class="poster-card__fallback" aria-hidden="true">
                     {% icon "movie" size=28 %}

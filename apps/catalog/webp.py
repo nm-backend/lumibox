@@ -43,14 +43,35 @@ IMAGE_FIELDS_BY_MODEL: dict[str, list[str]] = {
 # в WebP теряется, а статичный кадр вместо неё — это уже не та картинка.
 CONVERTIBLE_SUFFIXES = {".jpg", ".jpeg", ".png"}
 
+# Уменьшенные копии: какие ширины делать для каких полей.
+#
+# Постер в сетке каталога занимает 132–200px, то есть 264–400px на экране
+# с удвоенной плотностью. Отдавать туда картинку в 600px — это втрое больше
+# байтов, чем нужно, и платит за них телефон на мобильной сети. Оригинал
+# остаётся самой крупной копией и в список не входит.
+SIZED_VARIANTS: dict[tuple[str, str], tuple[int, ...]] = {
+    ("catalog.Title", "poster"): (200, 400),
+    ("catalog.Title", "backdrop"): (640, 1280),
+    ("catalog.Collection", "cover"): (400,),
+    ("catalog.Frame", "image"): (480,),
+}
 
-def webp_name(name: str) -> str:
-    """Имя WebP-копии рядом с оригиналом: posters/a.jpg → posters/a.webp."""
+
+def webp_name(name: str, width: int | None = None) -> str:
+    """
+    Имя WebP-копии рядом с оригиналом.
+
+    posters/a.jpg → posters/a.webp
+    posters/a.jpg + 200 → posters/a-200w.webp
+
+    Суффикс с шириной, а не отдельная папка: файлы лежат рядом, и удаление
+    записи уносит их тем же обходом, что и оригинал.
+    """
     base, _ = os.path.splitext(name)
-    return f"{base}.webp"
+    return f"{base}-{width}w.webp" if width else f"{base}.webp"
 
 
-def convert_field(field) -> str | None:
+def convert_field(field, widths: tuple[int, ...] = ()) -> str | None:
     """
     Делает WebP-копию файла из поля и возвращает её имя.
 
@@ -58,6 +79,10 @@ def convert_field(field) -> str | None:
     и в бакете. Возвращает None, если копия не нужна или не получилась —
     вызывающая сторона на это не смотрит, потому что отсутствие копии
     не ошибка: шаблон просто отдаст оригинал.
+
+    widths — дополнительные ширины уменьшенных копий. Картинку читаем
+    один раз и из неё же делаем все размеры: качать оригинал из бакета
+    трижды ради трёх копий незачем.
     """
     from PIL import Image
 
@@ -72,13 +97,16 @@ def convert_field(field) -> str | None:
     storage = field.storage
     target = webp_name(name)
 
-    # Уже сделана — второй раз не платим ни за чтение, ни за выгрузку.
     try:
-        if storage.exists(target):
-            return target
+        missing = [w for w in widths if not storage.exists(webp_name(name, w))]
+        base_exists = storage.exists(target)
     except Exception:
-        logger.exception("WebP: не удалось проверить наличие копии %s", target)
+        logger.exception("WebP: не удалось проверить наличие копий для %s", name)
         return None
+
+    # Всё на месте — второй раз не платим ни за чтение, ни за выгрузку.
+    if base_exists and not missing:
+        return target
 
     try:
         with storage.open(name, "rb") as source:
@@ -89,15 +117,30 @@ def convert_field(field) -> str | None:
             if image.mode in ("P", "LA"):
                 image = image.convert("RGBA")
 
-            buffer = io.BytesIO()
-            image.save(buffer, "WEBP", quality=85, method=6, lossless=False)
+        if not base_exists:
+            storage.save(target, ContentFile(_encode(image)))
+            logger.debug("WebP создан: %s", target)
 
-        storage.save(target, ContentFile(buffer.getvalue()))
-        logger.debug("WebP создан: %s", target)
+        for width in missing:
+            # Копию шире оригинала не делаем: она была бы тяжелее и мутнее.
+            if width >= image.width:
+                continue
+            height = round(image.height * width / image.width)
+            resized = image.resize((width, height), Image.LANCZOS)
+            storage.save(webp_name(name, width), ContentFile(_encode(resized)))
+            logger.debug("WebP %spx создан для %s", width, name)
+
         return target
     except Exception:
         logger.exception("WebP: ошибка конвертации %s", name)
         return None
+
+
+def _encode(image) -> bytes:
+    """WebP-байты картинки. Качество 85 — предел, за которым глаз не видит разницы."""
+    buffer = io.BytesIO()
+    image.save(buffer, "WEBP", quality=85, method=6, lossless=False)
+    return buffer.getvalue()
 
 
 @receiver(post_save)
@@ -120,4 +163,4 @@ def convert_images_to_webp(sender, instance, **kwargs) -> None:
         field = getattr(instance, field_name, None)
         if not field or not field.name:
             continue
-        convert_field(field)
+        convert_field(field, SIZED_VARIANTS.get((model_key, field_name), ()))

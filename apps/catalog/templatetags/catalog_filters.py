@@ -62,6 +62,68 @@ def webp_url(value):
 
 
 @register.filter
+def webp_srcset(value):
+    """
+    Список уменьшенных копий для атрибута srcset.
+
+    Возвращает строку вида «…-200w.webp 200w, …-400w.webp 400w, …webp 600w»
+    или пустую строку, если копий нет. Пустой srcset безопасен: браузер
+    возьмёт то, что в src.
+
+    Зачем: постер в сетке каталога занимает 132–200px, то есть до 400px на
+    экране с удвоенной плотностью. Без srcset туда уезжает картинка
+    в 600px и шире — и байты за неё платит телефон на мобильной сети.
+
+    Набор доступных ширин кладём в общий кэш одной записью: иначе каждая
+    карточка стоила бы трёх обращений к бакету вместо одного.
+    """
+    if not value or not getattr(value, "name", None):
+        return ""
+
+    from apps.catalog.webp import SIZED_VARIANTS, webp_name
+
+    field = getattr(value, "field", None)
+    model = getattr(getattr(field, "model", None), "_meta", None)
+    if model is None or field is None:
+        return ""
+    key = (f"{model.app_label}.{model.object_name}", field.name)
+    widths = SIZED_VARIANTS.get(key)
+    if not widths:
+        return ""
+
+    cache_key = f"webp:srcset:{value.name}"
+    cached = cache.get(cache_key)
+    if cached is not None:
+        return cached
+
+    storage = value.storage
+    parts = []
+    for width in widths:
+        candidate = webp_name(value.name, width)
+        try:
+            if storage.exists(candidate):
+                parts.append(f"{storage.url(candidate)} {width}w")
+        except (OSError, NotImplementedError):
+            continue
+
+    # Оригинальная копия замыкает список: её ширину знаем не всегда,
+    # поэтому берём из поля, а без неё вовсе не добавляем — иначе браузер
+    # получит кандидата без дескриптора и проигнорирует весь набор.
+    original_width = getattr(value, "width", None)
+    if parts and original_width:
+        base = webp_name(value.name)
+        try:
+            url = storage.url(base) if storage.exists(base) else value.url
+        except (OSError, NotImplementedError):
+            url = value.url
+        parts.append(f"{url} {original_width}w")
+
+    result = ", ".join(parts)
+    cache.set(cache_key, result, WEBP_CHECK_TTL)
+    return result
+
+
+@register.filter
 def lb_posted(value):
     """Относительная дата публикации: «Сегодня, 14:05»,
     «Вчера, 22:31», для более старых записей — «31.07.2026, 20:33»."""

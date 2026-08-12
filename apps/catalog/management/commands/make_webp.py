@@ -18,7 +18,12 @@
 from django.apps import apps
 from django.core.management.base import BaseCommand, CommandError
 
-from apps.catalog.webp import IMAGE_FIELDS_BY_MODEL, convert_field, webp_name
+from apps.catalog.webp import (
+    IMAGE_FIELDS_BY_MODEL,
+    SIZED_VARIANTS,
+    convert_field,
+    webp_name,
+)
 
 
 class Command(BaseCommand):
@@ -57,18 +62,27 @@ class Command(BaseCommand):
                     if not field or not field.name:
                         continue
 
+                    widths = SIZED_VARIANTS.get((model_key, field_name), ())
+                    # Считаем и основную копию, и уменьшенные: без них
+                    # srcset пуст, и телефон получает картинку в полный размер.
+                    wanted = [webp_name(field.name)] + [
+                        webp_name(field.name, width) for width in widths
+                    ]
+
                     try:
-                        if field.storage.exists(webp_name(field.name)):
-                            skipped += 1
-                            continue
+                        absent = [n for n in wanted if not field.storage.exists(n)]
                     except Exception:
                         self.stderr.write(f"Не удалось проверить {field.name}")
+                        continue
+
+                    if not absent:
+                        skipped += 1
                         continue
 
                     missing += 1
                     if options["dry_run"]:
                         continue
-                    if convert_field(field):
+                    if convert_field(field, widths):
                         created += 1
 
         if options["dry_run"]:
