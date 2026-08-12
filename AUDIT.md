@@ -10,7 +10,7 @@
 
 | # | Направление | Статус | Доказательство |
 |---|-------------|--------|----------------|
-| 1 | Тесты и покрытие | ✅ | 426 тестов (3 skip), OK; coverage 95%; порог CI 90% |
+| 1 | Тесты и покрытие | ✅ | 477 тестов (3 skip), OK; coverage 95%; порог CI 90% |
 | 2 | Статический анализ (ruff) | ✅ | `ruff check apps config scripts` — 0 ошибок |
 | 3 | Статическая типизация (mypy) | ✅ | `mypy apps` — 0 ошибок, 113 файлов |
 | 4 | Миграции | ✅ | `makemigrations --check --dry-run` — no changes |
@@ -27,7 +27,7 @@
 | 15 | Отзывы и рейтинг | ✅ | Оценка 1–10, денормализованный рейтинг, три пути пересчёта |
 | 16 | Личная библиотека | ✅ | Избранное, «смотреть позже», история; гонко-безопасные переключатели |
 | 17 | SEO | ✅ | sitemap (включая разделы, франшизы, годы), JSON-LD с крю и счётчиками, OG, canonical |
-| 18 | Доступность | ✅ | Вкладки с ролями и клавиатурой, фокус-ловушка в модалке, skip-link, aria-live |
+| 18 | Доступность | ✅ | Вкладки с ролями и клавиатурой, фокус-ловушка в модалке, skip-link, aria-live; axe 0 нарушений: 24 публичные + 4 авторизованные страницы × светлая/тёмная × 1920/390 px |
 | 19 | Безопасность заголовков | ✅ | CSP, HSTS, nosniff, X-Frame-Options (`check --deploy` 0) |
 | 20 | Внешние плееры | ✅ | Адрес обязан пройти белый список хостов (`PlaybackSource.clean`) |
 | 21 | Brute-force и рейт-лимиты | ✅ | django-axes; 60/мин гость, 300/мин авторизованный |
@@ -40,13 +40,13 @@
 | 28 | Email и сброс пароля | 🟡 | SMTP-бэкенд включается по `EMAIL_HOST`, на проде ждёт credentials |
 | — | R2-хранилище (прод) | 🟡 | Код готов, ждёт `AWS_*` / `CLOUDFLARE_R2_PUBLIC_URL` |
 | — | Sentry (прод) | 🟡 | Интеграция готова, ждёт `SENTRY_DSN` |
-| — | Каталоги переводов | 🟡 | См. «Что требует внешнего окружения» |
+| — | Каталоги переводов | ✅ | `scripts/generate_translations.py` собирает сам, без gettext: 461 запись × ru/en/ky, 0 непереведённых |
 | — | Подписка на сериал, запрос фильма, PWA | ⚪️ | Вне объёма осознанно |
 
 ## Доказательства (последний прогон)
 
 ```
-python manage.py test apps                → Ran 426, OK (skipped=3)
+python manage.py test apps                → Ran 477, OK (skipped=3)
 coverage report                            → TOTAL 95%
 ruff check apps config scripts             → All checks passed!
 mypy apps                                  → Success: no issues found in 113 files
@@ -54,21 +54,23 @@ makemigrations --check --dry-run           → No changes detected
 check --deploy --fail-level WARNING        → System check identified no issues
 scripts/check_branding.py                  → чисто
 scripts/smoke_pages.py                     → все 25 URL отдали 200
+python scripts/generate_translations.py    → ru/en/ky: 461 запись, 0 непереведённых
+axe через CDP (4 конфигурации)             → 0 violations: light/dark 1920, light 390, авторизованные
 ```
 
 ## Что требует внешнего окружения
 
-1. **Каталоги переводов (`.po`) не пересобраны.** `makemessages` требует GNU
-   gettext, которого нет в текущем окружении (и Docker не запущен). Русские
-   строки, добавленные в этой работе, в каталоги не попали: `ru` от этого не
-   страдает (msgid и есть русский текст), а `en` и `ky` показывают для них
-   русский — ровно то же поведение, что и у части интерфейса до работы.
-   Команда для окружения с gettext:
+1. **Каталоги переводов собираются скриптом, а не `makemessages`.** В окружении
+   нет GNU gettext (и Docker не запущен), поэтому генерацию каталогов делает
+   `python scripts/generate_translations.py`: он читает единственный список
+   строк в `STRINGS`, подставляет переводы из словарей `EN`/`KY` и пишет
+   `django.po` + `django.mo` для всех трёх языков (сейчас 461 запись,
+   непереведённых нет). Обновление после правок шаблонов:
    ```bash
-   python manage.py makemessages -l en -l ky && python manage.py compilemessages
+   python scripts/generate_translations.py
    ```
-   Каталоги писались вручную (в них нет ссылок `#:`), поэтому перед первым
-   `makemessages` стоит сделать копию: команда переразметит файлы целиком.
+   Строки, добавленные в шаблоны через `{% trans %}`, сперва нужно дописать
+   в `STRINGS` (и, если нужно, в словари переводов).
 
 2. **Поиск на SQLite регистрозависим для кириллицы.** `icontains` уходит
    в `LIKE`, а он в SQLite регистронезависим только для латиницы: «начало»

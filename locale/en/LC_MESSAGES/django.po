@@ -565,3 +565,949 @@ msgstr "Comment added."
 
 msgid "Комментарий удалён."
 msgstr "Comment deleted."
+
+msgid "FAQ"
+msgstr "FAQ"
+
+msgid "FAQ — LumiBox"
+msgstr "FAQ — LumiBox"
+
+msgid "GitHub:"
+msgstr "GitHub:"
+
+msgid "LumiBox — смотреть фильмы и сериалы онлайн"
+msgstr "LumiBox — watch movies and series online"
+
+msgid ""
+"LumiBox — современный каталог фильмов и сериалов с открытым кодом. Узнайте о"
+" миссии, преимуществах и планах развития платформы."
+msgstr ""
+"LumiBox is a modern open-source catalog of movies and series. Learn about "
+"the mission, advantages and development plans."
+
+msgid "LumiBox — фильмы и сериалы онлайн"
+msgstr "LumiBox — movies and series online"
+
+msgid "LumiBox — это бесплатно?"
+msgstr "Is LumiBox free?"
+
+msgid "Switch language"
+msgstr "Switch language"
+
+msgid "Telegram"
+msgstr "Telegram"
+
+msgid "Telegram:"
+msgstr "Telegram:"
+
+msgid "Telegram: @sonder1r"
+msgstr "Telegram: @sonder1r"
+
+msgid "Актёр не найден"
+msgstr "Actor not found"
+
+msgid "Актёры и команда"
+msgstr "Actors and crew"
+
+msgid "Безопасность и открытость"
+msgstr "Security and openness"
+
+msgid "Богатый каталог"
+msgstr "Rich catalog"
+
+msgid "Боковые баннеры (160×600)"
+msgstr "Side banners (160×600)"
+
+msgid "Будьте первым, кто поделится своим мнением."
+msgstr "Be the first to share your opinion."
+
+msgid "В избранном пусто"
+msgstr "Favorites are empty"
+
+msgid "В каталог"
+msgstr "Go to catalog"
+
+msgid "В кинобудке что-то задымилось"
+msgstr "Something is smoking in the projector booth"
+
+msgid "В ролях"
+msgstr "Starring"
+
+msgid "В списке"
+msgstr "In the list"
+
+msgid "Ваше имя пользователя (на случай, если вы забыли):"
+msgstr "Your username (in case you forgot it):"
+
+msgid ""
+"Введите адрес электронной почты, и мы отправим вам инструкцию по сбросу "
+"пароля."
+msgstr ""
+"Enter your email address and we'll send you password reset instructions."
+
+msgid "Введите имя актёра — и найдите все фильмы и сериалы с его участием."
+msgstr "Enter an actor's name to find all movies and series they starred in."
+
+msgid "Введите новый пароль дважды, чтобы мы не ошиблись."
+msgstr "Enter your new password twice so we don't make a mistake."
+
+msgid "Введите хотя бы два символа — по одному найдётся слишком многое."
+msgstr "Enter at least two characters — a single one matches too much."
+
+msgid "Вернуться ко входу"
+msgstr "Back to log in"
+
+msgid "Включить звук"
+msgstr "Unmute"
+
+msgid "Возрастная группа: 18–45 лет"
+msgstr "Age group: 18–45"
+
+msgid "Вперёд на 10 секунд"
+msgstr "Forward 10 seconds"
+
+msgid "Время ответа:"
+msgstr "Response time:"
+
+msgid "Все актёры"
+msgstr "All actors"
+
+msgid "Все похожие"
+msgstr "All similar"
+
+msgid "Все части"
+msgstr "All parts"
+
+msgid "Вся франшиза"
+msgstr "Whole franchise"
+
+msgid "Вход только для зрителей с билетом"
+msgstr "Entry is only for ticket holders"
+
+msgid "Вчера"
+msgstr "Yesterday"
+
+msgid "Вы получили это письмо, потому что запросили сброс пароля на LumiBox."
+msgstr ""
+"You received this email because you requested a password reset on LumiBox."
+
+msgid "Выйти из полного экрана"
+msgstr "Exit fullscreen"
+
+msgid "Выключить звук"
+msgstr "Mute"
+
+msgid "Высокая вовлечённость: среднее время на сайте более 5 минут"
+msgstr "High engagement: average session over 5 minutes"
+
+msgid "Где посмотреть историю просмотров?"
+msgstr "Where can I see my watch history?"
+
+msgid "География: русскоязычная аудитория по всему миру"
+msgstr "Geography: Russian-speaking audience worldwide"
+
+msgid "Горизонтальные баннеры (728×90)"
+msgstr "Horizontal banners (728×90)"
+
+msgid "Громкость"
+msgstr "Volume"
+
+msgid "Для обеспечения работы аккаунта и аутентификации"
+msgstr "To provide account functionality and authentication"
+
+msgid "Для обратной связи по запросам в службу поддержки"
+msgstr "For support requests and feedback"
+
+msgid "Для улучшения качества сервиса на основе агрегированной статистики"
+msgstr "To improve the service based on aggregated statistics"
+
+msgid "Для формирования персональных рекомендаций"
+msgstr "To build personal recommendations"
+
+msgid "Добавлено в «Смотреть позже»"
+msgstr "Added to watch later"
+
+msgid "Добавлено в избранное"
+msgstr "Added to favorites"
+
+msgid "Доступ запрещён"
+msgstr "Access denied"
+
+msgid "Доступ запрещён (403) — LumiBox"
+msgstr "Access denied (403) — LumiBox"
+
+msgid "Если вы не запрашивали сброс пароля, просто проигнорируйте это письмо."
+msgstr "If you didn't request a password reset, just ignore this email."
+
+msgid "Забыли пароль?"
+msgstr "Forgot password?"
+
+msgid "Загрузка"
+msgstr "Loading"
+
+msgid "Запрос слишком короткий"
+msgstr "Query too short"
+
+msgid "Запросить новый сброс"
+msgstr "Request a new reset"
+
+msgid "Защита данных"
+msgstr "Data protection"
+
+msgid "Здесь появится то, что вы открывали."
+msgstr "What you've opened will appear here."
+
+msgid ""
+"Здесь появятся фильмы и сериалы, которые вы открывали. Включайте что-нибудь "
+"интересное!"
+msgstr ""
+"Movies and series you've opened will appear here. Start watching something "
+"interesting!"
+
+msgid "Изменение условий"
+msgstr "Changing the terms"
+
+msgid "Имя актёра"
+msgstr "Actor name"
+
+msgid "Интерес к кино, сериалам, индустрии развлечений"
+msgstr "Interest in movies, series and the entertainment industry"
+
+msgid "Информация"
+msgstr "Information"
+
+msgid ""
+"Информация для правообладателей: как работает каталог, процедура подачи "
+"жалобы на нарушение авторских прав."
+msgstr ""
+"Information for rights holders: how the catalog works and how to file a "
+"copyright complaint."
+
+msgid "Информация для правообладателей: процедура подачи жалобы и контакты."
+msgstr "Information for rights holders: complaint procedure and contacts."
+
+msgid "Источники видео"
+msgstr "Video sources"
+
+msgid "К содержанию"
+msgstr "Back to content"
+
+msgid "Как LumiBox отличается от других сервисов?"
+msgstr "How is LumiBox different from other services?"
+
+msgid "Как добавить фильм в избранное?"
+msgstr "How do I add a movie to favorites?"
+
+msgid "Как добавить фильм в каталог?"
+msgstr "How do I add a movie to the catalog?"
+
+msgid "Как изменить данные профиля?"
+msgstr "How do I edit my profile?"
+
+msgid "Как мы используем данные"
+msgstr "How we use data"
+
+msgid "Как найти фильм?"
+msgstr "How do I find a movie?"
+
+msgid "Как работает LumiBox"
+msgstr "How LumiBox works"
+
+msgid "Как работают рекомендации?"
+msgstr "How do recommendations work?"
+
+msgid "Как связаться с разработчиками?"
+msgstr "How can I contact the developers?"
+
+msgid "Какие данные мы собираем"
+msgstr "What data we collect"
+
+msgid "Касса перегрелась, попробуйте позже"
+msgstr "The box office is overheated, try again later"
+
+msgid "Каталог фильмов"
+msgstr "Movie catalog"
+
+msgid ""
+"Каталог фильмов и сериалов с поиском, фильтрами, подборками и личной "
+"библиотекой. Современная кино-платформа с открытым кодом на Django."
+msgstr ""
+"Movie and series catalog with search, filters, collections and a personal "
+"library. A modern open-source film platform built on Django."
+
+msgid "Категории"
+msgstr "Categories"
+
+msgid "Качество"
+msgstr "Quality"
+
+msgid "Код ошибки"
+msgstr "Error code"
+
+msgid "Комментариев пока нет"
+msgstr "No comments yet"
+
+msgid "Комментарии"
+msgstr "Comments"
+
+msgid "Компьютеры под управлением Windows, macOS, Linux"
+msgstr "Computers with Windows, macOS, Linux"
+
+msgid "Контактная информация"
+msgstr "Contact information"
+
+msgid "Контактная информация проекта LumiBox."
+msgstr "Contact information of the LumiBox project."
+
+msgid "Контакты"
+msgstr "Contacts"
+
+msgid "Контакты — LumiBox"
+msgstr "Contacts — LumiBox"
+
+msgid "Конфиденциальность:"
+msgstr "Privacy:"
+
+msgid "Лицензия MIT"
+msgstr "MIT license"
+
+msgid "Личная библиотека"
+msgstr "Personal library"
+
+msgid "Люди"
+msgstr "People"
+
+msgid "Мой профиль"
+msgstr "My profile"
+
+msgid "Мультиплатформенность: десктоп, планшеты, мобильные устройства"
+msgstr "Cross-platform: desktop, tablets, mobile devices"
+
+msgid "Мультфильмы"
+msgstr "Cartoons"
+
+msgid ""
+"Мы используем cookies для аналитики посещаемости. Продолжая пользоваться "
+"сайтом, вы соглашаетесь с этим."
+msgstr ""
+"We use cookies for traffic analytics. By continuing to use the site you "
+"agree to this."
+
+msgid ""
+"Мы отправили инструкцию по сбросу пароля, если указанный адрес "
+"зарегистрирован в системе."
+msgstr ""
+"We've sent password reset instructions if the address is registered in the "
+"system."
+
+msgid ""
+"На сервере произошла внутренняя ошибка. Мы уже знаем о ней и делаем всё "
+"возможное, чтобы исправить её как можно скорее."
+msgstr ""
+"An internal server error occurred. We're aware of it and are working to fix "
+"it as soon as possible."
+
+msgid "На сервере произошла ошибка. Мы уже разбираемся."
+msgstr "A server error occurred. We're already looking into it."
+
+msgid "Наверх"
+msgstr "Back to top"
+
+msgid "Навигация по каталогу"
+msgstr "Catalog navigation"
+
+msgid "Навигация по сайту"
+msgstr "Site navigation"
+
+msgid ""
+"Нажмите «В избранное» на странице фильма — и он появится тут. Собирайте "
+"коллекцию любимых фильмов и сериалов."
+msgstr ""
+"Click \"Add to favorites\" on a movie page and it will appear here. Build "
+"your collection of favorite movies and series."
+
+msgid ""
+"Нажмите «Смотреть позже» на странице фильма — и он появится тут. "
+"Откладывайте то, что хотите посмотреть, а не забываете."
+msgstr ""
+"Click \"Watch later\" on a movie page and it will appear here. Save what you"
+" want to watch and never forget it."
+
+msgid "Назад на 10 секунд"
+msgstr "Back 10 seconds"
+
+msgid "Название, жанр, страна, студия или человек — найдём по любому из них."
+msgstr "Title, genre, country, studio or person — we'll find by any of them."
+
+msgid "Название, жанр, страна, человек…"
+msgstr "Title, genre, country, person…"
+
+msgid "Название, жанр, человек…"
+msgstr "Title, genre, person…"
+
+msgid "Найденные фильмы и сериалы"
+msgstr "Found movies and series"
+
+msgid "Найдите все фильмы и сериалы с любимым актёром."
+msgstr "Find all movies and series with your favorite actor."
+
+msgid ""
+"Найдите фильмы и сериалы с участием любимого актёра. Поиск по имени актёра с"
+" фильмографией и постерами."
+msgstr ""
+"Find movies and series starring your favorite actor. Search by actor name "
+"with filmography and posters."
+
+msgid "Например: Киану Ривз..."
+msgstr "For example: Keanu Reeves..."
+
+msgid "Настройки"
+msgstr "Settings"
+
+msgid "Начните обсуждение — вас прочитают."
+msgstr "Start the discussion — people will read you."
+
+msgid "Наша аудитория"
+msgstr "Our audience"
+
+msgid "Наша миссия"
+msgstr "Our mission"
+
+msgid "Не использовать сервис для распространения вредоносного кода"
+msgstr "Not to use the service to distribute malicious code"
+
+msgid "Не нарушать авторские и смежные права"
+msgstr "Not to infringe copyright and related rights"
+
+msgid "Не предпринимать действий, направленных на нарушение работы сервиса"
+msgstr "Not to take actions aimed at disrupting the service"
+
+msgid ""
+"Не пришло письмо? Проверьте папку «Спам» или попробуйте ещё раз через "
+"несколько минут."
+msgstr ""
+"Didn't get the email? Check the Spam folder or try again in a few minutes."
+
+msgid "Не удалось выполнить поиск. Проверьте соединение."
+msgstr "Search failed. Check your connection."
+
+msgid ""
+"Не удалось загрузить видео. Попробуйте другую озвучку или обновите страницу."
+msgstr "Failed to load the video. Try another dub or refresh the page."
+
+msgid "Необходимая информация для жалобы"
+msgstr "Required information for a complaint"
+
+msgid "Нести ответственность за сохранность своих учётных данных"
+msgstr "To keep your credentials safe"
+
+msgid "Нет опубликованных проектов"
+msgstr "No published projects"
+
+msgid "Новинки кино и сериалы в хорошем качестве."
+msgstr "New movies and series in great quality."
+
+msgid "Новый пароль — LumiBox"
+msgstr "New password — LumiBox"
+
+msgid "Нужна ли регистрация?"
+msgstr "Is registration required?"
+
+msgid "О платформе"
+msgstr "About the platform"
+
+msgid "О проекте LumiBox"
+msgstr "About LumiBox"
+
+msgid "О проекте — LumiBox"
+msgstr "About — LumiBox"
+
+msgid "Обзор каталога"
+msgstr "Catalog overview"
+
+msgid "Обновления сериалов"
+msgstr "Series updates"
+
+msgid "Общие вопросы:"
+msgstr "General questions:"
+
+msgid "Общие положения"
+msgstr "General provisions"
+
+msgid "Обязанности пользователя"
+msgstr "User obligations"
+
+msgid "Ограничение ответственности"
+msgstr "Limitation of liability"
+
+msgid "Озвучка"
+msgstr "Dub"
+
+msgid "Озвучка / Перевод"
+msgstr "Dub / Translation"
+
+msgid "Озвучка:"
+msgstr "Dub:"
+
+msgid "Ответить"
+msgstr "Reply"
+
+msgid "Ответы на популярные вопросы о платформе LumiBox."
+msgstr "Answers to popular questions about the LumiBox platform."
+
+msgid "Отзывов пока нет"
+msgstr "No reviews yet"
+
+msgid "Открывайте фильмы и жмите «В избранное» — они соберутся здесь."
+msgstr "Open movies and hit \"Add to favorites\" — they will collect here."
+
+msgid "Отложите то, до чего сейчас не доходят руки."
+msgstr "Save what you don't have time for right now."
+
+msgid "Оценить"
+msgstr "Rate"
+
+msgid "Оценка сохранена"
+msgstr "Rating saved"
+
+msgid "Очистить"
+msgstr "Clear"
+
+msgid "Ошибка"
+msgstr "Error"
+
+msgid "Ошибка сервера"
+msgstr "Server error"
+
+msgid "Пароль изменён"
+msgstr "Password changed"
+
+msgid "Пароль изменён — LumiBox"
+msgstr "Password changed — LumiBox"
+
+msgid "Партнёрские интеграции"
+msgstr "Partner integrations"
+
+msgid "Пауза"
+msgstr "Pause"
+
+msgid "Перейдите по ссылке ниже, чтобы задать новый пароль:"
+msgstr "Follow the link below to set a new password:"
+
+msgid "Переключить тему"
+msgstr "Toggle theme"
+
+msgid "Перемотка"
+msgstr "Seek"
+
+msgid "Персональные рекомендации"
+msgstr "Personal recommendations"
+
+msgid "Письмо отправлено — LumiBox"
+msgstr "Email sent — LumiBox"
+
+msgid "Планшеты на iPadOS и Android"
+msgstr "Tablets on iPadOS and Android"
+
+msgid "Планы развития"
+msgstr "Roadmap"
+
+msgid "По году"
+msgstr "By year"
+
+msgid "По странам"
+msgstr "By country"
+
+msgid "Поддерживаемые устройства"
+msgstr "Supported devices"
+
+msgid "Поделиться"
+msgstr "Share"
+
+msgid "Поделиться в Telegram"
+msgstr "Share in Telegram"
+
+msgid "Пожаловаться"
+msgstr "Report"
+
+msgid "Позже"
+msgstr "Later"
+
+msgid "Поиск"
+msgstr "Search"
+
+msgid "Поиск по актёру — LumiBox"
+msgstr "Search by actor — LumiBox"
+
+msgid "Поиск фильмов по актёру"
+msgstr "Search movies by actor"
+
+msgid "Поиск фильмов, сериалов и людей в каталоге LumiBox."
+msgstr "Search movies, series and people in the LumiBox catalog."
+
+msgid "Поиск — LumiBox"
+msgstr "Search — LumiBox"
+
+msgid "Пока нет опубликованных произведений"
+msgstr "No published works yet"
+
+msgid "Политика конфиденциальности"
+msgstr "Privacy policy"
+
+msgid ""
+"Политика конфиденциальности LumiBox: какие данные мы собираем, как "
+"используем и защищаем."
+msgstr ""
+"LumiBox privacy policy: what data we collect, how we use and protect it."
+
+msgid "Политика конфиденциальности — LumiBox"
+msgstr "Privacy policy — LumiBox"
+
+msgid "Полный экран"
+msgstr "Fullscreen"
+
+msgid "Пользовательское соглашение"
+msgstr "Terms of use"
+
+msgid "Пользовательское соглашение — LumiBox"
+msgstr "Terms of use — LumiBox"
+
+msgid "Попробуйте изменить запрос — возможно, актёр указан под другим именем."
+msgstr "Try changing your query — the actor may be listed under another name."
+
+msgid "Попробуйте изменить условия фильтров — или посмотрите весь каталог."
+msgstr "Try changing your filters — or browse the full catalog."
+
+msgid ""
+"Попробуйте сократить запрос, проверить орфографию — или посмотрите весь "
+"каталог."
+msgstr ""
+"Try shortening your query, checking the spelling — or browse the full "
+"catalog."
+
+msgid "Последние комментарии"
+msgstr "Latest comments"
+
+msgid "Последние обновления"
+msgstr "Latest updates"
+
+msgid "Последняя серия"
+msgstr "Latest episode"
+
+msgid "Похоже, плёнка порвалась"
+msgstr "Looks like the film broke"
+
+msgid "Почему выбирают LumiBox?"
+msgstr "Why choose LumiBox?"
+
+msgid "Почему не воспроизводится видео?"
+msgstr "Why won't the video play?"
+
+msgid "Почему стоит выбрать LumiBox"
+msgstr "Why choose LumiBox"
+
+msgid "Правообладателям"
+msgstr "Rights holders"
+
+msgid "Правообладателям — LumiBox"
+msgstr "Rights holders — LumiBox"
+
+msgid "Правообладателям:"
+msgstr "Rights holders:"
+
+msgid ""
+"Предложение сотрудничества для рекламодателей: аудитория, форматы "
+"размещения, контакты."
+msgstr "Advertising partnership offer: audience, placement formats, contacts."
+
+msgid "Предоставлять достоверную информацию при регистрации"
+msgstr "To provide accurate information when registering"
+
+msgid "Придумайте новый пароль"
+msgstr "Create a new password"
+
+msgid "Принять"
+msgstr "Accept"
+
+msgid "Проверьте орфографию или попробуйте более общий запрос."
+msgstr "Check the spelling or try a broader query."
+
+msgid "Проверьте почту"
+msgstr "Check your email"
+
+msgid "Просмотр и каталог"
+msgstr "Watch and catalog"
+
+msgid "Просмотренные фильмы и сериалы"
+msgstr "Watched movies and series"
+
+msgid "Просмотры"
+msgstr "Views"
+
+msgid "Профиль и рекомендации"
+msgstr "Profile and recommendations"
+
+msgid "Процедура подачи жалобы"
+msgstr "Complaint procedure"
+
+msgid "Разработка"
+msgstr "Development"
+
+msgid "Раньше"
+msgstr "Earlier"
+
+msgid "Режиссёр"
+msgstr "Director"
+
+msgid "Рекламодателям"
+msgstr "Advertisers"
+
+msgid "Рекламодателям — LumiBox"
+msgstr "Advertisers — LumiBox"
+
+msgid "Рекламодателям:"
+msgstr "Advertisers:"
+
+msgid "Рекомендуем посмотреть"
+msgstr "We recommend watching"
+
+msgid "Руководитель проекта"
+msgstr "Project lead"
+
+msgid ""
+"С этого адреса за последний час было создано слишком много аккаунтов. "
+"Ограничение снимается через час — или войдите, если аккаунт у вас уже есть."
+msgstr ""
+"Too many accounts were created from this address in the last hour. The limit"
+" resets in an hour — or log in if you already have an account."
+
+msgid "Сброс пароля — LumiBox"
+msgstr "Password reset — LumiBox"
+
+msgid "Сбросить все"
+msgstr "Reset all"
+
+msgid "Светлая тема"
+msgstr "Light theme"
+
+msgid "Свяжитесь с нами"
+msgstr "Contact us"
+
+msgid "Сделано на"
+msgstr "Built with"
+
+msgid "Сегодня"
+msgstr "Today"
+
+msgid "Сериал"
+msgstr "Series"
+
+msgid "Серия"
+msgstr "Episode"
+
+msgid "Скопировано"
+msgstr "Copied"
+
+msgid "Скоро"
+msgstr "Coming soon"
+
+msgid "Слишком много попыток"
+msgstr "Too many attempts"
+
+msgid "Слишком много попыток (429) — LumiBox"
+msgstr "Too many attempts (429) — LumiBox"
+
+msgid "Слишком много попыток регистрации. Повторите позже."
+msgstr "Too many registration attempts. Try again later."
+
+msgid "Случайный фильм"
+msgstr "Random title"
+
+msgid "Смартфоны с любым браузером (Safari, Chrome, Firefox)"
+msgstr "Smartphones with any browser (Safari, Chrome, Firefox)"
+
+msgid "Смотреть онлайн"
+msgstr "Watch online"
+
+msgid "Смотреть позже"
+msgstr "Watch later"
+
+msgid "Смотреть позже — LumiBox"
+msgstr "Watch later — LumiBox"
+
+msgid "Смотреть трейлер"
+msgstr "Watch trailer"
+
+msgid "Смотреть фильмы и сериалы онлайн бесплатно"
+msgstr "Watch movies and series online for free"
+
+msgid "Смотрим сейчас"
+msgstr "Watching now"
+
+msgid ""
+"Смотрите любимые фильмы в любое время и на любом устройстве: компьютер, "
+"планшет или смартфон. Новинки появляются на сайте сразу после релиза, а "
+"классика советского и зарубежного кино всегда в каталоге. Никакой "
+"регистрации и подписок — всё бесплатно."
+msgstr ""
+"Watch your favorite movies anytime on any device: computer, tablet or "
+"smartphone. New releases appear on the site right after premiere, and "
+"classics of Soviet and world cinema are always in the catalog. No "
+"registration and no subscriptions — everything is free."
+
+msgid "Современный дизайн"
+msgstr "Modern design"
+
+msgid ""
+"Современный каталог фильмов и сериалов: миссия, преимущества, дорожная карта"
+" и ответы на частые вопросы."
+msgstr ""
+"A modern movie and series catalog: mission, advantages, roadmap and answers "
+"to common questions."
+
+msgid ""
+"Современный каталог фильмов и сериалов: миссия, преимущества, дорожная "
+"карта."
+msgstr "A modern movie and series catalog: mission, advantages, roadmap."
+
+msgid "Сортировка"
+msgstr "Sorting"
+
+msgid "Сохранить пароль"
+msgstr "Save password"
+
+msgid "Список «Смотреть позже» пуст"
+msgstr "Watch later list is empty"
+
+msgid "Спонсорские размещения"
+msgstr "Sponsored placements"
+
+msgid "Способы связи"
+msgstr "Ways to contact"
+
+msgid "Сроки рассмотрения"
+msgstr "Review timelines"
+
+msgid "Ссылка устарела"
+msgstr "Link expired"
+
+msgid "Страница не найдена. Попробуйте поискать или вернитесь на главную."
+msgstr "Page not found. Try searching or go back to the home page."
+
+msgid ""
+"Страница, которую вы ищете, не существует или была перемещена. Возможно, вы "
+"перешли по устаревшей ссылке или ошиблись в адресе."
+msgstr ""
+"The page you're looking for doesn't exist or has been moved. You may have "
+"followed an outdated link or mistyped the address."
+
+msgid "Страницы"
+msgstr "Pages"
+
+msgid "ТВ-шоу"
+msgstr "TV shows"
+
+msgid "Телевизоры с браузером (Smart TV, Apple TV)"
+msgstr "TVs with a browser (Smart TV, Apple TV)"
+
+msgid "Теперь вы можете войти с новым паролем."
+msgstr "You can now log in with your new password."
+
+msgid "Тёмная тема"
+msgstr "Dark theme"
+
+msgid "У вас нет доступа к этой странице."
+msgstr "You don't have access to this page."
+
+msgid ""
+"У вас нет прав для просмотра этой страницы. Если вы считаете, что это "
+"ошибка, войдите в аккаунт."
+msgstr ""
+"You don't have permission to view this page. If you think this is a mistake,"
+" log in to your account."
+
+msgid "Убрано из «Смотреть позже»"
+msgstr "Removed from watch later"
+
+msgid "Убрано из избранного"
+msgstr "Removed from favorites"
+
+msgid "Удалить"
+msgstr "Delete"
+
+msgid "Удалить всю историю просмотров? Это действие нельзя отменить."
+msgstr "Delete entire watch history? This cannot be undone."
+
+msgid "Удалить комментарий?"
+msgstr "Delete comment?"
+
+msgid "Умный поиск"
+msgstr "Smart search"
+
+msgid "Условия использования сервиса LumiBox."
+msgstr "Terms of use of the LumiBox service."
+
+msgid "Файлы cookie"
+msgstr "Cookies"
+
+msgid "Фильм"
+msgstr "Movie"
+
+msgid "Фильмы и сериалы онлайн"
+msgstr "Movies and series online"
+
+msgid "Форматы размещения"
+msgstr "Placement formats"
+
+msgid "Часто задаваемые вопросы"
+msgstr "Frequently asked questions"
+
+msgid ""
+"Часто задаваемые вопросы о LumiBox: регистрация, просмотр, избранное, "
+"рекомендации."
+msgstr ""
+"Frequently asked questions about LumiBox: registration, watching, favorites,"
+" recommendations."
+
+msgid "Часто задаваемые вопросы — LumiBox"
+msgstr "Frequently asked questions — LumiBox"
+
+msgid "Что ищем?"
+msgstr "What are we looking for?"
+
+msgid "Что такое LumiBox?"
+msgstr "What is LumiBox?"
+
+msgid "Электронная почта:"
+msgstr "Email:"
+
+msgid ""
+"Эта ссылка для сброса пароля уже недействительна. Возможно, вы уже "
+"воспользовались ею, или срок её действия истёк."
+msgstr ""
+"This password reset link is no longer valid. You may have already used it, "
+"or it has expired."
+
+msgid "года"
+msgstr "years"
+
+msgid "до 3 рабочих дней"
+msgstr "up to 3 business days"
+
+msgid "мин"
+msgstr "min"
+
+msgid "отменить"
+msgstr "cancel"
+
+msgid "проектов"
+msgstr "projects"
+
+msgid "просм."
+msgstr "views"
+
+msgid "просмотров"
+msgstr "views"
+
+msgid "трейлер"
+msgstr "trailer"

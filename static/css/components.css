@@ -974,6 +974,12 @@
     transform: translateY(-1px);
 }
 
+/* Светлая тема: #6e6e73 на #ebebed даёт 4.25:1 — ниже порога. Текст бейджа
+   делаем основным цветом. */
+[data-theme="light"] .badge {
+    color: var(--color-text);
+}
+
 /* .badge--accent удалён вместе со старым баннером главной: тип записи
    теперь выводится обычным текстом в строке метаданных, а не бейджем. */
 
@@ -1669,6 +1675,12 @@
     color: var(--color-text-muted);
 }
 
+/* Светлая тема: #6e6e73 на #ebebed даёт 4.25:1 — ниже порога (тот же
+   случай, что .badge). Текст делаем основным цветом. */
+[data-theme="light"] .chip--muted {
+    color: var(--color-text);
+}
+
 .chip--clear {
     background-color: transparent;
     border: 1px solid var(--color-border);
@@ -2305,4 +2317,21 @@
         flex: 1 1 100%;
         justify-content: center;
     }
+}
+
+/* Светлая тема: hero — тёмная «кинозал»-зона (как film-hero на странице
+   фильма). Текст ложится на кадр и scrim и должен оставаться светлым,
+   иначе на белой подложке он потеряется. */
+[data-theme="light"] .hero {
+    background-color: var(--color-dark-bg);
+}
+
+[data-theme="light"] .hero__body {
+    color: var(--color-dark-text-bright);
+}
+
+[data-theme="light"] .hero__eyebrow,
+[data-theme="light"] .hero__meta,
+[data-theme="light"] .hero__text {
+    color: var(--color-dark-text-soft);
 }

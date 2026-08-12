@@ -256,7 +256,7 @@
                     </div>
                 </details>
             {% else %}
-                <a class="button button--primary site-header__login" href="{% url 'users:login' %}">
+                <a class="button button--primary site-header__login" href="{% url 'users:login' %}" aria-label="{% trans 'Войти' %}">
                     {% icon "user" size=16 class_name="site-header__login-icon" %}
                     <span class="site-header__login-text">{% trans "Войти" %}</span>
                 </a>

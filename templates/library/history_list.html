@@ -21,6 +21,7 @@
     <div class="lb-contentwrap">
     {% if history %}
         <div class="lb-main" id="lb-content">
+            <h2 class="visually-hidden">{% trans "Просмотренные фильмы и сериалы" %}</h2>
             <div class="poster-grid">
                 {% for entry in history %}
                     {% include "includes/story_card.html" with title=entry.title %}
