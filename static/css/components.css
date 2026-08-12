@@ -2057,66 +2057,6 @@
     width: 60%;
 }
 
-/* ---------- Ряд на главной ----------
-   Секция с заголовком и ссылкой «Все» справа. Так на главную вернулось то,
-   что раньше жило в боковой панели пятью строчками с крошечными постерами. */
-
-.home-row {
-    margin-top: var(--space-8);
-}
-
-.home-row__head {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: var(--space-4);
-    margin-bottom: var(--space-4);
-}
-
-.home-row__title {
-    font-size: var(--text-heading);
-    letter-spacing: var(--tracking-tight);
-}
-
-.home-row__more {
-    color: var(--color-text-dim);
-    font-size: var(--text-sm);
-    white-space: nowrap;
-    transition: color var(--transition-fast);
-}
-
-@media (hover: hover) {
-    .home-row__more:hover {
-        color: var(--color-text);
-    }
-}
-
-/* Ряд не переносится на вторую строку: это витрина, а не полный список.
-   Лишнее уезжает вбок вместе с прокруткой. */
-.home-row .poster-grid--row {
-    grid-auto-flow: column;
-    grid-auto-columns: minmax(132px, 1fr);
-    grid-template-columns: none;
-    overflow-x: auto;
-    scroll-snap-type: x proximity;
-    scrollbar-width: none;
-    padding-bottom: var(--space-2);
-}
-
-.home-row .poster-grid--row::-webkit-scrollbar {
-    display: none;
-}
-
-.home-row .poster-grid--row > .poster-card {
-    scroll-snap-align: start;
-}
-
-@media (min-width: 768px) {
-    .home-row .poster-grid--row {
-        grid-auto-columns: minmax(150px, 1fr);
-    }
-}
-
 /* ============================================================
    Герой главной
 

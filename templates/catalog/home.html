@@ -44,24 +44,6 @@
 
         </div>
 
-            {% comment %} «Популярное» переехало из боковой панели сюда: там
-               оно было списком из пяти строчек с крошечными постерами, здесь —
-               обычный ряд карточек. Данные те же (lb_most_viewed из общего
-               контекста), запросов не прибавилось. {% endcomment %}
-            {% if lb_most_viewed %}
-                <section class="home-row" aria-labelledby="home-popular">
-                    <div class="home-row__head">
-                        <h2 class="home-row__title" id="home-popular">{% trans "Популярное" %}</h2>
-                        <a class="home-row__more" href="{% url 'catalog:title_list' %}?sort=-views_count">{% trans "Все" %}</a>
-                    </div>
-                    <div class="poster-grid poster-grid--row">
-                        {% for title in lb_most_viewed|slice:":6" %}
-                            {% include "includes/story_card.html" %}
-                        {% endfor %}
-                    </div>
-                </section>
-            {% endif %}
-
             {# ---------- Горизонтальное рекламное место (между лентой и SEO) ---------- #}
             {% include "includes/ad_slot.html" %}
 
