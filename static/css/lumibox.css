@@ -155,9 +155,7 @@
 
 .lb-topnav {
     display: flex;
-    justify-content: center;
     flex-wrap: wrap;
-    gap: var(--space-1);
     margin-bottom: var(--space-2);
     background: transparent;
     border-bottom: 1px solid var(--color-border);
@@ -166,10 +164,10 @@
 
 .lb-topnav__link {
     display: block;
-    padding: var(--space-1) var(--space-4);
+    padding: 0 var(--space-4);
     font-size: var(--text-sm);
     font-weight: 600;
-    line-height: 34px;
+    line-height: 36px;
     color: var(--color-text);
     text-decoration: none;
     border-radius: 0;
@@ -180,7 +178,6 @@
 .lb-topnav__link:hover {
     background: var(--color-surface-hover);
     color: var(--color-text);
-    border-radius: var(--radius-full);
 }
 
 .lb-topnav__link--active {
@@ -1251,9 +1248,8 @@
    высотой 82px, и ни один из них не помогал ничего найти. */
 
 
-/* Навигация: сегмент-контрол в духе Apple — активный пункт серой пилюлей,
-   а не янтарной чертой. Никакого акцента в навигации: цвет на странице
-   остаётся только у действия. */
+/* Навигация слева, как была: активный пункт отмечен чертой под ним.
+   Черта нейтральная, без акцента — цвет на странице только у действия. */
 
 .lb-topnav {
     background: transparent;
@@ -1266,10 +1262,9 @@
 
 .lb-topnav__link--active,
 .lb-topnav__link--active:hover {
-    background: var(--color-surface-2);
+    background: transparent;
     color: var(--color-text-strong);
-    border-radius: var(--radius-full);
-    box-shadow: none;
+    box-shadow: inset 0 -2px 0 var(--color-border-strong);
 }
 
 /* Промо-зона: кинозальный градиент, заголовок-афиша, светящаяся кнопка */

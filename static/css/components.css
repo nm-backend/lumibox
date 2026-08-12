@@ -1208,7 +1208,7 @@
 
 /* Subtle section divider with cinema beam effect */
 .section {
-    margin-bottom: var(--space-10);
+    margin-bottom: var(--space-8);
     position: relative;
     content-visibility: auto;
     contain-intrinsic-size: 400px;
@@ -1217,7 +1217,7 @@
 .section::after {
     content: "";
     position: absolute;
-    bottom: calc(-1 * var(--space-10) / 2);
+    bottom: calc(-1 * var(--space-8) / 2);
     left: 10%;
     right: 10%;
     height: 1px;
@@ -2062,7 +2062,7 @@
    что раньше жило в боковой панели пятью строчками с крошечными постерами. */
 
 .home-row {
-    margin-top: var(--space-10);
+    margin-top: var(--space-8);
 }
 
 .home-row__head {
@@ -2130,9 +2130,9 @@
     position: relative;
     display: flex;
     align-items: flex-end;
-    min-height: clamp(360px, 46vw, 580px);
-    margin-bottom: var(--space-8);
-    padding: var(--space-8) var(--space-8);
+    min-height: clamp(320px, 42vw, 520px);
+    margin-bottom: var(--space-7);
+    padding: var(--space-7) var(--space-6);
     overflow: hidden;
     border-radius: var(--radius-lg);
     background: var(--color-surface);
@@ -2266,7 +2266,7 @@
 @media (max-width: 560px) {
     .hero {
         padding: var(--space-5) var(--space-4);
-        min-height: 360px;
+        min-height: 340px;
         border-radius: var(--radius-lg);
     }
 

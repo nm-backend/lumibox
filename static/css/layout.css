@@ -218,7 +218,7 @@
 
 .site-main {
     flex: 1;
-    padding: var(--space-7) 0 var(--space-10);
+    padding: var(--space-6) 0 var(--space-8);
 }
 
 /*
@@ -390,12 +390,12 @@
 
 @media (min-width: 1024px) {
     .container {
-        padding-inline: var(--space-8);
+        padding-inline: var(--space-6);
     }
 }
 
 @media (min-width: 1600px) {
     .container {
-        padding-inline: var(--space-10);
+        padding-inline: var(--space-8);
     }
 }
