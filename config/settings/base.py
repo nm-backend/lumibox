@@ -47,6 +47,12 @@ EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS", default=True)
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="LumiBox <noreply@lumibox.app>")
 SERVER_EMAIL = env("SERVER_EMAIL", default="root@lumibox.app")
 
+# Таймаут SMTP-соединения, секунды. preflight на старте контейнера открывает
+# живое соединение с почтовым сервером: без таймаута недоступный хост
+# держал бы boot (а значит, и порт) до упора. smtplib сам берёт значение
+# по умолчанию, если переменная не задана.
+EMAIL_TIMEOUT = env.int("EMAIL_TIMEOUT", default=10)
+
 # Google Analytics / Google Tag Manager — идентификатор отслеживания.
 # Если не задан, трекинг не вставляется в шаблон.
 GA_MEASUREMENT_ID = env("GA_MEASUREMENT_ID", default="")
@@ -163,6 +169,18 @@ DATABASES["default"]["CONN_MAX_AGE"] = env.int("DJANGO_CONN_MAX_AGE", default=60
 # запрос после того, как база разорвала соединение по своему таймауту,
 # падал бы с InterfaceError вместо переподключения.
 DATABASES["default"]["CONN_HEALTH_CHECKS"] = True
+
+# Таймаут установки TCP-соединения, секунды. Без него «мёртвая» база
+# (истёкший бесплатный Postgres Render, недоступный хост) держит подключение
+# на уровне libpq минутами: migrate на старте контейнера зависает, gunicorn
+# не занимает порт, и платформа убивает выкладку по таймауту сканирования
+# порта. С таймаутом старт падает за секунды с понятной ошибкой подключения.
+# Только для Postgres: sqlite-бэкенд локальной разработки не знает этого
+# параметра и упал бы с TypeError.
+if DATABASES["default"]["ENGINE"].endswith("postgresql"):
+    DATABASES["default"]["OPTIONS"] = {
+        "connect_timeout": env.int("DJANGO_DB_CONNECT_TIMEOUT", default=5),
+    }
 
 
 # Кэш. Если REDIS_URL не задан, работаем на памяти процесса:

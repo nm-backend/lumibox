@@ -7,29 +7,53 @@
 # как имя файла: «File name too long», выход 127, порт никто не занимал, и
 # платформа убивала контейнер по таймауту сканирования портов. Один
 # исполняемый путь такой неоднозначности не оставляет.
+#
+# Каждый шаг печатает маркер [boot]: если выкладка падает, по логу сразу
+# видно, на каком шаге остановился запуск — и почему порт так и не занялся.
 set -e
 
 # Схема обязательна: без неё сайт нерабочий, поэтому падение migrate
-# должно останавливать запуск, а не проходить незамеченным.
-python manage.py migrate --noinput
+# должно останавливать запуск, а не проходить незамеченным. Но мёртвая
+# база не должна вешать контейнер на полчаса: connect_timeout задан в
+# base.py (DJANGO_DB_CONNECT_TIMEOUT), а здесь — короткая серия попыток,
+# чтобы пережить «просыпание» базы, но честно упасть, если её нет.
+echo "[boot] migrate: применяю миграции"
+attempt=1
+while :; do
+    if python manage.py migrate --noinput; then
+        break
+    fi
+    status=$?
+    if [ "$attempt" -ge 3 ]; then
+        echo "[boot] migrate: 3 попытки не удались (код $status) — проверь DATABASE_URL и доступность базы"
+        exit "$status"
+    fi
+    echo "[boot] migrate: попытка $attempt не удалась (код $status), повтор через 5с"
+    attempt=$((attempt + 1))
+    sleep 5
+done
+echo "[boot] migrate: ок"
 
 # Наполнение витрины — необязательное: любой его сбой (например,
 # недоступный источник картинок) не повод не поднимать сайт.
-python manage.py ensure_demo_data || echo "ensure_demo_data failed - continuing"
+echo "[boot] ensure_demo_data: наполняю витрину"
+python manage.py ensure_demo_data || echo "[boot] ensure_demo_data: сбой — продолжаю запуск"
 
 # Предполётная проверка: база, кэш, хранилище и почта — делом, а не по
 # наличию переменных. Не останавливает запуск: сайт с недоступным бакетом
 # всё равно должен подняться и показать каталог, иначе одна сетевая
 # заминка кладёт весь сервис. Результат виден в логах выкладки — там его
 # и надо смотреть, когда «почему-то не грузятся картинки».
-python manage.py preflight --skip-storage || echo "preflight: есть замечания, смотрите вывод выше"
+echo "[boot] preflight: предполётная проверка"
+python manage.py preflight --skip-storage || echo "[boot] preflight: есть замечания — смотрите вывод выше"
 
 # Администратор. Создаётся только если владелец задал DJANGO_SUPERUSER_EMAIL
 # и DJANGO_SUPERUSER_PASSWORD в панели хостинга — пароля в репозитории нет
 # и быть не должно. Повторные выкладки существующего админа не трогают
 # и пароль ему не сбрасывают. Сбой не должен ронять запуск: сайт обязан
 # подняться даже с непонятной переменной, иначе одна опечатка кладёт всё.
-python manage.py bootstrap_admin || echo "bootstrap_admin failed - continuing"
+echo "[boot] bootstrap_admin: создаю администратора (если заданы переменные)"
+python manage.py bootstrap_admin || echo "[boot] bootstrap_admin: сбой — продолжаю запуск"
 
 # exec — чтобы gunicorn стал главным процессом и получал сигналы остановки
 # напрямую, иначе платформа гасит контейнер по таймауту вместо мягкого
@@ -45,6 +69,7 @@ python manage.py bootstrap_admin || echo "bootstrap_admin failed - continuing"
 #
 # --timeout 300 по той же причине: синхронный воркер, занятый раздачей
 # большого файла, не отчитывался арбитру и получал SIGKILL посреди просмотра.
+echo "[boot] gunicorn: бинд 0.0.0.0:${PORT:-8000}"
 exec gunicorn config.wsgi:application \
     --bind "0.0.0.0:${PORT:-8000}" \
     --worker-class gthread \
