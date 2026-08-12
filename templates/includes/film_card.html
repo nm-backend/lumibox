@@ -1,0 +1,149 @@
+{% load i18n icons catalog_filters %}
+{% comment %}
+   Детальная карточка фильма — главный блок ленты главной страницы.
+
+   Строение повторяет пост медиа-портала: шапка с названием и рейтингом,
+   бейджи типа и года, постер с колонкой метаданных (год, страна, жанр,
+   актёры, описание) и строка действий внизу. Постер несёт ровно два
+   бейджа: тип и качество (или возраст), как в компактной карточке.
+
+   Актёры приходят фильтром lb_crew из prefetch'а participations —
+   без новых запросов к базе: вьюха собирает ленту через with_crew().
+{% endcomment %}
+
+<article class="film-card">
+    <header class="film-card__head">
+        <h3 class="film-card__name">
+            <a href="{{ title.get_absolute_url }}">{{ title.name }}</a>
+        </h3>
+
+        {% if title.rating_average %}
+            <p class="film-card__rating"
+               aria-label="{% blocktranslate with rating=title.rating_average|floatformat:1 %}Рейтинг: {{ rating }} из 10{% endblocktranslate %}">
+                <span class="film-card__stars" aria-hidden="true">
+                    {% with stars=title.rating_average|floatformat:0|add:0 %}
+                        {% for i in "12345" %}
+                            <span class="film-card__star{% if forloop.counter <= stars %} film-card__star--on{% endif %}">{% icon "star" size=14 %}</span>
+                        {% endfor %}
+                    {% endwith %}
+                </span>
+                <span class="film-card__rating-value">{{ title.rating_average|floatformat:1 }}</span>
+            </p>
+        {% endif %}
+    </header>
+
+    <p class="film-card__badges">
+        <span class="film-card__badge">{{ title.get_type_display }}</span>
+        {% if title.release_year %}
+            <span class="film-card__badge">{{ title.release_year }}</span>
+        {% endif %}
+        {% if title.quality %}
+            <span class="film-card__badge film-card__badge--quality">{{ title.quality }}</span>
+        {% endif %}
+    </p>
+
+    <div class="film-card__body">
+        <div class="film-card__poster-wrap">
+            <a class="film-card__poster" href="{{ title.get_absolute_url }}" tabindex="-1" aria-hidden="true">
+                {% if title.poster %}
+                    {% with srcset=title.poster|webp_srcset %}
+                    <picture>
+                        {% if title.poster|webp_url != title.poster.url %}
+                            <source type="image/webp"
+                                    {% if srcset %}srcset="{{ srcset }}"
+                                    sizes="180px"
+                                    {% else %}srcset="{{ title.poster|webp_url }}"{% endif %}>
+                        {% endif %}
+                        <img class="film-card__image"
+                             src="{{ title.poster.url }}"
+                             width="180" height="270"
+                             alt=""
+                             loading="lazy"
+                             decoding="async">
+                    </picture>
+                    {% endwith %}
+                {% else %}
+                    <span class="film-card__fallback" aria-hidden="true">
+                        {% icon "movie" size=28 %}
+                    </span>
+                {% endif %}
+
+                <span class="film-card__play" aria-hidden="true">
+                    {% icon "play" size=22 %}
+                </span>
+            </a>
+
+            {% comment %} Прогресс вне aria-hidden-ссылки: бейдж «Продолжить
+               с S1E3» должен быть слышен скринридеру. {% endcomment %}
+            {% with progress=title.progress_item|first %}
+                {% if progress %}
+                    <span class="film-card__progress"
+                          role="img"
+                          aria-label="{% blocktranslate with s=progress.episode.season_number e=progress.episode.episode_number %}Начато: сезон {{ s }}, серия {{ e }}{% endblocktranslate %}">
+                        <span class="film-card__progress-bar"></span>
+                    </span>
+                {% endif %}
+            {% endwith %}
+        </div>
+
+        <div class="film-card__info">
+            {% if title.short_description %}
+                <p class="film-card__desc">{{ title.short_description|truncatewords:30 }}</p>
+            {% endif %}
+
+            <dl class="film-card__meta">
+                {% if title.release_year %}
+                    <div class="film-card__meta-row">
+                        <dt>{% trans "Год" %}</dt>
+                        <dd>{{ title.release_year }}</dd>
+                    </div>
+                {% endif %}
+                {% if title.countries.all %}
+                    <div class="film-card__meta-row">
+                        <dt>{% trans "Страна" %}</dt>
+                        <dd>{% for country in title.countries.all %}{% if not forloop.first %}, {% endif %}{{ country.name }}{% endfor %}</dd>
+                    </div>
+                {% endif %}
+                {% if title.genres.all %}
+                    <div class="film-card__meta-row">
+                        <dt>{% trans "Жанр" %}</dt>
+                        <dd>{% for genre in title.genres.all %}{% if not forloop.first %}, {% endif %}{{ genre.name }}{% endfor %}</dd>
+                    </div>
+                {% endif %}
+                {% with crew=title|lb_crew:"actor" %}
+                    {% if crew %}
+                        <div class="film-card__meta-row">
+                            <dt>{% trans "В ролях" %}</dt>
+                            <dd>{{ crew }}</dd>
+                        </div>
+                    {% endif %}
+                {% endwith %}
+            </dl>
+        </div>
+    </div>
+
+    <footer class="film-card__foot">
+        <div class="film-card__chips">
+            {% if title.views_count %}
+                <span class="film-card__chip">{{ title.views_count }} {% trans "просм." %}</span>
+            {% endif %}
+            {% if title.latest_episode_info %}
+                <span class="film-card__chip">{{ title.latest_episode_info }}</span>
+            {% endif %}
+        </div>
+
+        <div class="film-card__actions">
+            <a class="film-card__action film-card__action--favorite" href="{{ title.get_absolute_url }}"
+               aria-label="{% blocktranslate with name=title.name %}В избранное: {{ name }}{% endblocktranslate %}">
+                {% icon "heart" size=16 %}
+            </a>
+            <a class="film-card__action" href="{{ title.get_absolute_url }}"
+               aria-label="{% blocktranslate with name=title.name %}Смотреть позже: {{ name }}{% endblocktranslate %}">
+                {% icon "bookmark" size=16 %}
+            </a>
+            <a class="button button--primary film-card__watch" href="{{ title.get_absolute_url }}">
+                {% icon "play" size=16 %}{% trans "Смотреть" %}
+            </a>
+        </div>
+    </footer>
+</article>

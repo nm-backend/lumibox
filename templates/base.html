@@ -1,13 +1,13 @@
 {% load static i18n lumibox_urls icons %}<!DOCTYPE html>
 {% get_current_language as LANGUAGE_CODE %}
-<html lang="{{ LANGUAGE_CODE }}" data-theme="light">
+<html lang="{{ LANGUAGE_CODE }}" data-theme="">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="color-scheme" content="dark light">
     {% comment %} theme-color красит адресную строку браузера в цвет фона —
        страница перестаёт выглядеть вклеенной в чужой интерфейс. {% endcomment %}
-    <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+    <meta name="theme-color" content="#0b0b0c" media="(prefers-color-scheme: dark)">
     <meta name="theme-color" content="#f5f5f7" media="(prefers-color-scheme: light)">
 
     {% comment %} Тема — до первой отрисовки.
@@ -15,13 +15,12 @@
        Атрибут data-theme читает и ставит app.js, но он подключён с defer,
        то есть выполняется после разбора документа. Без этого скрипта
        посетитель успевал увидеть страницу в одной теме и её перерисовку
-       в другой — и так на каждой навигации. Скрипт синхронный и стоит
+       в другую — и так на каждой навигации. Скрипт синхронный и стоит
        в <head> именно поэтому: несколько строк в обмен на отсутствие вспышки.
 
-       Светлая тема — основная, поэтому она стоит в разметке. Пустая строка
-       в хранилище означает тёмную: так сложилось исторически, и переучивать
-       уже сохранённые у посетителей значения нечем — проверка на null
-       отличает «выбрал тёмную» от «ещё не выбирал». {% endcomment %}
+       Тёмная тема — основная, поэтому она стоит в разметке (пустое значение
+       атрибута означает тёмную: так сложилось исторически). Проверка на null
+       отличает «выбрал светлую» от «ещё не выбирал». {% endcomment %}
     <script>
         (function () {
             try {
@@ -185,92 +184,95 @@
             </a>
 
             {% comment %}
-               Старая десктопная навигация (site-nav__desktop) удалена:
-               её полностью заменяет глобальный топ-нав lb-topnav,
-               который строится context processor'ом lb_topnav.
+               Меню разделов — в шапке, по центру: логотип слева, ссылки
+               по центру, поиск и действия справа, как на витрине
+               медиа-портала. Раньше навигация висела отдельной полосой
+               под шапкой — две стеклянные линии подряд, и ни одна
+               не выглядела частью шапки.
             {% endcomment %}
+            <nav class="lb-topnav" aria-label="{% trans "Основная навигация" %}">
+                {% for label, url, is_active in lb_topnav %}
+                    <a class="lb-topnav__link{% if is_active %} lb-topnav__link--active{% endif %}"
+                       href="{{ url }}">{{ label }}</a>
+                {% endfor %}
+            </nav>
 
-            <div class="search-wrapper site-header__search">
-                {% comment %} Отправка ведёт на страницу поиска, а не в каталог:
-                   каталог искал только по названию, а здесь зритель ждёт, что
-                   найдутся и жанр, и студия, и человек. {% endcomment %}
-                <form class="search" action="{% url 'catalog:search' %}" method="get" role="search" data-search-form>
-                    <label class="visually-hidden" for="search-input">{% trans "Поиск по каталогу" %}</label>
-                    <input class="search__input"
-                           id="search-input"
-                           type="search"
-                           name="q"
-                           value="{{ request.GET.q|default:'' }}"
-                           placeholder="{% trans 'Поиск...' %}"
-                           autocomplete="off"
-                           data-search-input>
-                    <button class="search__submit" type="submit" aria-label="{% trans 'Найти' %}">{% icon "search" size=16 %}</button>
-                </form>
-                {% comment %} data-empty-msg — подпись пустой выдачи. Через
-                   разметку, а не строкой в скрипте: перевод умеет шаблон. {% endcomment %}
-                <div class="search__dropdown" data-search-dropdown
-                     data-empty-msg="{% trans 'Ничего не найдено' %}"
-                     data-error-msg="{% trans 'Не удалось выполнить поиск. Проверьте соединение.' %}"></div>
-            </div>
+            <div class="site-header__actions">
+                <div class="search-wrapper site-header__search">
+                    {% comment %} Отправка ведёт на страницу поиска, а не в каталог:
+                       каталог искал только по названию, а здесь зритель ждёт, что
+                       найдутся и жанр, и студия, и человек. {% endcomment %}
+                    <form class="search" action="{% url 'catalog:search' %}" method="get" role="search" data-search-form>
+                        <label class="visually-hidden" for="search-input">{% trans "Поиск по каталогу" %}</label>
+                        <input class="search__input"
+                               id="search-input"
+                               type="search"
+                               name="q"
+                               value="{{ request.GET.q|default:'' }}"
+                               placeholder="{% trans 'Поиск...' %}"
+                               autocomplete="off"
+                               data-search-input>
+                        <button class="search__submit" type="submit" aria-label="{% trans 'Найти' %}">{% icon "search" size=16 %}</button>
+                    </form>
+                    {% comment %} data-empty-msg — подпись пустой выдачи. Через
+                       разметку, а не строкой в скрипте: перевод умеет шаблон. {% endcomment %}
+                    <div class="search__dropdown" data-search-dropdown
+                         data-empty-msg="{% trans 'Ничего не найдено' %}"
+                         data-error-msg="{% trans 'Не удалось выполнить поиск. Проверьте соединение.' %}"></div>
+                </div>
 
-            <button class="search-toggle" type="button" data-search-toggle aria-label="{% trans 'Поиск' %}" aria-expanded="false">{% icon "search" size=18 %}</button>
+                <button class="search-toggle" type="button" data-search-toggle aria-label="{% trans 'Поиск' %}" aria-expanded="false">{% icon "search" size=18 %}</button>
 
-            <button class="theme-toggle" type="button" data-theme-toggle
-                    aria-label="{% trans 'Переключить тему' %}"
-                    data-label-dark="{% trans 'Тёмная тема' %}"
-                    data-label-light="{% trans 'Светлая тема' %}">{% icon "moon" class_name="theme-moon" %}{% icon "sun" class_name="theme-sun" %}</button>
+                <button class="theme-toggle" type="button" data-theme-toggle
+                        aria-label="{% trans 'Переключить тему' %}"
+                        data-label-dark="{% trans 'Тёмная тема' %}"
+                        data-label-light="{% trans 'Светлая тема' %}">{% icon "moon" class_name="theme-moon" %}{% icon "sun" class_name="theme-sun" %}</button>
 
-            <a class="telegram-header-link" href="https://t.me/lumiboxxx" target="_blank" rel="noopener noreferrer" aria-label="{% trans 'Telegram' %}">
-                {% icon "send" size=18 %}
-            </a>
-
-            {% include "includes/language_switcher.html" %}
-
-            <button class="hamburger" type="button" data-hamburger aria-controls="mobile-nav" aria-label="{% trans 'Меню' %}" aria-expanded="false">
-                <span class="hamburger__line"></span>
-                <span class="hamburger__line"></span>
-                <span class="hamburger__line"></span>
-            </button>
-
-            {% if user.is_authenticated %}
-                <details class="user-menu">
-                    <summary class="user-menu__trigger" aria-label="{% trans 'Меню пользователя' %}">
-                        <span class="avatar">
-                            {% if user.avatar %}
-                                <img class="avatar__image" src="{{ user.avatar.url }}" alt="" loading="lazy" decoding="async">
-                            {% else %}
-                                <span aria-hidden="true">{{ user.initial }}</span>
-                            {% endif %}
-                        </span>
-                    </summary>
-
-                    <div class="user-menu__dropdown">
-                        <p class="user-menu__name">{{ user.display_name }}</p>
-                        <a class="user-menu__link" href="{% url 'users:profile' %}">{% trans "Профиль" %}</a>
-                        <a class="user-menu__link" href="{% url 'library:favorites' %}">{% trans "Избранное" %}</a>
-                        <a class="user-menu__link" href="{% url 'library:watchlist' %}">{% trans "Смотреть позже" %}</a>
-                        <a class="user-menu__link" href="{% url 'library:history' %}">{% trans "История" %}</a>
-                        <form method="post" action="{% url 'users:logout' %}">
-                            {% csrf_token %}
-                            <button class="user-menu__link user-menu__link--button" type="submit">{% trans "Выйти" %}</button>
-                        </form>
-                    </div>
-                </details>
-            {% else %}
-                <a class="button button--primary site-header__login" href="{% url 'users:login' %}" aria-label="{% trans 'Войти' %}">
-                    {% icon "user" size=16 class_name="site-header__login-icon" %}
-                    <span class="site-header__login-text">{% trans "Войти" %}</span>
+                <a class="telegram-header-link" href="https://t.me/lumiboxxx" target="_blank" rel="noopener noreferrer" aria-label="{% trans 'Telegram' %}">
+                    {% icon "send" size=18 %}
                 </a>
-            {% endif %}
+
+                {% include "includes/language_switcher.html" %}
+
+                <button class="hamburger" type="button" data-hamburger aria-controls="mobile-nav" aria-label="{% trans 'Меню' %}" aria-expanded="false">
+                    <span class="hamburger__line"></span>
+                    <span class="hamburger__line"></span>
+                    <span class="hamburger__line"></span>
+                </button>
+
+                {% if user.is_authenticated %}
+                    <details class="user-menu">
+                        <summary class="user-menu__trigger" aria-label="{% trans 'Меню пользователя' %}">
+                            <span class="avatar">
+                                {% if user.avatar %}
+                                    <img class="avatar__image" src="{{ user.avatar.url }}" alt="" loading="lazy" decoding="async">
+                                {% else %}
+                                    <span aria-hidden="true">{{ user.initial }}</span>
+                                {% endif %}
+                            </span>
+                        </summary>
+
+                        <div class="user-menu__dropdown">
+                            <p class="user-menu__name">{{ user.display_name }}</p>
+                            <a class="user-menu__link" href="{% url 'users:profile' %}">{% trans "Профиль" %}</a>
+                            <a class="user-menu__link" href="{% url 'library:favorites' %}">{% trans "Избранное" %}</a>
+                            <a class="user-menu__link" href="{% url 'library:watchlist' %}">{% trans "Смотреть позже" %}</a>
+                            <a class="user-menu__link" href="{% url 'library:history' %}">{% trans "История" %}</a>
+                            <form method="post" action="{% url 'users:logout' %}">
+                                {% csrf_token %}
+                                <button class="user-menu__link user-menu__link--button" type="submit">{% trans "Выйти" %}</button>
+                            </form>
+                        </div>
+                    </details>
+                {% else %}
+                    <a class="button button--primary site-header__login" href="{% url 'users:login' %}" aria-label="{% trans 'Войти' %}">
+                        {% icon "user" size=16 class_name="site-header__login-icon" %}
+                        <span class="site-header__login-text">{% trans "Войти" %}</span>
+                    </a>
+                {% endif %}
+            </div>
         </div>
     </header>
-
-    <nav class="lb-topnav" aria-label="{% trans "Основная навигация" %}">
-        {% for label, url, is_active in lb_topnav %}
-            <a class="lb-topnav__link{% if is_active %} lb-topnav__link--active{% endif %}"
-               href="{{ url }}">{{ label }}</a>
-        {% endfor %}
-    </nav>
 
     {% comment %} Выдвижное меню — полный список разделов. Нижняя панель
        (bottom-nav) даёт четыре самых частых адреса под большой палец,

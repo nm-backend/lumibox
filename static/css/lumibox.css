@@ -151,27 +151,39 @@
     background: var(--color-text);
 }
 
-/* ---------- Верхняя навигация (topNav) ---------- */
+/* ---------- Верхняя навигация (topNav) в шапке ---------- */
 
 .lb-topnav {
     display: flex;
-    flex-wrap: wrap;
-    margin-bottom: var(--space-2);
+    align-items: center;
+    justify-content: center;
+    flex: 1 1 auto;
+    min-width: 0;
+    margin-inline: auto;
+    padding: 0 var(--space-2);
     background: transparent;
-    border-bottom: 1px solid var(--color-border);
+    border: 0;
     border-radius: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.lb-topnav::-webkit-scrollbar {
+    display: none;
 }
 
 .lb-topnav__link {
     display: block;
-    padding: 0 var(--space-4);
-    font-size: var(--text-sm);
+    flex-shrink: 0;
+    padding: 0 var(--space-2);
+    font-size: 0.8125rem;
     font-weight: 600;
     line-height: 36px;
     color: var(--color-text);
     text-decoration: none;
     border-radius: 0;
     background: transparent;
+    white-space: nowrap;
     transition: background var(--transition-fast), color var(--transition-fast);
 }
 
@@ -995,7 +1007,7 @@
    не должно накрыть гамбургер, иначе его нечем закрыть. */
 @media (max-width: 1024px) {
     .mobile-nav {
-        top: var(--lb-drawer-top, calc(var(--header-height) + 45px));
+        top: var(--lb-drawer-top, var(--header-height));
     }
 }
 
@@ -1248,7 +1260,7 @@
    высотой 82px, и ни один из них не помогал ничего найти. */
 
 
-/* Навигация слева, как была: активный пункт отмечен чертой под ним.
+/* Навигация в шапке по центру: активный пункт отмечен чертой под ним.
    Черта нейтральная, без акцента — цвет на странице только у действия. */
 
 .lb-topnav {

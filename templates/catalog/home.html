@@ -5,6 +5,10 @@
 
 {% block page_title %}{% trans "LumiBox — смотреть фильмы и сериалы онлайн" %}{% endblock %}
 
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/home_feed.css' %}?v={{ static_version }}">
+{% endblock %}
+
 {% block content %}
 <div class="lb-home">
     <div class="lb-wrap">
@@ -60,18 +64,21 @@
             </section>
         {% endwith %}
 
-        {# ---------- Лента справа + сайдбар слева ---------- #}
-        <div class="lb-contentwrap">
+        {# ---------- Сайдбар слева + лента детальных карточек справа ---------- #}
+        <div class="lb-contentwrap lb-contentwrap--home">
+
+            {% include "includes/lb_sidebar.html" %}
 
             <section class="lb-main" id="lb-content" aria-label="{% trans 'Каталог фильмов' %}">
 
                 <h2 class="visually-hidden">{% trans "Каталог фильмов" %}</h2>
 
-                {# ---------- Сетка карточек ---------- #}
+                {% comment %} Лента детальных карточек: постер + метаданные
+                   + строка действий, как пост ленты медиа-портала. {% endcomment %}
                 {% if home_titles %}
-                    <div class="poster-grid">
+                    <div class="film-feed">
                         {% for title in home_titles %}
-                            {% include "includes/story_card.html" %}
+                            {% include "includes/film_card.html" %}
                         {% endfor %}
                     </div>
                 {% else %}
@@ -83,6 +90,8 @@
                 {% include "includes/pagination.html" %}
 
             </section>
+
+        </div>
 
             {% comment %} Персональные рекомендации. Тоже переехали из боковой
                панели: там они были четырьмя мелкими постерами в колонке, и

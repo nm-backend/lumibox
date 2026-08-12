@@ -40,7 +40,16 @@
     min-height: var(--header-height);
     display: flex;
     align-items: center;
-    gap: var(--space-5);
+    gap: var(--space-4);
+}
+
+/* Правая группа шапки: поиск, переключатели, вход. Собраны в одну обёртку,
+   чтобы центрированное меню (lb-topnav) делило свободное место ровно
+   между логотипом слева и этой группой справа. */
+.site-header__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
 }
 
 .logo {
@@ -96,8 +105,8 @@
 
 /* Поиск занимает всё свободное место между навигацией и краем */
 .site-header__search {
-    margin-left: auto;
-    flex: 0 1 320px;
+    flex: 0 1 260px;
+    min-width: 0;
 }
 
 /* Theme toggle button — 44×44px touch target */
@@ -297,10 +306,15 @@
         gap: var(--space-2);
     }
 
+    .site-header__actions {
+        flex: 1;
+        min-width: 0;
+        gap: var(--space-2);
+    }
+
     .site-header__search {
         flex: 1;
         min-width: 0;
-        margin-left: 0;
     }
 
     /*

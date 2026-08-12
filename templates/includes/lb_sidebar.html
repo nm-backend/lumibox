@@ -11,153 +11,171 @@
 
    Данные приходят из apps.core.context_processors.lb_sidebar, поэтому
    блок работает на любой странице и не зависит от контекста конкретной вьюхи.
-{% endcomment %}
-            <aside class="lb-sidebar">
 
-                <h2 class="lb-aheader">{% trans "Обзор каталога" %}</h2>
-                <nav class="lb-mainnav" aria-label="{% trans "Навигация по каталогу" %}">
-                    <div class="lb-categories">
-                        <h3 class="lb-accent">{% trans "Категории" %}</h3>
-                        <ul>
-                            {% for genre in genres|slice:":22" %}
-                                <li>
-                                    <a href="{% url 'catalog:genre_titles' genre.slug %}" title="{{ genre.name }}">{{ genre.name }}</a>
-                                    <span class="lb-count">({{ genre.titles_count }})</span>
+   Виджеты — стеклянные панели: полупрозрачная заливка, blur 20px,
+   нейтральная рамка и радиус 20px, как у остальных поверхностей сайта.
+{% endcomment %}
+            <aside class="lb-sidebar" aria-label="{% trans "Боковая панель" %}">
+
+                {# ---------- Категории ---------- #}
+                <section class="sb-card" aria-labelledby="sb-categories">
+                    <h2 class="sb-card__title" id="sb-categories">{% trans "Категории" %}</h2>
+                    <nav aria-label="{% trans "Навигация по каталогу" %}">
+                        <ul class="sb-list">
+                            {% for genre in genres|slice:":16" %}
+                                <li class="sb-list__item">
+                                    <a class="sb-list__link" href="{% url 'catalog:genre_titles' genre.slug %}" title="{{ genre.name }}">
+                                        <span>{{ genre.name }}</span>
+                                        {% if genre.titles_count %}
+                                            <span class="sb-list__count">{{ genre.titles_count }}</span>
+                                        {% endif %}
+                                    </a>
                                 </li>
                             {% endfor %}
                         </ul>
-                    </div>
-                    <div class="lb-navsort">
-                        {% comment %} Годы ведут в собственный раздел /year/2024/,
-                           а не в каталог с «?year=». У раздела есть заголовок,
-                           свой адрес и место в карте сайта. {% endcomment %}
-                        <div class="lb-byyear">
-                            <h3 class="lb-accent">{% trans "По году" %}</h3>
-                            <ul>
-                                {% for year in lb_years|slice:":9" %}
-                                    <li><a href="{% url 'catalog:year_titles' year %}" title="{% blocktranslate %}Фильмы и сериалы {{ year }} года{% endblocktranslate %}">{{ year }} {% trans "года" %}</a></li>
-                                {% endfor %}
-                            </ul>
-                        </div>
-                        {% if lb_country_links %}
-                        <div class="lb-bycountry">
-                            <h3 class="lb-accent">{% trans "По странам" %}</h3>
-                            <ul>
-                                {% for url, label in lb_country_links %}
-                                    <li><a href="{{ url }}">{{ label }}</a></li>
-                                {% endfor %}
-                            </ul>
-                        </div>
-                        {% endif %}
-                        {% if lb_series_links %}
-                        <div class="lb-byseries">
-                            <h3 class="lb-accent">{% trans "Сериалы" %}</h3>
-                            <ul>
-                                {% for label, url in lb_series_links %}
-                                    <li><a href="{{ url }}">{{ label }}</a></li>
-                                {% endfor %}
-                            </ul>
-                        </div>
-                        {% endif %}                    </div>
-                </nav>
+                    </nav>
+                </section>
+
+                {# ---------- Годы, страны, сериалы ---------- #}
+                <section class="sb-card" aria-labelledby="sb-years">
+                    <h2 class="sb-card__title" id="sb-years">{% trans "По году" %}</h2>
+                    <ul class="sb-list sb-list--compact">
+                        {% for year in lb_years|slice:":9" %}
+                            <li class="sb-list__item">
+                                <a class="sb-list__link" href="{% url 'catalog:year_titles' year %}"
+                                   title="{% blocktranslate %}Фильмы и сериалы {{ year }} года{% endblocktranslate %}">{{ year }} {% trans "года" %}</a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </section>
+
+                {% if lb_country_links %}
+                <section class="sb-card" aria-labelledby="sb-countries">
+                    <h2 class="sb-card__title" id="sb-countries">{% trans "По странам" %}</h2>
+                    <ul class="sb-list sb-list--compact">
+                        {% for url, label in lb_country_links %}
+                            <li class="sb-list__item"><a class="sb-list__link" href="{{ url }}">{{ label }}</a></li>
+                        {% endfor %}
+                    </ul>
+                </section>
+                {% endif %}
+
+                {% if lb_series_links %}
+                <section class="sb-card" aria-labelledby="sb-series">
+                    <h2 class="sb-card__title" id="sb-series">{% trans "Сериалы" %}</h2>
+                    <ul class="sb-list sb-list--compact">
+                        {% for label, url in lb_series_links %}
+                            <li class="sb-list__item"><a class="sb-list__link" href="{{ url }}">{{ label }}</a></li>
+                        {% endfor %}
+                    </ul>
+                </section>
+                {% endif %}
 
                 {# ---------- Популярное (топ по просмотрам) ---------- #}
                 {% if lb_most_viewed %}
-                    <div class="lb-aheader lb-aheader--row">
-                        <h3>{% trans "Популярное" %}</h3>
-                        <a href="{% url 'catalog:title_list' %}?sort=-views_count">{% trans "Все" %}</a>
-                    </div>
-                    <div class="lb-mostviewed">
-                        {% for title in lb_most_viewed %}
-                            <a class="lb-mostviewed__item" href="{{ title.get_absolute_url }}">
-                                <span class="lb-mostviewed__rank" aria-hidden="true">{{ forloop.counter }}</span>
-                                {% if title.poster %}
-                                    <img class="lb-mostviewed__poster" src="{{ title.poster|webp_url }}" width="54" height="64" alt="" loading="lazy">
-                                {% endif %}
-                                <span class="lb-mostviewed__main">
-                                    <span class="lb-mostviewed__name">{{ title.name }}</span>
-                                    <span class="lb-mostviewed__meta">
-                                        {{ title.release_year }}
-                                        {% if title.views_count %} · {{ title.views_count }} {% trans "просм." %}{% endif %}
-                                    </span>
-                                </span>
-                            </a>
-                        {% endfor %}
-                    </div>
+                    <section class="sb-card" aria-labelledby="sb-popular">
+                        <h2 class="sb-card__title sb-card__title--row" id="sb-popular">
+                            <span>{% trans "Популярное" %}</span>
+                            <a class="sb-more" href="{% url 'catalog:title_list' %}?sort=-views_count">{% trans "Все" %}</a>
+                        </h2>
+                        <ol class="sb-films">
+                            {% for title in lb_most_viewed %}
+                                <li class="sb-films__item">
+                                    <a class="sb-films__link" href="{{ title.get_absolute_url }}">
+                                        <span class="sb-films__rank" aria-hidden="true">{{ forloop.counter }}</span>
+                                        {% if title.poster %}
+                                            <img class="sb-films__poster" src="{{ title.poster|webp_url }}" width="54" height="64" alt="" loading="lazy">
+                                        {% endif %}
+                                        <span class="sb-films__main">
+                                            <span class="sb-films__name">{{ title.name }}</span>
+                                            <span class="sb-films__meta">
+                                                {{ title.release_year }}
+                                                {% if title.views_count %} · {{ title.views_count }} {% trans "просм." %}{% endif %}
+                                            </span>
+                                        </span>
+                                    </a>
+                                </li>
+                            {% endfor %}
+                        </ol>
+                    </section>
                 {% endif %}
 
                 {# ---------- Рекомендуемое (только для вошедших) ---------- #}
                 {% if user.is_authenticated and recommendations %}
-                    <div class="lb-aheader"><h3>{% trans "Вам может понравиться" %}</h3></div>
-                    <div class="lb-soon">
-                        {% for title in recommendations|slice:":4" %}
-                            <a class="lb-soon__item" href="{{ title.get_absolute_url }}">
-                                {% if title.poster %}
-                                    <img src="{{ title.poster|webp_url }}" width="83" height="123" alt="" loading="lazy">
-                                {% endif %}
-                                <span class="lb-soon__title">{{ title.name }}</span>
-                            </a>
-                        {% endfor %}
-                    </div>
+                    <section class="sb-card" aria-labelledby="sb-recommend">
+                        <h2 class="sb-card__title" id="sb-recommend">{% trans "Рекомендации" %}</h2>
+                        <ul class="sb-films sb-films--posters">
+                            {% for title in recommendations|slice:":4" %}
+                                <li class="sb-films__item">
+                                    <a class="sb-films__link" href="{{ title.get_absolute_url }}">
+                                        {% if title.poster %}
+                                            <img src="{{ title.poster|webp_url }}" width="83" height="123" alt="" loading="lazy">
+                                        {% endif %}
+                                        <span class="sb-films__name">{{ title.name }}</span>
+                                    </a>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </section>
                 {% endif %}
 
                 {# ---------- Подборки ---------- #}
                 {% if collections %}
-                    <div class="lb-aheader lb-aheader--row">
-                        <h3>{% trans "Подборки" %}</h3>
-                        <a href="{% url 'catalog:collection_list' %}">{% trans "Все" %}</a>
-                    </div>
-                    <div class="lb-franchises">
-                        {% for collection in collections %}
-                            <a class="lb-franchise" href="{{ collection.get_absolute_url }}">
-                                {% if collection.cover %}
-                                    <img class="lb-franchise__img" src="{{ collection.cover|webp_url }}" width="60" height="40" alt="" loading="lazy">
-                                {% endif %}
-                                <span class="lb-franchise__title">{{ collection.name }}</span>
-                            </a>
-                        {% endfor %}
-                    </div>
+                    <section class="sb-card" aria-labelledby="sb-collections">
+                        <h2 class="sb-card__title sb-card__title--row" id="sb-collections">
+                            <span>{% trans "Подборки" %}</span>
+                            <a class="sb-more" href="{% url 'catalog:collection_list' %}">{% trans "Все" %}</a>
+                        </h2>
+                        <ul class="sb-list sb-list--compact">
+                            {% for collection in collections %}
+                                <li class="sb-list__item">
+                                    <a class="sb-list__link" href="{{ collection.get_absolute_url }}">{{ collection.name }}</a>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </section>
                 {% endif %}
 
                 {# ---------- Обновления сериалов ---------- #}
                 {% if series_updates %}
-                    <div class="lb-aheader lb-aheader--row">
-                        <h3>{% trans "Обновления сериалов" %}</h3>
-                        <a href="{% url 'catalog:title_list' %}?type=series">{% trans "Все" %}</a>
-                    </div>
-                    <div class="lb-lastupdates">
-                        <div class="lb-lastupdates__title">{% trans "Последние обновления" %}</div>
-                        {% for title in series_updates %}
-                            <a class="lb-lastupdates__item" href="{{ title.get_absolute_url }}">
-                                {% if title.poster %}
-                                    <img class="lb-lastupdates__poster" src="{{ title.poster|webp_url }}" width="54" height="64" alt="" loading="lazy">
-                                {% endif %}
-                                <span class="lb-lastupdates__main">
-                                    <span class="lb-lastupdates__name">{{ title.name }}<span class="lb-lastupdates__year">{{ title.release_year }}</span></span>
-                                    <span class="lb-lastupdates__meta">{{ title.get_type_display }}</span>
-                                </span>
-                            </a>
-                        {% endfor %}
-                    </div>
+                    <section class="sb-card" aria-labelledby="sb-updates">
+                        <h2 class="sb-card__title" id="sb-updates">{% trans "Обновления сериалов" %}</h2>
+                        <ul class="sb-films">
+                            {% for title in series_updates %}
+                                <li class="sb-films__item">
+                                    <a class="sb-films__link" href="{{ title.get_absolute_url }}">
+                                        {% if title.poster %}
+                                            <img class="sb-films__poster" src="{{ title.poster|webp_url }}" width="54" height="64" alt="" loading="lazy">
+                                        {% endif %}
+                                        <span class="sb-films__main">
+                                            <span class="sb-films__name">{{ title.name }}<span class="sb-films__year">{{ title.release_year }}</span></span>
+                                            <span class="sb-films__meta">{{ title.get_type_display }}</span>
+                                        </span>
+                                    </a>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </section>
                 {% endif %}
 
                 {# ---------- Последние комментарии ---------- #}
                 {% if latest_comments %}
-                    <div class="lb-aheader"><h3>{% trans "Последние комментарии" %}</h3></div>
-                    <div class="lb-lastcomments">
-                        {% for comment in latest_comments %}
-                            <div class="lb-lastcomment">
-                                <a class="lb-lastcomment__title" href="{{ comment.title.get_absolute_url }}#comments">
-                                    <span class="lb-lastcomment__avatar" aria-hidden="true">{{ comment.user.initial }}</span>
-                                    {{ comment.title.name }}
-                                </a>
-                                <div class="lb-lastcomment__text">
-                                    <span>{{ comment.user.display_name }}</span>
-                                    {{ comment.text|truncatewords:14 }}
-                                </div>
-                            </div>
-                        {% endfor %}
-                    </div>
+                    <section class="sb-card" aria-labelledby="sb-comments">
+                        <h2 class="sb-card__title" id="sb-comments">{% trans "Последние комментарии" %}</h2>
+                        <ul class="sb-comments">
+                            {% for comment in latest_comments %}
+                                <li class="sb-comments__item">
+                                    <a class="sb-comments__link" href="{{ comment.title.get_absolute_url }}#comments">
+                                        <span class="sb-comments__head">
+                                            <span class="sb-comments__avatar" aria-hidden="true">{{ comment.user.initial }}</span>
+                                            <span class="sb-comments__name">{{ comment.user.display_name }}</span>
+                                        </span>
+                                        <span class="sb-comments__text">{{ comment.text|truncatewords:14 }}</span>
+                                    </a>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </section>
                 {% endif %}
 
             </aside>

@@ -16,8 +16,8 @@
 :root {
     /* --- Цвета --- */
 
-    /* Фон: кинозал — абсолютный чёрный с микро-оттенком синего */
-    --color-bg: #000000;
+    /* Фон: кинозал — почти чёрный (#0b0b0c), тёплее чистого чёрного */
+    --color-bg: #0b0b0c;
     --color-surface: #1d1d1f;
     --color-surface-hover: #2c2c2e;
 
@@ -71,7 +71,7 @@
     --color-card-hover: #2c2c2e;
     --color-surface-2: #232325;
     --color-surface-3: #1d1d1f;
-    --color-surface-deep: #000000;
+    --color-surface-deep: #0b0b0c;
 
     /* Границы */
     --color-border: rgba(255, 255, 255, 0.1);
@@ -93,9 +93,9 @@
       даже в светлой теме (эффект тёмного зала при дневном свете), поэтому
       их цвета определены здесь и не переопределяются в [data-theme="light"].
     */
-    --color-dark-bg: #000;
+    --color-dark-bg: #0b0b0c;
     --color-dark-surface: #1d1d1f;
-    --color-dark-surface-deep: #000000;
+    --color-dark-surface-deep: #0b0b0c;
     --color-dark-text: #86868b;
     --color-dark-text-soft: #d2d2d7;
     --color-dark-text-bright: #f5f5f7;

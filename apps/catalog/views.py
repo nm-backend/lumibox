@@ -179,12 +179,13 @@ class HomeView(TemplateView):
 
         # Лента главной: популярное за неделю, затем топ по рейтингу,
         # добитый новинками. Карусель: популярное за неделю, добитое новинками.
-        # 8 карточек: высота страницы подогнана под высоту ленты.
+        # 12 детальных карточек: высота первого экрана списка, как в ленте
+        # медиа-портала — постер + метаданные на каждую запись.
         context["home_titles"] = _dedup_titles(
             context.get("trending", []),
             context.get("top_rated", []),
             context.get("new_titles", []),
-        )[:8]
+        )[:12]
         # Постеры промо-блока. Ровно столько, сколько рисует шаблон: раньше
         # здесь собиралось 14 объектов со всеми связями, а промо показывало
         # четыре — десять карточек прегружались и выбрасывались.
@@ -195,12 +196,18 @@ class HomeView(TemplateView):
         # Бейдж «Продолжить с S1E3» на главной. Секции главной приходят
         # из кэша, поэтому прогресс нельзя вешать на их объекты атрибутом:
         # LocMemCache вернул бы чужой прогресс другому пользователю.
-        # Пересобираем объекты свежим запросом с prefetch истории.
+        # Пересобираем объекты свежим запросом с prefetch истории —
+        # и заодно со связями детальной карточки (жанры, участия): кэш
+        # хранит объекты целиком, и добавить prefetch к ним уже нельзя.
         if self.request.user.is_authenticated:
             ids = {t.pk for t in context["home_titles"] + context["lb_carousel"]}
             fresh = {
                 t.pk: t
-                for t in Title.objects.published().filter(pk__in=ids).with_progress(self.request.user)
+                for t in Title.objects.published()
+                .filter(pk__in=ids)
+                .with_related()
+                .with_crew()
+                .with_progress(self.request.user)
             }
             context["home_titles"] = [fresh.get(t.pk, t) for t in context["home_titles"]]
             context["lb_carousel"] = [fresh.get(t.pk, t) for t in context["lb_carousel"]]

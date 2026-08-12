@@ -217,6 +217,9 @@ msgstr "Fresh in catalog"
 msgid "Рейтинг"
 msgstr "Rating"
 
+msgid "Рейтинг: %(rating)s из 10"
+msgstr "Rating: %(rating)s out of 10"
+
 msgid "Навигация по баннерам"
 msgstr "Banner navigation"
 
@@ -250,6 +253,9 @@ msgstr "In favorites"
 
 msgid "В избранное"
 msgstr "Add to favorites"
+
+msgid "В избранное: %(name)s"
+msgstr "Add %(name)s to favorites"
 
 msgid "Вы здесь"
 msgstr "You are here"
@@ -1331,6 +1337,9 @@ msgstr "Watch online"
 
 msgid "Смотреть позже"
 msgstr "Watch later"
+
+msgid "Смотреть позже: %(name)s"
+msgstr "Watch %(name)s later"
 
 msgid "Смотреть позже — LumiBox"
 msgstr "Watch later — LumiBox"
