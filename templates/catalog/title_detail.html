@@ -344,10 +344,15 @@
             {% comment %} Переключатель источников показываем, только когда
                источников больше одного. Одинокая вкладка «Смотреть» висела
                над кадром как отдельная кнопка неясного назначения. {% endcomment %}
-            {% if title.trailer_source %}
+            {% if title_players|length > 1 or title.trailer_source %}
                 <div class="player-tabs" data-player-tabs role="tablist" aria-label="{% trans 'Источники видео' %}">
-                    <button class="player-tabs__tab player-tabs__tab--active" type="button" data-player-tab="player1" role="tab" aria-selected="true">{% trans "Фильм" %}</button>
-                    <button class="player-tabs__tab" type="button" data-player-tab="trailer" role="tab" aria-selected="false">{% trans "Трейлер" %}</button>
+                    <button class="player-tabs__tab player-tabs__tab--active" type="button" data-player-tab="player1" data-player-index="0" role="tab" aria-selected="true">{% trans "Смотреть онлайн" %}</button>
+                    {% for player in title_players|slice:"1:" %}
+                        <button class="player-tabs__tab" type="button" data-player-tab="player1" data-player-index="{{ forloop.counter }}" role="tab" aria-selected="false">{% blocktranslate with n=forloop.counter|add:1 %}Плеер {{ n }}{% endblocktranslate %}</button>
+                    {% endfor %}
+                    {% if title.trailer_source %}
+                        <button class="player-tabs__tab" type="button" data-player-tab="trailer" role="tab" aria-selected="false">{% trans "Трейлер" %}</button>
+                    {% endif %}
                 </div>
             {% endif %}
 
@@ -553,9 +558,6 @@
                 {% if crew_by_role %}
                     <button class="tab" data-tab="crew" type="button">{% trans "Создатели" %}</button>
                 {% endif %}
-                {% if title.frames.all %}
-                    <button class="tab" data-tab="gallery" type="button">{% trans "Галерея" %}</button>
-                {% endif %}
                 <button class="tab" data-tab="reviews" type="button">{% trans "Отзывы" %}</button>
                 <button class="tab" data-tab="comments" type="button">
                     {% trans "Комментарии" %}{% if comments_count %} <span class="tab__count">{{ comments_count }}</span>{% endif %}
@@ -581,14 +583,14 @@
                    подпись активной вкладки прямо под ней. {% endcomment %}
                 <section class="section">
                     <dl class="spec-list">
+                        {% if title.voice_acting %}
+                            <dt class="spec-list__label">{% trans "Озвучка / Перевод" %}</dt>
+                            <dd class="spec-list__value">{{ title.get_voice_acting_display }}</dd>
+                        {% endif %}
                         <dt class="spec-list__label">{% if title.release_date %}{% trans "Дата выхода" %}{% else %}{% trans "Год" %}{% endif %}</dt>
                         <dd class="spec-list__value">
                             {% if title.release_date %}{{ title.release_date|date:"j E Y" }}{% else %}{{ title.release_year }}{% endif %}
                         </dd>
-                        {% if title.duration_minutes %}
-                            <dt class="spec-list__label">{% if title.is_series %}{% trans "Серия" %}{% else %}{% trans "Длительность" %}{% endif %}</dt>
-                            <dd class="spec-list__value">{% blocktranslate with min=title.duration_minutes %}{{ min }} мин{% endblocktranslate %}</dd>
-                        {% endif %}
                         {% if title.countries.all %}
                             <dt class="spec-list__label">{% trans "Страны" %}</dt>
                             <dd class="spec-list__value">
@@ -609,17 +611,35 @@
                                 </div>
                             </dd>
                         {% endif %}
-                        {% if title.quality %}
-                            <dt class="spec-list__label">{% trans "Качество" %}</dt>
-                            <dd class="spec-list__value">{{ title.quality }}</dd>
+                        {% if title.genres.all %}
+                            <dt class="spec-list__label">{% trans "Жанр" %}</dt>
+                            <dd class="spec-list__value">
+                                <div class="badge-list">
+                                    {% for genre in title.genres.all %}
+                                        <a class="badge" href="{% url 'catalog:genre_titles' genre.slug %}">{{ genre.name }}</a>
+                                    {% endfor %}
+                                </div>
+                            </dd>
                         {% endif %}
-                        {% if title.voice_acting %}
-                            <dt class="spec-list__label">{% trans "Озвучка / Перевод" %}</dt>
-                            <dd class="spec-list__value">{{ title.get_voice_acting_display }}</dd>
+                        {% if title.duration_minutes %}
+                            <dt class="spec-list__label">{% if title.is_series %}{% trans "Серия" %}{% else %}{% trans "Длительность" %}{% endif %}</dt>
+                            <dd class="spec-list__value">{% blocktranslate with min=title.duration_minutes %}{{ min }} мин{% endblocktranslate %}</dd>
                         {% endif %}
                         {% if title.latest_episode_info %}
                             <dt class="spec-list__label">{% trans "Последняя серия" %}</dt>
                             <dd class="spec-list__value">{{ title.latest_episode_info }}</dd>
+                        {% endif %}
+                        {% if title.quality %}
+                            <dt class="spec-list__label">{% trans "Качество" %}</dt>
+                            <dd class="spec-list__value">{{ title.quality }}</dd>
+                        {% endif %}
+                        {% if title.kp_rating or title.imdb_rating %}
+                            <dt class="spec-list__label">{% trans "Рейтинги" %}</dt>
+                            <dd class="spec-list__value">
+                                {% if title.kp_rating %}<span>Кинопоиск {{ title.kp_rating|stringformat:".1f" }}</span>{% endif %}
+                                {% if title.kp_rating and title.imdb_rating %}<span class="film-hero__dot" aria-hidden="true"> · </span>{% endif %}
+                                {% if title.imdb_rating %}<span>IMDb {{ title.imdb_rating|stringformat:".1f" }}</span>{% endif %}
+                            </dd>
                         {% endif %}
                         {% if title.views_count %}
                             <dt class="spec-list__label">{% trans "Просмотры" %}</dt>
@@ -682,31 +702,6 @@
                 </div>
             {% endif %}
 
-            {# Tab: Gallery #}
-            {% if title.frames.all %}
-                <div class="tab-content" data-tab-content="gallery">
-                    <section class="section">
-                        <h2 class="section__title">{% trans "Галерея кадров" %}</h2>
-                        <div class="frames">
-                            {% comment %} Кнопка, а не голая картинка: кадр открывает
-                               диалог, то есть это действие. Пока это был <img>
-                               с обработчиком клика, галерею нельзя было открыть
-                               с клавиатуры вообще — элемент не получал фокус
-                               и не отвечал на Enter. {% endcomment %}
-                            {% for frame in title.frames.all %}
-                                <button class="frames__item" type="button"
-                                        data-lightbox-trigger="{{ frame.image.url }}"
-                                        aria-label="{% blocktranslate with caption=frame.caption|default:title.name %}Открыть кадр: {{ caption }}{% endblocktranslate %}">
-                                    <img class="frames__image"
-                                         src="{{ frame.image.url }}"
-                                         alt="{{ frame.caption|default:title.name }}"
-                                         loading="lazy" decoding="async">
-                                </button>
-                            {% endfor %}
-                        </div>
-                    </section>
-                </div>
-            {% endif %}
 
         {# Tab: Reviews #}
         <div class="tab-content" data-tab-content="reviews">
@@ -791,6 +786,21 @@
         <a class="similar-section__more" href="{{ title.franchise.get_absolute_url }}">{% trans "Вся франшиза" %} →</a>
     </section>
 {% endif %}
+
+{% comment %}SEO-текст внизу детальной страницы — после контента
+   и рекомендаций, перед рекламой и футером.{% endcomment %}
+{% with kind=title.get_type_display|lower %}
+<div class="lb-seo">
+    <h2>{% blocktranslate with name=title.name %}Смотреть {{ name }} онлайн — LumiBox{% endblocktranslate %}</h2>
+    <p>{% blocktranslate with name=title.name kind=kind year=title.release_year %}«{{ name }}» — {{ kind }}
+        {{ year }} года. Смотрите онлайн в хорошем качестве{% endblocktranslate %}{% if title.quality %}{% blocktranslate with quality=title.quality %},
+        {{ quality }}{% endblocktranslate %}{% endif %}{% if title.voice_acting %}{% blocktranslate with voice=title.get_voice_acting_display %}, в озвучке «{{ voice }}»{% endblocktranslate %}{% endif %}.
+        {% trans "Удобный плеер, полное описание, актёры и съёмочная группа, кадры и отзывы зрителей — всё на LumiBox." %}</p>
+    <p>{% blocktranslate with name=title.name %}Смотреть «{{ name }}» можно бесплатно и без регистрации на любом
+        устройстве: компьютер, планшет или смартфон. Оценки, похожие фильмы и персональные рекомендации
+        помогут выбрать, что посмотреть дальше.{% endblocktranslate %}</p>
+</div>
+{% endwith %}
 
 {% include "includes/ad_slot.html" %}
 

@@ -9,6 +9,7 @@
 {% block extra_meta %}<meta name="robots" content="noindex, follow">{% endblock %}
 
 {% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/home_feed.css' %}?v={{ static_version }}">
     <link rel="stylesheet" href="{% static 'css/catalog.css' %}?v={{ static_version }}">
 {% endblock %}
 
@@ -26,8 +27,11 @@
         </h1>
     </div>
 
-    <div class="search-page-layout">
-        <div id="lb-content" data-testid="results">
+    <div class="lb-contentwrap lb-contentwrap--home">
+
+        {% include "includes/lb_sidebar.html" %}
+
+        <div class="lb-main" id="lb-content" data-testid="results">
 
             {% comment %} Кнопка живёт внутри поля, а не рядом с ним: раньше это
                была отдельная .button внутри контейнера-таблетки, и прямоугольный
@@ -76,9 +80,9 @@
 
                 {% if titles %}
                     <h2 class="visually-hidden">{% trans "Найденные фильмы и сериалы" %}</h2>
-                    <div class="poster-grid">
+                    <div class="film-feed">
                         {% for title in titles %}
-                            {% include "includes/story_card.html" %}
+                            {% include "includes/film_card.html" %}
                         {% endfor %}
                     </div>
                     {% include "includes/pagination.html" %}
@@ -96,10 +100,6 @@
         </div>
 
         {% include "includes/ad_slot.html" %}
-        {% comment %} Сайдбар с категориями и годами здесь не показывается:
-           человек уже сформулировал запрос, и предлагать ему вместо ответа
-           обзор всего каталога — значит уводить от того, зачем он пришёл.
-           Если ничего не нашлось, пустое состояние ниже само предлагает
-           открыть каталог. {% endcomment %}
+
     </div>
 {% endblock %}

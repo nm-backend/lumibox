@@ -134,8 +134,10 @@
     --card-lift: translateY(-2px);
 
     /* --- Типографика --- */
-    --font-display: "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
-    --font-base: "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
+                   "Segoe UI", Roboto, "Helvetica Neue", Arial, "Inter", sans-serif;
+    --font-base: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display",
+                 "Segoe UI", Roboto, "Helvetica Neue", Arial, "Inter", sans-serif;
     --font-mono: "JetBrains Mono", "Cascadia Code", monospace;
 
     /*
@@ -316,14 +318,14 @@
     --color-text-strong: #000000;
     --color-text-faint: #aeaeb2;
     --color-text-shadow: rgba(255, 255, 255, 0.55);
-    /* Тот же оранжевый тон, но затемнённый: #ff8a1f на белом даёт контраст
-       около 2:1 и не читается как текст. Затемнённый вариант проходит AA,
-       оставаясь узнаваемо тем же цветом бренда. */
-    --color-accent: #a34f00;
-    --color-accent-rgb: 163, 79, 0;
-    --color-accent-hover: #8a4200;
-    --color-accent-soft: #c46414;
-    --color-accent-deep: #6f3600;
+    /* Apple-синий: фирменный #0071e3. На белом даёт контраст ~4.6:1 —
+       проходит AA для текста обычного размера и отлично читается
+       на кнопках. Тёмные варианты — официальные ступени Apple. */
+    --color-accent: #0071e3;
+    --color-accent-rgb: 0, 113, 227;
+    --color-accent-hover: #0077ed;
+    --color-accent-soft: #2997ff;
+    --color-accent-deep: #0060df;
     --color-accent-dim: rgba(var(--color-accent-rgb), 0.08);
     --color-accent-glow: rgba(var(--color-accent-rgb), 0.06);
     --color-on-accent: #ffffff;

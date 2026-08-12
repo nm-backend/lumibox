@@ -3,18 +3,23 @@
 
 {% block page_title %}{% trans "Избранное — LumiBox" %}{% endblock %}
 
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/home_feed.css' %}?v={{ static_version }}">
+{% endblock %}
+
 {% block content %}
     <div class="page-header">
         <h1 class="page-title">{% trans "Избранное" %}</h1>
         <p class="page-subtitle">{% blocktranslate with count=paginator.count %}Всего: {{ count }}{% endblocktranslate %}</p>
     </div>
 
-    <div class="lb-contentwrap">
+    <div class="lb-contentwrap lb-contentwrap--home">
+    {% include "includes/lb_sidebar.html" %}
     {% if favorites %}
         <div class="lb-main" id="lb-content">
-            <div class="poster-grid">
+            <div class="film-feed">
                 {% for favorite in favorites %}
-                    {% include "includes/story_card.html" with title=favorite.title %}
+                    {% include "includes/film_card.html" with title=favorite.title %}
                 {% endfor %}
             </div>
 

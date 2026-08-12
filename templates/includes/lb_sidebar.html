@@ -36,6 +36,37 @@
                     </nav>
                 </section>
 
+                {# ---------- Скоро на сайте (премьеры) ---------- #}
+                {% if coming_soon %}
+                    <section class="sb-card" aria-labelledby="sb-coming">
+                        <h2 class="sb-card__title sb-card__title--row" id="sb-coming">
+                            <span>{% trans "Скоро на сайте" %}</span>
+                            <a class="sb-more" href="{% url 'catalog:premieres' %}">{% trans "Все" %}</a>
+                        </h2>
+                        <ul class="sb-films">
+                            {% for title in coming_soon %}
+                                <li class="sb-films__item">
+                                    <a class="sb-films__link" href="{{ title.get_absolute_url }}">
+                                        {% if title.poster %}
+                                            <img class="sb-films__poster" src="{{ title.poster|webp_url }}" width="54" height="64" alt="" loading="lazy">
+                                        {% endif %}
+                                        <span class="sb-films__main">
+                                            <span class="sb-films__name">{{ title.name }}</span>
+                                            <span class="sb-films__meta">
+                                                {% if title.release_date %}
+                                                    {{ title.release_date|date:"j E Y" }}
+                                                {% else %}
+                                                    {{ title.release_year }}
+                                                {% endif %}
+                                            </span>
+                                        </span>
+                                    </a>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </section>
+                {% endif %}
+
                 {# ---------- Годы, страны, сериалы ---------- #}
                 <section class="sb-card" aria-labelledby="sb-years">
                     <h2 class="sb-card__title" id="sb-years">{% trans "По году" %}</h2>
@@ -149,7 +180,13 @@
                                         {% endif %}
                                         <span class="sb-films__main">
                                             <span class="sb-films__name">{{ title.name }}<span class="sb-films__year">{{ title.release_year }}</span></span>
-                                            <span class="sb-films__meta">{{ title.get_type_display }}</span>
+                                            <span class="sb-films__meta">
+                                                {{ title.get_type_display }}
+                                                {% if title.voice_acting %} · {{ title.get_voice_acting_display }}{% endif %}
+                                            </span>
+                                            {% if title.latest_episode_info %}
+                                                <span class="sb-films__badge">{{ title.latest_episode_info }}</span>
+                                            {% endif %}
                                         </span>
                                     </a>
                                 </li>

@@ -3,6 +3,10 @@
 
 {% block page_title %}{% trans "История просмотров — LumiBox" %}{% endblock %}
 
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/home_feed.css' %}?v={{ static_version }}">
+{% endblock %}
+
 {% block content %}
     <div class="page-header page-header--with-action">
         <div>
@@ -18,13 +22,14 @@
         {% endif %}
     </div>
 
-    <div class="lb-contentwrap">
+    <div class="lb-contentwrap lb-contentwrap--home">
+    {% include "includes/lb_sidebar.html" %}
     {% if history %}
         <div class="lb-main" id="lb-content">
             <h2 class="visually-hidden">{% trans "Просмотренные фильмы и сериалы" %}</h2>
-            <div class="poster-grid">
+            <div class="film-feed">
                 {% for entry in history %}
-                    {% include "includes/story_card.html" with title=entry.title %}
+                    {% include "includes/film_card.html" with title=entry.title %}
                 {% endfor %}
             </div>
 

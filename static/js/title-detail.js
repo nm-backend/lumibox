@@ -291,6 +291,7 @@
         var playerFrame = section ? section.querySelector('[data-player-frame]') : null;
         var voiceButtons = section ? section.querySelectorAll('[data-voice]') : [];
         var currentVoiceId = null;
+        var currentPlayerIndex = 0;
         var playbackData = [];
 
         var dataNode = document.getElementById('playback-data');
@@ -302,7 +303,7 @@
             }
         }
 
-        function findSource(episodeId, voiceId) {
+        function findSource(episodeId, voiceId, playerIndex) {
             var episode = episodeId ? Number(episodeId) : null;
             var voice = voiceId ? Number(voiceId) : null;
             var forEpisode = playbackData.filter(function (item) {
@@ -313,8 +314,12 @@
                 return (item.voice || null) === voice;
             });
             /* Нужной озвучки у этой серии может не быть — тогда включаем
-               первую доступную, а не оставляем зрителя перед пустым плеером. */
-            return exact.length ? exact[0] : forEpisode[0];
+               первую доступную, а не оставляем зрителя перед пустым плеером.
+               playerIndex выбирает плеер (вкладки «Плеер N»), когда у пары
+               «серия × озвучка» несколько источников. */
+            var match = exact.length ? exact : forEpisode;
+            var index = (typeof playerIndex === 'number' && playerIndex >= 0) ? playerIndex : 0;
+            return match[index] || match[0];
         }
 
         /* Прячем и показываем оболочку плеера целиком, а не сам <video>:
@@ -350,7 +355,7 @@
 
         voiceButtons.forEach(function (btn) {
             btn.addEventListener('click', function () {
-                applySource(findSource(currentEpisodeId, btn.dataset.voice));
+                applySource(findSource(currentEpisodeId, btn.dataset.voice, currentPlayerIndex));
             });
         });
 
@@ -361,7 +366,7 @@
             btn.classList.add('player-episode--active');
             currentEpisodeId = btn.dataset.episodeId || null;
             // Озвучку сохраняем между сериями: зритель выбрал её один раз.
-            applySource(findSource(currentEpisodeId, currentVoiceId));
+            applySource(findSource(currentEpisodeId, currentVoiceId, currentPlayerIndex));
             if (currentLabel && btn.dataset.episodeLabel) {
                 currentLabel.textContent = btn.dataset.episodeLabel;
             }
@@ -449,6 +454,14 @@
         tabButtons.forEach(function (btn, index) {
             btn.addEventListener('click', function () {
                 selectPlayerTab(btn.dataset.playerTab);
+                /* Вкладки «Плеер N» меняют источник в той же панели: pane у
+                   них общий (player1), а data-player-index выбирает, какой
+                   источник из пары «серия × озвучка» подставить. У трейлера
+                   такого атрибута нет — он просто переключает панель. */
+                if (btn.dataset.playerIndex !== undefined) {
+                    currentPlayerIndex = parseInt(btn.dataset.playerIndex, 10) || 0;
+                    applySource(findSource(currentEpisodeId, currentVoiceId, currentPlayerIndex));
+                }
             });
             btn.addEventListener('keydown', function (event) {
                 if (event.key === 'ArrowRight') {

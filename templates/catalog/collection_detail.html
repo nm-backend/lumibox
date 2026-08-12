@@ -7,6 +7,7 @@
 {% block breadcrumb_2_name %}{{ collection.name }}{% endblock %}
 
 {% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/home_feed.css' %}?v={{ static_version }}">
     <link rel="stylesheet" href="{% static 'css/collections.css' %}?v={{ static_version }}">
 {% endblock %}
 
@@ -28,13 +29,14 @@
         </div>
     </div>
 
-    <div class="lb-contentwrap">
+    <div class="lb-contentwrap lb-contentwrap--home">
+    {% include "includes/lb_sidebar.html" %}
     {% if titles %}
         <div class="lb-main" id="lb-content">
             <h2 class="visually-hidden">{% trans "Фильмы в подборке" %}</h2>
-            <div class="poster-grid">
+            <div class="film-feed">
                 {% for title in titles %}
-                    {% include "includes/story_card.html" %}
+                    {% include "includes/film_card.html" %}
                 {% endfor %}
             </div>
 

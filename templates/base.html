@@ -183,20 +183,6 @@
                 <span>Lumi<span class="logo__accent">Box</span></span>
             </a>
 
-            {% comment %}
-               Меню разделов — в шапке, по центру: логотип слева, ссылки
-               по центру, поиск и действия справа, как на витрине
-               медиа-портала. Раньше навигация висела отдельной полосой
-               под шапкой — две стеклянные линии подряд, и ни одна
-               не выглядела частью шапки.
-            {% endcomment %}
-            <nav class="lb-topnav" aria-label="{% trans "Основная навигация" %}">
-                {% for label, url, is_active in lb_topnav %}
-                    <a class="lb-topnav__link{% if is_active %} lb-topnav__link--active{% endif %}"
-                       href="{{ url }}">{{ label }}</a>
-                {% endfor %}
-            </nav>
-
             <div class="site-header__actions">
                 <div class="search-wrapper site-header__search">
                     {% comment %} Отправка ведёт на страницу поиска, а не в каталог:
@@ -273,6 +259,19 @@
             </div>
         </div>
     </header>
+
+    {% comment %} Строка разделов — отдельной полосой под шапкой, как на
+       кино-портале: компактная шапка несёт логотип, поиск и действия,
+       а навигация живёт строкой ниже. Стеклянная полоса продолжает
+       шапку, чтобы две линии читались одним целым. {% endcomment %}
+    <nav class="lb-topnav-bar" aria-label="{% trans "Основная навигация" %}">
+        <div class="container lb-topnav-bar__inner">
+            {% for label, url, is_active in lb_topnav %}
+                <a class="lb-topnav__link{% if is_active %} lb-topnav__link--active{% endif %}"
+                   href="{{ url }}">{{ label }}</a>
+            {% endfor %}
+        </div>
+    </nav>
 
     {% comment %} Выдвижное меню — полный список разделов. Нижняя панель
        (bottom-nav) даёт четыре самых частых адреса под большой палец,

@@ -188,14 +188,14 @@ class CatalogCardResumeTests(TestCase):
         remember_episode_start(self.user, self.title, self.episode)
         self.client.force_login(self.user)
         response = self.client.get(self.catalog_url)
-        self.assertContains(response, "poster-card__progress")
+        self.assertContains(response, "film-card__progress")
         self.assertContains(response, "Начато: сезон 2, серия 4")
 
     def test_other_user_badge_not_shown(self):
         remember_episode_start(create_user(), self.title, self.episode)
         self.client.force_login(self.user)
         response = self.client.get(self.catalog_url)
-        self.assertNotIn("poster-card__progress", response.content.decode("utf-8"))
+        self.assertNotIn("film-card__progress", response.content.decode("utf-8"))
 
     def test_with_progress_uses_prefetch_not_n1(self):
         remember_episode_start(self.user, self.title, self.episode)
@@ -257,7 +257,7 @@ class HomeResumeBadgeTests(TestCase):
         remember_episode_start(create_user(), self.title, self.episode)
         self.client.force_login(self.user)
         response = self.client.get(self.home_url)
-        self.assertNotIn("poster-card__progress", response.content.decode("utf-8"))
+        self.assertNotIn("film-card__progress", response.content.decode("utf-8"))
 
 
 class TimecodeFilterTests(TestCase):

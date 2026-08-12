@@ -31,9 +31,16 @@ class UserTitleRelationQuerySet(models.QuerySet):
         """
         from django.db.models import Prefetch
 
+        from apps.catalog.models.person import Participation
         from apps.library.models import WatchHistory
 
         prefetches = ["title__genres", "title__countries"]
+        prefetches.append(
+            Prefetch(
+                "title__participations",
+                queryset=Participation.objects.select_related("person"),
+            )
+        )
         if user is not None and user.is_authenticated:
             prefetches.append(
                 Prefetch(

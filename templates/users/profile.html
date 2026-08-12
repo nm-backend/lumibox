@@ -4,6 +4,7 @@
 {% block page_title %}{% blocktranslate with name=user.display_name %}Профиль — {{ name }} — LumiBox{% endblocktranslate %}{% endblock %}
 
 {% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/home_feed.css' %}?v={{ static_version }}">
     <link rel="stylesheet" href="{% static 'css/profile.css' %}?v={{ static_version }}">
 {% endblock %}
 
@@ -104,9 +105,9 @@
                         {% endif %}
                     </div>
                     {% if recent_favorites %}
-                        <div class="poster-grid">
+                        <div class="film-feed">
                             {% for favorite in recent_favorites %}
-                                {% include "includes/story_card.html" with title=favorite.title %}
+                                {% include "includes/film_card.html" with title=favorite.title %}
                             {% endfor %}
                         </div>
                     {% else %}
@@ -129,9 +130,9 @@
                         {% endif %}
                     </div>
                     {% if recent_watchlist %}
-                        <div class="poster-grid">
+                        <div class="film-feed">
                             {% for item in recent_watchlist %}
-                                {% include "includes/story_card.html" with title=item.title %}
+                                {% include "includes/film_card.html" with title=item.title %}
                             {% endfor %}
                         </div>
                     {% else %}

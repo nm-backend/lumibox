@@ -9,6 +9,7 @@
 {% block twitter_description %}{% trans "Найдите все фильмы и сериалы с любимым актёром." %}{% endblock %}
 
 {% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/home_feed.css' %}?v={{ static_version }}">
     <link rel="stylesheet" href="{% static 'css/catalog.css' %}?v={{ static_version }}">
 {% endblock %}
 
@@ -74,9 +75,9 @@
 
                             {% if item.participations %}
                                 <div class="lb-main" id="lb-content">
-                                    <div class="poster-grid">
+                                    <div class="film-feed">
                                         {% for participation in item.participations %}
-                                            {% include "includes/story_card.html" with title=participation.title %}
+                                            {% include "includes/film_card.html" with title=participation.title character=participation.character %}
                                         {% endfor %}
                                     </div>
                                 </div>

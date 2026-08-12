@@ -131,6 +131,7 @@ def lb_sidebar(request):
     return {
         "countries": from_sidebar("countries"),
         "series_updates": from_sidebar("series_updates"),
+        "coming_soon": from_sidebar("coming_soon"),
         "latest_comments": from_sidebar("latest_comments"),
         "genres": SimpleLazyObject(lambda: _get_cached_genre_chip_list(50)),
         "collections": SimpleLazyObject(get_featured_collections),

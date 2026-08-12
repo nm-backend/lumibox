@@ -18,7 +18,7 @@ from apps.catalog.models.person import Participation
 # Ключ кэша главной. Константа, а не строка по месту: сбрасывать кэш
 # нужно из другого модуля, и опечатка там осталась бы незамеченной.
 HOME_CACHE_KEY = "home:sections:v1"
-HOME_SIDEBAR_CACHE_KEY = "home:sidebar:v1"
+HOME_SIDEBAR_CACHE_KEY = "home:sidebar:v2"
 
 
 def update_title_rating(title):
@@ -222,6 +222,8 @@ def get_home_sidebar():
     Кэшируются одним куском вместе с get_home_sections: меняются редко,
     а отдельными запросами на каждый заход стоили бы четыре запроса.
     """
+    from django.utils import timezone
+
     from apps.reviews.models import Comment
 
     cached = cache.get(HOME_SIDEBAR_CACHE_KEY)
@@ -252,6 +254,13 @@ def get_home_sidebar():
         # Только реально просмотренное (views_count > 0): иначе блок вырождается
         # в «последние добавленные» и чужие тайтлы мелькают в сайдбаре.
         "most_viewed": list(published.filter(views_count__gt=0).most_viewed(limit=5)),
+        # «Скоро на сайте» — премьеры, которые ещё не вышли (релиз в будущем).
+        # Тот же фильтр, что у PremieresView: точная дата, а не год.
+        "coming_soon": list(
+            published.filter(release_date__gt=timezone.localdate()).order_by(
+                "release_date", "pk"
+            )[:5]
+        ),
     }
     cache.set(HOME_SIDEBAR_CACHE_KEY, sidebar, settings.CACHE_TTL_HOME)
     return sidebar

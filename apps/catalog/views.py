@@ -3,7 +3,7 @@ from time import time
 
 from django.conf import settings
 from django.core.cache import cache
-from django.db.models import Count, F, Max, Q
+from django.db.models import Count, F, Max, Prefetch, Q
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
@@ -234,7 +234,14 @@ class TitleListView(ElidedPaginationMixin, ListView):
 
     def get_base_queryset(self):
         """Точка расширения для страниц жанра и страны."""
-        return Title.objects.published().with_related().with_progress(self.request.user)
+        # with_crew: детальная карточка (film_card) печатает режиссёра и
+        # актёров через фильтр lb_crew, который читает prefetch participations.
+        return (
+            Title.objects.published()
+            .with_related()
+            .with_crew()
+            .with_progress(self.request.user)
+        )
 
     def get_queryset(self):
         return self.get_filter_form().filter(self.get_base_queryset())
@@ -642,9 +649,13 @@ class TitleDetailView(DetailView):
         candidates = by_episode.get(opening.pk, []) if opening else title_sources
         primary = candidates[0] if candidates else (title_sources[0] if title_sources else None)
 
+        # Источники записи целиком и с адресом — для вкладок «Плеер N» фильма.
+        title_players = [source for source in title_sources if source.src]
+
         return {
             "playback_voices": voices,
             "title_sources": title_sources,
+            "title_players": title_players,
             "primary_source": primary,
             "has_playback": bool(sources),
             "playback_data": self._playback_data(sources),
@@ -756,7 +767,13 @@ class PersonDetailView(DetailView):
                 title__status=Title.Status.PUBLISHED,
             )
             .select_related("title")
-            .prefetch_related(*story_card_prefetches("title__", user=self.request.user))
+            .prefetch_related(
+                *story_card_prefetches("title__", user=self.request.user),
+                Prefetch(
+                    "title__participations",
+                    queryset=Participation.objects.select_related("person"),
+                ),
+            )
             .order_by("-title__release_year")
         )
         context["awards"] = self.object.award_entries.select_related("award", "title")[:12]
@@ -826,6 +843,7 @@ class StudioDetailView(ElidedPaginationMixin, ListView):
         return (
             Title.objects.published()
             .with_related()
+            .with_crew()
             .with_progress(self.request.user)
             .filter(studios=self.studio)
         )
@@ -869,6 +887,7 @@ class FranchiseDetailView(ElidedPaginationMixin, ListView):
         return (
             Title.objects.published()
             .with_related()
+            .with_crew()
             .with_progress(self.request.user)
             .filter(franchise=self.franchise)
             .order_by("release_year", "pk")
@@ -923,6 +942,7 @@ class AwardDetailView(ElidedPaginationMixin, ListView):
         return (
             Title.objects.published()
             .with_related()
+            .with_crew()
             .with_progress(self.request.user)
             .filter(award_entries__award=self.award)
             .annotate(award_year=Max("award_entries__year"))
@@ -962,6 +982,7 @@ class SearchView(ElidedPaginationMixin, ListView):
         return (
             search_titles(self.query, limit=None)
             .with_related()
+            .with_crew()
             .with_progress(self.request.user)
         )
 
@@ -1014,7 +1035,13 @@ class ActorSearchView(TemplateView):
                     title__status=Title.Status.PUBLISHED,
                 )
                 .select_related("title")
-                .prefetch_related(*story_card_prefetches("title__", user=self.request.user))
+                .prefetch_related(
+                    *story_card_prefetches("title__", user=self.request.user),
+                    Prefetch(
+                        "title__participations",
+                        queryset=Participation.objects.select_related("person"),
+                    ),
+                )
                 .order_by("-title__release_year")
             )
 
@@ -1116,6 +1143,7 @@ class CollectionDetailView(ElidedPaginationMixin, ListView):
         return (
             Title.objects.published()
             .with_related()
+            .with_crew()
             .with_progress(self.request.user)
             .in_collection(self.collection)
         )

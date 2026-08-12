@@ -7,6 +7,7 @@
 {% block breadcrumb_2_name %}{{ entity.name }}{% endblock %}
 
 {% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/home_feed.css' %}?v={{ static_version }}">
     <link rel="stylesheet" href="{% static 'css/collections.css' %}?v={{ static_version }}">
 {% endblock %}
 
@@ -26,11 +27,12 @@
         </div>
     </section>
 
-    <div class="lb-contentwrap">
+    <div class="lb-contentwrap lb-contentwrap--home">
+    {% include "includes/lb_sidebar.html" %}
     {% if titles %}
         <div class="lb-main" id="lb-content">
-            <div class="poster-grid">
-                {% for title in titles %}{% include "includes/story_card.html" %}{% endfor %}
+            <div class="film-feed">
+                {% for title in titles %}{% include "includes/film_card.html" %}{% endfor %}
             </div>
 
             {% include "includes/pagination.html" %}

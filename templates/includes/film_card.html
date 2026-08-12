@@ -125,6 +125,12 @@
                         </div>
                     {% endif %}
                 {% endwith %}
+                {% if character %}
+                    <div class="film-card__meta-row">
+                        <dt>{% trans "Роль" %}</dt>
+                        <dd>{{ character }}</dd>
+                    </div>
+                {% endif %}
             </dl>
         </div>
     </div>

@@ -19,7 +19,8 @@
 
     {% comment %} Тот же каркас «контент + боковая панель», что и на каталоге. Без него
        страницы жанров и стран были единственными в каталоге без сайдбара. {% endcomment %}
-    <div class="lb-contentwrap">
+    <div class="lb-contentwrap lb-contentwrap--home">
+        {% include "includes/lb_sidebar.html" %}
         <div class="lb-main">
             <div class="reference-grid">
                 {% for reference in references %}

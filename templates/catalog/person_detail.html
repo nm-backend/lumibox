@@ -8,6 +8,7 @@
 {% block breadcrumb_2_url %}{% absolute_url request.path %}{% endblock %}
 
 {% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/home_feed.css' %}?v={{ static_version }}">
     <link rel="stylesheet" href="{% static 'css/title-detail.css' %}?v={{ static_version }}">
     <link rel="stylesheet" href="{% static 'css/profile.css' %}?v={{ static_version }}">
 {% endblock %}
@@ -66,7 +67,8 @@
         </section>
     {% endif %}
 
-    <div class="lb-contentwrap">
+    <div class="lb-contentwrap lb-contentwrap--home">
+    {% include "includes/lb_sidebar.html" %}
     <section class="section">
         <h2 class="section__title">{% trans "Фильмография" %}</h2>
 
@@ -75,9 +77,9 @@
             {% for role_group in role_groups %}
                 <div class="crew-group">
                     <p class="crew-group__role">{{ role_group.grouper }} — {{ role_group.list|length }}</p>
-                    <div class="poster-grid">
+                    <div class="film-feed">
                         {% for participation in role_group.list %}
-                            {% include "includes/story_card.html" with title=participation.title character=participation.character %}
+                            {% include "includes/film_card.html" with title=participation.title character=participation.character %}
                         {% endfor %}
                     </div>
                 </div>

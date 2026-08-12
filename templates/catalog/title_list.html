@@ -5,6 +5,7 @@
 {% block page_description %}{% blocktranslate with heading=page_heading %}Смотрите {{ heading }} на LumiBox: фильтры по жанрам, странам, годам, рейтингу.{% endblocktranslate %}{% endblock %}
 
 {% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/home_feed.css' %}?v={{ static_version }}">
     <link rel="stylesheet" href="{% static 'css/catalog.css' %}?v={{ static_version }}">
 {% endblock %}
 
@@ -81,9 +82,9 @@
             <div data-testid="results">
             {% if titles %}
                 <h2 class="visually-hidden">{% trans "Найденные фильмы и сериалы" %}</h2>
-                <div class="poster-grid">
+                <div class="film-feed">
                     {% for title in titles %}
-                        {% include "includes/story_card.html" %}
+                        {% include "includes/film_card.html" %}
                     {% endfor %}
                 </div>
 
