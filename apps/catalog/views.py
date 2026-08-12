@@ -50,11 +50,6 @@ PUBLISHED_TITLES = Q(titles__status=Title.Status.PUBLISHED)
 # Отдельный от GenreListView — там данные другие (titles_count sorted).
 GENRE_CHIPS_CACHE_KEY = "catalog:genre_chips:v2"
 
-# Сколько постеров показывает промо-блок главной. Константа, а не число
-# по месту: шаблон и вьюха должны договориться об одном значении, иначе
-# снова начнём прегружать карточки, которые никто не увидит.
-PROMO_POSTERS = 4
-
 
 def build_sort_links(request, base_url=None):
     """
@@ -178,20 +173,14 @@ class HomeView(TemplateView):
         context["lb_sort_links"] = build_sort_links(self.request, base_url=catalog_url)
 
         # Лента главной: популярное за неделю, затем топ по рейтингу,
-        # добитый новинками. Карусель: популярное за неделю, добитое новинками.
-        # 12 детальных карточек: высота первого экрана списка, как в ленте
-        # медиа-портала — постер + метаданные на каждую запись.
+        # добитый новинками. 12 детальных карточек: высота первого экрана
+        # списка, как в ленте медиа-портала — постер + метаданные на каждую
+        # запись.
         context["home_titles"] = _dedup_titles(
             context.get("trending", []),
             context.get("top_rated", []),
             context.get("new_titles", []),
         )[:12]
-        # Постеры промо-блока. Ровно столько, сколько рисует шаблон: раньше
-        # здесь собиралось 14 объектов со всеми связями, а промо показывало
-        # четыре — десять карточек прегружались и выбрасывались.
-        context["lb_carousel"] = _dedup_titles(
-            context.get("trending", []), context.get("new_titles", [])
-        )[:PROMO_POSTERS]
 
         # Бейдж «Продолжить с S1E3» на главной. Секции главной приходят
         # из кэша, поэтому прогресс нельзя вешать на их объекты атрибутом:
@@ -200,7 +189,7 @@ class HomeView(TemplateView):
         # и заодно со связями детальной карточки (жанры, участия): кэш
         # хранит объекты целиком, и добавить prefetch к ним уже нельзя.
         if self.request.user.is_authenticated:
-            ids = {t.pk for t in context["home_titles"] + context["lb_carousel"]}
+            ids = {t.pk for t in context["home_titles"]}
             fresh = {
                 t.pk: t
                 for t in Title.objects.published()
@@ -210,7 +199,6 @@ class HomeView(TemplateView):
                 .with_progress(self.request.user)
             }
             context["home_titles"] = [fresh.get(t.pk, t) for t in context["home_titles"]]
-            context["lb_carousel"] = [fresh.get(t.pk, t) for t in context["lb_carousel"]]
 
         # Пагинация как в каталоге: 24 записи на страницу, ссылки ведут
         # на страницы каталога, поэтому номера совпадают.

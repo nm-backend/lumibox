@@ -13,56 +13,7 @@
 <div class="lb-home">
     <div class="lb-wrap">
 
-        {% comment %} Герой главной: один фильм крупно.
-
-           Здесь была текстовая промо-зона — слоган, абзац и четыре постера
-           по 104px. Она ничего не показывала: человек приходит смотреть кино,
-           а видел рекламную подпись о том, что тут можно смотреть кино.
-
-           Заголовок страницы остался тем же и с тем же текстом — он нужен
-           поисковику, — но визуально уступил место названию фильма: на витрине
-           кинотеатра крупно пишут не «у нас есть кино», а что именно идёт.
-
-           Фон — кадр из фильма (backdrop). Если кадра нет, остаётся ровная
-           тёмная поверхность: пустая рамка на первом экране хуже, чем её
-           отсутствие.
-        {% endcomment %}
-        {% with feature=lb_carousel|first %}
-            <section class="hero{% if feature.backdrop %} hero--with-image{% endif %}">
-                {% if feature.backdrop %}
-                    <img class="hero__backdrop" src="{{ feature.backdrop|webp_url }}" alt=""
-                         aria-hidden="true" fetchpriority="high" decoding="async">
-                {% endif %}
-                <div class="hero__scrim" aria-hidden="true"></div>
-
-                <div class="hero__body">
-                    <h1 class="visually-hidden">{% trans "Смотреть фильмы и сериалы онлайн бесплатно" %}</h1>
-
-                    {% if feature %}
-                        <p class="hero__eyebrow">{% trans "Смотрим сейчас" %}</p>
-                        <p class="hero__title">{{ feature.name }}</p>
-                        <p class="hero__meta">
-                            {{ feature.get_type_display }}{% if feature.release_year %} · {{ feature.release_year }}{% endif %}{% if feature.rating_average %} · {{ feature.rating_average|floatformat:1 }}{% endif %}
-                        </p>
-                        {% if feature.short_description %}
-                            <p class="hero__text">{{ feature.short_description|truncatewords:22 }}</p>
-                        {% endif %}
-                        <div class="hero__actions">
-                            <a class="hero__cta" href="{{ feature.get_absolute_url }}">
-                                {% icon "play" size=16 %} {% trans "Смотреть" %}
-                            </a>
-                            <a class="hero__link" href="{% url 'catalog:title_list' %}">{% trans "Весь каталог" %}</a>
-                        </div>
-                    {% else %}
-                        <p class="hero__title">{% trans "Фильмы и сериалы онлайн" %}</p>
-                        <p class="hero__text">{% trans "Новинки кино и сериалы в хорошем качестве." %}</p>
-                        <div class="hero__actions">
-                            <a class="hero__cta" href="{% url 'catalog:title_list' %}">{% trans "Открыть каталог" %}</a>
-                        </div>
-                    {% endif %}
-                </div>
-            </section>
-        {% endwith %}
+        <h1 class="visually-hidden">{% trans "Смотреть фильмы и сериалы онлайн бесплатно" %}</h1>
 
         {# ---------- Сайдбар слева + лента детальных карточек справа ---------- #}
         <div class="lb-contentwrap lb-contentwrap--home">
@@ -92,23 +43,6 @@
             </section>
 
         </div>
-
-            {% comment %} Персональные рекомендации. Тоже переехали из боковой
-               панели: там они были четырьмя мелкими постерами в колонке, и
-               блок, ради которого человек и заводит аккаунт, выглядел
-               наименее заметным на странице. {% endcomment %}
-            {% if user.is_authenticated and recommendations %}
-                <section class="home-row" aria-labelledby="home-recommend">
-                    <div class="home-row__head">
-                        <h2 class="home-row__title" id="home-recommend">{% trans "Вам может понравиться" %}</h2>
-                    </div>
-                    <div class="poster-grid poster-grid--row">
-                        {% for title in recommendations|slice:":6" %}
-                            {% include "includes/story_card.html" %}
-                        {% endfor %}
-                    </div>
-                </section>
-            {% endif %}
 
             {% comment %} «Популярное» переехало из боковой панели сюда: там
                оно было списком из пяти строчек с крошечными постерами, здесь —

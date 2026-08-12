@@ -91,13 +91,13 @@ class HomeViewTests(TestCase):
     def test_recommendations_hidden_from_guest(self):
         create_title()
         response = self.client.get(reverse("catalog:home"))
-        self.assertNotContains(response, "Вам может понравиться")
+        self.assertNotContains(response, 'aria-labelledby="sb-recommend"')
 
     def test_recommendations_shown_to_user(self):
         create_title()
         self.client.force_login(create_user())
         response = self.client.get(reverse("catalog:home"))
-        self.assertContains(response, "Вам может понравиться")
+        self.assertContains(response, 'aria-labelledby="sb-recommend"')
 
 
 class TitleListViewTests(TestCase):
