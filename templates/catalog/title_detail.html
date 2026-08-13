@@ -73,6 +73,13 @@
        при старте, а этот только рисует состояние. Оба работают через один
        и тот же элемент video и друг друга не трогают. {% endcomment %}
     <script src="{% static 'js/player.js' %}?v={{ static_version }}" defer></script>
+    {% comment %} SDK внешнего плеера грузим только там, где есть его вкладка:
+       глобальный <script> во всех <head> тащил бы 113 КБ чужого кода на
+       каждую страницу каталога, где плеер не нужен. defer — чтобы скрипт
+       выполнился после разметки и нашёл тег <ins>. {% endcomment %}
+    {% if external_player %}
+        <script src="https://graphicslab.io/sdk/v2/rendex-sdk.min.js" defer></script>
+    {% endif %}
 {% endblock %}
 
 {% block hero %}
@@ -322,14 +329,19 @@
 {% endblock %}
 
 {% block content %}
-    {% if has_playback %}
+    {% if has_playback or external_player %}
         {% comment %}Секция «Смотреть онлайн».
 
            Источники приходят из PlaybackSource: у фильма они висят на записи,
            у сериала — на каждой серии, и у одной серии их столько, сколько
            озвучек залил редактор. Вкладка «Плеер 2» исчезла вместе с полем
            player_url_2: теперь любой дополнительный источник — просто ещё
-           одна строка в той же таблице.{% endcomment %}
+           одна строка в той же таблице.
+
+           Секцию показываем и без своих источников, когда есть внешний
+           плеер: для таких записей его вкладка — единственный
+           способ посмотреть. Внутренние оболочки рендерим только при
+           has_playback — иначе primary_source пуст и разметка падает.{% endcomment %}
         <section class="player-section"
                  id="player"
                  data-player-section
@@ -342,14 +354,20 @@
             <h2 class="player-section__title">{% trans "Смотреть онлайн" %}</h2>
 
             {% comment %} Переключатель источников показываем, только когда
-               источников больше одного. Одинокая вкладка «Смотреть» висела
-               над кадром как отдельная кнопка неясного назначения. {% endcomment %}
-            {% if title_players|length > 1 or title.trailer_source %}
+               есть из чего выбирать: больше одного своего источника, либо
+               трейлер, либо внешний плеер. Одинокая вкладка «Смотреть»
+               висела над кадром как отдельная кнопка неясного назначения. {% endcomment %}
+            {% if title_players|length > 1 or title.trailer_source or external_player %}
                 <div class="player-tabs" data-player-tabs role="tablist" aria-label="{% trans 'Источники видео' %}">
-                    <button class="player-tabs__tab player-tabs__tab--active" type="button" data-player-tab="player1" data-player-index="0" role="tab" aria-selected="true">{% trans "Смотреть онлайн" %}</button>
+                    {% if has_playback %}
+                        <button class="player-tabs__tab player-tabs__tab--active" type="button" data-player-tab="player1" data-player-index="0" role="tab" aria-selected="true">{% trans "Смотреть онлайн" %}</button>
+                    {% endif %}
                     {% for player in title_players|slice:"1:" %}
                         <button class="player-tabs__tab" type="button" data-player-tab="player1" data-player-index="{{ forloop.counter }}" role="tab" aria-selected="false">{% blocktranslate with n=forloop.counter|add:1 %}Плеер {{ n }}{% endblocktranslate %}</button>
                     {% endfor %}
+                    {% if external_player %}
+                        <button class="player-tabs__tab{% if not has_playback %} player-tabs__tab--active{% endif %}" type="button" data-player-tab="external" role="tab" aria-selected="{% if has_playback %}false{% else %}true{% endif %}">{% trans "Внешний плеер" %}</button>
+                    {% endif %}
                     {% if title.trailer_source %}
                         <button class="player-tabs__tab" type="button" data-player-tab="trailer" role="tab" aria-selected="false">{% trans "Трейлер" %}</button>
                     {% endif %}
@@ -361,6 +379,7 @@
                может менять тип. Пересобирать элемент скриптом дороже и рискованнее,
                чем спрятать один и показать другой. Адрес внешнего плеера
                подставляется по надобности — пустой iframe ничего не грузит.{% endcomment %}
+            {% if has_playback %}
             <div class="player" data-player-pane="player1">
                 {% comment %} Оболочка со своими контролами. Атрибут controls
                    в разметке остаётся: без js зритель получит нативную панель
@@ -462,6 +481,7 @@
                         data-player-frame
                         {% if primary_source.kind != "embed" %}hidden{% endif %}></iframe>
             </div>
+            {% endif %}
 
             {% comment %}Выбор озвучки. Показываем только когда есть из чего
                выбирать: одна кнопка «Дубляж» без альтернативы — шум.{% endcomment %}
@@ -478,6 +498,22 @@
             {% endif %}
 
             {{ playback_data|json_script:"playback-data" }}
+
+            {% if external_player %}
+                <div class="player" data-player-pane="external"{% if has_playback %} hidden{% endif %}>
+                    <ins data-publisher-id="{{ external_player.publisher_id }}"
+                         data-type="{{ external_player.type }}"
+                         data-id="{{ external_player.id }}"
+                         {% if external_player.trailer %}data-trailer="{{ external_player.trailer }}"{% endif %}
+                         data-design="{{ external_player.design }}"
+                         {% for n, color in external_player.colors.items %}{% if color %}data-color{{ n }}="{{ color }}"{% endif %}{% endfor %}
+                         {% if external_player.season %}data-season="{{ external_player.season }}"{% endif %}
+                         {% if external_player.episodes %}data-episodes="{{ external_player.episodes }}"{% endif %}
+                         {% if external_player.voiceover %}data-voiceover="{{ external_player.voiceover }}"{% endif %}
+                         data-poster="true"
+                         data-nopreload="true"></ins>
+                </div>
+            {% endif %}
 
             {% if title.trailer_source %}
                 <div class="player" data-player-pane="trailer" hidden>

@@ -560,6 +560,7 @@ class TitleDetailView(DetailView):
         )
         context.update(self.get_playback(episodes))
         context.update(self.get_comments())
+        context["external_player"] = self._get_external_player()
 
         # «Все части» — остальные произведения франшизы. Запрос делаем
         # только когда франшиза задана: у большинства записей её нет.
@@ -572,6 +573,103 @@ class TitleDetailView(DetailView):
                 .order_by("release_year", "pk")[:12]
             )
         return context
+
+    def _get_external_player(self):
+        """
+        Параметры тега внешнего плеера, если он включён для записи.
+
+        Плеер работает по внутреннему ID видео (player_id из API),
+        либо по ID Кинопоиска/IMDb — редактор заполняет одно из полей,
+        а SDK сервиса сам подтянет контент. Пустой publisher_id в настройках
+        отключает интеграцию целиком.
+
+        Для сериала дополнительно передаются сезон и серия открытия
+        (data-season/data-episodes): плеер стартует с той серии, на которой
+        остановился зритель, иначе — с первой. Озвучка по умолчанию
+        (data-voiceover) подставляется, когда озвучка записи сопоставлена
+        с озвучкой сервиса командой sync_voiceovers.
+
+        Возвращает словарь для шаблона или None, когда плеер не нужен:
+        тогда вкладка не рендерится и SDK не грузится.
+        """
+        publisher_id = settings.VIDEO_SERVICE_PUBLISHER_ID.strip()
+        if not publisher_id:
+            return None
+        player = {
+            "publisher_id": publisher_id,
+            "design": settings.VIDEO_SERVICE_DESIGN,
+            # Цвета кастомизируемых дизайнов (1 и 6) — палитра сайта.
+            # Пустые значения настройки выпиливают data-colorN из тега.
+            "colors": {
+                n: getattr(settings, f"VIDEO_SERVICE_COLOR{n}").strip()
+                for n in range(1, 6)
+            },
+        }
+        # Приоритет — внутренний ID видео (player_id из API):
+        # это официальный формат тега (кнопка «Код» в кабинете даёт ровно
+        # такой). kp/imdb — запасные варианты, когда синхронизация ещё не
+        # успела проставить player_id, а редактор уже вписал внешний ID.
+        if self.object.player_id.strip():
+            embed_type = self.object.player_type.strip() or "movie"
+            # SDK принимает data-type="series", а не "serial" — исторические
+            # и ручные значения приводим к валидному виду.
+            if embed_type == "serial":
+                embed_type = "series"
+            player.update(
+                {"type": embed_type, "id": self.object.player_id.strip()}
+            )
+            if embed_type == "series":
+                opening = self._opening_episode()
+                if opening is not None:
+                    player["season"] = opening.season_number
+                    player["episodes"] = str(opening.episode_number)
+            voiceover_id = self._external_voiceover_id()
+            if voiceover_id is not None:
+                player["voiceover"] = voiceover_id
+            return player
+        # Для kp/imdb-типов плеер по документации поддерживает data-trailer:
+        # "true" — показывать трейлер, когда полное видео отсутствует
+        # в каталоге сервиса. Это ровно наш запасной сценарий: вместо
+        # заглушки «контент не добавлен» зритель увидит трейлер.
+        if self.object.kp_id.strip():
+            player.update(
+                {"type": "kp", "id": self.object.kp_id.strip(), "trailer": "true"}
+            )
+            return player
+        if self.object.imdb_id.strip():
+            player.update(
+                {"type": "imdb", "id": self.object.imdb_id.strip(), "trailer": "true"}
+            )
+            return player
+        return None
+
+    def _opening_episode(self):
+        """
+        Серия, с которой открывать внешний плеер сериала.
+
+        Та же логика, что у локального плеера: продолжаем с серии,
+        на которой остановился зритель, иначе — с первой. Эпизоды уже
+        в памяти (with_episodes), новых запросов нет.
+        """
+        opening = getattr(self, "_opening", None)
+        if opening is None:
+            episodes = list(self.object.episodes.all())
+            opening = episodes[0] if episodes else None
+        return opening
+
+    def _external_voiceover_id(self):
+        """
+        Озвучка по умолчанию во внешнем плеере, если сопоставлена.
+
+        Берём озвучку первого подходящего источника записи (порядок
+        задаёт редактор); в самом плеере зритель сможет переключиться.
+        Возвращает ID озвучки сервиса или None, когда сопоставления нет.
+        """
+        for source in self.object.playback_sources.all():
+            voiceover_id = getattr(source.voice, "vibix_voiceover_id", None)
+            if voiceover_id:
+                return voiceover_id
+        return None
 
     def get_comments(self):
         """
@@ -646,6 +744,9 @@ class TitleDetailView(DetailView):
 
         resume = self.get_resume_episode()
         opening = resume or (episodes[0] if episodes else None)
+        # Серия открытия нужна и внешнему плееру (data-season/data-episodes):
+        # храним, чтобы не пересчитывать и не ходить в базу второй раз.
+        self._opening = opening
         candidates = by_episode.get(opening.pk, []) if opening else title_sources
         primary = candidates[0] if candidates else (title_sources[0] if title_sources else None)
 

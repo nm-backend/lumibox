@@ -234,13 +234,32 @@
         video.addEventListener('playing', function () { showSpinner(false); hideError(); });
         video.addEventListener('canplay', function () { showSpinner(false); });
 
+        /* Смена источника (серия, озвучка) начинается с load(): старое
+           сообщение прячем сразу, иначе оно висит поверх нового кадра. */
+        video.addEventListener('loadstart', function () {
+            hideError();
+            shell.classList.remove('vplayer--error');
+        });
+
         /* Отказ источника раньше не показывался никак: кадр оставался
            чёрным, и зритель не мог отличить «не загрузилось» от «долго
            грузится». */
-        video.addEventListener('error', function () {
+        function onMediaError() {
             showSpinner(false);
             if (errorBox) errorBox.hidden = false;
             setPlayingState(false);
+            /* Приглашение к просмотру (большая кнопка) бесполезно, если
+               источник не грузится, и перекрывает сообщение об ошибке. */
+            shell.classList.add('vplayer--error');
+        }
+
+        /* 404 приходит не на <video>, а на его <source>: с источником
+           в атрибуте src медиаэлемент сам сообщает об ошибке, с элементом
+           <source> — нет, и кадр остаётся чёрным без объяснения. Ловим
+           оба случая. */
+        video.addEventListener('error', onMediaError);
+        Array.prototype.forEach.call(video.querySelectorAll('source'), function (s) {
+            s.addEventListener('error', onMediaError);
         });
 
         /* ---------- Панель прячется, когда не нужна ---------- */

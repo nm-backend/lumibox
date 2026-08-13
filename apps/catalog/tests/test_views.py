@@ -4,7 +4,7 @@ from django.test import TestCase
 from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
 
-from apps.catalog.models import Award, Title, TitleAward
+from apps.catalog.models import Award, Episode, PlaybackSource, Title, TitleAward, VoiceOver
 from apps.core.test_factories import (
     create_collection,
     create_country,
@@ -226,6 +226,114 @@ class TitleDetailViewTests(TestCase):
 
         self.client.get(create_title().get_absolute_url())
         self.assertEqual(WatchHistory.objects.count(), 0)
+
+    def test_external_player_from_kp_id(self):
+        title = create_title(kp_id="326")
+        response = self.client.get(title.get_absolute_url())
+        self.assertContains(response, 'data-publisher-id="678503345"')
+        self.assertContains(response, 'data-type="kp"')
+        self.assertContains(response, 'data-id="326"')
+        # kp/imdb-фолбэк: плеер покажет трейлер, если видео нет в каталоге.
+        self.assertContains(response, 'data-trailer="true"')
+
+    def test_external_player_falls_back_to_imdb(self):
+        title = create_title(imdb_id="tt0111161")
+        response = self.client.get(title.get_absolute_url())
+        self.assertContains(response, 'data-type="imdb"')
+        self.assertContains(response, 'data-id="tt0111161"')
+        self.assertNotContains(response, 'data-type="kp"')
+
+    def test_external_player_prefers_internal_id_over_kp(self):
+        title = create_title(kp_id="447301", player_id="4427", player_type="movie")
+        response = self.client.get(title.get_absolute_url())
+        self.assertContains(response, 'data-type="movie"')
+        self.assertContains(response, 'data-id="4427"')
+        self.assertNotContains(response, 'data-id="447301"')
+        # movie/serial-эмбед по внутреннему ID: data-trailer не нужен.
+        self.assertNotContains(response, 'data-trailer=')
+
+    def test_external_player_serial_type(self):
+        title = create_title(imdb_id="tt10919420", player_id="8264", player_type="serial")
+        response = self.client.get(title.get_absolute_url())
+        # SDK принимает data-type="series", историческое "serial" приводится.
+        self.assertContains(response, 'data-type="series"')
+        self.assertContains(response, 'data-id="8264"')
+
+    def test_external_player_serial_passes_opening_episode(self):
+        title = create_title(player_id="8264", player_type="series")
+        Episode.objects.create(
+            title=title, season_number=2, episode_number=5, name="Серия 5"
+        )
+        response = self.client.get(title.get_absolute_url())
+        self.assertContains(response, 'data-season="2"')
+        self.assertContains(response, 'data-episodes="5"')
+
+    def test_external_player_serial_without_episodes_has_no_episode_attrs(self):
+        title = create_title(player_id="8264", player_type="series")
+        response = self.client.get(title.get_absolute_url())
+        self.assertNotContains(response, "data-season=")
+        self.assertNotContains(response, "data-episodes=")
+
+    def test_external_player_movie_has_no_episode_attrs(self):
+        title = create_title(player_id="4427", player_type="movie")
+        response = self.client.get(title.get_absolute_url())
+        self.assertNotContains(response, "data-season=")
+        self.assertNotContains(response, "data-episodes=")
+
+    def test_external_player_passes_mapped_voiceover(self):
+        voice = VoiceOver.objects.create(
+            name="LostFilm", slug="lostfilm", vibix_voiceover_id=42
+        )
+        title = create_title(player_id="4427", player_type="movie")
+        PlaybackSource.objects.create(title=title, voice=voice)
+        response = self.client.get(title.get_absolute_url())
+        self.assertContains(response, 'data-voiceover="42"')
+
+    def test_external_player_skips_unmapped_voiceover(self):
+        voice = VoiceOver.objects.create(name="LostFilm", slug="lostfilm")
+        title = create_title(player_id="4427", player_type="movie")
+        PlaybackSource.objects.create(title=title, voice=voice)
+        response = self.client.get(title.get_absolute_url())
+        self.assertNotContains(response, "data-voiceover=")
+
+    def test_external_player_renders_design_and_colors(self):
+        title = create_title(kp_id="326")
+        response = self.client.get(title.get_absolute_url())
+        self.assertContains(response, 'data-design="1"')
+        self.assertContains(response, 'data-color1="#ff8a1f"')
+        self.assertContains(response, 'data-color5="#0b0b0c"')
+
+    def test_external_player_drops_empty_color_settings(self):
+        title = create_title(player_id="4427")
+        with self.settings(
+            VIDEO_SERVICE_COLOR1="",
+            VIDEO_SERVICE_COLOR2="",
+            VIDEO_SERVICE_COLOR3="",
+            VIDEO_SERVICE_COLOR4="",
+            VIDEO_SERVICE_COLOR5="",
+        ):
+            response = self.client.get(title.get_absolute_url())
+        self.assertNotContains(response, "data-color1=")
+        self.assertContains(response, 'data-design="1"')
+
+    def test_external_player_defaults_type_to_movie(self):
+        title = create_title(player_id="4427")
+        response = self.client.get(title.get_absolute_url())
+        self.assertContains(response, 'data-type="movie"')
+        self.assertContains(response, 'data-id="4427"')
+
+    def test_no_external_player_without_external_ids(self):
+        title = create_title()
+        response = self.client.get(title.get_absolute_url())
+        self.assertNotContains(response, "data-publisher-id")
+        self.assertNotContains(response, "rendex-sdk.min.js")
+        self.assertNotContains(response, 'data-player-tab="external"')
+
+    def test_external_player_disabled_when_publisher_id_empty(self):
+        title = create_title(kp_id="326")
+        with self.settings(VIDEO_SERVICE_PUBLISHER_ID=""):
+            response = self.client.get(title.get_absolute_url())
+        self.assertNotContains(response, "data-publisher-id")
 
 
 class ReferencePagesTests(TestCase):

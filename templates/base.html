@@ -136,6 +136,14 @@
     {% if ga_measurement_id %}
     <script>window.lbGaId = '{{ ga_measurement_id }}';</script>
     {% endif %}
+
+    {% comment %} Рекламная сеть — лоадер рекламных форматов
+       (стикеры, баннеры). Подключается только когда ADS_NETWORK_ENABLED=true,
+       иначе на странице нет ни скрипта, ни тега, ни лишних запросов.
+    {% endcomment %}
+    {% if ads_network.enabled %}
+    <script type="text/javascript" src="https://v-js-menu.run/public/lib.en.min.js"></script>
+    {% endif %}
 </head>
 {% comment %} data-authenticated — признак входа для скриптов. Полностраничного
    кэша в проекте нет, поэтому атрибут всегда соответствует текущему посетителю.
@@ -155,6 +163,16 @@
     {% endcomment %}
     <div class="cinema-glow" aria-hidden="true"></div>
     <div class="grain-overlay" aria-hidden="true"></div>
+
+    {% comment %} Точка подключения рекламной сети. Скрипт-лоадер
+       из <head> ищет этот тег по id и сам вешает стикеры (catfish) в углы
+       экрана и баннеры в слоты <ins data-pm-b="...">. Рендерится только
+       при ADS_NETWORK_ENABLED=true.
+    {% endcomment %}
+    {% if ads_network.enabled %}
+    {# id="vibix_union" фиксированный: его жёстко ищет внешний скрипт-лоадер (getElementById), менять нельзя #}
+    <ins id="vibix_union" data-publisher_id="{{ ads_network.publisher_id }}" data-add_types="{{ ads_network.add_types }}"></ins>
+    {% endif %}
 
     {% comment %} Боковые рекламные рельсы. Видны только на широких экранах
        (≥1640px) — там, где контейнер не занимает всю ширину окна. Сейчас

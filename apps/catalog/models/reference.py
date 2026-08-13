@@ -55,6 +55,16 @@ class VoiceOver(Reference):
     Первоисточником для плеера служит именно этот справочник.
     """
 
+    vibix_voiceover_id = models.PositiveIntegerField(
+        "ID озвучки в видеосервисе",
+        null=True,
+        blank=True,
+        help_text=(
+            "Заполняется командой sync_voiceovers; id из списка /videos/voiceovers."
+            " Передаётся внешнему плееру как data-voiceover."
+        ),
+    )
+
     class Meta(Reference.Meta):
         verbose_name = "Озвучка"
         verbose_name_plural = "Озвучки"

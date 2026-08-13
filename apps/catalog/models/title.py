@@ -144,6 +144,40 @@ class Title(SeoModel, TimeStampedModel):
         validators=[MinValueValidator(0), MaxValueValidator(10)],
         help_text="Внешний рейтинг для справки, от 0.0 до 10.0",
     )
+
+    # ID Кинопоиска и IMDb — для внешнего плеера (data-type="kp"/"imdb").
+    # Редактору проще найти фильм по известному ID, чем по номеру в каталоге
+    # сервиса; сам плеер по ID подтянет контент со своей стороны.
+    kp_id = models.CharField(
+        "ID на Кинопоиске",
+        max_length=20,
+        blank=True,
+        help_text="Например 326. Если заполнен — внешний плеер покажет фильм по этому ID.",
+    )
+    imdb_id = models.CharField(
+        "ID на IMDb",
+        max_length=20,
+        blank=True,
+        help_text="Например tt0111161. Используется, когда ID Кинопоиска не задан.",
+    )
+
+    # Внутренний ID видео во внешнем плеере — значение data-id тега
+    # (кнопка «Код» в кабинете видеосервиса даёт ровно такой тег).
+    # Синхронизация заполняет его вместе с kp_id/imdb_id; вкладка плеера
+    # отдаёт ему предпочтение перед kp/imdb, потому что это официальный
+    # формат эмбеда.
+    player_id = models.CharField(
+        "ID видео в плеере",
+        max_length=20,
+        blank=True,
+        help_text="Внутренний ID видео внешнего плеера (data-id тега плеера).",
+    )
+    player_type = models.CharField(
+        "Тип видео в плеере",
+        max_length=10,
+        blank=True,
+        help_text="Тип эмбеда: movie или series (data-type тега плеера).",
+    )
     age_rating = models.CharField(
         "Возрастной рейтинг",
         max_length=3,

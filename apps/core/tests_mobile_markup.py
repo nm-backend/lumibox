@@ -8,7 +8,7 @@
 экрана прокрутки или целого раздела.
 """
 
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse
 
 from apps.catalog.tests.test_episodes import create_source
@@ -107,3 +107,31 @@ class PlayerAnchorTests(TestCase):
         response = self.client.get(title.get_absolute_url())
 
         self.assertNotContains(response, 'href="#player"')
+
+
+class AdsNetworkMarkupTests(TestCase):
+    """Реклама появляется на странице только по флагу."""
+
+    def setUp(self):
+        self.url = reverse("catalog:home")
+
+    def test_no_ads_without_flag(self):
+        """Флаг выключен — ни тега, ни скрипта, ни слотов рекламы."""
+        response = self.client.get(self.url)
+        self.assertNotContains(response, 'id="vibix_union"')
+        self.assertNotContains(response, "v-js-menu.run")
+        self.assertNotContains(response, 'data-pm-b=')
+
+    @override_settings(
+        ADS_NETWORK_ENABLED=True,
+        ADS_NETWORK_PUBLISHER_ID="678503345",
+        ADS_NETWORK_ADD_TYPES="sticker,pcsticker,banners",
+    )
+    def test_ads_with_flag(self):
+        """Флаг включён — тег с ID издателя и форматами, лоадер, слот баннера."""
+        response = self.client.get(self.url)
+        self.assertContains(response, 'id="vibix_union"')
+        self.assertContains(response, 'data-publisher_id="678503345"')
+        self.assertContains(response, 'data-add_types="sticker,pcsticker,banners"')
+        self.assertContains(response, "https://v-js-menu.run/public/lib.en.min.js")
+        self.assertContains(response, 'data-pm-b="728x90"')

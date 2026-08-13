@@ -14,6 +14,7 @@ from apps.catalog.models.person import Participation, Person
 from apps.catalog.models.playback import PlaybackSource
 from apps.catalog.models.reference import Country, Genre, VoiceOver
 from apps.catalog.models.title import Title
+from apps.catalog.models.video_service import VideoServiceSyncState
 
 __all__ = [
     "Collection",
@@ -30,5 +31,6 @@ __all__ = [
     "Studio",
     "Title",
     "TitleAward",
+    "VideoServiceSyncState",
     "VoiceOver",
 ]

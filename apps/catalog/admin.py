@@ -69,7 +69,8 @@ class VoiceOverAdmin(admin.ModelAdmin):
     источников.
     """
 
-    list_display = ["name", "slug", "sources_count"]
+    list_display = ["name", "slug", "vibix_voiceover_id", "sources_count"]
+    list_editable = ["vibix_voiceover_id"]
     search_fields = ["name"]
     ordering = ["name"]
     prepopulated_fields = {"slug": ["name"]}
@@ -279,6 +280,10 @@ class TitleAdmin(admin.ModelAdmin):
                     "rating_display",
                     "imdb_rating",
                     "kp_rating",
+                    "kp_id",
+                    "imdb_id",
+                    "player_id",
+                    "player_type",
                 ],
                 "description": (
                     "Качество, озвучка/перевод и плашка последней серии — справка "

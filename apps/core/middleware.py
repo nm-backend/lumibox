@@ -10,6 +10,8 @@ import contextvars
 import logging
 import uuid
 
+from django.conf import settings
+
 # ID текущего запроса: middleware кладёт его в contextvar, лог-фильтр
 # и Sentry (before_send) читают то же значение — каждый лог и событие
 # об ошибке привязываются к конкретному запросу.
@@ -63,22 +65,47 @@ class ContentSecurityPolicyMiddleware:
     and some libraries need them. Images can come from anywhere (posters
     may be served from a CDN or object storage).
 
+    External exceptions, каждый с причиной:
+    - googletagmanager / google-analytics — метрика;
+    - graphicslab.io — SDK внешнего плеера, *.kinescopecdn.net — его iframe.
+      Оба нужны только на странице тайтла с заполненными ID, но политика
+      общая — разрешаем на всех страницах, а скрипт подключается только
+      там, где нужен.
+
     If a feature on the site stops working, check the browser console
     for CSP violation reports before loosening the policy.
     """
 
     CSP_TEMPLATE = (
         "default-src 'self'; "
-        "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com; "
+        "script-src 'self' 'unsafe-inline' "
+        "https://www.googletagmanager.com https://graphicslab.io; "
         "style-src 'self' 'unsafe-inline'; "
         "img-src 'self' data: https:; "
         "font-src 'self' data:; "
-        "connect-src 'self' https://www.google-analytics.com https://www.googletagmanager.com; "
-        "frame-src 'self' https://www.youtube.com https://player.vimeo.com https://rutube.ru; "
+        "connect-src 'self' https://www.google-analytics.com "
+        "https://www.googletagmanager.com https://graphicslab.io "
+        "https://*.kinescopecdn.net; "
+        "frame-src 'self' https://www.youtube.com https://player.vimeo.com "
+        "https://rutube.ru https://*.kinescopecdn.net; "
         "media-src 'self' https:; "
         "object-src 'none'; "
         "base-uri 'self'; "
         "form-action 'self'"
+    )
+
+    # Дополнение к политике при включённой рекламной сети
+    # (ADS_NETWORK_ENABLED=true). Лоадер и движок рекламы живут на этих
+    # доменах; креативы, трекинг-пиксели и iframe форматов (стикеры, баннеры)
+    # приходят с произвольных https-доменов рекламодателей, которые нельзя
+    # перечислить заранее, поэтому frame-src и connect-src расширяются
+    # до любых https-источников. Без этого реклама молча блокируется, как
+    # блокировался бы SDK плеера. Когда флаг выключен, политика остаётся
+    # строгой — этот блок не применяется вовсе.
+    ADS_NETWORK_CSP_ADDITIONS = (
+        "script-src https://v-js-menu.run https://cdn.timing-js-menu.xyz; "
+        "connect-src https://vast2.ufouxbwn.com https://cdn7.ufouxbwn.com https:; "
+        "frame-src https:; "
     )
 
     def __init__(self, get_response):
@@ -86,5 +113,29 @@ class ContentSecurityPolicyMiddleware:
 
     def __call__(self, request):
         response = self.get_response(request)
-        response["Content-Security-Policy"] = self.CSP_TEMPLATE
+        response["Content-Security-Policy"] = self._policy()
         return response
+
+    def _policy(self) -> str:
+        """Политика с учётом включённой рекламной сети."""
+        if not getattr(settings, "ADS_NETWORK_ENABLED", False):
+            return self.CSP_TEMPLATE
+        base = dict(
+            directive.split(" ", 1)
+            for directive in self.CSP_TEMPLATE.split("; ")
+            if " " in directive
+        )
+        for addition in self.ADS_NETWORK_CSP_ADDITIONS.split("; "):
+            if not addition:
+                continue
+            name, _, value = addition.partition(" ")
+            if name in base:
+                # Расширяем существующую директиву, не дублируя уже
+                # присутствующие в ней источники.
+                existing = set(base[name].split())
+                merged = existing | set(value.split())
+                base[name] = " ".join(sorted(merged))
+            else:
+                base[name] = value
+        return "; ".join(f"{name} {value}" for name, value in base.items())
+

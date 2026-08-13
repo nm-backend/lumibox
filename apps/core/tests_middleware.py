@@ -6,7 +6,7 @@
 отсутствие или ослабление должно быть замечено тестами.
 """
 
-from django.test import Client, TestCase
+from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 
 
@@ -66,6 +66,12 @@ class CSPMiddlewareTests(TestCase):
         self.assertIn("vimeo.com", csp)
         self.assertIn("rutube.ru", csp)
 
+    def test_csp_allows_external_player(self):
+        """script-src и frame-src должны разрешать внешний плеер (SDK и его iframe)."""
+        csp = self._check_csp_header(reverse("catalog:home"))
+        self.assertIn("graphicslab.io", csp)
+        self.assertIn("kinescopecdn.net", csp)
+
     def test_csp_blocks_objects(self):
         """object-src должен быть 'none' — Flash и плагины не нужны."""
         csp = self._check_csp_header(reverse("catalog:home"))
@@ -80,6 +86,34 @@ class CSPMiddlewareTests(TestCase):
         """form-action должен быть 'self' — нельзя отправить форму на чужой домен."""
         csp = self._check_csp_header(reverse("catalog:home"))
         self.assertIn("form-action 'self'", csp)
+
+    def test_csp_does_not_include_ads_when_disabled(self):
+        """При выключенной рекламе в CSP нет доменов рекламной сети."""
+        csp = self._check_csp_header(reverse("catalog:home"))
+        self.assertNotIn("v-js-menu.run", csp)
+        self.assertNotIn("ufouxbwn.com", csp)
+        self.assertNotIn("timing-js-menu.xyz", csp)
+
+    @override_settings(ADS_NETWORK_ENABLED=True)
+    def test_csp_includes_ads_when_enabled(self):
+        """При включённой рекламе CSP разрешает лоадер, движок и https-креативы."""
+        csp = self._check_csp_header(reverse("catalog:home"))
+        self.assertIn("v-js-menu.run", csp)
+        self.assertIn("timing-js-menu.xyz", csp)
+        self.assertIn("vast2.ufouxbwn.com", csp)
+        self.assertIn("cdn7.ufouxbwn.com", csp)
+        # https: в frame-src и connect-src — креативы и пиксели рекламодателей
+        self.assertIn("frame-src 'self'", csp)
+        self.assertIn("frame-src", csp)
+
+    @override_settings(ADS_NETWORK_ENABLED=True)
+    def test_csp_base_directives_survive_ads(self):
+        """Включение рекламы не должно ослаблять остальные директивы."""
+        csp = self._check_csp_header(reverse("catalog:home"))
+        self.assertIn("object-src 'none'", csp)
+        self.assertIn("base-uri 'self'", csp)
+        self.assertIn("form-action 'self'", csp)
+        self.assertIn("img-src 'self' data: https:", csp)
 
 
 class RequestIdMiddlewareTests(TestCase):

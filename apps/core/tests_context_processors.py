@@ -9,9 +9,9 @@
 
 from unittest.mock import patch
 
-from django.test import SimpleTestCase
+from django.test import SimpleTestCase, override_settings
 
-from apps.core.context_processors import _cached_static_version, static_version
+from apps.core.context_processors import _cached_static_version, global_settings, static_version
 
 
 class StaticVersionTests(SimpleTestCase):
@@ -45,3 +45,31 @@ class StaticVersionTests(SimpleTestCase):
         second = _cached_static_version()
 
         self.assertNotEqual(first, second)
+
+
+class AdsNetworkContextTests(SimpleTestCase):
+    """ads_network в контексте: флаг, publisher_id и форматы."""
+
+    @override_settings(
+        ADS_NETWORK_ENABLED=False,
+        ADS_NETWORK_PUBLISHER_ID="123",
+        ADS_NETWORK_ADD_TYPES="sticker,banners",
+    )
+    def test_disabled_flag(self):
+        """Флаг false — реклама в контексте выключена, параметры на месте."""
+        ctx = global_settings(None)["ads_network"]
+        self.assertFalse(ctx["enabled"])
+        self.assertEqual(ctx["publisher_id"], "123")
+        self.assertEqual(ctx["add_types"], "sticker,banners")
+
+    @override_settings(
+        ADS_NETWORK_ENABLED=True,
+        ADS_NETWORK_PUBLISHER_ID="678503345",
+        ADS_NETWORK_ADD_TYPES="sticker,pcsticker,banners",
+    )
+    def test_enabled_flag(self):
+        """Флаг true — контекст готов к рендеру тега <ins>."""
+        ctx = global_settings(None)["ads_network"]
+        self.assertTrue(ctx["enabled"])
+        self.assertEqual(ctx["publisher_id"], "678503345")
+        self.assertEqual(ctx["add_types"], "sticker,pcsticker,banners")

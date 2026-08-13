@@ -24,6 +24,31 @@ env = environ.Env(
     REDIS_URL=(str, ""),
     # 0 — прокси перед приложением нет. Безопасное умолчание, см. NUM_PROXIES ниже.
     DJANGO_NUM_PROXIES=(int, 0),
+    # Внешний видеосервис заказчика (плеер по ID видео). Пустая строка
+    # отключает интеграцию: вкладка не появится, SDK не загрузится.
+    VIDEO_SERVICE_PUBLISHER_ID=(str, "678503345"),
+    # Рекламная сеть (стикеры, баннеры). Флаг включает её на всех страницах;
+    # publisher_id и add_types пробрасываются в тег <ins id="vibix_union">
+    # (id фиксированный — его ищет внешний скрипт-лоадер). Форматы:
+    # sticker, pcsticker, banners, brand, flyroll. brand выключен по умолчанию —
+    # он подстраивает сайт под креатив и может сломать вёрстку; flyroll —
+    # рекламный ролик, подключается по желанию.
+    ADS_NETWORK_ENABLED=(bool, False),
+    ADS_NETWORK_PUBLISHER_ID=(str, "678503345"),
+    ADS_NETWORK_ADD_TYPES=(str, "sticker,pcsticker,banners"),
+    # Ключ API видеосервиса (Authorization: Bearer). Нужен команде
+    # sync_video_service для автоматического сопоставления видео
+    # и простановки kp_id/imdb_id/player_id. Пустая строка отключает команду.
+    VIDEO_SERVICE_API_KEY=(str, ""),
+    # Оформление внешнего плеера: дизайн (1-6 по документации сервиса)
+    # и цвета для кастомизируемых дизайнов (1 и 6). Умолчания повторяют
+    # палитру сайта: тёмный фон #0b0b0c и янтарный акцент #ff8a1f.
+    VIDEO_SERVICE_DESIGN=(str, "1"),
+    VIDEO_SERVICE_COLOR1=(str, "#ff8a1f"),
+    VIDEO_SERVICE_COLOR2=(str, "#ffffff"),
+    VIDEO_SERVICE_COLOR3=(str, "#ffb057"),
+    VIDEO_SERVICE_COLOR4=(str, "#e06d00"),
+    VIDEO_SERVICE_COLOR5=(str, "#0b0b0c"),
 )
 
 # Читаем .env из корня проекта.
@@ -188,6 +213,32 @@ if DATABASES["default"]["ENGINE"].endswith("postgresql"):
 # между процессами. Код, который зовёт cache.get/set, об этом не знает.
 REDIS_URL = env("REDIS_URL")
 
+# Идентификатор издателя во внешнем плеере. Задаётся через переменную
+# окружения или .env; умолчание — ID заказчика из его инструкции.
+VIDEO_SERVICE_PUBLISHER_ID = env("VIDEO_SERVICE_PUBLISHER_ID")
+
+# Рекламная сеть. Выключена по умолчанию: реклама подключается только
+# явным решением владельца сайта (ADS_NETWORK_ENABLED=true). Форматы
+# и publisher_id пробрасываются в тег <ins id="vibix_union"> на всех
+# страницах; id тега фиксированный — его ищет внешний скрипт-лоадер.
+ADS_NETWORK_ENABLED = env("ADS_NETWORK_ENABLED")
+ADS_NETWORK_PUBLISHER_ID = env("ADS_NETWORK_PUBLISHER_ID")
+ADS_NETWORK_ADD_TYPES = env("ADS_NETWORK_ADD_TYPES")
+
+# Ключ API видеосервиса для команды sync_video_service. Токен выдаётся
+# в личном кабинете; никогда не попадает в код — только в .env или
+# окружение сервера.
+VIDEO_SERVICE_API_KEY = env("VIDEO_SERVICE_API_KEY")
+
+# Оформление внешнего плеера. Цвета color1-5 применяются для дизайнов 1 и 6;
+# пустая строка у цвета убирает атрибут data-colorN из тега.
+VIDEO_SERVICE_DESIGN = env("VIDEO_SERVICE_DESIGN")
+VIDEO_SERVICE_COLOR1 = env("VIDEO_SERVICE_COLOR1")
+VIDEO_SERVICE_COLOR2 = env("VIDEO_SERVICE_COLOR2")
+VIDEO_SERVICE_COLOR3 = env("VIDEO_SERVICE_COLOR3")
+VIDEO_SERVICE_COLOR4 = env("VIDEO_SERVICE_COLOR4")
+VIDEO_SERVICE_COLOR5 = env("VIDEO_SERVICE_COLOR5")
+
 if REDIS_URL:
     CACHES = {
         "default": {
@@ -227,6 +278,22 @@ CELERY_TIMEZONE = "Asia/Bishkek"
 
 # Задачи по расписанию для масштабирования до 100K пользователей
 CELERY_BEAT_SCHEDULE = {
+    # Синхронизация kp_id/imdb_id/player_id с видеосервисом раз в сутки:
+    # подхватывает добавленные/изменённые видео (инкрементально,
+    # по updated_from). Первый прогон без отметки тянет каталог целиком
+    # и занимает минуты — поэтому раз в сутки, а не чаще. Без ключа API
+    # задача пропускается.
+    "sync-video-service-catalog": {
+        "task": "apps.catalog.tasks.sync_video_service",
+        "schedule": 60 * 60 * 24,
+    },
+    # Сопоставление озвучек с озвучками сервиса (vibix_voiceover_id) —
+    # следом за синхронизацией видео, чтобы data-voiceover внешнего
+    # плеера был актуален. Без ключа API задача пропускается.
+    "sync-video-service-voiceovers": {
+        "task": "apps.catalog.tasks.sync_voiceovers",
+        "schedule": 60 * 60 * 24,
+    },
     # Пересчёт рейтингов раз в час: страховка после массовых правок
     "refresh-title-ratings": {
         "task": "apps.catalog.tasks.refresh_title_ratings",

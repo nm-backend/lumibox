@@ -21,6 +21,66 @@ from apps.catalog.services import (
 
 
 @shared_task
+def sync_video_service():
+    """
+    Инкрементальная синхронизация ID каталога с видеосервисом.
+
+    Вызывается планировщиком раз в сутки и подхватывает видео сервиса,
+    добавленные или изменённые после прошлого запуска (отметка
+    updated_from хранится в VideoServiceSyncState). Возвращает строку-отчёт —
+    воркер логирует её, а ошибки API не роняют планировщик.
+
+    Без ключа в настройках (VIDEO_SERVICE_API_KEY пуст) задача молча
+    пропускается: каталог с пустым ключом синхронизировать нечем,
+    а ежедневная ошибка в логах только зашумляла бы их.
+    """
+    from apps.catalog.video_service_api import VideoServiceAPIError
+    from apps.catalog.video_service_sync import sync_video_service_ids
+
+    if not (settings.VIDEO_SERVICE_API_KEY or "").strip():
+        return "VIDEO_SERVICE_API_KEY не задан — синхронизация пропущена"
+
+    try:
+        stats = sync_video_service_ids()
+    except VideoServiceAPIError as exc:
+        return f"Ошибка синхронизации с видеосервисом: {exc}"
+
+    return (
+        f"Видеосервис: обработано {stats['fetched']}, совпадений "
+        f"{stats['matched']}, заполнено kp_id {stats['kp_filled']}, "
+        f"imdb_id {stats['imdb_filled']}, player_id {stats['player_filled']}"
+    )
+
+
+@shared_task
+def sync_voiceovers():
+    """
+    Сопоставление озвучек каталога с озвучками видеосервиса.
+
+    Вызывается планировщиком раз в сутки вслед за синхронизацией видео:
+    проставляет vibix_voiceover_id озвучкам по названию, чтобы вкладка
+    внешнего плеера могла передать data-voiceover. Тот же порядок, что
+    у sync_video_service: без ключа — тихо пропускается, ошибки API
+    не роняют планировщик.
+    """
+    from apps.catalog.video_service_api import VideoServiceAPIError
+    from apps.catalog.video_service_voiceover_sync import sync_voiceover_ids
+
+    if not (settings.VIDEO_SERVICE_API_KEY or "").strip():
+        return "VIDEO_SERVICE_API_KEY не задан — синхронизация пропущена"
+
+    try:
+        stats = sync_voiceover_ids()
+    except VideoServiceAPIError as exc:
+        return f"Ошибка синхронизации озвучек: {exc}"
+
+    return (
+        f"Озвучки: получено {stats['fetched']}, "
+        f"заполнено сопоставлений {stats['filled']}"
+    )
+
+
+@shared_task
 def refresh_title_ratings():
     """
     Пересчитывает рейтинги всех записей разом.

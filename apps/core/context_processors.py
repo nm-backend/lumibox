@@ -10,6 +10,14 @@ from django.utils.translation import gettext as _
 def global_settings(request):
     return {
         "ga_measurement_id": getattr(settings, "GA_MEASUREMENT_ID", ""),
+        # Рекламная сеть — отдельная опция, выключенная по умолчанию.
+        # В шаблоне тег <ins id="vibix_union"> и скрипт-лоадер подключаются
+        # только когда ads_network.enabled истинно.
+        "ads_network": {
+            "enabled": settings.ADS_NETWORK_ENABLED,
+            "publisher_id": settings.ADS_NETWORK_PUBLISHER_ID,
+            "add_types": settings.ADS_NETWORK_ADD_TYPES,
+        },
     }
 
 
