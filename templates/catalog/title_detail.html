@@ -233,15 +233,29 @@
                    рекламу этого кино. Обычная якорная ссылка, без скрипта:
                    работает и до загрузки js, и при открытии в новой вкладке.
                 {% endcomment %}
-                {% if has_playback %}
+                {% if youtube_video_url %}
+                    {% comment %} Полная версия на YouTube — главный источник MVP:
+                       кнопка ведёт на вкладку плеера с этим роликом. {% endcomment %}
+                    <a class="button button--primary button--large" href="#player">
+                        {% icon "play" size=14 %}
+                        {% trans "Смотреть фильм" %}
+                    </a>
+                {% elif has_playback %}
                     <a class="button button--primary button--large" href="#player">
                         {% icon "play" size=14 %}
                         {% trans "Смотреть онлайн" %}
                     </a>
+                {% elif has_youtube %}
+                    {% comment %} Сериал с эпизодами на YouTube, но без своих
+                       файлов: кнопка ведёт на вкладку плеера серий. {% endcomment %}
+                    <a class="button button--primary button--large" href="#player">
+                        {% icon "play" size=14 %}
+                        {% trans "Смотреть серии" %}
+                    </a>
                 {% endif %}
 
                 {% if title.trailer_source %}
-                    <button class="button {% if has_playback %}button--ghost{% else %}button--primary{% endif %} button--large" type="button" data-trailer-open>
+                    <button class="button {% if has_playback or has_youtube %}button--ghost{% else %}button--primary{% endif %} button--large" type="button" data-trailer-open>
                         {% icon "play" size=14 %}
                         {% trans "Смотреть трейлер" %}
                     </button>
@@ -337,7 +351,7 @@
 {% endblock %}
 
 {% block content %}
-    {% if has_playback or external_player %}
+    {% if has_playback or external_player or has_youtube %}
         {% comment %}Секция «Смотреть онлайн».
 
            Источники приходят из PlaybackSource: у фильма они висят на записи,
@@ -365,16 +379,19 @@
                есть из чего выбирать: больше одного своего источника, либо
                трейлер, либо внешний плеер. Одинокая вкладка «Смотреть»
                висела над кадром как отдельная кнопка неясного назначения. {% endcomment %}
-            {% if title_players|length > 1 or title.trailer_source or external_player %}
+            {% if title_players|length > 1 or title.trailer_source or external_player or has_youtube %}
                 <div class="player-tabs" data-player-tabs role="tablist" aria-label="{% trans 'Источники видео' %}">
+                    {% if has_youtube %}
+                        <button class="player-tabs__tab player-tabs__tab--active" type="button" data-player-tab="youtube" role="tab" aria-selected="true">{% if youtube_video_url %}{% trans "Смотреть фильм" %}{% else %}{% trans "Смотреть серии" %}{% endif %}</button>
+                    {% endif %}
                     {% if has_playback %}
-                        <button class="player-tabs__tab player-tabs__tab--active" type="button" data-player-tab="player1" data-player-index="0" role="tab" aria-selected="true">{% trans "Смотреть онлайн" %}</button>
+                        <button class="player-tabs__tab{% if not has_youtube %} player-tabs__tab--active{% endif %}" type="button" data-player-tab="player1" data-player-index="0" role="tab" aria-selected="{% if has_youtube %}false{% else %}true{% endif %}">{% trans "Смотреть онлайн" %}</button>
                     {% endif %}
                     {% for player in title_players|slice:"1:" %}
                         <button class="player-tabs__tab" type="button" data-player-tab="player1" data-player-index="{{ forloop.counter }}" role="tab" aria-selected="false">{% blocktranslate with n=forloop.counter|add:1 %}Плеер {{ n }}{% endblocktranslate %}</button>
                     {% endfor %}
                     {% if external_player %}
-                        <button class="player-tabs__tab{% if not has_playback %} player-tabs__tab--active{% endif %}" type="button" data-player-tab="external" role="tab" aria-selected="{% if has_playback %}false{% else %}true{% endif %}">{% trans "Внешний плеер" %}</button>
+                        <button class="player-tabs__tab{% if not has_playback and not has_youtube %} player-tabs__tab--active{% endif %}" type="button" data-player-tab="external" role="tab" aria-selected="{% if has_playback or has_youtube %}false{% else %}true{% endif %}">{% trans "Внешний плеер" %}</button>
                     {% endif %}
                     {% if title.trailer_source %}
                         <button class="player-tabs__tab" type="button" data-player-tab="trailer" role="tab" aria-selected="false">{% trans "Трейлер" %}</button>
@@ -387,8 +404,26 @@
                может менять тип. Пересобирать элемент скриптом дороже и рискованнее,
                чем спрятать один и показать другой. Адрес внешнего плеера
                подставляется по надобности — пустой iframe ничего не грузит.{% endcomment %}
+            {% if has_youtube %}
+                {% comment %} Вкладка YouTube MVP: полный фильм (youtube_video_url)
+                   или серия — у сериала адрес подставляет title-detail.js из
+                   активной кнопки серии, поэтому src здесь пустой.
+                   Собирается бэкендом из ID ролика: произвольный iframe-адрес
+                   или чужой домен сюда попасть не могут. {% endcomment %}
+                <div class="player" data-player-pane="youtube">
+                    <iframe class="player__frame player__frame--youtube"
+                            data-youtube-frame
+                            {% if youtube_video_url %}src="{{ youtube_video_url }}"{% endif %}
+                            title="{% blocktranslate with name=title.name %}Смотреть: {{ name }}{% endblocktranslate %}"
+                            loading="lazy"
+                            referrerpolicy="strict-origin-when-cross-origin"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowfullscreen></iframe>
+                </div>
+            {% endif %}
+
             {% if has_playback %}
-            <div class="player" data-player-pane="player1">
+            <div class="player" data-player-pane="player1"{% if has_youtube %} hidden{% endif %}>
                 {% comment %} Оболочка со своими контролами. Атрибут controls
                    в разметке остаётся: без js зритель получит нативную панель
                    браузера и всё равно посмотрит кино. Снимает его player.js —
@@ -513,7 +548,7 @@
                    внешнего плеера заменяет <ins> на iframe раньше, чем
                    отработает наш скрипт. Само data-sync="true" остаётся
                    на <ins> — его читает SDK сервиса. {% endcomment %}
-                <div class="player" data-player-pane="external"{% if has_playback %} hidden{% endif %}
+                <div class="player" data-player-pane="external"{% if has_playback or has_youtube %} hidden{% endif %}
                      {% if external_player.sync %}data-sync-room="{{ external_player.sync_room }}"{% if external_player.sync_user %} data-sync-user="{{ external_player.sync_user }}"{% endif %}{% endif %}>
                     <ins data-publisher-id="{{ external_player.publisher_id }}"
                          data-type="{{ external_player.type }}"
@@ -582,6 +617,7 @@
                                                 data-episode-id="{{ episode.pk }}"
                                                 data-episode-file="{{ episode.sources.0.src }}"
                                                 data-episode-kind="{{ episode.sources.0.kind }}"
+                                                {% if episode.video_embed_url %}data-episode-youtube="{{ episode.video_embed_url }}"{% endif %}
                                                 data-episode-season="{{ episode.season_number }}"
                                                 data-episode-number="{{ episode.episode_number }}"
                                                 data-episode-label="{% if episode.name %}{{ episode.name }}{% else %}{% blocktranslate with n=episode.episode_number %}Серия {{ n }}{% endblocktranslate %}{% endif %}">

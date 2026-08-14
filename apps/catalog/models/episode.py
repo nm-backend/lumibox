@@ -1,5 +1,7 @@
 from django.db import models
 
+from apps.catalog.youtube import validate_youtube_url
+
 
 class Episode(models.Model):
     """
@@ -45,6 +47,16 @@ class Episode(models.Model):
         blank=True,
     )
 
+    # Полная версия серии — YouTube-ссылка (watch, youtu.be или embed).
+    # Тот же контракт, что у Title.video_url: ID извлекается бэкендом,
+    # чужой домен в iframe не попадёт.
+    video_url = models.URLField(
+        "Ссылка на полную версию серии",
+        blank=True,
+        validators=[validate_youtube_url],
+        help_text="YouTube-ссылка на полную серию: watch, youtu.be или embed.",
+    )
+
     class Meta:
         verbose_name = "Серия"
         verbose_name_plural = "Серии"
@@ -64,3 +76,14 @@ class Episode(models.Model):
         if self.name:
             label += f" — {self.name}"
         return f"{label} · {self.title.name}"
+
+    @property
+    def video_embed_url(self):
+        """Встраиваемая YouTube-ссылка на серию или None.
+
+        None — серия без полного видео либо ссылка не YouTube: кнопку
+        серии покажем, но плеер не откроем.
+        """
+        from apps.catalog.youtube import youtube_embed_url
+
+        return youtube_embed_url(self.video_url)

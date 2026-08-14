@@ -60,7 +60,7 @@ class TitleModelTests(TestCase):
     def test_trailer_url_and_file_are_mutually_exclusive(self):
         """Оба варианта трейлера сразу — непонятно, что показывать: должна быть ошибка."""
         title = create_title()
-        title.trailer_url = "https://www.youtube.com/watch?v=test"
+        title.trailer_url = "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
         title.trailer_file = SimpleUploadedFile("t.mp4", b"data", content_type="video/mp4")
 
         with self.assertRaises(ValidationError):
@@ -68,14 +68,22 @@ class TitleModelTests(TestCase):
 
     def test_trailer_url_alone_passes(self):
         title = create_title()
-        title.trailer_url = "https://www.youtube.com/watch?v=test"
+        title.trailer_url = "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
         title.full_clean(exclude=["poster", "backdrop"])  # не должно бросить
+
+    def test_trailer_url_rejects_foreign_host(self):
+        """Чужой хостинг не проходит валидацию YouTube-трейлера."""
+        title = create_title()
+        title.trailer_url = "https://vimeo.com/123456789"
+
+        with self.assertRaises(ValidationError):
+            title.full_clean(exclude=["poster", "backdrop"])
 
     def test_trailer_source_reports_active_variant(self):
         no_trailer = create_title()
         self.assertIsNone(no_trailer.trailer_source)
 
-        with_url = create_title(trailer_url="https://vimeo.com/1")
+        with_url = create_title(trailer_url="https://youtu.be/dQw4w9WgXcQ")
         self.assertEqual(with_url.trailer_source, "url")
 
 

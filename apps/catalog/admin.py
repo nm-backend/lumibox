@@ -171,6 +171,27 @@ class FrameInline(admin.TabularInline):
         )
 
 
+@admin.register(Episode)
+class EpisodeAdmin(admin.ModelAdmin):
+    """
+    Быстрый поиск серий по каталогу.
+
+    Обычно серии правятся инлайном на странице сериала, но когда нужная
+    серия затерялась среди сотен, искать её удобнее здесь — по названию
+    сериала, сезону или номеру серии.
+    """
+
+    list_display = ["title", "season_number", "episode_number", "name", "duration_minutes", "has_video"]
+    list_filter = ["title__type", "season_number"]
+    search_fields = ["title__name", "name"]
+    autocomplete_fields = ["title"]
+    list_per_page = 50
+
+    @admin.display(description="Видео", boolean=True)
+    def has_video(self, episode):
+        return bool(episode.video_url)
+
+
 class EpisodeInline(admin.TabularInline):
     """
     Серии сериала прямо на странице фильма.
@@ -186,7 +207,13 @@ class EpisodeInline(admin.TabularInline):
 
     model = Episode
     extra = 0
-    fields = ["season_number", "episode_number", "name", "duration_minutes"]
+    fields = [
+        "season_number",
+        "episode_number",
+        "name",
+        "duration_minutes",
+        "video_url",
+    ]
 
 
 class PlaybackSourceInline(admin.TabularInline):
@@ -258,18 +285,23 @@ class TitleAdmin(admin.ModelAdmin):
     list_display = [
         "poster_thumb",
         "name",
+        "original_name",
         "type",
         "release_year",
-        "views_count",
-        "status",
+        "kp_id",
+        "imdb_id",
+        "quality",
         "rating_display",
+        "status",
+        "views_count",
         "vibix_status",
     ]
     list_display_links = ["poster_thumb", "name"]
-    list_filter = ["status", "type", "genres", "countries", "release_year"]
-    search_fields = ["name", "original_name"]
+    list_filter = ["status", "type", "quality", "genres", "countries", "release_year"]
+    search_fields = ["name", "original_name", "kp_id", "imdb_id", "slug"]
     ordering = ["-release_year", "name"]
     list_per_page = 30
+    date_hierarchy = "published_at"
     prepopulated_fields = {"slug": ["name"]}
 
     # Удобный выбор жанров и стран двумя списками вместо неудобного multi-select.
@@ -288,11 +320,11 @@ class TitleAdmin(admin.ModelAdmin):
     ]
 
     # Группируем поля по смыслу и по шагам заполнения: сначала о чём фильм,
-    # потом характеристики, потом картинки и видео, потом публикация.
+    # потом видео и идентификаторы, потом картинки и публикация.
     # Длинная простыня из 18 полей подряд нечитаема.
     fieldsets = [
         (
-            "О фильме",
+            "Основная информация",
             {
                 "fields": [
                     "type",
@@ -301,36 +333,61 @@ class TitleAdmin(admin.ModelAdmin):
                     "slug",
                     "short_description",
                     "description",
+                    "release_year",
+                    "release_date",
+                    "age_rating",
                 ],
                 "description": "Адрес (slug) заполнится сам из названия — трогать не нужно.",
             },
         ),
         (
-            "Характеристики",
+            "Видео",
             {
                 "fields": [
-                    "release_year",
-                    "release_date",
+                    "video_url",
+                    "trailer_url",
+                    "trailer_file",
                     "duration_minutes",
                     "quality",
                     "voice_acting",
                     "latest_episode_info",
-                    "age_rating",
-                    "genres",
-                    "countries",
-                    "studios",
-                    "rating_display",
-                    "imdb_rating",
-                    "kp_rating",
-                    "kp_id",
-                    "imdb_id",
-                    "player_id",
-                    "player_type",
                 ],
                 "description": (
-                    "Качество, озвучка/перевод и плашка последней серии — справка "
-                    "для посетителя. Внутренний рейтинг считается из отзывов "
-                    "автоматически, просмотры растут сами."
+                    "Полная версия фильма и трейлер — отдельные YouTube-ссылки "
+                    "(watch, youtu.be или embed), они не смешиваются. Трейлер можно "
+                    "задать и своим видеофайлом. Само видео сериала живёт ниже, "
+                    "в блоке «Серии»."
+                ),
+            },
+        ),
+        (
+            "Идентификаторы",
+            {
+                "fields": ["kp_id", "imdb_id", "player_id", "player_type"],
+                "classes": ["collapse"],
+                "description": (
+                    "ID Кинопоиска и IMDb — для внешнего плеера (data-type=kp/imdb). "
+                    "player_id/player_type заполняет синхронизация с видеосервисом."
+                ),
+            },
+        ),
+        (
+            "Оценки",
+            {
+                "fields": ["rating_display", "kp_rating", "imdb_rating"],
+                "description": (
+                    "Внутренний рейтинг считается из отзывов автоматически. "
+                    "KP/IMDb — внешние рейтинги для справки."
+                ),
+            },
+        ),
+        (
+            "Категории",
+            {
+                "fields": ["genres", "countries", "studios", "franchise", "related_titles"],
+                "description": (
+                    "Франшиза — серия связанных частей, показывается блоком «Все части». "
+                    "Похожие оставьте пустыми, и подбор пойдёт сам по совпадению жанров."
                 ),
             },
         ),
@@ -353,40 +410,13 @@ class TitleAdmin(admin.ModelAdmin):
             },
         ),
         (
-            "Связи",
-            {
-                "fields": ["franchise", "related_titles"],
-                "classes": ["collapse"],
-                "description": (
-                    "Франшиза — серия связанных частей, показывается блоком «Все части». "
-                    "Похожие оставьте пустыми, и подбор пойдёт сам по совпадению жанров."
-                ),
-            },
-        ),
-        (
-            "Трейлер",
-            {
-                "fields": ["trailer_url", "trailer_file"],
-                "description": (
-                    "Заполните ОДИН вариант — ссылку или свой видеофайл. "
-                    "Само видео для просмотра добавляется ниже, "
-                    "в блоке «Источники видео»."
-                ),
-            },
-        ),
-        (
-            "Просмотры",
-            {
-                "fields": ["views_count"],
-                "classes": ["collapse"],
-                "description": "Растёт автоматически при открытии страницы фильма (не чаще раза в сутки на сессию).",
-            },
-        ),
-        (
             "Публикация",
             {
-                "fields": ["status", "published_at"],
-                "description": "Пока статус «Черновик», фильм не виден на сайте. Дата публикации проставится сама.",
+                "fields": ["status", "published_at", "views_count"],
+                "description": (
+                    "Пока статус «Черновик», фильм не виден на сайте. Дата публикации "
+                    "проставится сама, просмотры растут при открытии страницы."
+                ),
             },
         ),
         (

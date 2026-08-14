@@ -294,6 +294,7 @@
            внешний плеер — в <iframe>. Обе оболочки уже в DOM, поэтому
            переключение типа сводится к показу одной и скрытию другой. */
         var playerFrame = section ? section.querySelector('[data-player-frame]') : null;
+        var youtubeFrame = section ? section.querySelector('[data-player-pane="youtube"] iframe') : null;
         var voiceButtons = section ? section.querySelectorAll('[data-voice]') : [];
         var currentVoiceId = null;
         var currentPlayerIndex = 0;
@@ -385,6 +386,17 @@
             frame.src = url.toString();
         }
 
+        /* Полная версия серии на YouTube: у каждой кнопки свой адрес
+           (data-episode-youtube, собран бэкендом из ID ролика). Подставляем
+           его в iframe вкладки YouTube, если открыта она — у локального
+           <video> свой источник, и трогать его не нужно. */
+        function applyYoutubeEpisode(btn) {
+            if (!youtubeFrame || !btn || !btn.dataset.episodeYoutube) return;
+            var pane = youtubeFrame.closest('[data-player-pane]');
+            if (pane && pane.hidden) return;
+            youtubeFrame.src = btn.dataset.episodeYoutube;
+        }
+
         function setEpisode(btn) {
             buttons.forEach(function (b) {
                 b.classList.remove('player-episode--active');
@@ -393,6 +405,7 @@
             currentEpisodeId = btn.dataset.episodeId || null;
             // Озвучку сохраняем между сериями: зритель выбрал её один раз.
             applySource(findSource(currentEpisodeId, currentVoiceId, currentPlayerIndex));
+            applyYoutubeEpisode(btn);
             // Во внешнем плеере своих источников нет: переключаем его серию.
             var externalPane = document.querySelector('[data-player-pane="external"]');
             if (externalPane && !externalPane.hidden) {
@@ -418,6 +431,9 @@
             currentLabel.textContent = active.dataset.episodeLabel;
         }
         if (active) currentEpisodeId = active.dataset.episodeId || null;
+        // Сериал на YouTube: адрес первой серии подставляем сразу, чтобы
+        // вкладка YouTube не осталась пустой при первом открытии страницы.
+        if (active) applyYoutubeEpisode(active);
 
         // Начальную озвучку берём из уже отрисованной кнопки: разметка
         // и скрипт должны стартовать из одного состояния.
@@ -494,6 +510,15 @@
                 if (btn.dataset.playerIndex !== undefined) {
                     currentPlayerIndex = parseInt(btn.dataset.playerIndex, 10) || 0;
                     applySource(findSource(currentEpisodeId, currentVoiceId, currentPlayerIndex));
+                }
+                /* Возврат на вкладку YouTube: если у сериала адрес подставлялся
+                   скриптом, src мог остаться от другой серии — ставим адрес
+                   текущей активной кнопки. У фильма src приходит из разметки. */
+                if (btn.dataset.playerTab === 'youtube' && youtubeFrame) {
+                    var current = section ? section.querySelector('.player-episode--active') : null;
+                    if (current && current.dataset.episodeYoutube) {
+                        youtubeFrame.src = current.dataset.episodeYoutube;
+                    }
                 }
             });
             btn.addEventListener('keydown', function (event) {

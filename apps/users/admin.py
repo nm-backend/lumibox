@@ -14,7 +14,15 @@ class UserAdmin(BaseUserAdmin):
     Переопределяем поля — у нас логин по почте и есть аватар.
     """
 
-    list_display = ["email", "username", "is_staff", "is_active", "date_joined"]
+    list_display = [
+        "email",
+        "username",
+        "is_staff",
+        "is_superuser",
+        "is_active",
+        "date_joined",
+        "last_login",
+    ]
     list_filter = ["is_staff", "is_superuser", "is_active"]
     search_fields = ["email", "username"]
     ordering = ["-date_joined"]

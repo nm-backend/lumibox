@@ -189,23 +189,41 @@ def sync_title(title, *, dry_run=False):
             payload = (
                 fetch_serial_by_kp(api_key, kp_id) if kp_id else fetch_serial_by_imdb(api_key, imdb_id)
             )
+            # У /serials/{id} нет embed_code и type (только id, name, seasons):
+            # player_id/player_type для тега плеера берём из карточки
+            # /videos/{kp|imdb}/{id}, её же используем для обогащения. Если
+            # карточки нет — плеер останется на kp/imdb-типе, а серии всё
+            # равно импортируются из payload.
+            try:
+                embed_payload = (
+                    fetch_video_by_kp(api_key, kp_id) if kp_id else fetch_video_by_imdb(api_key, imdb_id)
+                )
+            except VideoServiceNotFoundError:
+                embed_payload = None
         else:
             payload = (
                 fetch_video_by_kp(api_key, kp_id) if kp_id else fetch_video_by_imdb(api_key, imdb_id)
             )
+            embed_payload = payload
     except VideoServiceNotFoundError:
         stats["not_found"] = 1
         return stats
     stats["matched"] = 1
 
-    player_id, embed_type = _embed_player(payload)
+    player_id, embed_type = (
+        _embed_player(embed_payload) if embed_payload is not None else (None, None)
+    )
     changes = {}
     if not title.player_id and player_id:
         changes["player_id"] = player_id
     if not title.player_type and embed_type:
         changes["player_type"] = embed_type
 
-    enrich_fields, genre_names, country_names = _collect_enrichment(title, payload)
+    # Обогащаем из карточки /videos (полное описание, рейтинги, жанры),
+    # для сериала — из её же embed_payload, а не из короткого ответа
+    # /serials, где этих полей нет.
+    enrich_source = embed_payload if embed_payload is not None else payload
+    enrich_fields, genre_names, country_names = _collect_enrichment(title, enrich_source)
     changes.update(enrich_fields)
 
     if changes and not dry_run:

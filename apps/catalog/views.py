@@ -558,6 +558,13 @@ class TitleDetailView(DetailView):
             if episodes
             else None
         )
+        # YouTube-плеер MVP: полная версия фильма (video_url) или хотя бы
+        # одна серия с video_url. Embed-ссылки считаются из ID ролика
+        # (apps.catalog.youtube) — произвольный iframe-адрес сюда не попадёт.
+        context["has_youtube"] = bool(self.object.video_embed_url) or any(
+            episode.video_embed_url for episode in episodes
+        )
+        context["youtube_video_url"] = self.object.video_embed_url
         context.update(self.get_playback(episodes))
         context.update(self.get_comments())
         context["external_player"] = self._get_external_player()

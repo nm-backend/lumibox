@@ -8,6 +8,7 @@ from apps.catalog.managers import TitleQuerySet
 from apps.catalog.models.person import Person
 from apps.catalog.models.reference import Country, Genre
 from apps.catalog.validators import validate_video_signature, validate_video_size
+from apps.catalog.youtube import validate_youtube_url
 from apps.core.models import SeoModel, TimeStampedModel
 from apps.core.validators import validate_image_file
 
@@ -268,10 +269,15 @@ class Title(SeoModel, TimeStampedModel):
     # проверяет clean() ниже. Раздельные поля, а не одно, потому что источники
     # разной природы: внешнюю ссылку встраиваем iframe'ом, свой файл отдаём
     # тегом <video>. Впихнуть оба варианта в одно поле значит гадать по строке.
+    #
+    # По правилам MVP это YouTube-ссылка (watch, youtu.be или embed):
+    # валидатор пропустит только её, а видео ID из ссылки извлекает
+    # apps.catalog.youtube, чужой домен в iframe не попадёт.
     trailer_url = models.URLField(
         "Ссылка на трейлер",
         blank=True,
-        help_text="YouTube, Vimeo, Rutube и т.п. Оставьте пустым, если загружаете свой видеофайл.",
+        validators=[validate_youtube_url],
+        help_text="YouTube: watch, youtu.be или embed. Оставьте пустым, если загружаете свой видеофайл.",
     )
     trailer_file = models.FileField(
         "Видеофайл трейлера",
@@ -283,6 +289,17 @@ class Title(SeoModel, TimeStampedModel):
             validate_video_size,
         ],
         help_text="Своё видео (mp4, webm, ogg). Оставьте пустым, если указываете ссылку.",
+    )
+
+    # Полная версия фильма — отдельное поле от трейлера. Это два разных
+    # ролика: трейлер рекламирует фильм, video_url его показывает целиком.
+    # Поле валидируется как YouTube-ссылка, в iframe собирается бэкендом
+    # из ID ролика (youtube_embed_url) — произвольный адрес не пройдёт.
+    video_url = models.URLField(
+        "Ссылка на полную версию",
+        blank=True,
+        validators=[validate_youtube_url],
+        help_text="YouTube-ссылка на полный фильм: watch, youtu.be или embed.",
     )
 
     genres = models.ManyToManyField(
@@ -403,14 +420,32 @@ class Title(SeoModel, TimeStampedModel):
         """
         Встраиваемая ссылка на трейлер или None.
 
-        None означает «хост незнакомый» — тогда страница покажет обычную
-        кнопку-ссылку наружу вместо встроенного плеера. Список доверенных
-        хостов живёт в apps.catalog.embeds: пускать во фрейм произвольный
-        адрес, введённый редактором, нельзя.
+        Собирается только из YouTube-ссылки (плеер MVP открывает YouTube):
+        None означает, что введённая ссылка не YouTube, и страница покажет
+        обычную кнопку-ссылку наружу вместо встроенного плеера. Чужой
+        домен во фрейм не попадёт.
         """
-        from apps.catalog.embeds import get_embed_url
+        from apps.catalog.youtube import youtube_embed_url
 
-        return get_embed_url(self.trailer_url)
+        return youtube_embed_url(self.trailer_url)
+
+    @property
+    def video_embed_url(self):
+        """
+        Встраиемая ссылка на полную версию фильма или None.
+
+        None — видео на странице не показываем: поле пустое либо ссылка
+        не YouTube. Собирается из ID ролика, а не из введённой строки,
+        поэтому произвольный iframe-адрес сюда попасть не может.
+        """
+        from apps.catalog.youtube import youtube_embed_url
+
+        return youtube_embed_url(self.video_url)
+
+    @property
+    def has_youtube_video(self):
+        """Есть ли полноценный YouTube-плеер: трейлер или полная версия."""
+        return bool(self.video_embed_url)
 
     def save(self, *args, **kwargs):
         # Дату первой публикации проставляем сами, чтобы редактор не мог

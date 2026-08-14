@@ -1172,12 +1172,11 @@ class SyncTitleTests(TestCase):
 
     @staticmethod
     def _serial_payload(**overrides):
+        # Живой ответ /serials/kp/{id} не содержит embed_code и type:
+        # только id, name и seasons (проверено на реальном API).
         payload = {
             "id": 502,
-            "type": "serial",
             "name": "Игра в кальмара",
-            "year": 2021,
-            "embed_code": '<ins data-publisher-id="1" data-type="series" data-id="8285">',
             "seasons": [
                 {"name": "1", "series": [{"name": "Пилот"}, {"name": "Вторая серия"}]}
             ],
@@ -1215,9 +1214,19 @@ class SyncTitleTests(TestCase):
 
         self.assertEqual(title.description, "Уже написанное описание")
 
+    @patch("apps.catalog.video_service_sync.fetch_video_by_kp")
     @patch("apps.catalog.video_service_sync.fetch_serial_by_kp")
-    def test_series_imports_episodes_once(self, fetch):
-        fetch.return_value = self._serial_payload()
+    def test_series_imports_episodes_once(self, fetch_serial, fetch_video):
+        # Серии приходят из /serials, а embed (player_id/type) — из /videos:
+        # это два разных запроса, потому что /serials не отдаёт embed_code.
+        fetch_serial.return_value = self._serial_payload()
+        fetch_video.return_value = {
+            "id": 871666,
+            "type": "serial",
+            "name": "Игра в кальмара",
+            "year": 2021,
+            "embed_code": '<ins data-publisher-id="1" data-type="series" data-id="8285">',
+        }
         title = create_title(
             name="Игра в кальмара",
             release_year=2021,
@@ -1236,11 +1245,35 @@ class SyncTitleTests(TestCase):
         self.assertEqual(title.episodes.first().name, "Пилот")
         self.assertEqual(title.player_id, "8285")
         self.assertEqual(title.player_type, "series")
+        fetch_serial.assert_called_once()
+        fetch_video.assert_called_once()
 
         stats_again = sync_title(title)
 
         self.assertEqual(stats_again["episodes_created"], 0)
         self.assertEqual(title.episodes.count(), 2)
+
+    @patch("apps.catalog.video_service_sync.fetch_video_by_kp")
+    @patch("apps.catalog.video_service_sync.fetch_serial_by_kp")
+    def test_series_keeps_episodes_when_video_card_missing(self, fetch_serial, fetch_video):
+        # Если /videos/{kp} не находит карточку, серии всё равно импортируются
+        # из /serials, а плеер остаётся на kp/imdb-типе без player_id.
+        fetch_serial.return_value = self._serial_payload()
+        fetch_video.side_effect = VideoServiceNotFoundError("нет карточки")
+        title = create_title(
+            name="Игра в кальмара",
+            release_year=2021,
+            kp_id="5010913",
+            type=Title.Type.SERIES,
+        )
+
+        stats = sync_title(title)
+        title.refresh_from_db()
+
+        self.assertEqual(stats["episodes_created"], 2)
+        self.assertEqual(stats["matched"], 1)
+        self.assertEqual(title.player_id, "")
+        self.assertEqual(title.player_type, "")
 
     @patch("apps.catalog.video_service_sync.fetch_video_by_kp")
     def test_not_found_marks_statistics(self, fetch):
