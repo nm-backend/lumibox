@@ -101,10 +101,10 @@ pg_dump "$DATABASE_URL" > lumibox-$(date +%F).sql
 | `REDIS_URL` | строка Redis; без неё кэш в памяти процесса, а задачи выполняются на месте |
 | `DJANGO_SUPERUSER_EMAIL` | почта администратора |
 | `DJANGO_SUPERUSER_PASSWORD` | **задаёте вы**; в репозитории пароля нет и быть не должно |
-| `VIBIX_API_TOKEN` | ключ API Vibix (`Authorization: Bearer`); без него синк пропускается. Устаревшее имя `VIDEO_SERVICE_API_KEY` читается как запасное |
-| `VIBIX_PUBLISHER_ID` | ID издателя для внешнего плеера, по умолчанию `678503345` (fallback — `VIDEO_SERVICE_PUBLISHER_ID`) |
-| `VIBIX_API_BASE_URL` | адрес API Vibix, по умолчанию `https://vibix.org/api/v1` |
-| `VIDEO_SERVICE_TRAILER` | трейлер для kp/imdb-эмбедов: `true` — если полного видео нет, `only` — всегда трейлер, пусто — без параметра |
+| `VIBIX_API_TOKEN` | **опционально** — ключ API внешнего видеосервиса (`Authorization: Bearer`); без него синк пропускается. Устаревшее имя `VIDEO_SERVICE_API_KEY` читается как запасное. Для базового YouTube-плеера не нужен |
+| `VIBIX_PUBLISHER_ID` | **опционально** — ID издателя для внешнего плеера, по умолчанию `678503345` (fallback — `VIDEO_SERVICE_PUBLISHER_ID`) |
+| `VIBIX_API_BASE_URL` | **опционально** — адрес API внешнего видеосервиса, по умолчанию `https://vibix.org/api/v1` |
+| `VIDEO_SERVICE_TRAILER` | **опционально** — трейлер для kp/imdb-эмбедов: `true` — если полного видео нет, `only` — всегда трейлер, пусто — без параметра |
 | `ADS_NETWORK_ENABLED` | рекламная сеть; по умолчанию `false` |
 
 Хранилище медиа (пока не задано — файлы лежат на диске контейнера и
@@ -143,7 +143,11 @@ pg_dump "$DATABASE_URL" > lumibox-$(date +%F).sql
 - `https://lumibox.com/` открывается, `http://` уводит на `https://`;
 - вход в `/admin/` под созданным администратором;
 - добавление фильма и сериала с сериями и источниками видео;
-- воспроизведение и перемотка (плеер шлёт `Range`, сервер отвечает `206`);
+- у фильма заполнены `trailer_url` и `video_url` (YouTube), у серий —
+  свои `video_url`; страницы открывают вкладки «Смотреть фильм»
+  и «Трейлер» с рабочим YouTube-плеером, выбор серии меняет ролик;
+- воспроизведение и перемотка своих файлов (плеер шлёт `Range`,
+  сервер отвечает `206`);
 - `/sitemap.xml` и `/robots.txt` отдают 200.
 
 ### 5. Резервные копии
