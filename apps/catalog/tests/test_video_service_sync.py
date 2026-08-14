@@ -16,7 +16,14 @@ from django.core.management.base import CommandError
 from django.test import TestCase, override_settings
 from django.utils import timezone
 
-from apps.catalog.models import Country, Episode, Genre, VideoServiceSyncState, VoiceOver
+from apps.catalog.models import (
+    Country,
+    Episode,
+    Genre,
+    Title,
+    VideoServiceSyncState,
+    VoiceOver,
+)
 from apps.catalog.video_service_api import (
     MAX_RETRIES,
     VIDEO_SERVICE_API_BASE,
@@ -41,6 +48,7 @@ from apps.catalog.video_service_sync import (
     match_item,
     normalize_name,
     sync_series_episodes,
+    sync_title,
     sync_video_service_ids,
 )
 from apps.catalog.video_service_voiceover_sync import import_voiceovers_from_service, sync_voiceover_ids
@@ -1139,3 +1147,163 @@ class SyncVoiceoversTaskTests(TestCase):
             report = sync_voiceovers()
 
         self.assertIn("Ошибка синхронизации озвучек", report)
+
+
+class SyncTitleTests(TestCase):
+    """sync_title: точечная синхронизация одной записи (sync_vibix --title).
+
+    Клиентский слой замокан на уровне fetch_* функций: сам HTTP к Vibix
+    в юнит-тестах не ходим.
+    """
+
+    @staticmethod
+    def _video_payload(**overrides):
+        payload = {
+            "id": 501,
+            "type": "movie",
+            "name": "Начало",
+            "name_eng": "Inception",
+            "year": 2010,
+            "description": "Описание из API",
+            "embed_code": '<ins data-publisher-id="1" data-type="movie" data-id="8285">',
+        }
+        payload.update(overrides)
+        return payload
+
+    @staticmethod
+    def _serial_payload(**overrides):
+        payload = {
+            "id": 502,
+            "type": "serial",
+            "name": "Игра в кальмара",
+            "year": 2021,
+            "embed_code": '<ins data-publisher-id="1" data-type="series" data-id="8285">',
+            "seasons": [
+                {"name": "1", "series": [{"name": "Пилот"}, {"name": "Вторая серия"}]}
+            ],
+        }
+        payload.update(overrides)
+        return payload
+
+    @patch("apps.catalog.video_service_sync.fetch_video_by_kp")
+    def test_movie_fills_player_and_empty_fields(self, fetch):
+        fetch.return_value = self._video_payload()
+        title = create_title(
+            name="Начало",
+            original_name="Inception",
+            release_year=2010,
+            kp_id="4402886",
+            description="",
+        )
+
+        stats = sync_title(title)
+        title.refresh_from_db()
+
+        self.assertEqual(stats["player_filled"], 1)
+        self.assertEqual(stats["not_found"], 0)
+        self.assertEqual(title.player_id, "8285")
+        self.assertEqual(title.player_type, "movie")
+        self.assertEqual(title.description, "Описание из API")
+
+    @patch("apps.catalog.video_service_sync.fetch_video_by_kp")
+    def test_movie_preserves_existing_fields(self, fetch):
+        fetch.return_value = self._video_payload(description="Другое описание")
+        title = create_title(kp_id="4402886", description="Уже написанное описание")
+
+        sync_title(title)
+        title.refresh_from_db()
+
+        self.assertEqual(title.description, "Уже написанное описание")
+
+    @patch("apps.catalog.video_service_sync.fetch_serial_by_kp")
+    def test_series_imports_episodes_once(self, fetch):
+        fetch.return_value = self._serial_payload()
+        title = create_title(
+            name="Игра в кальмара",
+            release_year=2021,
+            kp_id="5010913",
+            type=Title.Type.SERIES,
+        )
+
+        stats = sync_title(title)
+        title.refresh_from_db()
+
+        self.assertEqual(stats["episodes_created"], 2)
+        self.assertEqual(
+            list(title.episodes.values_list("season_number", "episode_number")),
+            [(1, 1), (1, 2)],
+        )
+        self.assertEqual(title.episodes.first().name, "Пилот")
+        self.assertEqual(title.player_id, "8285")
+        self.assertEqual(title.player_type, "series")
+
+        stats_again = sync_title(title)
+
+        self.assertEqual(stats_again["episodes_created"], 0)
+        self.assertEqual(title.episodes.count(), 2)
+
+    @patch("apps.catalog.video_service_sync.fetch_video_by_kp")
+    def test_not_found_marks_statistics(self, fetch):
+        fetch.side_effect = VideoServiceNotFoundError("не найдено")
+        title = create_title(kp_id="999999999")
+
+        stats = sync_title(title)
+        title.refresh_from_db()
+
+        self.assertEqual(stats["not_found"], 1)
+        self.assertEqual(stats["matched"], 0)
+        self.assertEqual(title.player_id, "")
+
+    @patch("apps.catalog.video_service_sync.fetch_video_by_kp")
+    def test_dry_run_writes_nothing(self, fetch):
+        fetch.return_value = self._video_payload()
+        title = create_title(kp_id="4402886")
+
+        stats = sync_title(title, dry_run=True)
+        title.refresh_from_db()
+
+        self.assertEqual(stats["player_filled"], 1)
+        self.assertEqual(title.player_id, "")
+        self.assertEqual(title.description, "Описание для теста.")
+
+    def test_without_external_id_rejects(self):
+        title = create_title()
+
+        with self.assertRaises(ValueError):
+            sync_title(title)
+
+    def test_imdb_id_used_when_no_kp(self):
+        with patch(
+            "apps.catalog.video_service_sync.fetch_video_by_imdb",
+            return_value=self._video_payload(),
+        ) as fetch:
+            stats = sync_title(create_title(imdb_id="tt1375666"))
+
+        self.assertEqual(stats["player_filled"], 1)
+        fetch.assert_called_once()
+
+
+class SyncVibixCommandTests(TestCase):
+    """Команда sync_vibix: проверка аргументов и защиты без ключа API."""
+
+    def test_requires_api_key(self):
+        with override_settings(VIBIX_API_TOKEN="", VIDEO_SERVICE_API_KEY=""):
+            with self.assertRaises(CommandError):
+                call_command("sync_vibix", dry_run=True)
+
+    def test_title_requires_existing_title(self):
+        with override_settings(VIBIX_API_TOKEN="test-token"):
+            with self.assertRaises(CommandError):
+                call_command("sync_vibix", title="no-such-title")
+
+    @patch("apps.catalog.management.commands.sync_vibix.sync_title")
+    def test_title_syncs_one_record(self, sync):
+        sync.return_value = {"player_filled": 1, "not_found": 0, "enriched": 0, "episodes_created": 0}
+        title = create_title(kp_id="4402886")
+        out = StringIO()
+
+        call_command("sync_vibix", title=title.slug, stdout=out)
+
+        sync.assert_called_once()
+        self.assertEqual(sync.call_args.args[0], title)
+        self.assertIn("player_id", out.getvalue())

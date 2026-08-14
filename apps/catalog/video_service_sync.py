@@ -46,6 +46,8 @@ from apps.catalog.video_service_api import (
     VideoServiceNotFoundError,
     fetch_serial_by_imdb,
     fetch_serial_by_kp,
+    fetch_video_by_imdb,
+    fetch_video_by_kp,
     iter_video_links,
 )
 
@@ -150,6 +152,93 @@ def match_item(index, item):
                 continue
             return title
     return None
+
+
+def sync_title(title, *, dry_run=False):
+    """
+    Синхронизирует одну запись каталога с видеосервисом.
+
+    Тип записи определяет эндпоинт: сериал — GET /serials/kp|imdb/{id}
+    (сезоны и серии), всё остальное — GET /videos/kp|imdb/{id} (карточка).
+    Проставляет player_id/player_type из embed_code записи сервиса и
+    обогащает пустые поля записи (описание, рейтинги, жанры, страны) —
+    то же правило «только пустые», что и у массового синка: ручная работа
+    редактора не затирается, повторный запуск идемпотентен. Если фильм
+    оказался сериалом (в карточке пришли сезоны) — серии импортируются
+    тоже. Ничего не удаляет.
+
+    Возвращает словарь счётчиков: matched, not_found, player_filled,
+    enriched, episodes_created.
+    """
+    api_key = (settings.VIDEO_SERVICE_API_KEY or "").strip()
+    if not api_key:
+        raise VideoServiceAPIError(
+            "VIDEO_SERVICE_API_KEY не задан — синхронизацию невозможно запустить"
+        )
+
+    kp_id = title.kp_id.strip()
+    imdb_id = title.imdb_id.strip()
+    if not kp_id and not imdb_id:
+        raise ValueError(
+            f"У записи «{title.name}» нет kp_id/imdb_id — синхронизировать нечего"
+        )
+
+    stats = {"matched": 0, "not_found": 0, "player_filled": 0, "enriched": 0, "episodes_created": 0}
+    try:
+        if title.is_series:
+            payload = (
+                fetch_serial_by_kp(api_key, kp_id) if kp_id else fetch_serial_by_imdb(api_key, imdb_id)
+            )
+        else:
+            payload = (
+                fetch_video_by_kp(api_key, kp_id) if kp_id else fetch_video_by_imdb(api_key, imdb_id)
+            )
+    except VideoServiceNotFoundError:
+        stats["not_found"] = 1
+        return stats
+    stats["matched"] = 1
+
+    player_id, embed_type = _embed_player(payload)
+    changes = {}
+    if not title.player_id and player_id:
+        changes["player_id"] = player_id
+    if not title.player_type and embed_type:
+        changes["player_type"] = embed_type
+
+    enrich_fields, genre_names, country_names = _collect_enrichment(title, payload)
+    changes.update(enrich_fields)
+
+    if changes and not dry_run:
+        Title.objects.filter(pk=title.pk).update(**changes)
+    if "player_id" in changes:
+        stats["player_filled"] = 1
+    if enrich_fields or genre_names or country_names:
+        stats["enriched"] = 1
+
+    needs_genres = bool(genre_names) and not title.genres.exists()
+    needs_countries = bool(country_names) and not title.countries.exists()
+    if not dry_run:
+        if needs_genres:
+            for name in genre_names:
+                genre = _ensure_reference(Genre, name, "genre")
+                if genre is not None:
+                    title.genres.add(genre)
+        if needs_countries:
+            for name in country_names:
+                country = _ensure_reference(Country, name, "country")
+                if country is not None:
+                    title.countries.add(country)
+
+    seasons = payload.get("seasons")
+    if seasons is not None and not title.is_series:
+        # Карточка фильма пришла с сезонами — запись на деле сериал
+        # (в каталоге сервиса типы не разделены строго). Импортируем серии,
+        # player_type для плеера останется из embed_code.
+        stats["episodes_created"] = _import_episodes(title, payload, dry_run=dry_run)
+    elif title.is_series:
+        stats["episodes_created"] = _import_episodes(title, payload, dry_run=dry_run)
+
+    return stats
 
 
 def sync_video_service_ids(*, full=False, dry_run=False, page_size=100, max_pages=None):

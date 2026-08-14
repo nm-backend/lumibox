@@ -24,8 +24,16 @@ env = environ.Env(
     REDIS_URL=(str, ""),
     # 0 — прокси перед приложением нет. Безопасное умолчание, см. NUM_PROXIES ниже.
     DJANGO_NUM_PROXIES=(int, 0),
-    # Внешний видеосервис заказчика (плеер по ID видео). Пустая строка
+    # Внешний видеосервис Vibix (плеер по ID видео). VIBIX_* — официальные
+    # имена переменных; старые VIDEO_SERVICE_* ниже читаются как fallback,
+    # чтобы существующий .env продолжал работать без правок. Пустая строка
     # отключает интеграцию: вкладка не появится, SDK не загрузится.
+    VIBIX_API_TOKEN=(str, ""),
+    VIBIX_PUBLISHER_ID=(str, "678503345"),
+    # Корень публичного API: /publisher/... живут под ним же, сериалы —
+    # напрямую (GET /api/v1/serials/...).
+    VIBIX_API_BASE_URL=(str, "https://vibix.org/api/v1"),
+    # Устаревшие имена переменных — остаются для обратной совместимости.
     VIDEO_SERVICE_PUBLISHER_ID=(str, "678503345"),
     # Рекламная сеть (стикеры, баннеры). Флаг включает её на всех страницах;
     # publisher_id и add_types пробрасываются в тег <ins id="vibix_union">
@@ -226,9 +234,16 @@ if DATABASES["default"]["ENGINE"].endswith("postgresql"):
 # между процессами. Код, который зовёт cache.get/set, об этом не знает.
 REDIS_URL = env("REDIS_URL")
 
-# Идентификатор издателя во внешнем плеере. Задаётся через переменную
-# окружения или .env; умолчание — ID заказчика из его инструкции.
-VIDEO_SERVICE_PUBLISHER_ID = env("VIDEO_SERVICE_PUBLISHER_ID")
+# Идентификатор издателя во внешнем плеере. Официальное имя — VIBIX_*;
+# если оно не задано, читается устаревшее VIDEO_SERVICE_* (существующий
+# .env продолжает работать без правок).
+VIBIX_API_TOKEN = env("VIBIX_API_TOKEN") or env("VIDEO_SERVICE_API_KEY")
+VIBIX_PUBLISHER_ID = env("VIBIX_PUBLISHER_ID") or env("VIDEO_SERVICE_PUBLISHER_ID")
+VIBIX_API_BASE_URL = env("VIBIX_API_BASE_URL")
+
+# Алиасы для кода, написанного до появления VIBIX_*.
+VIDEO_SERVICE_PUBLISHER_ID = VIBIX_PUBLISHER_ID
+VIDEO_SERVICE_API_KEY = VIBIX_API_TOKEN
 
 # Рекламная сеть. Выключена по умолчанию: реклама подключается только
 # явным решением владельца сайта (ADS_NETWORK_ENABLED=true). Форматы
@@ -238,10 +253,9 @@ ADS_NETWORK_ENABLED = env("ADS_NETWORK_ENABLED")
 ADS_NETWORK_PUBLISHER_ID = env("ADS_NETWORK_PUBLISHER_ID")
 ADS_NETWORK_ADD_TYPES = env("ADS_NETWORK_ADD_TYPES")
 
-# Ключ API видеосервиса для команды sync_video_service. Токен выдаётся
-# в личном кабинете; никогда не попадает в код — только в .env или
+# Ключ API видеосервиса (алиас VIBIX_API_TOKEN). Токен выдаётся в личном
+# кабинете; никогда не попадает в код, HTML, логи — только в .env или
 # окружение сервера.
-VIDEO_SERVICE_API_KEY = env("VIDEO_SERVICE_API_KEY")
 
 # Оформление внешнего плеера. Цвета color1-5 применяются для дизайнов 1 и 6;
 # пустая строка у цвета убирает атрибут data-colorN из тега.

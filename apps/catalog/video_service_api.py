@@ -20,15 +20,17 @@
 import time
 
 import requests
+from django.conf import settings
 from django.utils import timezone
 
-# Базовый адрес публичного API издателя.
-VIDEO_SERVICE_API_BASE = "https://vibix.org/api/v1/publisher"
+# Базовый адрес публичного API издателя: корень VIBIX_API_BASE_URL
+# (по умолчанию https://vibix.org/api/v1) + сегмент /publisher.
+VIDEO_SERVICE_API_BASE = f"{settings.VIBIX_API_BASE_URL.rstrip('/')}/publisher"
 
 # Сериалы живут на отдельном хосте API без сегмента /publisher:
 # документация указывает GET /api/v1/serials/kp|imdb/{id} (без префикса),
 # и запросы к /api/v1/publisher/serials/... сервис отвечает 404.
-VIDEO_SERVICE_SERIALS_API_BASE = "https://vibix.org/api/v1"
+VIDEO_SERVICE_SERIALS_API_BASE = settings.VIBIX_API_BASE_URL.rstrip("/")
 
 # Таймаут на запрос: каталог большой, но зависнуть навсегда не должен.
 REQUEST_TIMEOUT = 30

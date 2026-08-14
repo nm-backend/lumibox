@@ -23,6 +23,39 @@ from apps.catalog.models import (
 from apps.core.cache import invalidate_for_model
 
 
+def _run_vibix_sync(request, queryset, *, dry_run=False):
+    """
+    Синхронизирует выбранные записи с видеосервисом Vibix.
+
+    Вызывает тот же сервис, что и команда sync_vibix --title: для сериала
+    импортируются сезоны/серии, для фильма — карточка и player_id.
+    Возвращает сообщение для message_user.
+    """
+    from apps.catalog.video_service_api import VideoServiceAPIError
+    from apps.catalog.video_service_sync import sync_title
+
+    synced = matched = not_found = errors = skipped = 0
+    for title in queryset:
+        if not title.kp_id.strip() and not title.imdb_id.strip():
+            skipped += 1
+            continue
+        try:
+            stats = sync_title(title, dry_run=dry_run)
+        except (VideoServiceAPIError, ValueError):
+            errors += 1
+            continue
+        synced += 1
+        matched += stats["matched"]
+        not_found += stats["not_found"]
+
+    if dry_run:
+        return (f"Сухой прогон: записей {synced}, совпадений {matched}, "
+                f"не найдено {not_found}, ошибок {errors}, без kp/imdb {skipped}. "
+                f"В базу ничего не записано.")
+    return (f"Синхронизировано с Vibix: {synced} (совпадений {matched}, "
+            f"не найдено {not_found}), ошибок {errors}, без kp/imdb {skipped}.")
+
+
 class ReferenceAdmin(admin.ModelAdmin):
     """
     Общие настройки админки для справочников — жанров и стран.
@@ -222,7 +255,16 @@ class TitleAdmin(admin.ModelAdmin):
     # в обычном multi-select нерабочий.
     autocomplete_fields = ["related_titles", "franchise"]
 
-    list_display = ["poster_thumb", "name", "type", "release_year", "views_count", "status", "rating_display"]
+    list_display = [
+        "poster_thumb",
+        "name",
+        "type",
+        "release_year",
+        "views_count",
+        "status",
+        "rating_display",
+        "vibix_status",
+    ]
     list_display_links = ["poster_thumb", "name"]
     list_filter = ["status", "type", "genres", "countries", "release_year"]
     search_fields = ["name", "original_name"]
@@ -364,7 +406,26 @@ class TitleAdmin(admin.ModelAdmin):
         ),
     ]
 
-    actions = ["publish", "unpublish"]
+    actions = ["publish", "unpublish", "vibix_sync", "vibix_sync_dry_run"]
+
+    @admin.display(description="Vibix")
+    def vibix_status(self, title):
+        """
+        Статус интеграции с Vibix для колонки списка.
+
+        Считается из заполненных полей, в базу не ходит:
+        player_id — контент сопоставлен; kp/imdb — будет сопоставлен
+        ближайшим синком; ничего — интеграции пока нет.
+        """
+        if title.player_id:
+            return format_html(
+                '<span style="color:#2e7d32;">&#10003; {}</span>', title.player_id
+            )
+        if title.kp_id or title.imdb_id:
+            return format_html(
+                '<span style="color:#b26a00;">ID задан</span>'
+            )
+        return format_html('<span style="color:#999;">—</span>')
 
     @admin.display(description="Постер")
     def poster_preview(self, title):
@@ -414,6 +475,14 @@ class TitleAdmin(admin.ModelAdmin):
         return format_html(
             '<img src="{}" style="height: 56px; border-radius: 4px;">', title.poster.url
         )
+
+    @admin.action(description="Синхронизировать с Vibix")
+    def vibix_sync(self, request, queryset):
+        self.message_user(request, _run_vibix_sync(request, queryset))
+
+    @admin.action(description="Синхронизация с Vibix (сухой прогон)")
+    def vibix_sync_dry_run(self, request, queryset):
+        self.message_user(request, _run_vibix_sync(request, queryset, dry_run=True))
 
     @admin.action(description="Опубликовать выбранное")
     def publish(self, request, queryset):
