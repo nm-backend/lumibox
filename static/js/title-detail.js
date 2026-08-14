@@ -359,6 +359,24 @@
             });
         });
 
+        /* Переключение серии во внешнем плеере Vibix.
+
+           Внешний плеер открывает серию атрибутами data-season/data-episodes
+           тега <ins>; SDK читает их, когда заменяет тег на iframe. Менять
+           атрибуты у уже заменённого тега бесполезно — плеер их не увидит.
+           Поэтому тег пересоздаётся (клонируется с новыми значениями), и
+           SDK подхватывает новую серию заново. Старые data-атрибуты
+           копируются как есть: publisher, тип, дизайн, озвучка, цвета. */
+        function updateExternalPlayer(season, episode) {
+            var pane = document.querySelector('[data-player-pane="external"]');
+            var ins = pane ? pane.querySelector('ins[data-publisher-id]') : null;
+            if (!ins || !season || !episode) return;
+            var clone = ins.cloneNode(false);
+            clone.setAttribute('data-season', String(season));
+            clone.setAttribute('data-episodes', String(episode));
+            ins.parentNode.replaceChild(clone, ins);
+        }
+
         function setEpisode(btn) {
             buttons.forEach(function (b) {
                 b.classList.remove('player-episode--active');
@@ -367,6 +385,11 @@
             currentEpisodeId = btn.dataset.episodeId || null;
             // Озвучку сохраняем между сериями: зритель выбрал её один раз.
             applySource(findSource(currentEpisodeId, currentVoiceId, currentPlayerIndex));
+            // Во внешнем плеере своих источников нет: переключаем его серию.
+            var externalPane = document.querySelector('[data-player-pane="external"]');
+            if (externalPane && !externalPane.hidden) {
+                updateExternalPlayer(btn.dataset.episodeSeason, btn.dataset.episodeNumber);
+            }
             if (currentLabel && btn.dataset.episodeLabel) {
                 currentLabel.textContent = btn.dataset.episodeLabel;
             }

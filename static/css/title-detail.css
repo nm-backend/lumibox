@@ -818,6 +818,32 @@
     background: #000;
 }
 
+/* Внешний плеер Vibix: SDK заменяет тег <ins> на iframe не мгновенно.
+   Пока iframe не появился, показываем спиннер поверх чёрной панели —
+   иначе зритель видит пустой прямоугольник и думает, что плеер сломан.
+   :has() поддерживается всеми современными браузерами; при его
+   отсутствии спиннер просто остаётся под кадром плеера. */
+.player[data-player-pane="external"] {
+    position: relative;
+}
+
+.player[data-player-pane="external"]::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    width: 44px;
+    height: 44px;
+    border: 3px solid rgba(255, 255, 255, 0.15);
+    border-top-color: var(--color-accent, #ff8a1f);
+    border-radius: 50%;
+    animation: vplayer-spin 0.9s linear infinite;
+}
+
+.player[data-player-pane="external"]:has(iframe)::after {
+    display: none;
+}
+
 .player-panel {
     display: grid;
     gap: var(--space-3);

@@ -152,6 +152,75 @@ class TrailerRenderingTests(TestCase):
         self.assertContains(response, "Трейлер размещён на стороннем сервисе.")
 
 
+class ExternalPlayerRenderingTests(TestCase):
+    """Внешний плеер Vibix: тег <ins> с data-атрибутами и защита ключа.
+
+    Разметку SDK забирает с официального CDN, а данные плеер получает
+    из атрибутов тега — поэтому здесь проверяем именно их.
+    """
+
+    def test_series_renders_ins_with_season_and_episodes(self):
+        title = create_title(
+            name="Сериал с внешним плеером",
+            type=Title.Type.SERIES,
+            player_id="8285",
+            player_type="serial",
+        )
+        create_episode(title, season=1, episode=1)
+        create_episode(title, season=1, episode=2)
+
+        response = self.client.get(title.get_absolute_url())
+
+        self.assertContains(response, 'data-publisher-id="678503345"')
+        self.assertContains(response, 'data-type="series"')
+        self.assertContains(response, 'data-id="8285"')
+        self.assertContains(response, 'data-season="1"')
+        self.assertContains(response, 'data-episodes="1"')
+        self.assertContains(response, 'data-nopreload="true"')
+
+    def test_movie_without_player_uses_kp_id(self):
+        title = create_title(name="Фильм по kp", kp_id="4402886")
+
+        response = self.client.get(title.get_absolute_url())
+
+        self.assertContains(response, 'data-type="kp"')
+        self.assertContains(response, 'data-id="4402886"')
+
+    def test_no_external_player_without_ids(self):
+        title = create_title(name="Ничего нет")
+
+        response = self.client.get(title.get_absolute_url())
+
+        self.assertNotContains(response, "data-publisher-id")
+        self.assertNotContains(response, "rendex-sdk.min.js")
+
+    def test_sdk_script_only_with_external_player(self):
+        with_player = create_title(name="С плеером", player_id="5", player_type="movie")
+        response = self.client.get(with_player.get_absolute_url())
+        self.assertContains(response, "rendex-sdk.min.js")
+
+        without_player = create_title(name="Без плеера", player_id="", player_type="")
+        self.assertNotContains(self.client.get(without_player.get_absolute_url()), "rendex-sdk")
+
+    def test_api_token_never_reaches_html(self):
+        title = create_title(name="Секретный плеер", player_id="5", player_type="movie")
+        with self.settings(VIBIX_API_TOKEN="super-secret-token-abc"):
+            response = self.client.get(title.get_absolute_url())
+
+        self.assertNotContains(response, "super-secret-token-abc")
+
+    def test_episode_buttons_carry_season_and_number(self):
+        title = create_title(
+            name="Сериал с кнопками", type=Title.Type.SERIES, player_id="7", player_type="serial"
+        )
+        create_episode(title, season=2, episode=3)
+
+        response = self.client.get(title.get_absolute_url())
+
+        self.assertContains(response, 'data-episode-season="2"')
+        self.assertContains(response, 'data-episode-number="3"')
+
+
 class StructuredDataTests(TestCase):
     """JSON-LD должен оставаться разбираемым и нести данные для сниппета."""
 

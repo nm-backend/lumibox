@@ -582,6 +582,8 @@
                                                 data-episode-id="{{ episode.pk }}"
                                                 data-episode-file="{{ episode.sources.0.src }}"
                                                 data-episode-kind="{{ episode.sources.0.kind }}"
+                                                data-episode-season="{{ episode.season_number }}"
+                                                data-episode-number="{{ episode.episode_number }}"
                                                 data-episode-label="{% if episode.name %}{{ episode.name }}{% else %}{% blocktranslate with n=episode.episode_number %}Серия {{ n }}{% endblocktranslate %}{% endif %}">
                                             <span class="player-episode__num">{{ episode.episode_number }}</span>
                                             <span class="player-episode__name">

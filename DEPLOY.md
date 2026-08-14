@@ -101,8 +101,9 @@ pg_dump "$DATABASE_URL" > lumibox-$(date +%F).sql
 | `REDIS_URL` | строка Redis; без неё кэш в памяти процесса, а задачи выполняются на месте |
 | `DJANGO_SUPERUSER_EMAIL` | почта администратора |
 | `DJANGO_SUPERUSER_PASSWORD` | **задаёте вы**; в репозитории пароля нет и быть не должно |
-| `VIDEO_SERVICE_API_KEY` | ключ API видеосервиса (`Authorization: Bearer`); без него синк ID пропускается |
-| `VIDEO_SERVICE_PUBLISHER_ID` | ID издателя для внешнего плеера, по умолчанию `678503345` |
+| `VIBIX_API_TOKEN` | ключ API Vibix (`Authorization: Bearer`); без него синк пропускается. Устаревшее имя `VIDEO_SERVICE_API_KEY` читается как запасное |
+| `VIBIX_PUBLISHER_ID` | ID издателя для внешнего плеера, по умолчанию `678503345` (fallback — `VIDEO_SERVICE_PUBLISHER_ID`) |
+| `VIBIX_API_BASE_URL` | адрес API Vibix, по умолчанию `https://vibix.org/api/v1` |
 | `VIDEO_SERVICE_TRAILER` | трейлер для kp/imdb-эмбедов: `true` — если полного видео нет, `only` — всегда трейлер, пусто — без параметра |
 | `ADS_NETWORK_ENABLED` | рекламная сеть; по умолчанию `false` |
 
