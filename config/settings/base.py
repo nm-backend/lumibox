@@ -49,6 +49,19 @@ env = environ.Env(
     VIDEO_SERVICE_COLOR3=(str, "#ffb057"),
     VIDEO_SERVICE_COLOR4=(str, "#e06d00"),
     VIDEO_SERVICE_COLOR5=(str, "#0b0b0c"),
+    # Автовоспроизведение внешнего плеера (data-autoplay). Браузеры
+    # блокируют запуск со звуком без действия зрителя, поэтому
+    # по умолчанию выключено.
+    VIDEO_SERVICE_AUTOPLAY=(bool, False),
+    # Совместный просмотр (data-sync): зрители одной страницы смотрят
+    # синхронно. Подключает sync-lib.js и инициализирует WatchParty
+    # с комнатой по адресу записи. По умолчанию выключено.
+    VIDEO_SERVICE_WATCH_PARTY=(bool, False),
+    # Показ трейлера для kp/imdb-эмбедов (data-trailer). Значения:
+    # "true" — трейлер, когда полное видео в каталоге сервиса отсутствует
+    # (запасной сценарий: вместо заглушки зритель увидит трейлер);
+    # "only" — всегда только трейлер; пустая строка отключает параметр.
+    VIDEO_SERVICE_TRAILER=(str, "true"),
 )
 
 # Читаем .env из корня проекта.
@@ -238,6 +251,9 @@ VIDEO_SERVICE_COLOR2 = env("VIDEO_SERVICE_COLOR2")
 VIDEO_SERVICE_COLOR3 = env("VIDEO_SERVICE_COLOR3")
 VIDEO_SERVICE_COLOR4 = env("VIDEO_SERVICE_COLOR4")
 VIDEO_SERVICE_COLOR5 = env("VIDEO_SERVICE_COLOR5")
+VIDEO_SERVICE_AUTOPLAY = env("VIDEO_SERVICE_AUTOPLAY")
+VIDEO_SERVICE_WATCH_PARTY = env("VIDEO_SERVICE_WATCH_PARTY")
+VIDEO_SERVICE_TRAILER = env("VIDEO_SERVICE_TRAILER")
 
 if REDIS_URL:
     CACHES = {

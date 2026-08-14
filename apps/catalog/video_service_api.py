@@ -25,6 +25,11 @@ from django.utils import timezone
 # Базовый адрес публичного API издателя.
 VIDEO_SERVICE_API_BASE = "https://vibix.org/api/v1/publisher"
 
+# Сериалы живут на отдельном хосте API без сегмента /publisher:
+# документация указывает GET /api/v1/serials/kp|imdb/{id} (без префикса),
+# и запросы к /api/v1/publisher/serials/... сервис отвечает 404.
+VIDEO_SERVICE_SERIALS_API_BASE = "https://vibix.org/api/v1"
+
 # Таймаут на запрос: каталог большой, но зависнуть навсегда не должен.
 REQUEST_TIMEOUT = 30
 
@@ -65,13 +70,13 @@ def _retryable(status_code):
     return status_code in (429, 500, 502, 503, 504)
 
 
-def _request_json(api_key, path, params):
+def _request_json(api_key, path, params, base=VIDEO_SERVICE_API_BASE):
     """GET с Bearer-авторизацией и ретраями; возвращает распарсенный JSON."""
     last_error = None
     for attempt in range(MAX_RETRIES):
         try:
             response = requests.get(
-                f"{VIDEO_SERVICE_API_BASE}{path}",
+                f"{base}{path}",
                 params=params,
                 headers={"Authorization": f"Bearer {api_key}"},
                 timeout=REQUEST_TIMEOUT,
@@ -117,9 +122,9 @@ def _get(api_key, path, params):
     return payload
 
 
-def _get_unwrapped(api_key, path, params):
+def _get_unwrapped(api_key, path, params, base=VIDEO_SERVICE_API_BASE):
     """GET с detail-эндпоинтом: запись приходит напрямую, без обёртки."""
-    return _request_json(api_key, path, params)
+    return _request_json(api_key, path, params, base=base)
 
 
 def fetch_video_by_kp(api_key, kp_id):
@@ -149,22 +154,31 @@ def fetch_serial_by_kp(api_key, kp_id):
     Возвращает словарь {id, name, seasons}: seasons — список сезонов
     с сериями, или null, если структура сериала не разобрана.
 
-    На момент проверки (август 2026) сервис отдаёт 404 на любой id этого
-    эндпоинта — даже на пример из документации (kp 484488), хотя тот же
-    id на /videos/kp/{id} отвечает 200. Метод оставлен по документации;
-    когда сервис починит эндпоинт, он заработает без изменений.
+    Эндпоинт живёт на отдельном базе без /publisher (см. константу
+    VIDEO_SERVICE_SERIALS_API_BASE): под /api/v1/publisher/serials/...
+    сервис отвечает 404.
     """
-    return _get_unwrapped(api_key, f"/serials/kp/{kp_id}", {})
+    return _get_unwrapped(
+        api_key,
+        f"/serials/kp/{kp_id}",
+        {},
+        base=VIDEO_SERVICE_SERIALS_API_BASE,
+    )
 
 
 def fetch_serial_by_imdb(api_key, imdb_id):
     """
     Сезоны и серии сериала по IMDb ID (GET /serials/imdb/{imdbId}).
 
-    Та же оговорка, что и у fetch_serial_by_kp: эндпоинт пока отдаёт 404
-    на любой id (проверено в августе 2026 на примере из документации).
+    Та же оговорка о базе, что и у fetch_serial_by_kp: префикс /publisher
+    здесь не нужен.
     """
-    return _get_unwrapped(api_key, f"/serials/imdb/{imdb_id}", {})
+    return _get_unwrapped(
+        api_key,
+        f"/serials/imdb/{imdb_id}",
+        {},
+        base=VIDEO_SERVICE_SERIALS_API_BASE,
+    )
 
 
 def fetch_video_links(api_key, *, page=1, limit=100, updated_from=None, years=None):

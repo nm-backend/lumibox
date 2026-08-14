@@ -623,25 +623,56 @@ class TitleDetailView(DetailView):
                 if opening is not None:
                     player["season"] = opening.season_number
                     player["episodes"] = str(opening.episode_number)
-            voiceover_id = self._external_voiceover_id()
-            if voiceover_id is not None:
-                player["voiceover"] = voiceover_id
+            voiceover_ids = self._external_voiceover_ids()
+            if voiceover_ids:
+                player["voiceover"] = voiceover_ids[0]
+                # data-voiceover-only: у записи одна озвучка — выбор в плеере
+                # не нужен, и сервису это можно сказать прямо.
+                if len(voiceover_ids) == 1:
+                    player["voiceover_only"] = True
+            self._apply_player_switches(player)
             return player
         # Для kp/imdb-типов плеер по документации поддерживает data-trailer:
         # "true" — показывать трейлер, когда полное видео отсутствует
-        # в каталоге сервиса. Это ровно наш запасной сценарий: вместо
-        # заглушки «контент не добавлен» зритель увидит трейлер.
+        # в каталоге сервиса (вместо заглушки «контент не добавлен»),
+        # "only" — всегда только трейлер. Режим задаёт настройка
+        # VIDEO_SERVICE_TRAILER; пустое значение убирает параметр из тега.
+        trailer = settings.VIDEO_SERVICE_TRAILER.strip()
         if self.object.kp_id.strip():
             player.update(
-                {"type": "kp", "id": self.object.kp_id.strip(), "trailer": "true"}
+                {"type": "kp", "id": self.object.kp_id.strip()}
             )
+            if trailer:
+                player["trailer"] = trailer
+            self._apply_player_switches(player)
             return player
         if self.object.imdb_id.strip():
             player.update(
-                {"type": "imdb", "id": self.object.imdb_id.strip(), "trailer": "true"}
+                {"type": "imdb", "id": self.object.imdb_id.strip()}
             )
+            if trailer:
+                player["trailer"] = trailer
+            self._apply_player_switches(player)
             return player
         return None
+
+    def _apply_player_switches(self, player):
+        """
+        Опциональные выключатели внешнего плеера из настроек.
+
+        data-autoplay (VIDEO_SERVICE_AUTOPLAY) и совместный просмотр
+        (VIDEO_SERVICE_WATCH_PARTY) — не для всех: автозапуск браузеры
+        часто блокируют, а комнату синхронного просмотра владелец сайта
+        может не захотеть включать без подготовки. Поэтому оба — за
+        явными флагами в настройках, по умолчанию выключены.
+        """
+        if settings.VIDEO_SERVICE_AUTOPLAY:
+            player["autoplay"] = True
+        if settings.VIDEO_SERVICE_WATCH_PARTY:
+            player["sync"] = True
+            player["sync_room"] = self.object.slug
+            if self.request.user.is_authenticated:
+                player["sync_user"] = self.request.user.username
 
     def _opening_episode(self):
         """
@@ -657,19 +688,22 @@ class TitleDetailView(DetailView):
             opening = episodes[0] if episodes else None
         return opening
 
-    def _external_voiceover_id(self):
+    def _external_voiceover_ids(self):
         """
-        Озвучка по умолчанию во внешнем плеере, если сопоставлена.
+        Озвучки сервиса, сопоставленные источникам записи.
 
-        Берём озвучку первого подходящего источника записи (порядок
-        задаёт редактор); в самом плеере зритель сможет переключиться.
-        Возвращает ID озвучки сервиса или None, когда сопоставления нет.
+        Берём озвучки источников в порядке, который задал редактор.
+        Первая станет data-voiceover (озвучка по умолчанию), а если она
+        единственная — плеер получит ещё и data-voiceover-only. Возвращает
+        список ID озвучек сервиса (может быть пустым, когда сопоставления
+        нет вовсе).
         """
+        ids = []
         for source in self.object.playback_sources.all():
             voiceover_id = getattr(source.voice, "vibix_voiceover_id", None)
-            if voiceover_id:
-                return voiceover_id
-        return None
+            if voiceover_id and voiceover_id not in ids:
+                ids.append(voiceover_id)
+        return ids
 
     def get_comments(self):
         """

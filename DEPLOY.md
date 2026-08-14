@@ -103,6 +103,7 @@ pg_dump "$DATABASE_URL" > lumibox-$(date +%F).sql
 | `DJANGO_SUPERUSER_PASSWORD` | **задаёте вы**; в репозитории пароля нет и быть не должно |
 | `VIDEO_SERVICE_API_KEY` | ключ API видеосервиса (`Authorization: Bearer`); без него синк ID пропускается |
 | `VIDEO_SERVICE_PUBLISHER_ID` | ID издателя для внешнего плеера, по умолчанию `678503345` |
+| `VIDEO_SERVICE_TRAILER` | трейлер для kp/imdb-эмбедов: `true` — если полного видео нет, `only` — всегда трейлер, пусто — без параметра |
 | `ADS_NETWORK_ENABLED` | рекламная сеть; по умолчанию `false` |
 
 Хранилище медиа (пока не задано — файлы лежат на диске контейнера и

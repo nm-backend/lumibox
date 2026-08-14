@@ -81,6 +81,34 @@ def sync_voiceovers():
 
 
 @shared_task
+def sync_series_episodes():
+    """
+    Импорт серий сериалов из видеосервиса.
+
+    Обрабатывает записи каталога с kp_id/imdb_id без единой серии и создаёт
+    недостающие (GET /serials/kp|imdb/{id}). В расписание не внесена —
+    наполнение серий точечная операция, запускается вручную командой
+    sync_episodes. Тот же порядок, что у остальных: без ключа — тихо
+    пропускается, ошибки API не роняют планировщик.
+    """
+    from apps.catalog.video_service_api import VideoServiceAPIError
+    from apps.catalog.video_service_sync import sync_series_episodes as run
+
+    if not (settings.VIDEO_SERVICE_API_KEY or "").strip():
+        return "VIDEO_SERVICE_API_KEY не задан — синхронизация пропущена"
+
+    try:
+        stats = run()
+    except VideoServiceAPIError as exc:
+        return f"Ошибка синхронизации серий: {exc}"
+
+    return (
+        f"Серии: обработано {stats['processed']}, создано {stats['created']}, "
+        f"не найдено {stats['not_found']}, ошибок {stats['errors']}"
+    )
+
+
+@shared_task
 def refresh_title_ratings():
     """
     Пересчитывает рейтинги всех записей разом.

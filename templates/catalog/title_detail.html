@@ -79,6 +79,14 @@
        выполнился после разметки и нашёл тег <ins>. {% endcomment %}
     {% if external_player %}
         <script src="https://graphicslab.io/sdk/v2/rendex-sdk.min.js" defer></script>
+        {% comment %} Совместный просмотр: sync-lib рисует синхронизацию поверх
+           iframe внешнего плеера, watch-party.js ждёт, пока SDK создаст
+           iframe, и инициализирует WatchParty. Включено настройкой
+           VIDEO_SERVICE_WATCH_PARTY, по умолчанию выключено. {% endcomment %}
+        {% if external_player.sync %}
+            <script src="https://sync.videoframe2.com/sync-lib.js" defer></script>
+            <script src="{% static 'js/watch-party.js' %}?v={{ static_version }}" defer></script>
+        {% endif %}
     {% endif %}
 {% endblock %}
 
@@ -500,7 +508,13 @@
             {{ playback_data|json_script:"playback-data" }}
 
             {% if external_player %}
-                <div class="player" data-player-pane="external"{% if has_playback %} hidden{% endif %}>
+                {% comment %} data-sync-room/data-sync-user — для watch-party.js:
+                   данные висят на панели, а не на теге <ins>, потому что SDK
+                   внешнего плеера заменяет <ins> на iframe раньше, чем
+                   отработает наш скрипт. Само data-sync="true" остаётся
+                   на <ins> — его читает SDK сервиса. {% endcomment %}
+                <div class="player" data-player-pane="external"{% if has_playback %} hidden{% endif %}
+                     {% if external_player.sync %}data-sync-room="{{ external_player.sync_room }}"{% if external_player.sync_user %} data-sync-user="{{ external_player.sync_user }}"{% endif %}{% endif %}>
                     <ins data-publisher-id="{{ external_player.publisher_id }}"
                          data-type="{{ external_player.type }}"
                          data-id="{{ external_player.id }}"
@@ -510,6 +524,9 @@
                          {% if external_player.season %}data-season="{{ external_player.season }}"{% endif %}
                          {% if external_player.episodes %}data-episodes="{{ external_player.episodes }}"{% endif %}
                          {% if external_player.voiceover %}data-voiceover="{{ external_player.voiceover }}"{% endif %}
+                         {% if external_player.voiceover_only %}data-voiceover-only="true"{% endif %}
+                         {% if external_player.autoplay %}data-autoplay="true"{% endif %}
+                         {% if external_player.sync %}data-sync="true"{% endif %}
                          data-poster="true"
                          data-nopreload="true"></ins>
                 </div>

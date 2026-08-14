@@ -243,6 +243,19 @@ class TitleDetailViewTests(TestCase):
         self.assertContains(response, 'data-id="tt0111161"')
         self.assertNotContains(response, 'data-type="kp"')
 
+    def test_external_player_trailer_off_by_setting(self):
+        title = create_title(kp_id="326")
+        with self.settings(VIDEO_SERVICE_TRAILER=""):
+            response = self.client.get(title.get_absolute_url())
+        self.assertContains(response, 'data-type="kp"')
+        self.assertNotContains(response, "data-trailer=")
+
+    def test_external_player_trailer_only_mode(self):
+        title = create_title(imdb_id="tt0111161")
+        with self.settings(VIDEO_SERVICE_TRAILER="only"):
+            response = self.client.get(title.get_absolute_url())
+        self.assertContains(response, 'data-trailer="only"')
+
     def test_external_player_prefers_internal_id_over_kp(self):
         title = create_title(kp_id="447301", player_id="4427", player_type="movie")
         response = self.client.get(title.get_absolute_url())
@@ -295,6 +308,67 @@ class TitleDetailViewTests(TestCase):
         PlaybackSource.objects.create(title=title, voice=voice)
         response = self.client.get(title.get_absolute_url())
         self.assertNotContains(response, "data-voiceover=")
+
+    def test_external_player_voiceover_only_with_single_voiceover(self):
+        voice = VoiceOver.objects.create(
+            name="Дубляж", slug="dublyazh", vibix_voiceover_id=42
+        )
+        title = create_title(player_id="4427", player_type="movie")
+        PlaybackSource.objects.create(title=title, voice=voice)
+        response = self.client.get(title.get_absolute_url())
+        # Одна озвучка: и ID по умолчанию, и запрет выбора в плеере.
+        self.assertContains(response, 'data-voiceover="42"')
+        self.assertContains(response, 'data-voiceover-only="true"')
+
+    def test_external_player_no_voiceover_only_with_multiple(self):
+        first = VoiceOver.objects.create(
+            name="Дубляж", slug="dublyazh", vibix_voiceover_id=42
+        )
+        second = VoiceOver.objects.create(
+            name="Оригинал", slug="original", vibix_voiceover_id=7
+        )
+        title = create_title(player_id="4427", player_type="movie")
+        PlaybackSource.objects.create(title=title, voice=first)
+        PlaybackSource.objects.create(title=title, voice=second)
+        response = self.client.get(title.get_absolute_url())
+        # Озвучек две — зритель вправе выбирать сам.
+        self.assertContains(response, 'data-voiceover="42"')
+        self.assertNotContains(response, "data-voiceover-only=")
+
+    def test_external_player_autoplay_off_by_default(self):
+        title = create_title(player_id="4427")
+        response = self.client.get(title.get_absolute_url())
+        self.assertNotContains(response, "data-autoplay=")
+
+    def test_external_player_autoplay_when_enabled(self):
+        title = create_title(player_id="4427")
+        with self.settings(VIDEO_SERVICE_AUTOPLAY=True):
+            response = self.client.get(title.get_absolute_url())
+        self.assertContains(response, 'data-autoplay="true"')
+
+    def test_external_player_watch_party_off_by_default(self):
+        title = create_title(player_id="4427")
+        response = self.client.get(title.get_absolute_url())
+        self.assertNotContains(response, "data-sync=")
+        self.assertNotContains(response, "sync.videoframe2.com")
+        self.assertNotContains(response, "watch-party.js")
+
+    def test_external_player_watch_party_when_enabled(self):
+        title = create_title(player_id="4427", slug="igra-v-kalmara-2021")
+        with self.settings(VIDEO_SERVICE_WATCH_PARTY=True):
+            response = self.client.get(title.get_absolute_url())
+        self.assertContains(response, 'data-sync="true"')
+        self.assertContains(response, 'data-sync-room="igra-v-kalmara-2021"')
+        self.assertContains(response, "sync.videoframe2.com/sync-lib.js")
+        self.assertContains(response, "watch-party.js")
+
+    def test_external_player_watch_party_passes_username(self):
+        user = create_user()
+        title = create_title(player_id="4427")
+        self.client.force_login(user)
+        with self.settings(VIDEO_SERVICE_WATCH_PARTY=True):
+            response = self.client.get(title.get_absolute_url())
+        self.assertContains(response, f'data-sync-user="{user.username}"')
 
     def test_external_player_renders_design_and_colors(self):
         title = create_title(kp_id="326")

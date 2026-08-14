@@ -6,6 +6,7 @@
 """
 
 from datetime import datetime
+from decimal import Decimal
 from io import StringIO
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
@@ -15,10 +16,11 @@ from django.core.management.base import CommandError
 from django.test import TestCase, override_settings
 from django.utils import timezone
 
-from apps.catalog.models import VideoServiceSyncState, VoiceOver
+from apps.catalog.models import Country, Episode, Genre, VideoServiceSyncState, VoiceOver
 from apps.catalog.video_service_api import (
     MAX_RETRIES,
     VIDEO_SERVICE_API_BASE,
+    VIDEO_SERVICE_SERIALS_API_BASE,
     VideoServiceAPIError,
     VideoServiceNotFoundError,
     fetch_categories,
@@ -38,6 +40,7 @@ from apps.catalog.video_service_sync import (
     _filter_years,
     match_item,
     normalize_name,
+    sync_series_episodes,
     sync_video_service_ids,
 )
 from apps.catalog.video_service_voiceover_sync import import_voiceovers_from_service, sync_voiceover_ids
@@ -144,6 +147,42 @@ class SyncVideoServiceIdsTests(TestCase):
         self.assertEqual(stats["matched"], 1)
         self.assertEqual(stats["kp_filled"], 1)
         self.assertEqual(stats["imdb_filled"], 1)
+        self.assertEqual(stats["player_filled"], 1)
+
+    def test_player_id_from_embed_code_when_id_differs(self):
+        # Внутренний id списка не совпадает с data-id из embed_code:
+        # плееру нужен именно data-id (проверено на живых данных).
+        items = [
+            {
+                "id": 871666,
+                "name": "Начало",
+                "name_rus": "Начало",
+                "type": "serial",
+                "year": "2010",
+                "embed_code": 'data-publisher-id="678503345" data-type="serial" data-id="8285"',
+            }
+        ]
+        with patch(
+            "apps.catalog.video_service_sync.iter_video_links", self._fake_links(items)
+        ):
+            stats = sync_video_service_ids()
+
+        self.movie.refresh_from_db()
+        self.assertEqual(self.movie.player_id, "8285")
+        self.assertEqual(self.movie.player_type, "series")
+        self.assertEqual(stats["player_filled"], 1)
+
+    def test_player_id_falls_back_to_item_id_without_embed_code(self):
+        items = [
+            {"id": 4427, "name": "Inception", "type": "movie", "year": "2010"}
+        ]
+        with patch(
+            "apps.catalog.video_service_sync.iter_video_links", self._fake_links(items)
+        ):
+            stats = sync_video_service_ids()
+
+        self.movie.refresh_from_db()
+        self.assertEqual(self.movie.player_id, "4427")
         self.assertEqual(stats["player_filled"], 1)
 
     def test_does_not_clobber_manual_kp_id(self):
@@ -299,6 +338,309 @@ class SyncVideoServiceCommandTests(TestCase):
 
         output = out.getvalue()
         self.assertIn("заполнено kp_id: 1", output)
+        self.assertIn("сухой прогон", output)
+
+
+class TitleEnrichmentTests(TestCase):
+    """Обогащение записи данными из карточки API при совпадении."""
+
+    def setUp(self):
+        self.movie = create_title(
+            name="Начало",
+            original_name="Inception",
+            release_year=2010,
+            description="",
+            short_description="",
+            kp_rating=None,
+            imdb_rating=None,
+            duration_minutes=None,
+        )
+
+    @staticmethod
+    def _item(**overrides):
+        item = {
+            "name": "Inception",
+            "year": "2010",
+            "description": "Полное описание фильма.",
+            "description_short": "Короткая аннотация.",
+            "name_original": "Inception",
+            "name_eng": "Inception",
+            "duration": 148,
+            "kp_rating": "8.6",
+            "imdb_rating": "8.8",
+            "genre": ["Фантастика"],
+            "country": ["США"],
+        }
+        item.update(overrides)
+        return item
+
+    def test_fills_empty_enrichable_fields(self):
+        with patch(
+            "apps.catalog.video_service_sync.iter_video_links",
+            self._fake_links([self._item()]),
+        ):
+            stats = sync_video_service_ids()
+
+        self.movie.refresh_from_db()
+        self.assertEqual(self.movie.description, "Полное описание фильма.")
+        self.assertEqual(self.movie.short_description, "Короткая аннотация.")
+        self.assertEqual(self.movie.duration_minutes, 148)
+        self.assertEqual(self.movie.kp_rating, Decimal("8.6"))
+        self.assertEqual(self.movie.imdb_rating, Decimal("8.8"))
+        self.assertEqual(stats["enriched"], 1)
+
+    def test_does_not_clobber_existing_fields(self):
+        self.movie.description = "Описание, которое написал редактор."
+        self.movie.kp_rating = Decimal("9.9")
+        self.movie.save(update_fields=["description", "kp_rating"])
+
+        with patch(
+            "apps.catalog.video_service_sync.iter_video_links",
+            self._fake_links([self._item(description="Другое описание.")]),
+        ):
+            sync_video_service_ids()
+
+        self.movie.refresh_from_db()
+        self.assertEqual(self.movie.description, "Описание, которое написал редактор.")
+        self.assertEqual(self.movie.kp_rating, Decimal("9.9"))
+        # imdb_rating был пуст — его заполняем, не тронутое не затираем.
+        self.assertEqual(self.movie.imdb_rating, Decimal("8.8"))
+
+    def test_skips_invalid_rating_and_duration(self):
+        with patch(
+            "apps.catalog.video_service_sync.iter_video_links",
+            self._fake_links(
+                [self._item(kp_rating="не рейтинг", duration=0)]
+            ),
+        ):
+            sync_video_service_ids()
+
+        self.movie.refresh_from_db()
+        self.assertIsNone(self.movie.kp_rating)
+        self.assertIsNone(self.movie.duration_minutes)
+
+    def test_creates_and_links_genres_and_countries(self):
+        with patch(
+            "apps.catalog.video_service_sync.iter_video_links",
+            self._fake_links(
+                [self._item(genre=["Драма", "Фантастика"], country=["США"])]
+            ),
+        ):
+            stats = sync_video_service_ids()
+
+        self.movie.refresh_from_db()
+        self.assertEqual(list(self.movie.genres.values_list("name", flat=True)), ["Драма", "Фантастика"])
+        self.assertEqual(list(self.movie.countries.values_list("name", flat=True)), ["США"])
+        self.assertEqual(stats["genres_added"], 2)
+        self.assertEqual(stats["countries_added"], 1)
+
+    def test_skips_genres_when_title_has_them(self):
+        genre = Genre.objects.create(name="Боевик", slug="boevik")
+        self.movie.genres.add(genre)
+
+        with patch(
+            "apps.catalog.video_service_sync.iter_video_links",
+            self._fake_links([self._item(genre=["Фантастика"])]),
+        ):
+            sync_video_service_ids()
+
+        self.movie.refresh_from_db()
+        # Ручной набор жанров редактора не трогаем.
+        self.assertEqual(list(self.movie.genres.all()), [genre])
+        self.assertFalse(Genre.objects.filter(name="Фантастика").exists())
+
+    def test_dry_run_does_not_create_references(self):
+        with patch(
+            "apps.catalog.video_service_sync.iter_video_links",
+            self._fake_links([self._item(genre=["Драма"])]),
+        ):
+            sync_video_service_ids(dry_run=True)
+
+        self.assertEqual(Genre.objects.count(), 0)
+        self.assertEqual(Country.objects.count(), 0)
+
+    def _fake_links(self, items):
+        def generator(api_key, *, limit=100, updated_from=None, years=None, max_pages=None):
+            yield from items
+
+        return generator
+
+
+class SyncSeriesEpisodesTests(TestCase):
+    """Импорт серий сериалов через GET /serials/kp|imdb/{id}."""
+
+    def setUp(self):
+        self.serial = create_title(
+            name="Игра в кальмара",
+            release_year=2021,
+            kp_id="4402886",
+            player_type="series",
+        )
+        self.seasons_payload = {
+            "id": 871666,
+            "name": "Игра в кальмара",
+            "seasons": [
+                {"name": "1", "series": [{"id": 1, "name": "Пилот"}, {"id": 2, "name": ""}]},
+                {"name": "2", "series": [{"id": 3, "name": "Третья серия"}]},
+            ],
+        }
+
+    def test_creates_episodes_from_seasons(self):
+        with patch(
+            "apps.catalog.video_service_sync.fetch_serial_by_kp",
+            return_value=self.seasons_payload,
+        ):
+            stats = sync_series_episodes()
+
+        episodes = list(self.serial.episodes.order_by("season_number", "episode_number"))
+        self.assertEqual(len(episodes), 3)
+        self.assertEqual(
+            (episodes[0].season_number, episodes[0].episode_number, episodes[0].name),
+            (1, 1, "Пилот"),
+        )
+        self.assertEqual(
+            (episodes[1].season_number, episodes[1].episode_number, episodes[1].name),
+            (1, 2, ""),
+        )
+        self.assertEqual(
+            (episodes[2].season_number, episodes[2].episode_number, episodes[2].name),
+            (2, 1, "Третья серия"),
+        )
+        self.assertEqual(stats["processed"], 1)
+        self.assertEqual(stats["created"], 3)
+        self.assertEqual(stats["not_found"], 0)
+        self.assertEqual(stats["errors"], 0)
+
+    def test_uses_imdb_when_no_kp(self):
+        self.serial.kp_id = ""
+        self.serial.imdb_id = "tt10919420"
+        self.serial.save(update_fields=["kp_id", "imdb_id"])
+
+        with patch(
+            "apps.catalog.video_service_sync.fetch_serial_by_imdb",
+            return_value=self.seasons_payload,
+        ) as fetch:
+            sync_series_episodes()
+
+        fetch.assert_called_once()
+        self.assertEqual(fetch.call_args.args[1], "tt10919420")
+        self.assertEqual(self.serial.episodes.count(), 3)
+
+    def test_second_run_is_idempotent(self):
+        with patch(
+            "apps.catalog.video_service_sync.fetch_serial_by_kp",
+            return_value=self.seasons_payload,
+        ):
+            sync_series_episodes()
+            stats = sync_series_episodes()
+
+        self.assertEqual(self.serial.episodes.count(), 3)
+        self.assertEqual(stats["created"], 0)
+
+    def test_dry_run_writes_nothing(self):
+        with patch(
+            "apps.catalog.video_service_sync.fetch_serial_by_kp",
+            return_value=self.seasons_payload,
+        ):
+            stats = sync_series_episodes(dry_run=True)
+
+        self.assertEqual(self.serial.episodes.count(), 0)
+        self.assertEqual(stats["created"], 3)
+
+    def test_not_found_is_counted_and_skipped(self):
+        with patch(
+            "apps.catalog.video_service_sync.fetch_serial_by_kp",
+            side_effect=VideoServiceNotFoundError("нет записи"),
+        ):
+            stats = sync_series_episodes()
+
+        self.assertEqual(stats["not_found"], 1)
+        self.assertEqual(stats["created"], 0)
+        self.assertEqual(self.serial.episodes.count(), 0)
+
+    def test_api_error_is_counted_and_skipped(self):
+        with patch(
+            "apps.catalog.video_service_sync.fetch_serial_by_kp",
+            side_effect=VideoServiceAPIError("API упал"),
+        ):
+            stats = sync_series_episodes()
+
+        self.assertEqual(stats["errors"], 1)
+        self.assertEqual(self.serial.episodes.count(), 0)
+
+    def test_season_name_falls_back_to_index(self):
+        payload = {
+            "seasons": [
+                {"name": "Первый сезон", "series": [{"id": 1, "name": "A"}]},
+                {"name": "2", "series": [{"id": 2, "name": "B"}]},
+            ]
+        }
+        with patch(
+            "apps.catalog.video_service_sync.fetch_serial_by_kp", return_value=payload
+        ):
+            sync_series_episodes()
+
+        numbers = list(self.serial.episodes.values_list("season_number", flat=True))
+        self.assertEqual(numbers, [1, 2])
+
+    def test_limit_caps_processed_titles(self):
+        second = create_title(name="Другой сериал", release_year=2022, kp_id="777")
+        with patch(
+            "apps.catalog.video_service_sync.fetch_serial_by_kp",
+            return_value=self.seasons_payload,
+        ):
+            stats = sync_series_episodes(limit=1)
+
+        self.assertEqual(stats["processed"], 1)
+        self.assertEqual(second.episodes.count(), 0)
+
+    def test_skips_titles_without_external_ids(self):
+        create_title(name="Без ID", release_year=2023)
+        with patch(
+            "apps.catalog.video_service_sync.fetch_serial_by_kp",
+            return_value=self.seasons_payload,
+        ) as fetch:
+            stats = sync_series_episodes()
+
+        self.assertEqual(stats["processed"], 1)
+        fetch.assert_called_once()
+
+    def test_skips_titles_that_already_have_episodes(self):
+        Episode.objects.create(
+            title=self.serial, season_number=1, episode_number=1, name="Пилот"
+        )
+        with patch(
+            "apps.catalog.video_service_sync.fetch_serial_by_kp",
+            return_value=self.seasons_payload,
+        ) as fetch:
+            stats = sync_series_episodes()
+
+        self.assertEqual(stats["processed"], 0)
+        fetch.assert_not_called()
+
+    def test_no_key_raises(self):
+        with override_settings(VIDEO_SERVICE_API_KEY=""):
+            with self.assertRaises(VideoServiceAPIError):
+                sync_series_episodes()
+
+
+class SyncEpisodesCommandTests(TestCase):
+    def test_raises_without_key(self):
+        with override_settings(VIDEO_SERVICE_API_KEY=""):
+            with self.assertRaises(CommandError):
+                call_command("sync_episodes", dry_run=True)
+
+    def test_reports_statistics(self):
+        create_title(name="Сериал", release_year=2021, kp_id="4402886")
+        payload = {"seasons": [{"name": "1", "series": [{"id": 1, "name": "Пилот"}]}]}
+        out = StringIO()
+        with patch(
+            "apps.catalog.video_service_sync.fetch_serial_by_kp", return_value=payload
+        ):
+            call_command("sync_episodes", dry_run=True, stdout=out)
+
+        output = out.getvalue()
+        self.assertIn("создано серий: 1", output)
         self.assertIn("сухой прогон", output)
 
 
@@ -460,7 +802,11 @@ class VideoServiceAPIClientTests(TestCase):
             serial = fetch_serial_by_kp("secret-key", 1301710)
 
         self.assertEqual(serial["seasons"][0]["name"], "Сезон 1")
-        self.assertEqual(get.call_args.args[0], f"{VIDEO_SERVICE_API_BASE}/serials/kp/1301710")
+        # Сериалы живут на отдельной базе без префикса /publisher.
+        self.assertEqual(
+            get.call_args.args[0],
+            f"{VIDEO_SERVICE_SERIALS_API_BASE}/serials/kp/1301710",
+        )
 
     def test_fetch_serial_by_imdb_path(self):
         payload = {"id": 1, "name": "x", "seasons": None}
@@ -469,7 +815,10 @@ class VideoServiceAPIClientTests(TestCase):
             get.return_value.json.return_value = payload
             fetch_serial_by_imdb("secret-key", "tt10919420")
 
-        self.assertEqual(get.call_args.args[0], f"{VIDEO_SERVICE_API_BASE}/serials/imdb/tt10919420")
+        self.assertEqual(
+            get.call_args.args[0],
+            f"{VIDEO_SERVICE_SERIALS_API_BASE}/serials/imdb/tt10919420",
+        )
 
     def test_detail_not_found_raises_specific_error(self):
         with patch("apps.catalog.video_service_api.requests.get") as get:
