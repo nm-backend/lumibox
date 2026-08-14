@@ -228,18 +228,23 @@
     /* ---------- 4. Плеер серий: переключение эпизодов ---------- */
 
     var playerVideo = document.querySelector('[data-player-video]');
-    if (playerVideo) {
-        var source = playerVideo.querySelector('[data-player-source]');
-        /* Секция ищется по data-атрибуту: на этой одной строке держатся выбор
-           серии, выбор озвучки, сохранение прогресса и продолжение с секунды.
-           Пока здесь стоял класс оформления, переименование .player-section при
-           правке стилей выключило бы все четыре механики разом и молча.
-           Класс оставлен вторым вариантом — на случай кэша старой разметки. */
-        var section = playerVideo.closest('[data-player-section]') ||
-            playerVideo.closest('.player-section');
+    /* Секция ищется по data-атрибуту: на этой одной строке держатся выбор
+       серии, выбор озвучки, сохранение прогресса и продолжение с секунды.
+       Пока здесь стоял класс оформления, переименование .player-section при
+       правке стилей выключило бы все четыре механики разом и молча.
+       Класс оставлен вторым вариантом — на случай кэша старой разметки.
+       Страница может жить только внешним плеером (локального <video> нет) —
+       выбор серии всё равно должен работать. */
+    var section = playerVideo
+        ? (playerVideo.closest('[data-player-section]') ||
+            playerVideo.closest('.player-section'))
+        : (document.querySelector('[data-player-section]') ||
+            document.querySelector('.player-section'));
+    if (playerVideo || section) {
         var buttons = section ? section.querySelectorAll('[data-episode]') : [];
         var currentLabel = section ? section.querySelector('[data-player-label]') : null;
         var titleSlug = section ? section.dataset.titleSlug : '';
+        var source = playerVideo ? playerVideo.querySelector('[data-player-source]') : null;
 
         /* Прогресс просмотра: анонимно не пишем — сервер всё равно ответит 403.
            Раньше в комментарии это было обещано, а в коде проверки не было,
@@ -326,11 +331,11 @@
            вокруг него теперь своя панель контролов, и скрытие одного видео
            оставило бы висеть кнопки от исчезнувшего кадра. Если оболочки
            нет (без своих контролов), работаем по-старому с самим элементом. */
-        var videoShell = playerVideo.closest('[data-vplayer]') || playerVideo;
+        var videoShell = playerVideo ? playerVideo.closest('[data-vplayer]') || playerVideo : null;
 
         function applySource(item) {
             if (!item) return;
-            if (item.kind === 'file') {
+            if (item.kind === 'file' && playerVideo) {
                 if (source) source.src = item.src;
                 if (playerFrame) {
                     playerFrame.hidden = true;
@@ -340,8 +345,10 @@
                 playerVideo.load();
                 playerVideo.play().catch(function () {});
             } else if (playerFrame) {
-                playerVideo.pause();
-                videoShell.hidden = true;
+                if (playerVideo) {
+                    playerVideo.pause();
+                    videoShell.hidden = true;
+                }
                 playerFrame.hidden = false;
                 playerFrame.src = item.src;
             }
@@ -361,20 +368,21 @@
 
         /* Переключение серии во внешнем плеере Vibix.
 
-           Внешний плеер открывает серию атрибутами data-season/data-episodes
-           тега <ins>; SDK читает их, когда заменяет тег на iframe. Менять
-           атрибуты у уже заменённого тега бесполезно — плеер их не увидит.
-           Поэтому тег пересоздаётся (клонируется с новыми значениями), и
-           SDK подхватывает новую серию заново. Старые data-атрибуты
-           копируются как есть: publisher, тип, дизайн, озвучка, цвета. */
+           Внешний плеер открывает серию параметрами season и episode[]
+           в адресе своего iframe (этот адрес SDK собирает из атрибутов
+           data-season/data-episodes тега <ins> в момент инициализации).
+           Заменить тег <ins> уже не получится: SDK заменяет его iframe-ом
+           при старте и новые теги не подхватывает. Поэтому адрес iframe
+           переписывается напрямую — это тот же интерфейс, которым SDK
+           передаёт серию плееру. */
         function updateExternalPlayer(season, episode) {
             var pane = document.querySelector('[data-player-pane="external"]');
-            var ins = pane ? pane.querySelector('ins[data-publisher-id]') : null;
-            if (!ins || !season || !episode) return;
-            var clone = ins.cloneNode(false);
-            clone.setAttribute('data-season', String(season));
-            clone.setAttribute('data-episodes', String(episode));
-            ins.parentNode.replaceChild(clone, ins);
+            var frame = pane ? pane.querySelector('iframe') : null;
+            if (!frame || !season || !episode) return;
+            var url = new URL(frame.src, window.location.href);
+            url.searchParams.set('season', String(season));
+            url.searchParams.set('episode[]', String(episode));
+            frame.src = url.toString();
         }
 
         function setEpisode(btn) {
@@ -422,7 +430,7 @@
            это на каждый loadedmetadata значило бы возвращать зрителя назад
            после каждого переключения серии. */
         var resumeAt = parseInt(section ? section.dataset.resumePosition : '0', 10) || 0;
-        if (resumeAt > 0) {
+        if (resumeAt > 0 && playerVideo) {
             playerVideo.addEventListener('loadedmetadata', function seekOnce() {
                 playerVideo.removeEventListener('loadedmetadata', seekOnce);
                 // За пару секунд до остановки: так легче поймать нить сцены.
@@ -434,14 +442,16 @@
             });
         }
 
-        playerVideo.addEventListener('timeupdate', function () {
-            savePosition(false);
-        });
-        // Пауза и уход со страницы — те моменты, когда позицию важно
-        // записать точно, не дожидаясь очередного интервала.
-        playerVideo.addEventListener('pause', function () {
-            savePosition(true);
-        });
+        if (playerVideo) {
+            playerVideo.addEventListener('timeupdate', function () {
+                savePosition(false);
+            });
+            // Пауза и уход со страницы — те моменты, когда позицию важно
+            // записать точно, не дожидаясь очередного интервала.
+            playerVideo.addEventListener('pause', function () {
+                savePosition(true);
+            });
+        }
         window.addEventListener('pagehide', function () {
             savePosition(true);
         });
