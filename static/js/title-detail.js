@@ -240,6 +240,12 @@
             playerVideo.closest('.player-section'))
         : (document.querySelector('[data-player-section]') ||
             document.querySelector('.player-section'));
+    /* Источники и поиск по ним вызываются и вкладками (секция ниже),
+       поэтому объявлены var-ами на уровне функции: function declaration
+       внутри блока в strict-режиме вне блока не видна, и клик по вкладке
+       «Смотреть онлайн» падал бы с ReferenceError. */
+    var applySource = null;
+    var findSource = null;
     if (playerVideo || section) {
         var buttons = section ? section.querySelectorAll('[data-episode]') : [];
         var currentLabel = section ? section.querySelector('[data-player-label]') : null;
@@ -295,6 +301,14 @@
            переключение типа сводится к показу одной и скрытию другой. */
         var playerFrame = section ? section.querySelector('[data-player-frame]') : null;
         var youtubeFrame = section ? section.querySelector('[data-player-pane="youtube"] iframe') : null;
+        var youtubePane = section ? section.querySelector('[data-player-pane="youtube"]') : null;
+        /* Экземпляр YT.Player (IFrame API) — когда API загружен и плеер
+           создан. null до этого: вкладка YouTube работает обычным iframe. */
+        var ytPlayer = null;
+        /* Переключение ролика YouTube; объявлено var-ом на уровне функции,
+           чтобы вкладки (секция ниже) могли его вызвать: function declaration
+           внутри блока в strict-режиме вне блока не видна. */
+        var applyYoutubeEpisode = null;
         var voiceButtons = section ? section.querySelectorAll('[data-voice]') : [];
         var currentVoiceId = null;
         var currentPlayerIndex = 0;
@@ -309,7 +323,7 @@
             }
         }
 
-        function findSource(episodeId, voiceId, playerIndex) {
+        findSource = function (episodeId, voiceId, playerIndex) {
             var episode = episodeId ? Number(episodeId) : null;
             var voice = voiceId ? Number(voiceId) : null;
             var forEpisode = playbackData.filter(function (item) {
@@ -334,7 +348,7 @@
            нет (без своих контролов), работаем по-старому с самим элементом. */
         var videoShell = playerVideo ? playerVideo.closest('[data-vplayer]') || playerVideo : null;
 
-        function applySource(item) {
+        applySource = function (item) {
             if (!item) return;
             if (item.kind === 'file' && playerVideo) {
                 if (source) source.src = item.src;
@@ -389,13 +403,24 @@
         /* Полная версия серии на YouTube: у каждой кнопки свой адрес
            (data-episode-youtube, собран бэкендом из ID ролика). Подставляем
            его в iframe вкладки YouTube, если открыта она — у локального
-           <video> свой источник, и трогать его не нужно. */
-        function applyYoutubeEpisode(btn) {
-            if (!youtubeFrame || !btn || !btn.dataset.episodeYoutube) return;
-            var pane = youtubeFrame.closest('[data-player-pane]');
+           <video> свой источник, и трогать его не нужно. Когда IFrame API
+           уже создал YT.Player, серию переключаем его методом — менять src
+           у созданного API iframe нельзя. */
+        applyYoutubeEpisode = function (btn) {
+            if (!btn || !btn.dataset.episodeYoutube) return;
+            /* Панель после создания YT.Player может стать самим iframe
+               (API переносит на него атрибуты контейнера) — берём живой
+               элемент, а не сохранённый при старте. */
+            var pane = document.querySelector('[data-player-pane="youtube"]');
             if (pane && pane.hidden) return;
-            youtubeFrame.src = btn.dataset.episodeYoutube;
-        }
+            var match = btn.dataset.episodeYoutube.match(/embed\/([A-Za-z0-9_-]{11})/);
+            if (ytPlayer && match) {
+                ytPlayer.loadVideoById(match[1]);
+                lastSent = 0;
+                return;
+            }
+            if (youtubeFrame) youtubeFrame.src = btn.dataset.episodeYoutube;
+        };
 
         function setEpisode(btn) {
             buttons.forEach(function (b) {
@@ -471,6 +496,111 @@
         window.addEventListener('pagehide', function () {
             savePosition(true);
         });
+
+        /* ---------- YouTube: реальный прогресс через IFrame API ----------
+
+           Локальный <video> отдаёт позицию событиями timeupdate. У iframe
+           YouTube время живёт внутри чужого фрейма — вытащить его можно
+           только официальным IFrame API. Подключаем его лениво, когда на
+           странице есть вкладка YouTube, и опрашиваем getCurrentTime()/
+           getDuration(): позиция настоящая, ничего не выдумываем.
+        */
+        if (youtubePane) {
+            var ytTimer = null;
+            var ytSeekedOnce = false;
+
+            function currentYoutubeId() {
+                var frame = youtubePane.querySelector('[data-youtube-frame]');
+                if (!frame || !frame.getAttribute('src')) return null;
+                var match = frame.getAttribute('src').match(/embed\/([A-Za-z0-9_-]{11})/);
+                return match ? match[1] : null;
+            }
+
+            function saveYoutubePosition(force) {
+                if (!isAuthenticated || !ytPlayer || !ytPlayer.getCurrentTime) return;
+                var position = Math.floor(ytPlayer.getCurrentTime() || 0);
+                if (!force && position - lastSent < POSITION_INTERVAL && position >= lastSent) return;
+                lastSent = position;
+                var duration = ytPlayer.getDuration();
+                sendProgress({
+                    episode: currentEpisodeId ? Number(currentEpisodeId) : null,
+                    position: position,
+                    duration: isFinite(duration) ? Math.floor(duration) : undefined,
+                });
+            }
+
+            function initYoutubePlayer() {
+                if (ytPlayer) return;
+                var videoId = currentYoutubeId();
+                if (!videoId) return;
+                /* Создаём отдельный контейнер внутри панели, а не отдаём
+                   API саму панель: иначе он заменит панель своим iframe,
+                   и ссылки на неё устареют — переключение вкладок перестанет
+                   её скрывать. Обычный iframe прячем — его роль взял API. */
+                var host = document.createElement('div');
+                host.className = 'player__frame player__frame--youtube';
+                youtubePane.appendChild(host);
+                var fallback = youtubePane.querySelector('[data-youtube-frame]');
+                if (fallback) fallback.hidden = true;
+                ytPlayer = new window.YT.Player(host, {
+                    width: '100%',
+                    height: '100%',
+                    videoId: videoId,
+                    playerVars: {
+                        rel: 0,
+                        modestbranding: 1,
+                        playsinline: 1,
+                    },
+                    events: {
+                        onReady: function () {
+                            /* Возврат на сохранённую секунду — один раз,
+                               при первом готовом кадре. Перемотка при каждом
+                               переключении серии возвращала бы зрителя
+                               на старое место. */
+                            if (resumeAt > 0 && !ytSeekedOnce) {
+                                ytSeekedOnce = true;
+                                ytPlayer.seekTo(Math.max(0, resumeAt - 2), true);
+                                lastSent = resumeAt;
+                            }
+                            /* Позицию шлём не на каждый кадр, а раз в
+                               POSITION_INTERVAL секунд — как у локального
+                               видео (timeupdate). */
+                            ytTimer = setInterval(function () {
+                                saveYoutubePosition(false);
+                            }, POSITION_INTERVAL * 1000);
+                        },
+                        onStateChange: function (event) {
+                            /* Пауза (2) и конец ролика (0) — точные моменты:
+                               позицию важно записать сразу, не дожидаясь
+                               очередного тика интервала. */
+                            if (event.data === 2 || event.data === 0) {
+                                saveYoutubePosition(true);
+                            }
+                        },
+                    },
+                });
+            }
+
+            function loadYoutubeApi() {
+                if (window.YT && window.YT.Player) {
+                    initYoutubePlayer();
+                    return;
+                }
+                /* Колбэк ставим до загрузки скрипта: iframe_api вызывает
+                   его сразу после инициализации. */
+                window.onYouTubeIframeAPIReady = initYoutubePlayer;
+                var script = document.createElement('script');
+                script.src = 'https://www.youtube.com/iframe_api';
+                script.async = true;
+                document.head.appendChild(script);
+            }
+
+            loadYoutubeApi();
+
+            window.addEventListener('pagehide', function () {
+                saveYoutubePosition(true);
+            });
+        }
     }
 
     /* ---------- 4. Вкладки мультиплеера (Плеер 1 | Плеер 2 | Трейлер) ---------- */
@@ -488,7 +618,10 @@
                 if (isActive) btn.tabIndex = 0;
                 else btn.tabIndex = -1;
             });
-            panes.forEach(function (pane) {
+            /* Панели пере-выбираем каждый раз: YT.Player мог заменить
+               свою панель на iframe (атрибуты переносятся на него),
+               и ссылки, сохранённые при старте, устарели бы. */
+            document.querySelectorAll('[data-player-pane]').forEach(function (pane) {
                 var isActive = pane.dataset.playerPane === name;
                 pane.hidden = !isActive;
             });
@@ -512,13 +645,12 @@
                     applySource(findSource(currentEpisodeId, currentVoiceId, currentPlayerIndex));
                 }
                 /* Возврат на вкладку YouTube: если у сериала адрес подставлялся
-                   скриптом, src мог остаться от другой серии — ставим адрес
-                   текущей активной кнопки. У фильма src приходит из разметки. */
-                if (btn.dataset.playerTab === 'youtube' && youtubeFrame) {
+                   скриптом, ролик мог остаться от другой серии — ставим
+                   ролик текущей активной кнопки (метод сам разрулит
+                   YT.Player и обычный iframe). У фильма ролик один. */
+                if (btn.dataset.playerTab === 'youtube') {
                     var current = section ? section.querySelector('.player-episode--active') : null;
-                    if (current && current.dataset.episodeYoutube) {
-                        youtubeFrame.src = current.dataset.episodeYoutube;
-                    }
+                    if (current) applyYoutubeEpisode(current);
                 }
             });
             btn.addEventListener('keydown', function (event) {

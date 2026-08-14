@@ -71,6 +71,10 @@ class ContentSecurityPolicyMiddleware:
       Оба нужны только на странице тайтла с заполненными ID, но политика
       общая — разрешаем на всех страницах, а скрипт подключается только
       там, где нужен.
+    - www.youtube.com — IFrame API и iframe плеера YouTube (вкладка
+      «Смотреть фильм/серии»). frame-src уже был разрешён для трейлеров,
+      script-src/connect-src нужны API ролика: он грузится лениво,
+      только на страницах с YouTube-видео.
 
     If a feature on the site stops working, check the browser console
     for CSP violation reports before loosening the policy.
@@ -79,13 +83,14 @@ class ContentSecurityPolicyMiddleware:
     CSP_TEMPLATE = (
         "default-src 'self'; "
         "script-src 'self' 'unsafe-inline' "
-        "https://www.googletagmanager.com https://graphicslab.io; "
+        "https://www.googletagmanager.com https://graphicslab.io "
+        "https://www.youtube.com; "
         "style-src 'self' 'unsafe-inline'; "
         "img-src 'self' data: https:; "
         "font-src 'self' data:; "
         "connect-src 'self' https://www.google-analytics.com "
         "https://www.googletagmanager.com https://graphicslab.io "
-        "https://*.kinescopecdn.net; "
+        "https://*.kinescopecdn.net https://www.youtube.com; "
         "frame-src 'self' https://www.youtube.com https://player.vimeo.com "
         "https://rutube.ru https://*.kinescopecdn.net; "
         "media-src 'self' https:; "
