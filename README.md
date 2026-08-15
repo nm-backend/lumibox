@@ -325,8 +325,15 @@ docker compose exec web python manage.py createsuperuser
 плеер получает `data-trailer` — по умолчанию `"true"`: покажет трейлер,
 если полного видео нет в каталоге сервиса (режим задаёт
 `VIDEO_SERVICE_TRAILER`, см. таблицу). SDK и тег `<ins>` подключаются
-только на таких страницах. Пустой `VIDEO_SERVICE_PUBLISHER_ID`
-в настройках отключает интеграцию целиком.
+только на таких страницах. Пустой `VIBIX_PUBLISHER_ID` отключает
+интеграцию целиком.
+
+После `seed_catalog` реальный плеер уже включён у фильма «Начало»:
+`kp_id=447301`, `imdb_id=tt1375666`. Для показа по Kinopoisk ID API-токен
+не нужен — браузерный SDK Vibix получает `data-type="kp"` и `data-id`.
+Токен нужен серверным командам синхронизации и хранится только в окружении.
+Доступность полной версии определяет каталог и договор вашего аккаунта Vibix;
+если фильма нет, при `VIDEO_SERVICE_TRAILER=true` сервис покажет трейлер.
 
 ### Синхронизация ID
 
@@ -366,8 +373,9 @@ docker compose exec web python manage.py sync_episodes --dry-run  # только
 
 | Переменная | Назначение |
 |---|---|
-| `VIDEO_SERVICE_API_KEY` | Ключ API видеосервиса (`Authorization: Bearer`). Без него синк невозможен |
-| `VIDEO_SERVICE_PUBLISHER_ID` | ID издателя для плеера (тег `data-publisher-id`) |
+| `VIBIX_API_TOKEN` | Ключ API Vibix (`Authorization: Bearer`). Без него синк невозможен; старое имя `VIDEO_SERVICE_API_KEY` поддерживается как fallback |
+| `VIBIX_PUBLISHER_ID` | ID издателя для плеера (тег `data-publisher-id`); старое имя `VIDEO_SERVICE_PUBLISHER_ID` поддерживается как fallback |
+| `VIBIX_API_BASE_URL` | Корень API, по умолчанию `https://vibix.org/api/v1` |
 | `VIDEO_SERVICE_DESIGN`, `VIDEO_SERVICE_COLOR1..5` | Оформление внешнего плеера (дизайн 1–6 и цвета для кастомизируемых) |
 | `VIDEO_SERVICE_AUTOPLAY` | Автовоспроизведение внешнего плеера (`data-autoplay`), выключено |
 | `VIDEO_SERVICE_WATCH_PARTY` | Совместный просмотр (`data-sync` + sync-lib + WatchParty, комната — адрес записи), выключено |

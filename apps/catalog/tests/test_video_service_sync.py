@@ -115,6 +115,7 @@ class FilterYearsTests(TestCase):
         self.assertIsNone(_filter_years({}))
 
 
+@override_settings(VIBIX_API_TOKEN="test-key", VIDEO_SERVICE_API_KEY="test-key")
 class SyncVideoServiceIdsTests(TestCase):
     def setUp(self):
         self.movie = create_title(
@@ -320,14 +321,15 @@ class SyncVideoServiceIdsTests(TestCase):
         self.assertIsNone(captured["updated_from"])
 
     def test_no_key_raises(self):
-        with override_settings(VIDEO_SERVICE_API_KEY=""):
+        with override_settings(VIBIX_API_TOKEN="", VIDEO_SERVICE_API_KEY=""):
             with self.assertRaises(VideoServiceAPIError):
                 sync_video_service_ids(dry_run=True)
 
 
+@override_settings(VIBIX_API_TOKEN="test-key", VIDEO_SERVICE_API_KEY="test-key")
 class SyncVideoServiceCommandTests(TestCase):
     def test_raises_without_key(self):
-        with override_settings(VIDEO_SERVICE_API_KEY=""):
+        with override_settings(VIBIX_API_TOKEN="", VIDEO_SERVICE_API_KEY=""):
             with self.assertRaises(CommandError):
                 call_command("sync_video_service", dry_run=True)
 
@@ -349,6 +351,7 @@ class SyncVideoServiceCommandTests(TestCase):
         self.assertIn("сухой прогон", output)
 
 
+@override_settings(VIBIX_API_TOKEN="test-key", VIDEO_SERVICE_API_KEY="test-key")
 class TitleEnrichmentTests(TestCase):
     """Обогащение записи данными из карточки API при совпадении."""
 
@@ -474,6 +477,7 @@ class TitleEnrichmentTests(TestCase):
         return generator
 
 
+@override_settings(VIBIX_API_TOKEN="test-key", VIDEO_SERVICE_API_KEY="test-key")
 class SyncSeriesEpisodesTests(TestCase):
     """Импорт серий сериалов через GET /serials/kp|imdb/{id}."""
 
@@ -627,14 +631,15 @@ class SyncSeriesEpisodesTests(TestCase):
         fetch.assert_not_called()
 
     def test_no_key_raises(self):
-        with override_settings(VIDEO_SERVICE_API_KEY=""):
+        with override_settings(VIBIX_API_TOKEN="", VIDEO_SERVICE_API_KEY=""):
             with self.assertRaises(VideoServiceAPIError):
                 sync_series_episodes()
 
 
+@override_settings(VIBIX_API_TOKEN="test-key", VIDEO_SERVICE_API_KEY="test-key")
 class SyncEpisodesCommandTests(TestCase):
     def test_raises_without_key(self):
-        with override_settings(VIDEO_SERVICE_API_KEY=""):
+        with override_settings(VIBIX_API_TOKEN="", VIDEO_SERVICE_API_KEY=""):
             with self.assertRaises(CommandError):
                 call_command("sync_episodes", dry_run=True)
 
@@ -888,6 +893,7 @@ class VideoServiceReferenceListsTests(TestCase):
                 self.assertEqual(get.call_args.args[0], f"{VIDEO_SERVICE_API_BASE}{path}")
 
 
+@override_settings(VIBIX_API_TOKEN="test-key", VIDEO_SERVICE_API_KEY="test-key")
 class VoiceoverSyncTests(TestCase):
     """Сопоставление озвучек каталога с озвучками сервиса."""
 
@@ -945,14 +951,15 @@ class VoiceoverSyncTests(TestCase):
         self.assertEqual(stats["filled"], 1)
 
     def test_no_key_raises(self):
-        with override_settings(VIDEO_SERVICE_API_KEY=""):
+        with override_settings(VIBIX_API_TOKEN="", VIDEO_SERVICE_API_KEY=""):
             with self.assertRaises(VideoServiceAPIError):
                 sync_voiceover_ids(dry_run=True)
 
 
+@override_settings(VIBIX_API_TOKEN="test-key", VIDEO_SERVICE_API_KEY="test-key")
 class SyncVoiceoversCommandTests(TestCase):
     def test_raises_without_key(self):
-        with override_settings(VIDEO_SERVICE_API_KEY=""):
+        with override_settings(VIBIX_API_TOKEN="", VIDEO_SERVICE_API_KEY=""):
             with self.assertRaises(CommandError):
                 call_command("sync_voiceovers", dry_run=True)
 
@@ -973,6 +980,7 @@ class SyncVoiceoversCommandTests(TestCase):
         self.assertIn("сухой прогон", output)
 
 
+@override_settings(VIBIX_API_TOKEN="test-key", VIDEO_SERVICE_API_KEY="test-key")
 class ImportVoiceoversTests(TestCase):
     """Импорт справочника озвучек из сервиса."""
 
@@ -1055,9 +1063,10 @@ class ImportVoiceoversTests(TestCase):
         self.assertEqual(VoiceOver.objects.count(), 0)
 
 
+@override_settings(VIBIX_API_TOKEN="test-key", VIDEO_SERVICE_API_KEY="test-key")
 class ImportVoiceoversCommandTests(TestCase):
     def test_raises_without_key(self):
-        with override_settings(VIDEO_SERVICE_API_KEY=""):
+        with override_settings(VIBIX_API_TOKEN="", VIDEO_SERVICE_API_KEY=""):
             with self.assertRaises(CommandError):
                 call_command("import_voiceovers", dry_run=True)
 
@@ -1075,13 +1084,14 @@ class ImportVoiceoversCommandTests(TestCase):
         self.assertIn("сухой прогон", output)
 
 
+@override_settings(VIBIX_API_TOKEN="test-key", VIDEO_SERVICE_API_KEY="test-key")
 class SyncVideoServiceTaskTests(TestCase):
     """Планировщик дергает задачу, а не команду: проверяем её поведение."""
 
     def test_skips_without_api_key(self):
         from apps.catalog.tasks import sync_video_service
 
-        with override_settings(VIDEO_SERVICE_API_KEY=""):
+        with override_settings(VIBIX_API_TOKEN="", VIDEO_SERVICE_API_KEY=""):
             self.assertIn("пропущена", sync_video_service())
 
     def test_reports_statistics(self):
@@ -1115,13 +1125,14 @@ class SyncVideoServiceTaskTests(TestCase):
         self.assertIn("Ошибка синхронизации", report)
 
 
+@override_settings(VIBIX_API_TOKEN="test-key", VIDEO_SERVICE_API_KEY="test-key")
 class SyncVoiceoversTaskTests(TestCase):
     """Планировщик дергает задачу озвучек, а не команду."""
 
     def test_skips_without_api_key(self):
         from apps.catalog.tasks import sync_voiceovers
 
-        with override_settings(VIDEO_SERVICE_API_KEY=""):
+        with override_settings(VIBIX_API_TOKEN="", VIDEO_SERVICE_API_KEY=""):
             self.assertIn("пропущена", sync_voiceovers())
 
     def test_reports_statistics(self):
@@ -1149,6 +1160,7 @@ class SyncVoiceoversTaskTests(TestCase):
         self.assertIn("Ошибка синхронизации озвучек", report)
 
 
+@override_settings(VIBIX_API_TOKEN="test-key", VIDEO_SERVICE_API_KEY="test-key")
 class SyncTitleTests(TestCase):
     """sync_title: точечная синхронизация одной записи (sync_vibix --title).
 

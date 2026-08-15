@@ -39,6 +39,19 @@ class SeedCatalogTests(TestCase):
         self.assertGreater(title.genres.count(), 0)
         self.assertGreater(title.countries.count(), 0)
 
+    def test_demo_movie_has_real_ids_for_vibix_player(self):
+        """После первого запуска «Начало» сразу открывается через Vibix."""
+        self.seed()
+
+        title = Title.objects.get(slug="nachalo-2010")
+        self.assertEqual(title.kp_id, "447301")
+        self.assertEqual(title.imdb_id, "tt1375666")
+
+        response = self.client.get(title.get_absolute_url())
+        self.assertContains(response, 'data-type="kp"')
+        self.assertContains(response, 'data-id="447301"')
+        self.assertContains(response, "rendex-sdk.min.js")
+
     def test_drafts_stay_drafts(self):
         """
         Два черновика в данных лежат намеренно: на них видно, что каталог

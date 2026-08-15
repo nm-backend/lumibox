@@ -34,7 +34,6 @@ sync_series_episodes через detail-эндпоинты GET /serials/kp|imdb/{
 import re
 from decimal import Decimal, InvalidOperation
 
-from django.conf import settings
 from django.db.models import Q
 from django.utils import timezone
 from django.utils.text import slugify
@@ -48,6 +47,7 @@ from apps.catalog.video_service_api import (
     fetch_serial_by_kp,
     fetch_video_by_imdb,
     fetch_video_by_kp,
+    get_vibix_api_token,
     iter_video_links,
 )
 
@@ -170,7 +170,7 @@ def sync_title(title, *, dry_run=False):
     Возвращает словарь счётчиков: matched, not_found, player_filled,
     enriched, episodes_created.
     """
-    api_key = (settings.VIDEO_SERVICE_API_KEY or "").strip()
+    api_key = get_vibix_api_token()
     if not api_key:
         raise VideoServiceAPIError(
             "VIDEO_SERVICE_API_KEY не задан — синхронизацию невозможно запустить"
@@ -271,7 +271,7 @@ def sync_video_service_ids(*, full=False, dry_run=False, page_size=100, max_page
     player_filled, enriched (записей, чьи поля обогащены), genres_added,
     countries_added.
     """
-    api_key = (settings.VIDEO_SERVICE_API_KEY or "").strip()
+    api_key = get_vibix_api_token()
     if not api_key:
         from apps.catalog.video_service_api import VideoServiceAPIError
 
@@ -515,7 +515,7 @@ def sync_series_episodes(*, dry_run=False, limit=None):
     processed (записей каталога), created (созданных серий), not_found
     (нет в каталоге сервиса), errors (ошибок API).
     """
-    api_key = (settings.VIDEO_SERVICE_API_KEY or "").strip()
+    api_key = get_vibix_api_token()
     if not api_key:
         raise VideoServiceAPIError(
             "VIDEO_SERVICE_API_KEY не задан — синхронизацию невозможно запустить"

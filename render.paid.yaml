@@ -62,6 +62,16 @@ services:
       - key: DJANGO_SUPERUSER_PASSWORD
         sync: false
 
+      # --- Vibix (реальный внешний плеер) ---
+      - key: VIBIX_PUBLISHER_ID
+        value: "678503345"
+      - key: VIBIX_API_TOKEN
+        sync: false
+      - key: VIBIX_API_BASE_URL
+        value: https://vibix.org/api/v1
+      - key: VIDEO_SERVICE_TRAILER
+        value: "true"
+
       # --- Sentry (опционально) ---
       - key: SENTRY_DSN
         sync: false
@@ -108,3 +118,14 @@ services:
           type: keyvalue
           name: lumibox-redis
           property: connectionString
+      # Планировщик синхронизации должен видеть ту же конфигурацию Vibix,
+      # что и web-процесс. Секрет не дублируется — берётся у web-сервиса.
+      - key: VIBIX_PUBLISHER_ID
+        value: "678503345"
+      - key: VIBIX_API_TOKEN
+        fromService:
+          type: web
+          name: lumibox-web
+          envVarKey: VIBIX_API_TOKEN
+      - key: VIBIX_API_BASE_URL
+        value: https://vibix.org/api/v1

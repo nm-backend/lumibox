@@ -51,6 +51,18 @@ class VideoServiceNotFoundError(VideoServiceAPIError):
     """HTTP 404: записи нет в каталоге издателя."""
 
 
+def get_vibix_api_token():
+    """Возвращает актуальный API-токен с поддержкой старого имени настройки.
+
+    Значение читается при каждом вызове, а не копируется один раз при импорте
+    settings. Это важно для тестов, ротации конфигурации и постепенного
+    перехода с VIDEO_SERVICE_API_KEY на официальное VIBIX_API_TOKEN.
+    """
+    official = getattr(settings, "VIBIX_API_TOKEN", "") or ""
+    legacy = getattr(settings, "VIDEO_SERVICE_API_KEY", "") or ""
+    return (official or legacy).strip()
+
+
 def _retry_delay(attempt, response=None):
     """
     Пауза перед повтором запроса, в секундах.
