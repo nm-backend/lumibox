@@ -14,11 +14,14 @@
   получит тот же ID.
 """
 
-from django.conf import settings
 from django.utils.text import slugify
 
 from apps.catalog.models import VoiceOver
-from apps.catalog.video_service_api import VideoServiceAPIError, fetch_voiceovers
+from apps.catalog.video_service_api import (
+    VideoServiceAPIError,
+    fetch_voiceovers,
+    get_vibix_api_token,
+)
 from apps.catalog.video_service_sync import normalize_name
 
 
@@ -52,7 +55,7 @@ def import_voiceovers_from_service(*, dry_run=False):
     fetched (озвучек от сервиса), created (созданных), filled (заполненных
     у существующих).
     """
-    api_key = (settings.VIDEO_SERVICE_API_KEY or "").strip()
+    api_key = get_vibix_api_token()
     if not api_key:
         raise VideoServiceAPIError(
             "VIDEO_SERVICE_API_KEY не задан — синхронизацию невозможно запустить"
@@ -91,7 +94,7 @@ def sync_voiceover_ids(*, dry_run=False):
     dry_run=True ничего не пишет в базу. Возвращает словарь счётчиков:
     fetched (озвучек от сервиса), filled (заполненных сопоставлений).
     """
-    api_key = (settings.VIDEO_SERVICE_API_KEY or "").strip()
+    api_key = get_vibix_api_token()
     if not api_key:
         raise VideoServiceAPIError(
             "VIDEO_SERVICE_API_KEY не задан — синхронизацию невозможно запустить"

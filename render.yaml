@@ -68,6 +68,18 @@ services:
       - key: DJANGO_SUPERUSER_PASSWORD
         sync: false
 
+      # --- Vibix (реальный внешний плеер) ---
+      # Publisher ID участвует только в публичном теге плеера. API-токен —
+      # секрет: задайте его в Render Dashboard, в HTML он не попадает.
+      - key: VIBIX_PUBLISHER_ID
+        value: "678503345"
+      - key: VIBIX_API_TOKEN
+        sync: false
+      - key: VIBIX_API_BASE_URL
+        value: https://vibix.org/api/v1
+      - key: VIDEO_SERVICE_TRAILER
+        value: "true"
+
       # --- Cloudflare R2 (опционально) ---
       # Без R2 медиа-файлы хранятся локально и сбрасываются при перезапуске.
       # Заполни эти переменные вручную в Dashboard Render после деплоя.

@@ -18,6 +18,7 @@ from apps.catalog.services import (
     REFERENCE_COUNTRY_CACHE_KEY,
     REFERENCE_GENRE_CACHE_KEY,
 )
+from apps.catalog.video_service_api import get_vibix_api_token
 
 
 @shared_task
@@ -37,7 +38,7 @@ def sync_video_service():
     from apps.catalog.video_service_api import VideoServiceAPIError
     from apps.catalog.video_service_sync import sync_video_service_ids
 
-    if not (settings.VIDEO_SERVICE_API_KEY or "").strip():
+    if not get_vibix_api_token():
         return "VIDEO_SERVICE_API_KEY не задан — синхронизация пропущена"
 
     try:
@@ -66,7 +67,7 @@ def sync_voiceovers():
     from apps.catalog.video_service_api import VideoServiceAPIError
     from apps.catalog.video_service_voiceover_sync import sync_voiceover_ids
 
-    if not (settings.VIDEO_SERVICE_API_KEY or "").strip():
+    if not get_vibix_api_token():
         return "VIDEO_SERVICE_API_KEY не задан — синхронизация пропущена"
 
     try:
@@ -94,7 +95,7 @@ def sync_series_episodes():
     from apps.catalog.video_service_api import VideoServiceAPIError
     from apps.catalog.video_service_sync import sync_series_episodes as run
 
-    if not (settings.VIDEO_SERVICE_API_KEY or "").strip():
+    if not get_vibix_api_token():
         return "VIDEO_SERVICE_API_KEY не задан — синхронизация пропущена"
 
     try:
