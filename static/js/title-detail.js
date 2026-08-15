@@ -284,6 +284,11 @@
             if (!isAuthenticated || !playerVideo) return;
             var position = Math.floor(playerVideo.currentTime || 0);
             if (!force && position - lastSent < POSITION_INTERVAL && position >= lastSent) return;
+            /* Нулевую позицию при уходе со страницы не шлём, если видео ни
+               разу не воспроизводилось (played пуст): иначе скрытая вкладка
+               «Смотреть онлайн» затирала бы прогресс, сохранённый YouTube-
+               плеером. timeupdate всё равно придёт, когда видео заиграет. */
+            if (position === 0 && playerVideo.played.length === 0) return;
             lastSent = position;
             var duration = playerVideo.duration;
             sendProgress({
@@ -520,6 +525,12 @@
                 if (!isAuthenticated || !ytPlayer || !ytPlayer.getCurrentTime) return;
                 var position = Math.floor(ytPlayer.getCurrentTime() || 0);
                 if (!force && position - lastSent < POSITION_INTERVAL && position >= lastSent) return;
+                /* То же правило, что у локального видео: нулевую позицию
+                   при уходе со страницы не шлём, если ролик ни разу не
+                   запускался (UNSTARTED=-1 или CUED=5) — иначе перезагрузка
+                   страницы без нажатия play затирала бы сохранённый прогресс. */
+                var state = ytPlayer.getPlayerState ? ytPlayer.getPlayerState() : null;
+                if (position === 0 && (state === -1 || state === 5)) return;
                 lastSent = position;
                 var duration = ytPlayer.getDuration();
                 sendProgress({
