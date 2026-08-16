@@ -176,7 +176,6 @@ class ExternalPlayerRenderingTests(TestCase):
         self.assertContains(response, 'data-id="8285"')
         self.assertContains(response, 'data-season="1"')
         self.assertContains(response, 'data-episodes="1"')
-        self.assertContains(response, 'data-nopreload="true"')
 
     def test_movie_without_player_uses_kp_id(self):
         title = create_title(name="Фильм по kp", kp_id="4402886")
@@ -185,6 +184,44 @@ class ExternalPlayerRenderingTests(TestCase):
 
         self.assertContains(response, 'data-type="kp"')
         self.assertContains(response, 'data-id="4402886"')
+
+    def test_external_player_is_primary_when_configured(self):
+        """Внешний плеер — основной «Смотреть фильм»: вкладка открыта первой.
+
+        Когда внешний плеер настроен, страница показывает ровно два плеера —
+        фильм и трейлер. Запасные источники (YouTube, свои файлы) в разметку
+        не попадают, чтобы зритель не путался в одинаковых вкладках.
+        """
+        title = create_title(
+            name="Фильм с внешним плеером",
+            video_url="https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+            trailer_url="https://www.youtube.com/watch?v=9bZkp7q19f0",
+            player_id="4427",
+            player_type="movie",
+        )
+        create_source(title=title)
+
+        response = self.client.get(title.get_absolute_url())
+
+        # Вкладка внешнего плеера — «Смотреть фильм» и активна по умолчанию.
+        self.assertContains(response, 'data-player-tab="external"')
+        self.assertContains(response, "Смотреть фильм")
+        self.assertContains(response, "Смотреть трейлер")
+        # Запасные источники при настроенном внешнем плеере скрыты.
+        self.assertNotContains(response, 'data-player-pane="youtube"')
+        self.assertNotContains(response, 'data-player-pane="player1"')
+
+    def test_youtube_pane_when_no_external_player(self):
+        """Без внешнего плеера полная версия остаётся на YouTube."""
+        title = create_title(
+            name="Фильм на YouTube",
+            video_url="https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+        )
+
+        response = self.client.get(title.get_absolute_url())
+
+        self.assertContains(response, 'data-player-pane="youtube"')
+        self.assertNotContains(response, 'data-player-tab="external"')
 
     def test_no_external_player_without_ids(self):
         title = create_title(name="Ничего нет")

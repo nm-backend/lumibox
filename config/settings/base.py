@@ -32,7 +32,7 @@ env = environ.Env(
     VIBIX_PUBLISHER_ID=(str, "678503345"),
     # Корень публичного API: /publisher/... живут под ним же, сериалы —
     # напрямую (GET /api/v1/serials/...).
-    VIBIX_API_BASE_URL=(str, "https://vibix.org/api/v1"),
+    VIBIX_API_BASE_URL=(str, "https://api.vibix.org/api/v1"),
     # Устаревшие имена переменных — остаются для обратной совместимости.
     VIDEO_SERVICE_PUBLISHER_ID=(str, "678503345"),
     # Рекламная сеть (стикеры, баннеры). Флаг включает её на всех страницах;

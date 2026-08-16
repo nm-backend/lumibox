@@ -182,6 +182,7 @@
 .lb-topnav-bar__inner {
     display: flex;
     align-items: center;
+    justify-content: space-evenly;
     gap: var(--space-1);
     overflow-x: auto;
     scrollbar-width: none;

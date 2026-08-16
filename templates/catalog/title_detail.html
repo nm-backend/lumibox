@@ -233,7 +233,14 @@
                    рекламу этого кино. Обычная якорная ссылка, без скрипта:
                    работает и до загрузки js, и при открытии в новой вкладке.
                 {% endcomment %}
-                {% if youtube_video_url %}
+                {% if external_player %}
+                    {% comment %} Полный фильм/сериал из внешнего плеера (Vibix) —
+                       главный источник: кнопка ведёт на его вкладку. {% endcomment %}
+                    <a class="button button--primary button--large" href="#player">
+                        {% icon "play" size=14 %}
+                        {% trans "Смотреть фильм" %}
+                    </a>
+                {% elif youtube_video_url %}
                     {% comment %} Полная версия на YouTube — главный источник MVP:
                        кнопка ведёт на вкладку плеера с этим роликом. {% endcomment %}
                     <a class="button button--primary button--large" href="#player">
@@ -379,22 +386,30 @@
                есть из чего выбирать: больше одного своего источника, либо
                трейлер, либо внешний плеер. Одинокая вкладка «Смотреть»
                висела над кадром как отдельная кнопка неясного назначения. {% endcomment %}
-            {% if title_players|length > 1 or title.trailer_source or external_player or has_youtube %}
+            {% if external_player or title_players|length > 1 or title.trailer_source or has_youtube %}
                 <div class="player-tabs" data-player-tabs role="tablist" aria-label="{% trans 'Источники видео' %}">
-                    {% if has_youtube %}
-                        <button class="player-tabs__tab player-tabs__tab--active" type="button" data-player-tab="youtube" role="tab" aria-selected="true">{% if youtube_video_url %}{% trans "Смотреть фильм" %}{% else %}{% trans "Смотреть серии" %}{% endif %}</button>
-                    {% endif %}
-                    {% if has_playback %}
-                        <button class="player-tabs__tab{% if not has_youtube %} player-tabs__tab--active{% endif %}" type="button" data-player-tab="player1" data-player-index="0" role="tab" aria-selected="{% if has_youtube %}false{% else %}true{% endif %}">{% trans "Смотреть онлайн" %}</button>
-                    {% endif %}
-                    {% for player in title_players|slice:"1:" %}
-                        <button class="player-tabs__tab" type="button" data-player-tab="player1" data-player-index="{{ forloop.counter }}" role="tab" aria-selected="false">{% blocktranslate with n=forloop.counter|add:1 %}Плеер {{ n }}{% endblocktranslate %}</button>
-                    {% endfor %}
                     {% if external_player %}
-                        <button class="player-tabs__tab{% if not has_playback and not has_youtube %} player-tabs__tab--active{% endif %}" type="button" data-player-tab="external" role="tab" aria-selected="{% if has_playback or has_youtube %}false{% else %}true{% endif %}">{% trans "Внешний плеер" %}</button>
+                        {% comment %} Внешний плеер (Vibix) — основной источник
+                           «Смотреть фильм». Идёт первым и открыт по умолчанию.
+                           Когда он настроен, это единственный плеер полной
+                           версии: вкладки YouTube и своих файлов не рисуем,
+                           чтобы на странице было ровно два плеера —
+                           фильм и трейлер. {% endcomment %}
+                        <button class="player-tabs__tab player-tabs__tab--active" type="button" data-player-tab="external" role="tab" aria-selected="true">{% trans "Смотреть фильм" %}</button>
+                    {% elif has_youtube %}
+                        {% comment %} Полная версия на YouTube — источник MVP,
+                           когда внешний плеер не настроен. {% endcomment %}
+                        <button class="player-tabs__tab player-tabs__tab--active" type="button" data-player-tab="youtube" role="tab" aria-selected="true">{% if youtube_video_url %}{% trans "Смотреть фильм" %}{% else %}{% trans "Смотреть серии" %}{% endif %}</button>
+                    {% elif has_playback %}
+                        <button class="player-tabs__tab player-tabs__tab--active" type="button" data-player-tab="player1" data-player-index="0" role="tab" aria-selected="true">{% trans "Смотреть онлайн" %}</button>
+                    {% endif %}
+                    {% if not external_player %}
+                        {% for player in title_players|slice:"1:" %}
+                            <button class="player-tabs__tab" type="button" data-player-tab="player1" data-player-index="{{ forloop.counter }}" role="tab" aria-selected="false">{% blocktranslate with n=forloop.counter|add:1 %}Плеер {{ n }}{% endblocktranslate %}</button>
+                        {% endfor %}
                     {% endif %}
                     {% if title.trailer_source %}
-                        <button class="player-tabs__tab" type="button" data-player-tab="trailer" role="tab" aria-selected="false">{% trans "Трейлер" %}</button>
+                        <button class="player-tabs__tab" type="button" data-player-tab="trailer" role="tab" aria-selected="false">{% trans "Смотреть трейлер" %}</button>
                     {% endif %}
                 </div>
             {% endif %}
@@ -404,12 +419,13 @@
                может менять тип. Пересобирать элемент скриптом дороже и рискованнее,
                чем спрятать один и показать другой. Адрес внешнего плеера
                подставляется по надобности — пустой iframe ничего не грузит.{% endcomment %}
-            {% if has_youtube %}
+            {% if has_youtube and not external_player %}
                 {% comment %} Вкладка YouTube MVP: полный фильм (youtube_video_url)
                    или серия — у сериала адрес подставляет title-detail.js из
                    активной кнопки серии, поэтому src здесь пустой.
                    Собирается бэкендом из ID ролика: произвольный iframe-адрес
-                   или чужой домен сюда попасть не могут. {% endcomment %}
+                   или чужой домен сюда попасть не могут. Показывается только
+                   когда внешний плеер не настроен. {% endcomment %}
                 <div class="player" data-player-pane="youtube">
                     <iframe class="player__frame player__frame--youtube"
                             data-youtube-frame
@@ -422,7 +438,7 @@
                 </div>
             {% endif %}
 
-            {% if has_playback %}
+            {% if has_playback and not external_player %}
             <div class="player" data-player-pane="player1"{% if has_youtube %} hidden{% endif %}>
                 {% comment %} Оболочка со своими контролами. Атрибут controls
                    в разметке остаётся: без js зритель получит нативную панель
@@ -528,7 +544,7 @@
 
             {% comment %}Выбор озвучки. Показываем только когда есть из чего
                выбирать: одна кнопка «Дубляж» без альтернативы — шум.{% endcomment %}
-            {% if playback_voices|length > 1 %}
+            {% if playback_voices|length > 1 and not external_player %}
                 <div class="player-voices" role="group" aria-label="{% trans 'Озвучка' %}">
                     <span class="player-voices__label">{% trans "Озвучка:" %}</span>
                     {% for voice in playback_voices %}
@@ -540,15 +556,18 @@
                 </div>
             {% endif %}
 
-            {{ playback_data|json_script:"playback-data" }}
+            {% if has_playback and not external_player %}
+                {{ playback_data|json_script:"playback-data" }}
+            {% endif %}
 
             {% if external_player %}
                 {% comment %} data-sync-room/data-sync-user — для watch-party.js:
                    данные висят на панели, а не на теге <ins>, потому что SDK
                    внешнего плеера заменяет <ins> на iframe раньше, чем
                    отработает наш скрипт. Само data-sync="true" остаётся
-                   на <ins> — его читает SDK сервиса. {% endcomment %}
-                <div class="player" data-player-pane="external"{% if has_playback or has_youtube %} hidden{% endif %}
+                   на <ins> — его читает SDK сервиса. Это основной плеер
+                   страницы «Смотреть фильм», поэтому панель открыта. {% endcomment %}
+                <div class="player" data-player-pane="external"
                      {% if external_player.sync %}data-sync-room="{{ external_player.sync_room }}"{% if external_player.sync_user %} data-sync-user="{{ external_player.sync_user }}"{% endif %}{% endif %}>
                     <ins data-publisher-id="{{ external_player.publisher_id }}"
                          data-type="{{ external_player.type }}"
@@ -561,9 +580,7 @@
                          {% if external_player.voiceover %}data-voiceover="{{ external_player.voiceover }}"{% endif %}
                          {% if external_player.voiceover_only %}data-voiceover-only="true"{% endif %}
                          {% if external_player.autoplay %}data-autoplay="true"{% endif %}
-                         {% if external_player.sync %}data-sync="true"{% endif %}
-                         data-poster="true"
-                         data-nopreload="true"></ins>
+                         {% if external_player.sync %}data-sync="true"{% endif %}></ins>
                 </div>
             {% endif %}
 

@@ -35,32 +35,33 @@ class SeedCatalogTests(TestCase):
         """Связи важнее счётчиков: запись без жанров не найдётся фильтром."""
         self.seed()
 
-        title = Title.objects.get(slug="nachalo-2010")
+        title = Title.objects.get(slug="sotsialnaya-set-2010")
         self.assertGreater(title.genres.count(), 0)
         self.assertGreater(title.countries.count(), 0)
 
     def test_demo_movie_has_real_ids_for_vibix_player(self):
-        """После первого запуска «Начало» сразу открывается через Vibix."""
+        """После первого запуска «Социальная сеть» сразу открывается через Vibix."""
         self.seed()
 
-        title = Title.objects.get(slug="nachalo-2010")
-        self.assertEqual(title.kp_id, "447301")
-        self.assertEqual(title.imdb_id, "tt1375666")
+        title = Title.objects.get(slug="sotsialnaya-set-2010")
+        self.assertEqual(title.player_id, "4951")
+        self.assertEqual(title.player_type, "movie")
 
         response = self.client.get(title.get_absolute_url())
-        self.assertContains(response, 'data-type="kp"')
-        self.assertContains(response, 'data-id="447301"')
+        self.assertContains(response, 'data-publisher-id="678503345"')
+        self.assertContains(response, 'data-type="movie"')
+        self.assertContains(response, 'data-id="4951"')
         self.assertContains(response, "rendex-sdk.min.js")
 
     def test_drafts_stay_drafts(self):
         """
-        Два черновика в данных лежат намеренно: на них видно, что каталог
-        показывает посетителю только опубликованное.
+        Черновиков в данных нет: весь каталог доступен посетителю.
+        Если они появятся — статус должен оставаться черновиком.
         """
         self.seed()
 
         drafts = Title.objects.filter(status=Title.Status.DRAFT)
-        self.assertEqual(drafts.count(), 2)
+        self.assertEqual(drafts.count(), 0)
         self.assertFalse(drafts.filter(published_at__isnull=False).exists())
 
     def test_published_titles_get_publication_date(self):
