@@ -137,6 +137,10 @@ class ReviewSerializer(serializers.ModelSerializer):
         read_only_fields = ["id", "author", "title_slug", "created_at"]
 
 
+class RateRequestSerializer(serializers.Serializer):
+    rating = serializers.IntegerField(min_value=1, max_value=10)
+
+
 class CommentSerializer(serializers.ModelSerializer):
     """
     Комментарий с ответами.
