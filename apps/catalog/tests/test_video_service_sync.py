@@ -48,6 +48,7 @@ from apps.catalog.video_service_api import (
 from apps.catalog.video_service_sync import (
     TitleMatchIndex,
     _filter_years,
+    create_title_from_vibix,
     match_item,
     normalize_name,
     sync_series_episodes,
@@ -1485,3 +1486,204 @@ class SyncVibixCommandTests(TestCase):
     def test_limit_requires_episodes_mode(self):
         with self.assertRaises(CommandError):
             call_command("sync_vibix", limit=1)
+
+
+@override_settings(VIBIX_API_TOKEN="test-token")
+class CreateTitleFromVibixTests(TestCase):
+    """create_title_from_vibix: создание записи каталога из карточки API.
+
+    API не трогаем — fetch_video_by_kp замокан на уровне модуля синхронизации.
+    """
+
+    def _detail(self, **overrides):
+        item = {
+            "id": 990001,
+            "name": "Inception",
+            "name_rus": "Начало",
+            "name_eng": "Inception",
+            "name_original": "Inception",
+            "type": "movie",
+            "year": "2010",
+            "kp_id": 447301,
+            "imdb_id": "tt1375666",
+            "kp_rating": "8.6",
+            "imdb_rating": "8.8",
+            "duration": 148,
+            "description": "Вор проникает в чужие сны, чтобы внедрить идею.",
+            "description_short": "Кража идей во сне.",
+            "embed_code": 'data-publisher-id="678822630" data-type="movie" data-id="4427"',
+            "genre": ["Фантастика", "Триллер"],
+            "country": ["США", "Великобритания"],
+        }
+        item.update(overrides)
+        return item
+
+    def _patch(self, item):
+        return patch(
+            "apps.catalog.video_service_sync.fetch_video_by_kp",
+            return_value=item,
+        )
+
+    def test_creates_published_title_with_metadata(self):
+        with self._patch(self._detail()):
+            title, outcome = create_title_from_vibix("test-token", "447301")
+
+        self.assertEqual(outcome, "created")
+        self.assertIsNotNone(title)
+        title.refresh_from_db()
+        self.assertEqual(title.name, "Начало")
+        self.assertEqual(title.original_name, "Inception")
+        self.assertEqual(title.release_year, 2010)
+        self.assertEqual(title.kp_id, "447301")
+        self.assertEqual(title.imdb_id, "tt1375666")
+        self.assertEqual(title.status, Title.Status.PUBLISHED)
+        self.assertIsNotNone(title.published_at)
+        self.assertEqual(title.type, Title.Type.MOVIE)
+        # player_id берётся из data-id embed_code, а не из внутреннего item.id.
+        self.assertEqual(title.player_id, "4427")
+        self.assertEqual(title.player_type, "movie")
+        self.assertEqual(title.description, "Вор проникает в чужие сны, чтобы внедрить идею.")
+        self.assertEqual(title.duration_minutes, 148)
+        self.assertEqual(title.kp_rating, Decimal("8.6"))
+        self.assertEqual(title.imdb_rating, Decimal("8.8"))
+        self.assertEqual(
+            sorted(title.genres.values_list("name", flat=True)),
+            ["Триллер", "Фантастика"],
+        )
+        self.assertEqual(
+            sorted(title.countries.values_list("name", flat=True)),
+            ["Великобритания", "США"],
+        )
+        self.assertTrue(title.slug)
+
+    def test_serial_type_maps_to_series(self):
+        with self._patch(self._detail(type="serial")):
+            title, outcome = create_title_from_vibix("test-token", "447301")
+
+        self.assertEqual(outcome, "created")
+        self.assertEqual(title.type, Title.Type.SERIES)
+
+    def test_existing_kp_id_is_not_duplicated(self):
+        existing = create_title(name="Уже в базе", kp_id="447301")
+
+        with self._patch(self._detail()) as mock_fetch:
+            title, outcome = create_title_from_vibix("test-token", "447301")
+
+        self.assertEqual(outcome, "exists")
+        self.assertEqual(title.pk, existing.pk)
+        # Существующий kp_id — сразу выход, к API не обращаемся.
+        mock_fetch.assert_not_called()
+        self.assertEqual(Title.objects.filter(kp_id="447301").count(), 1)
+
+    def test_not_found_returns_outcome(self):
+        with patch(
+            "apps.catalog.video_service_sync.fetch_video_by_kp",
+            side_effect=VideoServiceNotFoundError("нет записи"),
+        ):
+            title, outcome = create_title_from_vibix("test-token", "999999")
+
+        self.assertIsNone(title)
+        self.assertEqual(outcome, "not_found")
+        self.assertFalse(Title.objects.filter(kp_id="999999").exists())
+
+    def test_missing_year_is_skipped(self):
+        with self._patch(self._detail(year=None)):
+            title, outcome = create_title_from_vibix("test-token", "447301")
+
+        self.assertIsNone(title)
+        self.assertEqual(outcome, "no_year")
+        self.assertFalse(Title.objects.filter(kp_id="447301").exists())
+
+    def test_missing_name_is_skipped(self):
+        with self._patch(self._detail(name="", name_rus="", name_eng="")):
+            title, outcome = create_title_from_vibix("test-token", "447301")
+
+        self.assertIsNone(title)
+        self.assertEqual(outcome, "no_name")
+
+    def test_dry_run_creates_nothing(self):
+        with self._patch(self._detail()):
+            title, outcome = create_title_from_vibix("test-token", "447301", dry_run=True)
+
+        self.assertIsNone(title)
+        self.assertEqual(outcome, "created")
+        self.assertFalse(Title.objects.filter(kp_id="447301").exists())
+
+
+@override_settings(VIBIX_API_TOKEN="test-token")
+class CreateFromVibixCommandTests(TestCase):
+    """Команда create_from_vibix: аргументы, отчёт, идемпотентность."""
+
+    def _detail(self, kp_id, name, year):
+        return {
+            "name_rus": name,
+            "type": "movie",
+            "year": str(year),
+            "kp_id": kp_id,
+            "imdb_id": "",
+            "embed_code": f'data-type="movie" data-id="{kp_id}"',
+            "genre": [],
+            "country": [],
+        }
+
+    def test_creates_titles_from_arguments(self):
+        details = {
+            "447301": self._detail("447301", "Начало", 2010),
+            "258687": self._detail("258687", "Интерстеллар", 2014),
+        }
+        out = StringIO()
+        with patch(
+            "apps.catalog.video_service_sync.fetch_video_by_kp",
+            side_effect=lambda key, kp_id: details[str(kp_id)],
+        ):
+            call_command("create_from_vibix", "447301", "258687", stdout=out)
+
+        self.assertTrue(Title.objects.filter(kp_id="447301").exists())
+        self.assertTrue(Title.objects.filter(kp_id="258687").exists())
+        self.assertIn("создано: 2", out.getvalue())
+
+    def test_duplicate_ids_processed_once(self):
+        detail = self._detail("447301", "Начало", 2010)
+        with patch(
+            "apps.catalog.video_service_sync.fetch_video_by_kp",
+            return_value=detail,
+        ) as mock_fetch:
+            call_command("create_from_vibix", "447301", "447301", "447301", stdout=StringIO())
+
+        self.assertEqual(Title.objects.filter(kp_id="447301").count(), 1)
+        # Дубли ID схлопываются до запроса к API.
+        self.assertEqual(mock_fetch.call_count, 1)
+
+    def test_rerun_is_idempotent(self):
+        detail = self._detail("447301", "Начало", 2010)
+        with patch(
+            "apps.catalog.video_service_sync.fetch_video_by_kp",
+            return_value=detail,
+        ):
+            call_command("create_from_vibix", "447301", stdout=StringIO())
+            out = StringIO()
+            call_command("create_from_vibix", "447301", stdout=out)
+
+        self.assertEqual(Title.objects.filter(kp_id="447301").count(), 1)
+        self.assertIn("уже было: 1", out.getvalue())
+
+    def test_dry_run_writes_nothing(self):
+        detail = self._detail("447301", "Начало", 2010)
+        out = StringIO()
+        with patch(
+            "apps.catalog.video_service_sync.fetch_video_by_kp",
+            return_value=detail,
+        ):
+            call_command("create_from_vibix", "447301", "--dry-run", stdout=out)
+
+        self.assertFalse(Title.objects.filter(kp_id="447301").exists())
+        self.assertIn("ничего не записано", out.getvalue())
+
+    def test_no_ids_raises(self):
+        with self.assertRaises(CommandError):
+            call_command("create_from_vibix", stdout=StringIO())
+
+    @override_settings(VIBIX_API_TOKEN="", VIDEO_SERVICE_API_KEY="")
+    def test_missing_token_raises(self):
+        with self.assertRaises(CommandError):
+            call_command("create_from_vibix", "447301", stdout=StringIO())
