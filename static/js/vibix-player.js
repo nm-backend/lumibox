@@ -8,7 +8,12 @@
 (function () {
     'use strict';
 
-    var SDK_URL = 'https://graphicslab.io/sdk/v2/rendex-sdk.min.js';
+    /* Официальная инструкция Vibix даёт два адреса SDK: основной и резервный
+       alt-домен на случай недоступности первого. Пробуем по порядку. */
+    var SDK_URLS = [
+        'https://graphicslab.io/sdk/v2/rendex-sdk.min.js',
+        'https://alt.graphicslab.io/sdk/v2/rendex-sdk.min.js',
+    ];
     var LOAD_TIMEOUT_MS = 20000;
 
     function initPlayer(pane) {
@@ -90,12 +95,23 @@
             var existing = document.querySelector('script[data-lumibox-vibix-sdk]');
             if (existing) return;
 
+            appendSdkScript(0);
+        }
+
+        function appendSdkScript(index) {
             var script = document.createElement('script');
-            script.src = SDK_URL;
+            script.src = SDK_URLS[index];
             script.async = true;
             script.referrerPolicy = 'no-referrer';
             script.dataset.lumiboxVibixSdk = '1';
-            script.addEventListener('error', showError, { once: true });
+            script.addEventListener('error', function () {
+                script.remove();
+                if (index + 1 < SDK_URLS.length) {
+                    appendSdkScript(index + 1);
+                } else {
+                    showError();
+                }
+            }, { once: true });
             document.head.appendChild(script);
         }
 

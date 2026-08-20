@@ -29,7 +29,7 @@ databases:
 
 services:
   - type: web
-    name: lumibox-web
+    name: lumibox-test-new
     runtime: docker
     plan: free
     dockerfilePath: ./Dockerfile
@@ -76,7 +76,7 @@ services:
       - key: VIBIX_API_TOKEN
         sync: false
       - key: VIBIX_API_BASE_URL
-        value: https://api.vibix.org/api/v1
+        value: https://vibix.org/api/v1
       - key: VIDEO_SERVICE_TRAILER
         value: "true"
 
