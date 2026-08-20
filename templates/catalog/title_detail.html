@@ -395,7 +395,13 @@
                            версии: вкладки YouTube и своих файлов не рисуем,
                            чтобы на странице было ровно два плеера —
                            фильм и трейлер. {% endcomment %}
-                        <button class="player-tabs__tab player-tabs__tab--active" type="button" data-player-tab="external" role="tab" aria-selected="true">{% trans "Смотреть фильм" %}</button>
+                        <button class="player-tabs__tab player-tabs__tab--active" type="button" data-player-tab="external" role="tab" aria-selected="true">
+                            {% if external_player.force_trailer_only %}
+                                {% trans "Только трейлер" %}
+                            {% else %}
+                                {% trans "Смотреть фильм" %}
+                            {% endif %}
+                        </button>
                     {% elif has_youtube %}
                         {% comment %} Полная версия на YouTube — источник MVP,
                            когда внешний плеер не настроен. {% endcomment %}
@@ -569,6 +575,12 @@
                    страницы «Смотреть фильм», поэтому панель открыта. {% endcomment %}
                 <div class="player" data-player-pane="external"
                      {% if external_player.sync %}data-sync-room="{{ external_player.sync_room }}"{% if external_player.sync_user %} data-sync-user="{{ external_player.sync_user }}"{% endif %}{% endif %}>
+                    {% if external_player.force_trailer_only %}
+                        <div class="player__unavailable">
+                            <p>{% trans "Полная версия недоступна для просмотра." %}</p>
+                            <p class="player__unavailable-hint">{% trans "Доступен только трейлер." %}</p>
+                        </div>
+                    {% endif %}
                     <ins data-publisher-id="{{ external_player.publisher_id }}"
                          data-type="{{ external_player.type }}"
                          data-id="{{ external_player.id }}"

@@ -844,6 +844,34 @@
     display: none;
 }
 
+/* Сообщение когда контент недоступен для стриминга (только трейлер) */
+.player__unavailable {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-6);
+    text-align: center;
+    background: rgba(7, 8, 13, 0.92);
+    color: #fff;
+    z-index: 10;
+    border-radius: var(--radius-lg);
+}
+
+.player__unavailable p:first-child {
+    margin: 0 0 var(--space-2);
+    font-size: var(--text-md);
+    font-weight: 600;
+}
+
+.player__unavailable-hint {
+    margin: 0;
+    font-size: var(--text-sm);
+    color: var(--color-text-muted);
+}
+
 .player-panel {
     display: grid;
     gap: var(--space-3);

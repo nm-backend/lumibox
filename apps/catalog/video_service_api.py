@@ -296,3 +296,75 @@ def iter_video_links(api_key, *, limit=100, updated_from=None, years=None, max_p
             return
         page += 1
         time.sleep(PAGE_DELAY)
+
+
+# Кэш доступности видео: video_key -> (is_playable, timestamp)
+# video_key: "kp:{kp_id}" или "imdb:{imdb_id}" или "player:{player_id}"
+_video_availability_cache = {}
+_AVAILABILITY_CACHE_TTL = 60 * 60  # 1 час
+
+
+def check_video_playable(api_key, *, kp_id=None, imdb_id=None, player_id=None, player_type=None):
+    """
+    Проверяет, доступно ли видео для воспроизведения (есть ли лицензия на стриминг).
+
+    Возвращает кортеж: (is_playable: bool, video_detail: dict|None, error: str|None)
+
+    Логика:
+    1. Сначала проверяем кэш
+    2. Пытаемся получить детальную карточку через /videos/kp|imdb/{id}
+    3. Если видео есть в каталоге (200), но у него нет embed_code или он не играет — считаем недоступным
+    4. Кэшируем результат на 1 час
+
+    Примечание: API Vibix отдаёт 200 даже для нелицензированного контента.
+    Настоящая проверка лицензии возможна только клиентски (iframe загрузится или нет).
+    Здесь мы проверяем наличие видео в каталоге издателя.
+    """
+    # Формируем ключ кэша
+    if kp_id:
+        cache_key = f"kp:{kp_id}"
+        path = f"/videos/kp/{kp_id}"
+    elif imdb_id:
+        cache_key = f"imdb:{imdb_id}"
+        path = f"/videos/imdb/{imdb_id}"
+    elif player_id and player_type:
+        cache_key = f"player:{player_id}"
+        # Для player_id нужно использовать detail endpoint
+        path = f"/videos/kp/{player_id}"  # fallback, не используется для player_id напрямую
+    else:
+        return False, None, "Не указан идентификатор видео"
+
+    # Проверяем кэш
+    if cache_key in _video_availability_cache:
+        is_playable, detail, cached_at = _video_availability_cache[cache_key]
+        if time.time() - cached_at < _AVAILABILITY_CACHE_TTL:
+            return is_playable, detail, None
+
+    # Пытаемся получить детальную карточку
+    try:
+        if kp_id:
+            detail = fetch_video_by_kp(api_key, kp_id)
+        elif imdb_id:
+            detail = fetch_video_by_imdb(api_key, imdb_id)
+        else:
+            # Для player_id пытаемся через kp_id если есть
+            return False, None, "Неподдерживаемый тип идентификатора для проверки"
+
+        # Видео есть в каталоге — проверяем наличие embed_code
+        # (признак того, что плеер может его открыть)
+        embed_code = detail.get("embed_code")
+        if embed_code and 'data-id="' in embed_code:
+            # Видео есть в каталоге и есть embed_code — потенциально играемо
+            # Но реальная лицензия проверяется только клиентски
+            _video_availability_cache[cache_key] = (True, detail, time.time())
+            return True, detail, None
+        else:
+            _video_availability_cache[cache_key] = (False, detail, time.time())
+            return False, detail, "Нет embed_code в ответе API"
+
+    except VideoServiceNotFoundError:
+        _video_availability_cache[cache_key] = (False, None, time.time())
+        return False, None, "Видео не найдено в каталоге Vibix"
+    except VideoServiceAPIError as e:
+        # При ошибке API не кэшируем, возвращаем ошибку
+        return False, None, f"Ошибка API: {e}"

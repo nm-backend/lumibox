@@ -585,10 +585,12 @@ class TitleDetailView(DetailView):
         """
         Параметры тега внешнего плеера, если он включён для записи.
 
-        Плеер работает по внутреннему ID видео (player_id из API),
-        либо по ID Кинопоиска/IMDb — редактор заполняет одно из полей,
-        а SDK сервиса сам подтянет контент. Пустой publisher_id в настройках
-        отключает интеграцию целиком.
+        Плеер работает по kp_id / imdb_id (официальные идентификаторы):
+        SDK Vibix сам резолвит контент в браузере по этим ID, токен не нужен.
+        player_id (внутренний ID видео из API) используется ТОЛЬКО если это
+        действительно ID из Vibix API, а не kp_id/imdb_id.
+        Поле player_id заполняется командой sync_vibix при успешном матче.
+        Если редактор вручную вписал kp_id/imdb_id — используем их напрямую.
 
         Для сериала дополнительно передаются сезон и серия открытия
         (data-season/data-episodes): плеер стартует с той серии, на которой
@@ -602,8 +604,41 @@ class TitleDetailView(DetailView):
         publisher_id = settings.VIDEO_SERVICE_PUBLISHER_ID.strip()
         if not publisher_id:
             return None
+
+        # Сначала определяем тип и ID для плеера
+        player_type = None
+        player_id = None
+        if self.object.kp_id.strip():
+            player_type, player_id = "kp", self.object.kp_id.strip()
+        elif self.object.imdb_id.strip():
+            player_type, player_id = "imdb", self.object.imdb_id.strip()
+        elif self.object.player_id.strip():
+            embed_type = self.object.player_type.strip() or "movie"
+            if embed_type == "serial":
+                embed_type = "series"
+            player_type, player_id = embed_type, self.object.player_id.strip()
+        else:
+            return None
+
+        # Проверяем доступность контента для стриминга
+        is_playable = True
+        try:
+            from apps.catalog.video_service_api import check_video_playable, get_vibix_api_token
+            api_key = get_vibix_api_token()
+            if api_key:
+                if player_type == "kp":
+                    is_playable, _, _ = check_video_playable(api_key, kp_id=player_id)
+                elif player_type == "imdb":
+                    is_playable, _, _ = check_video_playable(api_key, imdb_id=player_id)
+        except Exception:
+            # При ошибках (сеть, API) считаем контент доступным (fail-open)
+            is_playable = True
+
+        # Определяем режим плеера на основе доступности
+        force_trailer_only = not is_playable and settings.VIDEO_SERVICE_TRAILER.strip() in ("true", "only")
+
         player = {
-            "publisher_id": publisher_id,
+            "publisher_id": settings.VIDEO_SERVICE_PUBLISHER_ID.strip(),
             "design": settings.VIDEO_SERVICE_DESIGN,
             # Цвета кастомизируемых дизайнов (1 и 6) — палитра сайта.
             # Пустые значения настройки выпиливают data-colorN из тега.
@@ -611,57 +646,42 @@ class TitleDetailView(DetailView):
                 n: getattr(settings, f"VIDEO_SERVICE_COLOR{n}").strip()
                 for n in range(1, 6)
             },
+            "type": player_type,
+            "id": player_id,
+            "is_playable": is_playable,
+            "force_trailer_only": force_trailer_only,
         }
-        # Приоритет — внутренний ID видео (player_id из API):
-        # это официальный формат тега (кнопка «Код» в кабинете даёт ровно
-        # такой). kp/imdb — запасные варианты, когда синхронизация ещё не
-        # успела проставить player_id, а редактор уже вписал внешний ID.
-        if self.object.player_id.strip():
-            embed_type = self.object.player_type.strip() or "movie"
-            # SDK принимает data-type="series", а не "serial" — исторические
-            # и ручные значения приводим к валидному виду.
-            if embed_type == "serial":
-                embed_type = "series"
-            player.update(
-                {"type": embed_type, "id": self.object.player_id.strip()}
-            )
-            if embed_type == "series":
+        # Приоритет — kp_id / imdb_id (официальные идентификаторы):
+        # SDK Vibix сам резолвит контент в браузере по этим ID, токен не нужен.
+        # player_id (внутренний ID видео из API) используем ТОЛЬКО если это
+        # действительно ID из Vibix API, а не kp_id/imdb_id.
+        # Поле player_id заполняется командой sync_vibix при успешном матче.
+        # Если редактор вручную вписал kp_id/imdb_id — используем их напрямую.
+
+        # data-trailer для kp/imdb: "true" — трейлер как запасной вариант
+        # (когда полного видео в каталоге сервиса нет), "only" — всегда трейлер.
+        # Если контент недоступен для стриминга, форсируем "only"
+        trailer = settings.VIDEO_SERVICE_TRAILER.strip()
+        if force_trailer_only:
+            player["trailer"] = "only"
+        elif player_type in ("kp", "imdb") and trailer:
+            player["trailer"] = trailer
+
+        # Озвучка и переключатели для всех типов (в т.ч. kp/imdb).
+        if player_type in ("movie", "series"):
+            voiceover_ids = self._external_voiceover_ids()
+            if voiceover_ids:
+                player["voiceover"] = voiceover_ids[0]
+                if len(voiceover_ids) == 1:
+                    player["voiceover_only"] = True
+            if player_type == "series":
                 opening = self._opening_episode()
                 if opening is not None:
                     player["season"] = opening.season_number
                     player["episodes"] = str(opening.episode_number)
-            voiceover_ids = self._external_voiceover_ids()
-            if voiceover_ids:
-                player["voiceover"] = voiceover_ids[0]
-                # data-voiceover-only: у записи одна озвучка — выбор в плеере
-                # не нужен, и сервису это можно сказать прямо.
-                if len(voiceover_ids) == 1:
-                    player["voiceover_only"] = True
-            self._apply_player_switches(player)
-            return player
-        # Для kp/imdb-типов плеер по документации поддерживает data-trailer:
-        # "true" — показывать трейлер, когда полное видео отсутствует
-        # в каталоге сервиса (вместо заглушки «контент не добавлен»),
-        # "only" — всегда только трейлер. Режим задаёт настройка
-        # VIDEO_SERVICE_TRAILER; пустое значение убирает параметр из тега.
-        trailer = settings.VIDEO_SERVICE_TRAILER.strip()
-        if self.object.kp_id.strip():
-            player.update(
-                {"type": "kp", "id": self.object.kp_id.strip()}
-            )
-            if trailer:
-                player["trailer"] = trailer
-            self._apply_player_switches(player)
-            return player
-        if self.object.imdb_id.strip():
-            player.update(
-                {"type": "imdb", "id": self.object.imdb_id.strip()}
-            )
-            if trailer:
-                player["trailer"] = trailer
-            self._apply_player_switches(player)
-            return player
-        return None
+
+        self._apply_player_switches(player)
+        return player
 
     def _apply_player_switches(self, player):
         """
