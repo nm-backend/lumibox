@@ -323,14 +323,10 @@ def check_video_playable(api_key, *, kp_id=None, imdb_id=None, player_id=None, p
     # Формируем ключ кэша
     if kp_id:
         cache_key = f"kp:{kp_id}"
-        path = f"/videos/kp/{kp_id}"
     elif imdb_id:
         cache_key = f"imdb:{imdb_id}"
-        path = f"/videos/imdb/{imdb_id}"
     elif player_id and player_type:
         cache_key = f"player:{player_id}"
-        # Для player_id нужно использовать detail endpoint
-        path = f"/videos/kp/{player_id}"  # fallback, не используется для player_id напрямую
     else:
         return False, None, "Не указан идентификатор видео"
 
