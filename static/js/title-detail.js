@@ -388,21 +388,30 @@
 
         /* Переключение серии во внешнем плеере Vibix.
 
-           Внешний плеер открывает серию параметрами season и episode[]
-           в адресе своего iframe (этот адрес SDK собирает из атрибутов
-           data-season/data-episodes тега <ins> в момент инициализации).
-           Заменить тег <ins> уже не получится: SDK заменяет его iframe-ом
-           при старте и новые теги не подхватывает. Поэтому адрес iframe
-           переписывается напрямую — это тот же интерфейс, которым SDK
-           передаёт серию плееру. */
+           До согласия зрителя SDK ещё не загружен: обновляем атрибуты <ins>,
+           и выбранная серия попадёт в первый iframe. После запуска SDK уже
+           заменил <ins> на iframe — тогда меняем те же query-параметры,
+           которыми SDK передаёт season/episode плееру. */
         function updateExternalPlayer(season, episode) {
             var pane = document.querySelector('[data-player-pane="external"]');
-            var frame = pane ? pane.querySelector('iframe') : null;
-            if (!frame || !season || !episode) return;
-            var url = new URL(frame.src, window.location.href);
-            url.searchParams.set('season', String(season));
-            url.searchParams.set('episode[]', String(episode));
-            frame.src = url.toString();
+            if (!pane || !season || !episode) return;
+            var frame = pane.querySelector('iframe');
+            if (!frame) {
+                var embed = pane.querySelector('ins[data-publisher-id]');
+                if (embed) {
+                    embed.dataset.season = String(season);
+                    embed.dataset.episodes = String(episode);
+                }
+                return;
+            }
+            try {
+                var url = new URL(frame.src, window.location.href);
+                url.searchParams.set('season', String(season));
+                url.searchParams.set('episode[]', String(episode));
+                frame.src = url.toString();
+            } catch (error) {
+                /* Невалидный src внешнего iframe не должен ломать выбор серий. */
+            }
         }
 
         /* Полная версия серии на YouTube: у каждой кнопки свой адрес

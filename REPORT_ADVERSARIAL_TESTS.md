@@ -1,84 +1,80 @@
-# Адверсариальное тестирование LumiBox — отчёт
+# Адверсариальное тестирование LumiBox — актуальный статус
 
-## Команда воспроизведения
+Дата повторной проверки: 20 августа 2026 года.
 
+## Результат
+
+Пять адверсариальных модулей теперь проходят полностью:
+
+```bash
+python manage.py test \
+  apps.catalog.tests.test_adversarial_api \
+  apps.catalog.tests.test_adversarial_auth \
+  apps.catalog.tests.test_adversarial_xss \
+  apps.catalog.tests.test_adversarial_validation \
+  apps.catalog.tests.test_adversarial_media
 ```
-$env:DJANGO_SETTINGS_MODULE="config.settings.development"
-python -m pytest apps/catalog/tests/test_adversarial_api.py apps/catalog/tests/test_adversarial_auth.py apps/catalog/tests/test_adversarial_xss.py apps/catalog/tests/test_adversarial_validation.py apps/catalog/tests/test_adversarial_media.py -q --no-header
-```
 
-Итог: **8 failed, 94 passed** (102 теста, 5 файлов).
+Итог: **102 теста, OK**.
 
-Легенда: `FAILED` — подтверждённая поломка (атака воспроизведена); `passed` — атака заблокирована защитой, тест фиксирует работу защиты.
+Полный набор проекта: **764 теста, OK, skipped=3**, покрытие **95%**.
 
----
+## Исправленные воспроизведённые дефекты
 
-## Подтверждённые баги (8)
+### API быстрой оценки
 
-### 1. Краш API рейтинга на не-dict JSON-теле → 500
-Файл: `apps/catalog/tests/test_adversarial_api.py`, класс `RateTitleViewCrashTests`:
-- `test_rate_title_500_on_json_array_body`
-- `test_rate_title_500_on_json_string_body`
-- `test_rate_title_500_on_json_number_body`
+- JSON-массив, строка или число вместо объекта больше не вызывают 500;
+- JSON `true` не преобразуется в оценку `1`;
+- строка `"9"` не преобразуется неявно в число;
+- принимается только JSON integer в диапазоне 1–10.
 
-Атака: `POST /api/v1/titles/<slug>/rate/` с телом `[1,2,3]` / `"x"` / `5` и `Content-Type: application/json`.
+Реализация: `RateRequestSerializer` использует строгое целочисленное поле,
+а `RateTitleView` валидирует запрос сериализатором.
 
-Поведение: `RateTitleView` (apps/api/v1/views.py) вызывает `request.data.get("rating")`; для списка/строки/числа это `AttributeError: 'list' object has no attribute 'get'` — в боевом окружении 500, в тесте исключение пере-поднимается тестовым клиентом.
+### Родитель комментария
 
-Ожидание: 400 Bad Request.
+- нельзя ответить на скрытый модератором комментарий;
+- нельзя указать родителя из другой записи каталога;
+- ошибочный parent возвращает 400 вместо создания корневого комментария.
 
-### 2. Логическая оценка как число → сохраняется рейтинг 1
-Файл: `apps/catalog/tests/test_adversarial_api.py`, `RateTitleViewCrashTests::test_rate_title_accepts_boolean_rating`
+Реализация: `CommentSerializer.validate_parent()`.
 
-Атака: `{"rating": true}` (JSON-логическое). В Python `bool` — подкласс `int`, `True == 1`, поэтому проверки `isinstance(rating, int)` и `1 <= rating <= 10` проходят, создаётся отзыв с рейтингом 1.
+### Прогресс просмотра
 
-Поведение: 200, отзыв создан. Ожидание: 400.
+`position` и `duration` ограничены диапазоном PostgreSQL
+`PositiveIntegerField` (`0..2^31-1`). Значение за пределами диапазона
+отклоняется до обращения к базе.
 
-### 3. Ответ на скрытый комментарий принимается
-Файл: `apps/catalog/tests/test_adversarial_api.py`, `CommentApiModerationTests::test_comment_reply_to_hidden_parent_allowed`
+### YouTube embed
 
-Атака: создаётся комментарий на публичном тайтле, родитель скрывается (status=HIDDEN), затем `POST /api/v1/titles/<slug>/comments/` с `{"text": ..., "parent": <pk>}`.
+Оба пути встраивания используют один строгий парсер 11-символьного YouTube
+ID. Короткий или повреждённый ID больше не превращается в битый iframe URL.
 
-Поведение: 201, комментарий-ответ создан — `save_comment` (apps/reviews/services.py) проверяет только принадлежность parent к тайтлу, не статус. Ожидание: 400 — отвечать на скрытое нельзя.
+## Защиты, которые продолжили работать
 
-### 6→4. Родитель с чужого тайтла молча сбрасывается
-Файл: `apps/catalog/tests/test_adversarial_api.py`, `CommentApiModerationTests::test_comment_cross_title_parent_silently_dropped`
+- авторизация и IDOR для отзывов, комментариев и личной библиотеки;
+- черновики не доступны через страницы и API;
+- stored/reflected XSS и выход из JSON-LD;
+- ограничения длины текста и шкалы рейтинга;
+- traversal и закрытый `private_media`;
+- корректные ответы Range `206/416`;
+- мусорные page/filter/order параметры не приводят к 500;
+- лимит регистраций и POST-only logout.
 
-Атака: `parent` указывает на комментарий другого тайтла. `save_comment` не находит совпадения и создаёт корневой комментарий, **молча теряя parent**.
+## Дополнительное усиление Vibix
 
-Поведение: 201 с `parent=null`. Ожидание: 400 — ошибка валидации, а не тихая потеря связи.
+В рамках повторной проверки также закрыты ошибки интеграции:
 
-### 5. Позиция прогресса без верхней границы
-Файл: `apps/catalog/tests/test_adversarial_api.py`, `WatchProgressBoundaryTests::test_watch_progress_accepts_absurd_position`
-
-Атака: `POST /api/v1/titles/<slug>/watch/` с `{"episode": <pk>, "position": 2**40}`.
-
-Поведение: 200, значение сохранено (на sqlite помещается, на PostgreSQL — DataError/переполнение). Ожидание: 400 — `EpisodeWatchRequestSerializer` не задаёт `max_value`.
-
-### 6. Валидация YouTube ID не совпадает между модулями
-Файл: `apps/catalog/tests/test_adversarial_api.py`, `EmbedValidationTests::test_short_youtube_id_rejected`
-
-Атака: `youtube.py` требует ровно 11 символов ID; `embeds._youtube` (apps/catalog/embeds.py) строит embed-URL для любого значения `v=` без проверки длины.
-
-Поведение: для `v=abc` возвращается embed-URL. Ожидание: None — невалидный ID отклоняется.
-
----
-
-## Заблокированные атаки (94 теста — защита работает)
-
-| Направление | Файл | Кол-во | Что проверено |
-|---|---|---|---|
-| API-границы | test_adversarial_api.py | 29 | rating 0/11/дробь/строка, текст 2001, parent 999999, page garbage, поиск-лимиты, черновики скрыты, сортировка-мусор, unknown-host embed, protocol-relative embed, дробная позиция (400) |
-| Авторизация | test_adversarial_auth.py | 21 | guest→302 на все мутации, IDOR (web 404 / API 403), logout GET→405, rate limit регистрации 429, дубль email (в т.ч. с регистром), черновики→404 везде |
-| XSS | test_adversarial_xss.py | 14 | stored XSS (имя тайтла, отзыв, комментарий, username, bio, эпизод, жанр), JSON-LD breakout `</script>`, og-meta, reflected XSS в поиске, attribute breakout |
-| Валидация | test_adversarial_validation.py | 15 | rating 0/11/«мусор» (web 400), текст 2001 (web+API), page/sort/year garbage, дедупликация отзывов (обновление, не дубль) |
-| Медиа | test_adversarial_media.py | 15 | traversal (.., %2e%2e, обратный слэш, абсолютный путь) → 404, private_media → 404, Range 206/416/200, огромный Range без 500 |
-
-## Примечания
-
-- `test_watch_progress_truncates_float_position` — сериализатор **отклоняет** дробную позицию (400): тихого усечения нет, защита работает.
-- DRF-пагинация: `?page=999999999` и `?page=abc` → 404, `?release_year=abc` → 400 — мусорные параметры не валят каталог.
-- Формы отзывов/комментариев возвращают 400 на невалидные данные (а не перерисовку с 200).
-- Emails нормализуются в lowercase на уровне менеджера + формы (регистр-дубль невозможен).
-- Rate limit регистрации: 10 попыток проходят, 11-я — 429.
-- В тестах клиента `raise_request_exception=False` не подавляет повторный подъём исключения (Django test client) — краш-тесты фиксируют падение через сам факт исключения; в проде это 500.
+- auth redirect Vibix не маскируется под `404 video not found`;
+- 401/403/404/422 имеют разные исключения;
+- не-JSON и JSON не в форме объекта отклоняются;
+- внешний ID проверяется до формирования URL;
+- страница фильма не вызывает server API, а browser SDK загружается только после клика;
+- publisher/design/trailer и внешние ID валидируются до формирования embed;
+- `player_id` заполняется только из `embed_code`, не из API resource ID;
+- неоднозначное совпадение названия и года пропускается;
+- watermark синхронизации исключает потерю обновлений;
+- dry-run не создаёт служебную строку состояния;
+- серии запрашиваются только для записей типа `series`, повторный запуск добавляет новые сезоны;
+- исправлен отчёт `sync_vibix --voiceovers`, добавлен `sync_vibix --episodes`;
+- WatchParty не подключается до отдельного origin/privacy review.

@@ -818,20 +818,56 @@
     background: #000;
 }
 
-/* Внешний плеер Vibix: SDK заменяет тег <ins> на iframe не мгновенно.
-   Пока iframe не появился, показываем спиннер поверх чёрной панели —
-   иначе зритель видит пустой прямоугольник и думает, что плеер сломан.
-   :has() поддерживается всеми современными браузерами; при его
-   отсутствии спиннер просто остаётся под кадром плеера. */
+/* Vibix загружается только по действию зрителя. До нажатия поверх пустого
+   <ins> лежит понятная privacy-граница; во время загрузки остаются статус и
+   спиннер. После появления iframe локальный JS скрывает gate без :has(),
+   поэтому состояние одинаково работает и в старых браузерах. */
 .player[data-player-pane="external"] {
     position: relative;
 }
 
-.player[data-player-pane="external"]::after {
-    content: "";
+.vibix-player__gate {
     position: absolute;
+    z-index: 2;
     inset: 0;
-    margin: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-3);
+    padding: var(--space-5);
+    text-align: center;
+    background:
+        radial-gradient(circle at 50% 45%, rgba(var(--color-accent-rgb), 0.12), transparent 45%),
+        #07080d;
+}
+
+.vibix-player__gate[hidden] {
+    display: none;
+}
+
+.vibix-player__load {
+    min-width: min(260px, 100%);
+}
+
+.vibix-player__notice,
+.vibix-player__status {
+    max-width: 520px;
+    margin: 0;
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
+}
+
+.vibix-player__status:empty {
+    display: none;
+}
+
+.player--vibix-loading .vibix-player__load {
+    visibility: hidden;
+}
+
+.player--vibix-loading .vibix-player__gate::before {
+    content: "";
     width: 44px;
     height: 44px;
     border: 3px solid rgba(255, 255, 255, 0.15);
@@ -840,36 +876,8 @@
     animation: vplayer-spin 0.9s linear infinite;
 }
 
-.player[data-player-pane="external"]:has(iframe)::after {
-    display: none;
-}
-
-/* Сообщение когда контент недоступен для стриминга (только трейлер) */
-.player__unavailable {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: var(--space-6);
-    text-align: center;
-    background: rgba(7, 8, 13, 0.92);
-    color: #fff;
-    z-index: 10;
-    border-radius: var(--radius-lg);
-}
-
-.player__unavailable p:first-child {
-    margin: 0 0 var(--space-2);
-    font-size: var(--text-md);
-    font-weight: 600;
-}
-
-.player__unavailable-hint {
-    margin: 0;
-    font-size: var(--text-sm);
-    color: var(--color-text-muted);
+.player--vibix-error .vibix-player__status {
+    color: #ffb4ab;
 }
 
 .player-panel {

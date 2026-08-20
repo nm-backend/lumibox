@@ -11,6 +11,7 @@
 from django.test import TestCase, override_settings
 from django.urls import reverse
 
+from apps.catalog.models import Title
 from apps.catalog.tests.test_episodes import create_source
 from apps.core.test_factories import create_genre, create_title
 
@@ -34,19 +35,18 @@ class MobileDrawerLinksTests(TestCase):
         self.assertIn(reverse("catalog:premieres"), drawer)
         self.assertIn(reverse("catalog:top"), drawer)
 
-    def test_covers_every_type_from_the_top_navigation(self):
+    def test_covers_every_supported_type_without_extra_links(self):
         """
         На ≤900px строка разделов скрыта, и её пункты обязаны быть здесь:
         иначе тип фильма перестаёт существовать для телефона.
         """
         drawer = self._drawer()
+        supported_types = [value for value, _label in Title.Type.choices]
 
-        for value in ("movie", "series", "cartoon", "tv_show"):
+        for value in supported_types:
             with self.subTest(type=value):
                 self.assertIn(f"?type={value}", drawer)
-
-    def test_has_no_anime(self):
-        self.assertNotIn("anime", self._drawer())
+        self.assertEqual(drawer.count("?type="), len(supported_types))
 
     def _drawer(self):
         """Кусок разметки с выдвижным меню — по нему и сверяем ссылки."""

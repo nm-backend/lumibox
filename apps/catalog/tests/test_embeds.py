@@ -14,20 +14,20 @@ from apps.catalog.embeds import get_embed_url
 class KnownHostsTests(SimpleTestCase):
     def test_youtube_watch_link(self):
         self.assertEqual(
-            get_embed_url("https://www.youtube.com/watch?v=abc123"),
-            "https://www.youtube.com/embed/abc123",
+            get_embed_url("https://www.youtube.com/watch?v=dQw4w9WgXcQ"),
+            "https://www.youtube.com/embed/dQw4w9WgXcQ",
         )
 
     def test_youtube_short_link(self):
         self.assertEqual(
-            get_embed_url("https://youtu.be/abc123"),
-            "https://www.youtube.com/embed/abc123",
+            get_embed_url("https://youtu.be/dQw4w9WgXcQ"),
+            "https://www.youtube.com/embed/dQw4w9WgXcQ",
         )
 
     def test_youtube_already_embed(self):
         self.assertEqual(
-            get_embed_url("https://www.youtube.com/embed/abc123"),
-            "https://www.youtube.com/embed/abc123",
+            get_embed_url("https://www.youtube.com/embed/dQw4w9WgXcQ"),
+            "https://www.youtube.com/embed/dQw4w9WgXcQ",
         )
 
     def test_vimeo(self):
@@ -71,8 +71,8 @@ class SecurityTests(SimpleTestCase):
     def test_subdomain_of_trusted_host_allowed(self):
         """Поддомен доверенного хоста — легитимен (m.youtube.com)."""
         self.assertEqual(
-            get_embed_url("https://m.youtube.com/watch?v=abc123"),
-            "https://www.youtube.com/embed/abc123",
+            get_embed_url("https://m.youtube.com/watch?v=dQw4w9WgXcQ"),
+            "https://www.youtube.com/embed/dQw4w9WgXcQ",
         )
 
     def test_vimeo_non_numeric_id_rejected(self):

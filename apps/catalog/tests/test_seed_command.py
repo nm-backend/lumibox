@@ -11,7 +11,7 @@ from unittest import mock
 
 from django.core.management import call_command
 from django.core.management.base import CommandError
-from django.test import TestCase
+from django.test import TestCase, override_settings
 
 from apps.catalog.models import Country, Genre, Title
 from apps.catalog.seed_data import COUNTRIES, GENRES, TITLES
@@ -39,19 +39,22 @@ class SeedCatalogTests(TestCase):
         self.assertGreater(title.genres.count(), 0)
         self.assertGreater(title.countries.count(), 0)
 
-    def test_demo_movie_has_real_ids_for_vibix_player(self):
-        """После первого запуска «Социальная сеть» сразу открывается через Vibix."""
+    @override_settings(VIDEO_SERVICE_PUBLISHER_ID="678503345")
+    def test_demo_movie_uses_account_safe_kp_fallback(self):
+        """Демоданные не поставляют чужой account-specific player ID."""
         self.seed()
 
         title = Title.objects.get(slug="sotsialnaya-set-2010")
-        self.assertEqual(title.player_id, "4951")
-        self.assertEqual(title.player_type, "movie")
+        self.assertEqual(title.player_id, "")
+        self.assertEqual(title.player_type, "")
+        self.assertEqual(title.kp_id, "427198")
 
         response = self.client.get(title.get_absolute_url())
         self.assertContains(response, 'data-publisher-id="678503345"')
-        self.assertContains(response, 'data-type="movie"')
-        self.assertContains(response, 'data-id="4951"')
-        self.assertContains(response, "rendex-sdk.min.js")
+        self.assertContains(response, 'data-type="kp"')
+        self.assertContains(response, 'data-id="427198"')
+        self.assertContains(response, "vibix-player.js")
+        self.assertContains(response, "data-vibix-load")
 
     def test_drafts_stay_drafts(self):
         """

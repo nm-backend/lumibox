@@ -9,7 +9,9 @@
 возвращаем None, и страница покажет обычную кнопку со ссылкой наружу.
 """
 
-from urllib.parse import parse_qs, urlparse
+from urllib.parse import urlparse
+
+from apps.catalog.youtube import parse_youtube_id
 
 # Только https: URLField пропускает и http, но встраивать незащищённый
 # фрейм на https-странице бессмысленно — браузер его заблокирует.
@@ -28,16 +30,10 @@ def _host_matches(host, domain):
 
 
 def _youtube(parsed):
-    if _host_matches(parsed.hostname or "", "youtu.be"):
-        video_id = parsed.path.strip("/").split("/")[0]
-    elif _host_matches(parsed.hostname or "", "youtube.com"):
-        if parsed.path.startswith("/embed/"):
-            video_id = parsed.path.split("/embed/")[1].strip("/").split("/")[0]
-        else:
-            video_id = parse_qs(parsed.query).get("v", [""])[0]
-    else:
-        return None
-
+    # Тот же строгий 11-символьный ID, что у основного YouTube-плеера.
+    # Два разных парсера раньше расходились: video_url отклонял v=abc,
+    # а PlaybackSource строил из него заведомо битый iframe.
+    video_id = parse_youtube_id(parsed.geturl())
     return f"{EMBED_SCHEME}://www.youtube.com/embed/{video_id}" if video_id else None
 
 

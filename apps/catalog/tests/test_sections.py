@@ -321,14 +321,10 @@ class PlaybackSourceFilterDataTests(TestCase):
         self.assertEqual(PlaybackSource.objects.count(), 2)
 
 
-class RemovedAnimeTypeTests(TestCase):
-    """
-    Тип «Аниме» убран из каталога по решению владельца сайта.
+class TitleTypeContractTests(TestCase):
+    """Каталог предлагает только четыре поддерживаемых типа записей."""
 
-    Проверяем не только отсутствие пункта в меню: тип раздавался ссылками
-    вида ?type=anime, и они разошлись по закладкам и поисковикам. Такая
-    ссылка не должна ронять страницу — только перестать что-либо отбирать.
-    """
+    supported_types = {"movie", "series", "cartoon", "tv_show"}
 
     def setUp(self):
         cache.clear()
@@ -337,17 +333,23 @@ class RemovedAnimeTypeTests(TestCase):
     def tearDown(self):
         cache.clear()
 
-    def test_type_is_not_offered_anywhere(self):
-        self.assertNotIn("anime", dict(Title.Type.choices))
+    def test_model_offers_only_supported_types(self):
+        self.assertEqual(set(dict(Title.Type.choices)), self.supported_types)
 
-    def test_navigation_does_not_mention_anime(self):
+    def test_navigation_uses_only_supported_types(self):
         response = self.client.get(reverse("catalog:home"))
+        navigation_types = {
+            url.split("type=", 1)[1]
+            for _label, url, _is_active in response.context["lb_topnav"]
+            if "type=" in url
+        }
 
-        self.assertNotContains(response, "Аниме")
-        self.assertNotContains(response, "type=anime")
+        self.assertEqual(navigation_types, self.supported_types)
 
-    def test_stale_link_opens_catalog_instead_of_failing(self):
-        response = self.client.get(reverse("catalog:title_list"), {"type": "anime"})
+    def test_unknown_type_opens_catalog_instead_of_failing(self):
+        response = self.client.get(
+            reverse("catalog:title_list"), {"type": "unsupported"}
+        )
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(names(response), ["Обычный фильм"])

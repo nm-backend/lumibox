@@ -1,6 +1,6 @@
 from django.core.cache import cache
 from django.db import connection
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
 
@@ -199,6 +199,7 @@ class TitleListViewTests(TestCase):
         self.assertEqual(year_queries, [])
 
 
+@override_settings(VIDEO_SERVICE_PUBLISHER_ID="678503345")
 class TitleDetailViewTests(TestCase):
     def test_published_title_opens(self):
         title = create_title()
@@ -243,6 +244,12 @@ class TitleDetailViewTests(TestCase):
         self.assertContains(response, 'data-id="tt0111161"')
         self.assertNotContains(response, 'data-type="kp"')
 
+    def test_external_player_normalizes_uppercase_imdb(self):
+        title = create_title(imdb_id="TT0111161")
+        response = self.client.get(title.get_absolute_url())
+        self.assertContains(response, 'data-type="imdb"')
+        self.assertContains(response, 'data-id="tt0111161"')
+
     def test_external_player_trailer_off_by_setting(self):
         title = create_title(kp_id="326")
         with self.settings(VIDEO_SERVICE_TRAILER=""):
@@ -255,6 +262,12 @@ class TitleDetailViewTests(TestCase):
         with self.settings(VIDEO_SERVICE_TRAILER="only"):
             response = self.client.get(title.get_absolute_url())
         self.assertContains(response, 'data-trailer="only"')
+
+    def test_external_player_drops_unknown_trailer_mode(self):
+        title = create_title(kp_id="326")
+        with self.settings(VIDEO_SERVICE_TRAILER="unexpected"):
+            response = self.client.get(title.get_absolute_url())
+        self.assertNotContains(response, "data-trailer=")
 
     def test_external_player_prefers_internal_id_over_kp(self):
         title = create_title(kp_id="447301", player_id="4427", player_type="movie")
@@ -346,29 +359,14 @@ class TitleDetailViewTests(TestCase):
             response = self.client.get(title.get_absolute_url())
         self.assertContains(response, 'data-autoplay="true"')
 
-    def test_external_player_watch_party_off_by_default(self):
+    def test_external_player_does_not_connect_watch_party(self):
+        """WatchParty не входит в безопасное ядро даже при старом флаге."""
         title = create_title(player_id="4427")
-        response = self.client.get(title.get_absolute_url())
+        with self.settings(VIDEO_SERVICE_WATCH_PARTY=True):
+            response = self.client.get(title.get_absolute_url())
         self.assertNotContains(response, "data-sync=")
         self.assertNotContains(response, "sync.videoframe2.com")
         self.assertNotContains(response, "watch-party.js")
-
-    def test_external_player_watch_party_when_enabled(self):
-        title = create_title(player_id="4427", slug="igra-v-kalmara-2021")
-        with self.settings(VIDEO_SERVICE_WATCH_PARTY=True):
-            response = self.client.get(title.get_absolute_url())
-        self.assertContains(response, 'data-sync="true"')
-        self.assertContains(response, 'data-sync-room="igra-v-kalmara-2021"')
-        self.assertContains(response, "sync.videoframe2.com/sync-lib.js")
-        self.assertContains(response, "watch-party.js")
-
-    def test_external_player_watch_party_passes_username(self):
-        user = create_user()
-        title = create_title(player_id="4427")
-        self.client.force_login(user)
-        with self.settings(VIDEO_SERVICE_WATCH_PARTY=True):
-            response = self.client.get(title.get_absolute_url())
-        self.assertContains(response, f'data-sync-user="{user.username}"')
 
     def test_external_player_renders_design_and_colors(self):
         title = create_title(kp_id="326")
@@ -376,6 +374,13 @@ class TitleDetailViewTests(TestCase):
         self.assertContains(response, 'data-design="1"')
         self.assertContains(response, 'data-color1="#ff8a1f"')
         self.assertContains(response, 'data-color5="#0b0b0c"')
+
+    def test_external_player_rejects_unknown_design(self):
+        title = create_title(kp_id="326")
+        with self.settings(VIDEO_SERVICE_DESIGN="99"):
+            response = self.client.get(title.get_absolute_url())
+        self.assertContains(response, 'data-design="1"')
+        self.assertNotContains(response, 'data-design="99"')
 
     def test_external_player_drops_empty_color_settings(self):
         title = create_title(player_id="4427")
@@ -400,7 +405,7 @@ class TitleDetailViewTests(TestCase):
         title = create_title()
         response = self.client.get(title.get_absolute_url())
         self.assertNotContains(response, "data-publisher-id")
-        self.assertNotContains(response, "rendex-sdk.min.js")
+        self.assertNotContains(response, "vibix-player.js")
         self.assertNotContains(response, 'data-player-tab="external"')
 
     def test_external_player_disabled_when_publisher_id_empty(self):
@@ -408,6 +413,13 @@ class TitleDetailViewTests(TestCase):
         with self.settings(VIDEO_SERVICE_PUBLISHER_ID=""):
             response = self.client.get(title.get_absolute_url())
         self.assertNotContains(response, "data-publisher-id")
+
+    def test_external_player_disabled_for_invalid_publisher_id(self):
+        title = create_title(kp_id="326")
+        with self.settings(VIDEO_SERVICE_PUBLISHER_ID="not-a-number"):
+            response = self.client.get(title.get_absolute_url())
+        self.assertNotContains(response, "data-publisher-id")
+        self.assertNotContains(response, "vibix-player.js")
 
 
 class ReferencePagesTests(TestCase):

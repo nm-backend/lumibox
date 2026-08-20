@@ -29,7 +29,9 @@ from apps.catalog.video_service_api import (
     VIDEO_SERVICE_API_BASE,
     VIDEO_SERVICE_SERIALS_API_BASE,
     VideoServiceAPIError,
+    VideoServiceAuthenticationError,
     VideoServiceNotFoundError,
+    VideoServiceValidationError,
     fetch_categories,
     fetch_countries,
     fetch_genres,
@@ -44,6 +46,7 @@ from apps.catalog.video_service_api import (
     iter_video_links,
 )
 from apps.catalog.video_service_sync import (
+    TitleMatchIndex,
     _filter_years,
     match_item,
     normalize_name,
@@ -53,6 +56,24 @@ from apps.catalog.video_service_sync import (
 )
 from apps.catalog.video_service_voiceover_sync import import_voiceovers_from_service, sync_voiceover_ids
 from apps.core.test_factories import create_title
+
+
+def make_title_index(*titles):
+    by_name = {}
+    by_kp = {}
+    by_imdb = {}
+    for title in titles:
+        for name in (getattr(title, "name", ""), getattr(title, "original_name", "")):
+            normalized = normalize_name(name)
+            if normalized:
+                by_name.setdefault(normalized, []).append(title)
+        kp_id = str(getattr(title, "kp_id", "") or "")
+        imdb_id = str(getattr(title, "imdb_id", "") or "").lower()
+        if kp_id:
+            by_kp.setdefault(kp_id, []).append(title)
+        if imdb_id:
+            by_imdb.setdefault(imdb_id, []).append(title)
+    return TitleMatchIndex(list(titles), by_name, by_kp, by_imdb)
 
 
 class NormalizeNameTests(TestCase):
@@ -72,47 +93,66 @@ class NormalizeNameTests(TestCase):
 
 class MatchItemTests(TestCase):
     def test_matches_by_russian_name(self):
-        index = {"начало": [create_title(name="Начало", release_year=2010)]}
+        title = create_title(name="Начало", release_year=2010)
         item = {"name": "Начало", "year": "2010", "kp_id": 1, "imdb_id": "tt1"}
-        self.assertIsNotNone(match_item(index, item))
+        self.assertEqual(match_item(make_title_index(title), item), title)
 
     def test_matches_by_original_name(self):
         title = create_title(name="Начало", original_name="Inception", release_year=2010)
-        index = {"inception": [title]}
         item = {"name_eng": "Inception", "year": 2010}
-        self.assertEqual(match_item(index, item), title)
+        self.assertEqual(match_item(make_title_index(title), item), title)
+
+    def test_external_id_has_priority_over_name(self):
+        exact = create_title(name="Другое название", release_year=2010, kp_id="447301")
+        create_title(name="Начало", release_year=2010)
+
+        result = match_item(
+            make_title_index(*Title.objects.all()),
+            {"name": "Начало", "year": 2010, "kp_id": 447301},
+        )
+
+        self.assertEqual(result, exact)
 
     def test_year_mismatch_skips(self):
-        index = {"начало": [create_title(name="Начало", release_year=2010)]}
+        title = create_title(name="Начало", release_year=2010)
         item = {"name": "Начало", "year": "2015"}
-        self.assertIsNone(match_item(index, item))
+        self.assertIsNone(match_item(make_title_index(title), item))
+
+    def test_ambiguous_name_and_year_skips(self):
+        first = create_title(name="Одинаковый", release_year=2010)
+        second = create_title(name="Одинаковый", release_year=2010)
+
+        self.assertIsNone(
+            match_item(
+                make_title_index(first, second),
+                {"name": "Одинаковый", "year": 2010},
+            )
+        )
 
     def test_no_name_match(self):
-        index = {"начало": [create_title(name="Начало", release_year=2010)]}
+        title = create_title(name="Начало", release_year=2010)
         item = {"name": "Совсем другой фильм", "year": "2010"}
-        self.assertIsNone(match_item(index, item))
+        self.assertIsNone(match_item(make_title_index(title), item))
 
 
 class FilterYearsTests(TestCase):
     def test_all_years_known_returns_sorted_set(self):
-        index = {
-            "a": [SimpleNamespace(release_year=2010)],
-            "b": [
-                SimpleNamespace(release_year=2021),
-                SimpleNamespace(release_year=2010),
-            ],
-        }
+        index = make_title_index(
+            SimpleNamespace(release_year=2010, pk=1),
+            SimpleNamespace(release_year=2021, pk=2),
+            SimpleNamespace(release_year=2010, pk=3),
+        )
         self.assertEqual(_filter_years(index), [2010, 2021])
 
     def test_unknown_year_disables_filter(self):
-        index = {
-            "a": [SimpleNamespace(release_year=2010)],
-            "b": [SimpleNamespace(release_year=None)],
-        }
+        index = make_title_index(
+            SimpleNamespace(release_year=2010, pk=1),
+            SimpleNamespace(release_year=None, pk=2),
+        )
         self.assertIsNone(_filter_years(index))
 
     def test_empty_index_disables_filter(self):
-        self.assertIsNone(_filter_years({}))
+        self.assertIsNone(_filter_years(TitleMatchIndex([], {}, {}, {})))
 
 
 @override_settings(VIBIX_API_TOKEN="test-key", VIDEO_SERVICE_API_KEY="test-key")
@@ -140,6 +180,10 @@ class SyncVideoServiceIdsTests(TestCase):
                 "year": "2010",
                 "kp_id": 27205,
                 "imdb_id": "tt1375666",
+                "embed_code": (
+                    'data-publisher-id="678503345" data-type="movie" '
+                    'data-id="4427"'
+                ),
             }
         ]
         with patch(
@@ -181,7 +225,7 @@ class SyncVideoServiceIdsTests(TestCase):
         self.assertEqual(self.movie.player_type, "series")
         self.assertEqual(stats["player_filled"], 1)
 
-    def test_player_id_falls_back_to_item_id_without_embed_code(self):
+    def test_player_id_stays_empty_without_embed_code(self):
         items = [
             {"id": 4427, "name": "Inception", "type": "movie", "year": "2010"}
         ]
@@ -191,8 +235,8 @@ class SyncVideoServiceIdsTests(TestCase):
             stats = sync_video_service_ids()
 
         self.movie.refresh_from_db()
-        self.assertEqual(self.movie.player_id, "4427")
-        self.assertEqual(stats["player_filled"], 1)
+        self.assertEqual(self.movie.player_id, "")
+        self.assertEqual(stats["player_filled"], 0)
 
     def test_does_not_clobber_manual_kp_id(self):
         self.movie.kp_id = "999"
@@ -256,6 +300,10 @@ class SyncVideoServiceIdsTests(TestCase):
                 "name": "Игра в кальмара",
                 "type": "serial",
                 "year": "2021",
+                "embed_code": (
+                    'data-publisher-id="678503345" data-type="serial" '
+                    'data-id="8264"'
+                ),
             }
         ]
         with patch(
@@ -277,8 +325,7 @@ class SyncVideoServiceIdsTests(TestCase):
 
         self.movie.refresh_from_db()
         self.assertEqual(self.movie.kp_id, "")
-        state = VideoServiceSyncState.get_solo()
-        self.assertIsNone(state.last_updated_from)
+        self.assertFalse(VideoServiceSyncState.objects.exists())
 
     def test_incremental_uses_stored_updated_from(self):
         state = VideoServiceSyncState.get_solo()
@@ -484,6 +531,7 @@ class SyncSeriesEpisodesTests(TestCase):
     def setUp(self):
         self.serial = create_title(
             name="Игра в кальмара",
+            type=Title.Type.SERIES,
             release_year=2021,
             kp_id="4402886",
             player_type="series",
@@ -596,7 +644,12 @@ class SyncSeriesEpisodesTests(TestCase):
         self.assertEqual(numbers, [1, 2])
 
     def test_limit_caps_processed_titles(self):
-        second = create_title(name="Другой сериал", release_year=2022, kp_id="777")
+        second = create_title(
+            name="Другой сериал",
+            type=Title.Type.SERIES,
+            release_year=2022,
+            kp_id="777",
+        )
         with patch(
             "apps.catalog.video_service_sync.fetch_serial_by_kp",
             return_value=self.seasons_payload,
@@ -607,7 +660,7 @@ class SyncSeriesEpisodesTests(TestCase):
         self.assertEqual(second.episodes.count(), 0)
 
     def test_skips_titles_without_external_ids(self):
-        create_title(name="Без ID", release_year=2023)
+        create_title(name="Без ID", type=Title.Type.SERIES, release_year=2023)
         with patch(
             "apps.catalog.video_service_sync.fetch_serial_by_kp",
             return_value=self.seasons_payload,
@@ -617,7 +670,18 @@ class SyncSeriesEpisodesTests(TestCase):
         self.assertEqual(stats["processed"], 1)
         fetch.assert_called_once()
 
-    def test_skips_titles_that_already_have_episodes(self):
+    def test_movies_are_not_sent_to_serial_endpoint(self):
+        create_title(name="Фильм с ID", type=Title.Type.MOVIE, kp_id="123")
+        with patch(
+            "apps.catalog.video_service_sync.fetch_serial_by_kp",
+            return_value=self.seasons_payload,
+        ) as fetch:
+            stats = sync_series_episodes()
+
+        self.assertEqual(stats["processed"], 1)
+        fetch.assert_called_once_with("test-key", "4402886")
+
+    def test_existing_series_is_refreshed_for_new_episodes(self):
         Episode.objects.create(
             title=self.serial, season_number=1, episode_number=1, name="Пилот"
         )
@@ -627,8 +691,10 @@ class SyncSeriesEpisodesTests(TestCase):
         ) as fetch:
             stats = sync_series_episodes()
 
-        self.assertEqual(stats["processed"], 0)
-        fetch.assert_not_called()
+        self.assertEqual(stats["processed"], 1)
+        self.assertEqual(stats["created"], 2)
+        self.assertEqual(self.serial.episodes.count(), 3)
+        fetch.assert_called_once_with("test-key", "4402886")
 
     def test_no_key_raises(self):
         with override_settings(VIBIX_API_TOKEN="", VIDEO_SERVICE_API_KEY=""):
@@ -644,7 +710,12 @@ class SyncEpisodesCommandTests(TestCase):
                 call_command("sync_episodes", dry_run=True)
 
     def test_reports_statistics(self):
-        create_title(name="Сериал", release_year=2021, kp_id="4402886")
+        create_title(
+            name="Сериал",
+            type=Title.Type.SERIES,
+            release_year=2021,
+            kp_id="4402886",
+        )
         payload = {"seasons": [{"name": "1", "series": [{"id": 1, "name": "Пилот"}]}]}
         out = StringIO()
         with patch(
@@ -677,6 +748,28 @@ class VideoServiceAPIClientTests(TestCase):
         self.assertEqual(meta["total"], 1)
         call_kwargs = get.call_args.kwargs
         self.assertEqual(call_kwargs["headers"]["Authorization"], "Bearer secret-key")
+        self.assertEqual(call_kwargs["headers"]["Accept"], "application/json")
+        self.assertFalse(call_kwargs["allow_redirects"])
+
+    def test_login_redirect_is_authentication_error(self):
+        with patch("apps.catalog.video_service_api.requests.get") as get:
+            get.return_value = self._resp(302, headers={"Location": "/login"})
+            with self.assertRaises(VideoServiceAuthenticationError):
+                fetch_video_links("expired-token")
+
+        self.assertEqual(get.call_count, 1)
+
+    def test_unauthorized_is_authentication_error(self):
+        with patch("apps.catalog.video_service_api.requests.get") as get:
+            get.return_value = self._resp(401)
+            with self.assertRaises(VideoServiceAuthenticationError):
+                fetch_video_links("expired-token")
+
+    def test_non_object_json_is_rejected(self):
+        with patch("apps.catalog.video_service_api.requests.get") as get:
+            get.return_value = self._resp(200, [1, 2, 3])
+            with self.assertRaises(VideoServiceAPIError):
+                fetch_video_links("secret-key")
 
     def test_fetch_sends_year_filter_as_list(self):
         payload = {"success": True, "data": [], "meta": {"last_page": 1, "total": 0}}
@@ -697,8 +790,10 @@ class VideoServiceAPIClientTests(TestCase):
         self.assertNotIn("year[]", get.call_args.kwargs["params"])
 
     def test_http_error_raises(self):
-        with patch("apps.catalog.video_service_api.requests.get") as get:
-            get.return_value.status_code = 500
+        with patch("apps.catalog.video_service_api.time.sleep"), patch(
+            "apps.catalog.video_service_api.requests.get"
+        ) as get:
+            get.return_value = self._resp(500)
             with self.assertRaises(VideoServiceAPIError):
                 fetch_video_links("secret-key")
 
@@ -840,6 +935,15 @@ class VideoServiceAPIClientTests(TestCase):
             with self.assertRaises(VideoServiceNotFoundError):
                 fetch_video_by_imdb("secret-key", "tt2543164")
 
+    def test_invalid_external_ids_are_rejected_before_http(self):
+        with patch("apps.catalog.video_service_api.requests.get") as get:
+            with self.assertRaises(VideoServiceValidationError):
+                fetch_video_by_kp("secret-key", "../../login")
+            with self.assertRaises(VideoServiceValidationError):
+                fetch_video_by_imdb("secret-key", "not-an-imdb-id")
+
+        get.assert_not_called()
+
 
 class VideoServiceReferenceListsTests(TestCase):
     """Списковые эндпоинты-справочники: URL, Bearer, разбор обёртки."""
@@ -877,7 +981,7 @@ class VideoServiceReferenceListsTests(TestCase):
 
     def test_fetch_reference_lists(self):
         cases = [
-            ("/videos/categories", fetch_categories, [{"id": 100, "name": "Аниме"}]),
+            ("/videos/categories", fetch_categories, [{"id": 100, "name": "Фильм"}]),
             ("/videos/genres", fetch_genres, [{"id": 100, "name": "комедия", "name_eng": "comedy"}]),
             ("/videos/countries", fetch_countries, [{"id": 100, "name": "Россия", "code": "RU"}]),
             ("/videos/tags", fetch_tags, [{"id": 100, "name": "Новинка", "code": "novinka"}]),
@@ -1352,3 +1456,32 @@ class SyncVibixCommandTests(TestCase):
         sync.assert_called_once()
         self.assertEqual(sync.call_args.args[0], title)
         self.assertIn("player_id", out.getvalue())
+
+    @patch("apps.catalog.management.commands.sync_vibix.sync_voiceover_ids")
+    def test_voiceovers_reports_filled_count(self, sync):
+        sync.return_value = {"fetched": 7, "filled": 3}
+        out = StringIO()
+
+        call_command("sync_vibix", voiceovers=True, stdout=out)
+
+        sync.assert_called_once_with(dry_run=False)
+        self.assertIn("сопоставлено 3", out.getvalue())
+
+    @patch("apps.catalog.management.commands.sync_vibix.sync_series_episodes")
+    def test_episodes_syncs_new_seasons(self, sync):
+        sync.return_value = {
+            "processed": 2,
+            "created": 5,
+            "not_found": 0,
+            "errors": 0,
+        }
+        out = StringIO()
+
+        call_command("sync_vibix", episodes=True, limit=2, stdout=out)
+
+        sync.assert_called_once_with(dry_run=False, limit=2)
+        self.assertIn("создано серий 5", out.getvalue())
+
+    def test_limit_requires_episodes_mode(self):
+        with self.assertRaises(CommandError):
+            call_command("sync_vibix", limit=1)

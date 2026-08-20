@@ -31,7 +31,7 @@ def sync_video_service():
     updated_from хранится в VideoServiceSyncState). Возвращает строку-отчёт —
     воркер логирует её, а ошибки API не роняют планировщик.
 
-    Без ключа в настройках (VIDEO_SERVICE_API_KEY пуст) задача молча
+    Без ключа в настройках (VIBIX_API_TOKEN пуст) задача молча
     пропускается: каталог с пустым ключом синхронизировать нечем,
     а ежедневная ошибка в логах только зашумляла бы их.
     """
@@ -39,7 +39,7 @@ def sync_video_service():
     from apps.catalog.video_service_sync import sync_video_service_ids
 
     if not get_vibix_api_token():
-        return "VIDEO_SERVICE_API_KEY не задан — синхронизация пропущена"
+        return "VIBIX_API_TOKEN не задан — синхронизация пропущена"
 
     try:
         stats = sync_video_service_ids()
@@ -68,7 +68,7 @@ def sync_voiceovers():
     from apps.catalog.video_service_voiceover_sync import sync_voiceover_ids
 
     if not get_vibix_api_token():
-        return "VIDEO_SERVICE_API_KEY не задан — синхронизация пропущена"
+        return "VIBIX_API_TOKEN не задан — синхронизация пропущена"
 
     try:
         stats = sync_voiceover_ids()
@@ -86,17 +86,17 @@ def sync_series_episodes():
     """
     Импорт серий сериалов из видеосервиса.
 
-    Обрабатывает записи каталога с kp_id/imdb_id без единой серии и создаёт
-    недостающие (GET /serials/kp|imdb/{id}). В расписание не внесена —
-    наполнение серий точечная операция, запускается вручную командой
-    sync_episodes. Тот же порядок, что у остальных: без ключа — тихо
-    пропускается, ошибки API не роняют планировщик.
+    Обрабатывает сериалы с kp_id/imdb_id и создаёт недостающие пары
+    сезон/серия (GET /serials/kp|imdb/{id}). Повторный запуск добавляет новые
+    сезоны без дублей. В расписание не внесена — операция запускается вручную
+    через ``sync_vibix --episodes``. Без токена тихо пропускается, ошибки API
+    не роняют вызывающий процесс.
     """
     from apps.catalog.video_service_api import VideoServiceAPIError
     from apps.catalog.video_service_sync import sync_series_episodes as run
 
     if not get_vibix_api_token():
-        return "VIDEO_SERVICE_API_KEY не задан — синхронизация пропущена"
+        return "VIBIX_API_TOKEN не задан — синхронизация пропущена"
 
     try:
         stats = run()

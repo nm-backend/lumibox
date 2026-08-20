@@ -8,6 +8,7 @@ sync_voiceovers — остаются для обратной совместим�
     python manage.py sync_vibix --full         # полный обход каталога сервиса
     python manage.py sync_vibix --title <slug> # одна запись каталога
     python manage.py sync_vibix --voiceovers   # сопоставление озвучек
+    python manage.py sync_vibix --episodes     # новые сезоны и серии
     python manage.py sync_vibix --dry-run      # ничего не пишет в базу
 
 Повторный запуск идемпотентен: заполняются только пустые поля, серии
@@ -19,7 +20,11 @@ from django.core.management.base import BaseCommand, CommandError
 
 from apps.catalog.models import Title
 from apps.catalog.video_service_api import VideoServiceAPIError
-from apps.catalog.video_service_sync import sync_title, sync_video_service_ids
+from apps.catalog.video_service_sync import (
+    sync_series_episodes,
+    sync_title,
+    sync_video_service_ids,
+)
 from apps.catalog.video_service_voiceover_sync import sync_voiceover_ids
 
 
@@ -43,6 +48,16 @@ class Command(BaseCommand):
             help="Сопоставить озвучки каталога с озвучками сервиса (vibix_voiceover_id).",
         )
         parser.add_argument(
+            "--episodes",
+            action="store_true",
+            help="Добавить недостающие сезоны и серии для всех сериалов с KP/IMDb ID.",
+        )
+        parser.add_argument(
+            "--limit",
+            type=int,
+            help="С --episodes обработать не больше N сериалов (для проверки).",
+        )
+        parser.add_argument(
             "--dry-run",
             action="store_true",
             help="Ничего не писать в базу: показать, что было бы сделано.",
@@ -61,6 +76,11 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         dry_run = options["dry_run"]
+        selected_modes = sum(bool(options[name]) for name in ("title", "voiceovers", "episodes"))
+        if selected_modes > 1:
+            raise CommandError("--title, --voiceovers и --episodes нельзя использовать вместе.")
+        if options["limit"] is not None and not options["episodes"]:
+            raise CommandError("--limit применяется только вместе с --episodes.")
 
         if options["title"]:
             self._sync_one_title(options["title"], dry_run=dry_run)
@@ -68,6 +88,10 @@ class Command(BaseCommand):
 
         if options["voiceovers"]:
             self._sync_voiceovers(dry_run=dry_run)
+            return
+
+        if options["episodes"]:
+            self._sync_episodes(dry_run=dry_run, limit=options["limit"])
             return
 
         self._sync_catalog(
@@ -129,10 +153,24 @@ class Command(BaseCommand):
         try:
             stats = sync_voiceover_ids(dry_run=dry_run)
         except VideoServiceAPIError as exc:
-            raise CommandError(str(exc))
+            raise CommandError(str(exc)) from exc
 
         self.stdout.write(self.style.SUCCESS(
-            f"Озвучки: получено {stats['fetched']}, сопоставлено {stats['matched']}"
+            f"Озвучки: получено {stats['fetched']}, сопоставлено {stats['filled']}"
+        ))
+        if dry_run:
+            self.stdout.write(self.style.WARNING("Сухой прогон: в базу ничего не записано."))
+
+    def _sync_episodes(self, *, dry_run, limit):
+        try:
+            stats = sync_series_episodes(dry_run=dry_run, limit=limit)
+        except VideoServiceAPIError as exc:
+            raise CommandError(str(exc)) from exc
+
+        self.stdout.write(self.style.SUCCESS(
+            f"Сериалы: обработано {stats['processed']}, создано серий "
+            f"{stats['created']}, не найдено {stats['not_found']}, "
+            f"ошибок {stats['errors']}"
         ))
         if dry_run:
             self.stdout.write(self.style.WARNING("Сухой прогон: в базу ничего не записано."))

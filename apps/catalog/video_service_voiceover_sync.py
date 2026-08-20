@@ -58,7 +58,7 @@ def import_voiceovers_from_service(*, dry_run=False):
     api_key = get_vibix_api_token()
     if not api_key:
         raise VideoServiceAPIError(
-            "VIDEO_SERVICE_API_KEY не задан — синхронизацию невозможно запустить"
+            "VIBIX_API_TOKEN не задан — синхронизацию невозможно запустить"
         )
 
     items = fetch_voiceovers(api_key)
@@ -97,7 +97,7 @@ def sync_voiceover_ids(*, dry_run=False):
     api_key = get_vibix_api_token()
     if not api_key:
         raise VideoServiceAPIError(
-            "VIDEO_SERVICE_API_KEY не задан — синхронизацию невозможно запустить"
+            "VIBIX_API_TOKEN не задан — синхронизацию невозможно запустить"
         )
 
     items = fetch_voiceovers(api_key)

@@ -67,10 +67,10 @@ class ContentSecurityPolicyMiddleware:
 
     External exceptions, каждый с причиной:
     - googletagmanager / google-analytics — метрика;
-    - graphicslab.io — SDK внешнего плеера, *.kinescopecdn.net — его iframe.
-      Оба нужны только на странице тайтла с заполненными ID, но политика
-      общая — разрешаем на всех страницах, а скрипт подключается только
-      там, где нужен.
+    - graphicslab.io — SDK внешнего плеера; *.kinescopecdn.net и
+      *.videoframe2.com — текущий и прежний iframe-контуры. SDK загружается
+      только после нажатия зрителя на странице с заполненными ID; CSP лишь
+      разрешает известные контуры и сама запросов не создаёт.
     - www.youtube.com — IFrame API и iframe плеера YouTube (вкладка
       «Смотреть фильм/серии»). frame-src уже был разрешён для трейлеров,
       script-src/connect-src нужны API ролика: он грузится лениво,
@@ -90,9 +90,10 @@ class ContentSecurityPolicyMiddleware:
         "font-src 'self' data:; "
         "connect-src 'self' https://www.google-analytics.com "
         "https://www.googletagmanager.com https://graphicslab.io "
-        "https://*.kinescopecdn.net https://www.youtube.com; "
+        "https://*.kinescopecdn.net https://*.videoframe2.com "
+        "https://www.youtube.com; "
         "frame-src 'self' https://www.youtube.com https://player.vimeo.com "
-        "https://rutube.ru https://*.kinescopecdn.net; "
+        "https://rutube.ru https://*.kinescopecdn.net https://*.videoframe2.com; "
         "media-src 'self' https:; "
         "object-src 'none'; "
         "base-uri 'self'; "

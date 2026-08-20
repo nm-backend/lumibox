@@ -137,8 +137,20 @@ class ReviewSerializer(serializers.ModelSerializer):
         read_only_fields = ["id", "author", "title_slug", "created_at"]
 
 
+class StrictIntegerField(serializers.IntegerField):
+    """JSON-целое без неявного преобразования строк и bool."""
+
+    default_error_messages = {"invalid": "Ожидалось целое число."}
+
+    def to_internal_value(self, data):
+        # bool — подкласс int в Python, но JSON true не является оценкой 1.
+        if type(data) is not int:
+            self.fail("invalid")
+        return super().to_internal_value(data)
+
+
 class RateRequestSerializer(serializers.Serializer):
-    rating = serializers.IntegerField(min_value=1, max_value=10)
+    rating = StrictIntegerField(min_value=1, max_value=10)
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -157,6 +169,19 @@ class CommentSerializer(serializers.ModelSerializer):
         model = Comment
         fields = ["id", "author", "parent", "text", "created_at", "replies"]
         read_only_fields = ["id", "author", "created_at", "replies"]
+
+    def validate_parent(self, parent):
+        """Родитель должен быть видимым комментарием той же записи."""
+        if parent is None:
+            return None
+        title = self.context["view"].get_title()
+        if parent.title_id != title.pk:
+            raise serializers.ValidationError(
+                "Нельзя ответить на комментарий другой записи."
+            )
+        if parent.status != Comment.Status.PUBLISHED:
+            raise serializers.ValidationError("Нельзя ответить на скрытый комментарий.")
+        return parent
 
     @extend_schema_field(serializers.ListField(child=serializers.DictField()))
     def get_replies(self, comment):

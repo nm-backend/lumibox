@@ -102,8 +102,8 @@ pg_dump "$DATABASE_URL" > lumibox-$(date +%F).sql
 | `DJANGO_SUPERUSER_EMAIL` | почта администратора |
 | `DJANGO_SUPERUSER_PASSWORD` | **задаёте вы**; в репозитории пароля нет и быть не должно |
 | `VIBIX_API_TOKEN` | **опционально** — ключ API внешнего видеосервиса (`Authorization: Bearer`); без него синк пропускается. Устаревшее имя `VIDEO_SERVICE_API_KEY` читается как запасное. Для базового YouTube-плеера не нужен |
-| `VIBIX_PUBLISHER_ID` | **опционально** — ID издателя для внешнего плеера, по умолчанию `678503345` (fallback — `VIDEO_SERVICE_PUBLISHER_ID`) |
-| `VIBIX_API_BASE_URL` | **опционально** — адрес API внешнего видеосервиса, по умолчанию `https://vibix.org/api/v1` |
+| `VIBIX_PUBLISHER_ID` | ID издателя из вашего кабинета, обязателен для внешнего плеера; безопасного default нет (fallback — `VIDEO_SERVICE_PUBLISHER_ID`) |
+| `VIBIX_API_BASE_URL` | **опционально** — адрес API внешнего видеосервиса, по умолчанию `https://api.vibix.org/api/v1` |
 | `VIDEO_SERVICE_TRAILER` | **опционально** — трейлер для kp/imdb-эмбедов: `true` — если полного видео нет, `only` — всегда трейлер, пусто — без параметра |
 | `ADS_NETWORK_ENABLED` | рекламная сеть; по умолчанию `false` |
 
@@ -115,11 +115,14 @@ pg_dump "$DATABASE_URL" > lumibox-$(date +%F).sql
 ```bash
 python manage.py sync_vibix --title nachalo-2010
 python manage.py sync_vibix --voiceovers
+python manage.py sync_vibix --episodes
 ```
 
 Первая команда проверит фильм в каталоге аккаунта и, если Vibix вернёт
-`embed_code`, сохранит внутренний `player_id`. Секретный токен не передавайте
-в командной строке и не добавляйте в Git — только в переменные окружения.
+`embed_code`, сохранит внутренний `player_id`; последняя добавит недостающие
+сезоны/серии. Секретный токен не передавайте в командной строке и не
+добавляйте в Git — только в переменные окружения. Браузерный SDK запускается
+на карточке только после явного нажатия зрителя.
 
 Хранилище медиа (пока не задано — файлы лежат на диске контейнера и
 теряются при пересоздании):
