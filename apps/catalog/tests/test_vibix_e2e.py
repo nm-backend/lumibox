@@ -56,6 +56,7 @@ class VibixE2ETests(TestCase):
         params = args[2]
         self.assertEqual(params["limit"], 20)
 
+    @override_settings(VIBIX_API_TOKEN="test-token")
     @patch("apps.catalog.video_service_sync.fetch_video_by_kp")
     @patch("apps.catalog.video_service_sync.iter_video_links")
     def test_sync_title_fallback_on_403(self, mock_iter, mock_fetch_kp):
@@ -93,6 +94,7 @@ class VibixE2ETests(TestCase):
         self.assertEqual(title.player_type, "movie")
         self.assertEqual(title.description, "Описание фильма")
 
+    @override_settings(VIBIX_API_TOKEN="test-token")
     @patch("apps.catalog.video_service_sync.fetch_serial_by_kp")
     @patch("apps.catalog.video_service_sync.fetch_video_by_kp")
     def test_sync_series_creates_episodes(self, mock_fetch_video, mock_fetch_serial):
