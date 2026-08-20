@@ -66,16 +66,56 @@ class VideoServiceValidationError(VideoServiceAPIError):
     """HTTP 422: API отклонил параметры запроса."""
 
 
-def get_vibix_api_token():
+def login_vibix(email=None, password=None):
+    """Аутентификация издателя в API Vibix (POST /api/v1/login).
+
+    Возвращает словарь {access_token, token_type, role, id} или поднимает
+    VideoServiceAuthenticationError.
+    """
+    email = (email or getattr(settings, "VIBIX_USERNAME", "") or "").strip()
+    password = (password or getattr(settings, "VIBIX_PASSWORD", "") or "").strip()
+    if not email or not password:
+        raise VideoServiceAuthenticationError("VIBIX_USERNAME / VIBIX_PASSWORD не заданы")
+    base_url = settings.VIBIX_API_BASE_URL.rstrip("/")
+    try:
+        response = requests.post(
+            f"{base_url}/login",
+            json={"email": email, "password": password},
+            headers={"Accept": "application/json"},
+            timeout=REQUEST_TIMEOUT,
+        )
+    except requests.RequestException as exc:
+        raise VideoServiceAPIError("Не удалось связаться с сервером авторизации Vibix") from exc
+    if response.status_code != 200:
+        raise VideoServiceAuthenticationError("Неверный логин или пароль Vibix")
+    try:
+        data = response.json()
+    except ValueError as exc:
+        raise VideoServiceAPIError("Сервер авторизации Vibix вернул не-JSON ответ") from exc
+    token = data.get("access_token")
+    if not token:
+        raise VideoServiceAuthenticationError("API Vibix не вернул access_token")
+    return data
+
+
+def get_vibix_api_token(auto_login=False):
     """Возвращает актуальный API-токен с поддержкой старого имени настройки.
 
     Значение читается при каждом вызове, а не копируется один раз при импорте
     settings. Это важно для тестов, ротации конфигурации и постепенного
     перехода с VIDEO_SERVICE_API_KEY на официальное VIBIX_API_TOKEN.
+    Если токен пуст и auto_login=True, пытается получить токен через login_vibix.
     """
     official = getattr(settings, "VIBIX_API_TOKEN", "") or ""
     legacy = getattr(settings, "VIDEO_SERVICE_API_KEY", "") or ""
-    return (official or legacy).strip()
+    token = (official or legacy).strip()
+    if not token and auto_login:
+        try:
+            auth_data = login_vibix()
+            token = auth_data.get("access_token", "").strip()
+        except Exception:
+            pass
+    return token
 
 
 def _retry_delay(attempt, response=None):
@@ -276,6 +316,9 @@ def fetch_video_links(api_key, *, page=1, limit=100, updated_from=None, years=No
     этих лет. Полезно, когда известен год записи каталога: не нужно
     обходить весь список в десятки тысяч записей. None — без фильтра.
     """
+    valid_limits = (20, 50, 100)
+    if limit not in valid_limits:
+        limit = min(valid_limits, key=lambda x: abs(x - limit))
     params = {"page": page, "limit": limit}
     if updated_from is not None:
         params["updated_from"] = timezone.localtime(updated_from).strftime(

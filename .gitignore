@@ -41,3 +41,7 @@ Thumbs.db
 # это временные файлы одной сессии, а не часть проекта.
 .playwright-mcp/
 .claude/
+node_modules/
+screenshot_*.png
+test_vibix_*.png
+

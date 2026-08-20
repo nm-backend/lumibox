@@ -44,6 +44,7 @@ from apps.catalog.models.video_service import VideoServiceSyncState
 from apps.catalog.video_service_api import (
     VideoServiceAPIError,
     VideoServiceNotFoundError,
+    VideoServicePermissionError,
     fetch_serial_by_imdb,
     fetch_serial_by_kp,
     fetch_video_by_imdb,
@@ -172,6 +173,22 @@ def match_item(index, item):
     return _one_candidate(list(matched.values()))
 
 
+def _find_in_video_links(api_key, title):
+    """Ищет запись в /publisher/videos/links по годам и ID/названию."""
+    years = [title.release_year] if title.release_year else None
+    index = TitleMatchIndex(titles=[title], by_name={}, by_kp={}, by_imdb={})
+    _append_candidate(index.by_kp, title.kp_id.strip(), title)
+    _append_candidate(index.by_imdb, title.imdb_id.strip().lower(), title)
+    for candidate in (title.name, title.original_name):
+        _append_candidate(index.by_name, normalize_name(candidate), title)
+
+    for item in iter_video_links(api_key, limit=100, years=years, max_pages=15):
+        matched = match_item(index, item)
+        if matched is not None and matched.pk == title.pk:
+            return item
+    return None
+
+
 def sync_title(title, *, dry_run=False):
     """
     Синхронизирует одну запись каталога с видеосервисом.
@@ -207,22 +224,26 @@ def sync_title(title, *, dry_run=False):
             payload = (
                 fetch_serial_by_kp(api_key, kp_id) if kp_id else fetch_serial_by_imdb(api_key, imdb_id)
             )
-            # У /serials/{id} нет embed_code и type (только id, name, seasons):
-            # player_id/player_type для тега плеера берём из карточки
-            # /videos/{kp|imdb}/{id}, её же используем для обогащения. Если
-            # карточки нет — плеер останется на kp/imdb-типе, а серии всё
-            # равно импортируются из payload.
             try:
                 embed_payload = (
                     fetch_video_by_kp(api_key, kp_id) if kp_id else fetch_video_by_imdb(api_key, imdb_id)
                 )
+            except VideoServicePermissionError:
+                embed_payload = _find_in_video_links(api_key, title)
             except VideoServiceNotFoundError:
                 embed_payload = None
         else:
-            payload = (
-                fetch_video_by_kp(api_key, kp_id) if kp_id else fetch_video_by_imdb(api_key, imdb_id)
-            )
-            embed_payload = payload
+            try:
+                payload = (
+                    fetch_video_by_kp(api_key, kp_id) if kp_id else fetch_video_by_imdb(api_key, imdb_id)
+                )
+                embed_payload = payload
+            except VideoServicePermissionError:
+                payload = _find_in_video_links(api_key, title)
+                embed_payload = payload
+                if payload is None:
+                    stats["not_found"] = 1
+                    return stats
     except VideoServiceNotFoundError:
         stats["not_found"] = 1
         return stats
