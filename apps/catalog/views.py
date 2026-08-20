@@ -582,93 +582,68 @@ class TitleDetailView(DetailView):
         return context
 
     def _get_external_player(self):
-        """
-        Параметры тега внешнего плеера, если он включён для записи.
+        """Параметры официального тега Vibix или ``None``.
 
-        Плеер работает по kp_id / imdb_id (официальные идентификаторы):
-        SDK Vibix сам резолвит контент в браузере по этим ID, токен не нужен.
-        player_id (внутренний ID видео из API) используется ТОЛЬКО если это
-        действительно ID из Vibix API, а не kp_id/imdb_id.
-        Поле player_id заполняется командой sync_vibix при успешном матче.
-        Если редактор вручную вписал kp_id/imdb_id — используем их напрямую.
+        Серверный API здесь не вызывается: открытие страницы не должно
+        зависеть от сети Vibix и ждать его retry/timeout. Синхронизация
+        заранее сохраняет проверенный ``player_id`` из ``embed_code``.
+        Если его ещё нет, SDK умеет разрешить KP/IMDb ID в браузере.
 
-        Для сериала дополнительно передаются сезон и серия открытия
-        (data-season/data-episodes): плеер стартует с той серии, на которой
-        остановился зритель, иначе — с первой. Озвучка по умолчанию
-        (data-voiceover) подставляется, когда озвучка записи сопоставлена
-        с озвучкой сервиса командой sync_voiceovers.
-
-        Возвращает словарь для шаблона или None, когда плеер не нужен:
-        тогда вкладка не рендерится и SDK не грузится.
+        Приоритет источников:
+        1. внутренний ID плеера, полученный синхронизацией;
+        2. Kinopoisk ID;
+        3. IMDb ID.
         """
         publisher_id = settings.VIDEO_SERVICE_PUBLISHER_ID.strip()
-        if not publisher_id:
+        # Контракт SDK принимает числовой publisher ID. Невалидная
+        # конфигурация не должна загружать сторонний скрипт и оставлять
+        # зрителя перед бесконечным пустым плеером.
+        if not publisher_id.isdigit():
             return None
 
-        # Сначала определяем тип и ID для плеера
         player_type = None
         player_id = None
-        if self.object.kp_id.strip():
+
+        internal_id = self.object.player_id.strip()
+        internal_type = self.object.player_type.strip()
+        if internal_type == "serial":
+            internal_type = "series"
+        if not internal_type:
+            internal_type = "series" if self.object.is_series else "movie"
+
+        if internal_id.isdigit() and internal_type in {"movie", "series"}:
+            player_type, player_id = internal_type, internal_id
+        elif self.object.kp_id.strip().isdigit():
             player_type, player_id = "kp", self.object.kp_id.strip()
-        elif self.object.imdb_id.strip():
-            player_type, player_id = "imdb", self.object.imdb_id.strip()
-        elif self.object.player_id.strip():
-            embed_type = self.object.player_type.strip() or "movie"
-            if embed_type == "serial":
-                embed_type = "series"
-            player_type, player_id = embed_type, self.object.player_id.strip()
         else:
+            imdb_id = self.object.imdb_id.strip().lower()
+            if imdb_id.startswith("tt") and imdb_id[2:].isdigit():
+                player_type, player_id = "imdb", imdb_id
+
+        if player_type is None or player_id is None:
             return None
 
-        # Проверяем доступность контента для стриминга
-        is_playable = True
-        try:
-            from apps.catalog.video_service_api import check_video_playable, get_vibix_api_token
-            api_key = get_vibix_api_token()
-            if api_key:
-                if player_type == "kp":
-                    is_playable, _, _ = check_video_playable(api_key, kp_id=player_id)
-                elif player_type == "imdb":
-                    is_playable, _, _ = check_video_playable(api_key, imdb_id=player_id)
-        except Exception:
-            # При ошибках (сеть, API) считаем контент доступным (fail-open)
-            is_playable = True
-
-        # Определяем режим плеера на основе доступности
-        force_trailer_only = not is_playable and settings.VIDEO_SERVICE_TRAILER.strip() in ("true", "only")
-
+        design = settings.VIDEO_SERVICE_DESIGN.strip()
+        if design not in {"1", "2", "3", "4", "5", "6"}:
+            design = "1"
         player = {
-            "publisher_id": settings.VIDEO_SERVICE_PUBLISHER_ID.strip(),
-            "design": settings.VIDEO_SERVICE_DESIGN,
-            # Цвета кастомизируемых дизайнов (1 и 6) — палитра сайта.
-            # Пустые значения настройки выпиливают data-colorN из тега.
+            "publisher_id": publisher_id,
+            "design": design,
             "colors": {
                 n: getattr(settings, f"VIDEO_SERVICE_COLOR{n}").strip()
                 for n in range(1, 6)
             },
             "type": player_type,
             "id": player_id,
-            "is_playable": is_playable,
-            "force_trailer_only": force_trailer_only,
         }
-        # Приоритет — kp_id / imdb_id (официальные идентификаторы):
-        # SDK Vibix сам резолвит контент в браузере по этим ID, токен не нужен.
-        # player_id (внутренний ID видео из API) используем ТОЛЬКО если это
-        # действительно ID из Vibix API, а не kp_id/imdb_id.
-        # Поле player_id заполняется командой sync_vibix при успешном матче.
-        # Если редактор вручную вписал kp_id/imdb_id — используем их напрямую.
 
-        # data-trailer для kp/imdb: "true" — трейлер как запасной вариант
-        # (когда полного видео в каталоге сервиса нет), "only" — всегда трейлер.
-        # Если контент недоступен для стриминга, форсируем "only"
-        trailer = settings.VIDEO_SERVICE_TRAILER.strip()
-        if force_trailer_only:
-            player["trailer"] = "only"
-        elif player_type in ("kp", "imdb") and trailer:
+        # data-trailer относится к режимам разрешения по внешнему ID.
+        # Неизвестное значение не передаём в mutable SDK как новый режим.
+        trailer = settings.VIDEO_SERVICE_TRAILER.strip().lower()
+        if player_type in {"kp", "imdb"} and trailer in {"true", "only"}:
             player["trailer"] = trailer
 
-        # Озвучка и переключатели для всех типов (в т.ч. kp/imdb).
-        if player_type in ("movie", "series"):
+        if player_type in {"movie", "series"}:
             voiceover_ids = self._external_voiceover_ids()
             if voiceover_ids:
                 player["voiceover"] = voiceover_ids[0]
@@ -684,22 +659,15 @@ class TitleDetailView(DetailView):
         return player
 
     def _apply_player_switches(self, player):
-        """
-        Опциональные выключатели внешнего плеера из настроек.
+        """Добавляет безопасные опциональные параметры внешнего плеера.
 
-        data-autoplay (VIDEO_SERVICE_AUTOPLAY) и совместный просмотр
-        (VIDEO_SERVICE_WATCH_PARTY) — не для всех: автозапуск браузеры
-        часто блокируют, а комнату синхронного просмотра владелец сайта
-        может не захотеть включать без подготовки. Поэтому оба — за
-        явными флагами в настройках, по умолчанию выключены.
+        Автозапуск выключен по умолчанию: браузеры часто блокируют его без
+        жеста пользователя. WatchParty сюда намеренно не входит — его
+        сторонняя библиотека и WebSocket требуют отдельного origin/privacy
+        review и не являются частью базовой интеграции Vibix.
         """
         if settings.VIDEO_SERVICE_AUTOPLAY:
             player["autoplay"] = True
-        if settings.VIDEO_SERVICE_WATCH_PARTY:
-            player["sync"] = True
-            player["sync_room"] = self.object.slug
-            if self.request.user.is_authenticated:
-                player["sync_user"] = self.request.user.username
 
     def _opening_episode(self):
         """

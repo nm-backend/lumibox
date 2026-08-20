@@ -71,6 +71,7 @@ class CSPMiddlewareTests(TestCase):
         csp = self._check_csp_header(reverse("catalog:home"))
         self.assertIn("graphicslab.io", csp)
         self.assertIn("kinescopecdn.net", csp)
+        self.assertIn("videoframe2.com", csp)
 
     def test_csp_blocks_objects(self):
         """object-src должен быть 'none' — Flash и плагины не нужны."""

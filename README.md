@@ -16,7 +16,7 @@ JavaScript без сборки.
 ## Возможности
 
 **Каталог**
-- Фильмы, сериалы, мультфильмы, аниме и ТВ-шоу в одной модели `Title`
+- Фильмы, сериалы, мультфильмы и ТВ-шоу в одной модели `Title`
   с полем «тип» — один каталог, один поиск, одно избранное вместо
   параллельных веток
 - Разделы-витрины: новинки, популярное, топ по рейтингу, премьеры,
@@ -324,23 +324,30 @@ docker compose exec web python manage.py createsuperuser
 (поля «ID на Кинопоиске» / «ID на IMDb» в админке). Для kp/imdb-варианта
 плеер получает `data-trailer` — по умолчанию `"true"`: покажет трейлер,
 если полного видео нет в каталоге сервиса (режим задаёт
-`VIDEO_SERVICE_TRAILER`, см. таблицу). SDK и тег `<ins>` подключаются
-только на таких страницах. Пустой `VIBIX_PUBLISHER_ID` отключает
+`VIDEO_SERVICE_TRAILER`, см. таблицу). Тег `<ins>` и локальный загрузчик
+появляются только на таких страницах, а сторонний SDK запрашивается лишь
+после нажатия «Запустить плеер Vibix». Простое открытие карточки не создаёт
+запроса к Vibix. Пустой или нечисловой `VIBIX_PUBLISHER_ID` отключает
 интеграцию целиком.
 
-После `seed_catalog` реальный плеер уже включён у фильма «Начало»:
-`kp_id=447301`, `imdb_id=tt1375666`. Для показа по Kinopoisk ID API-токен
-не нужен — браузерный SDK Vibix получает `data-type="kp"` и `data-id`.
-Токен нужен серверным командам синхронизации и хранится только в окружении.
-Доступность полной версии определяет каталог и договор вашего аккаунта Vibix;
-если фильма нет, при `VIDEO_SERVICE_TRAILER=true` сервис покажет трейлер.
+После `seed_catalog` и настройки `VIBIX_PUBLISHER_ID` внешний плеер
+доступен у демонстрационного фильма «Социальная сеть» через KP/IMDb fallback.
+Account-specific `player_id` в демоданные не зашит: его может сохранить только
+синхронизация с текущим кабинетом. Для показа по Kinopoisk ID API-токен не
+нужен — браузерный SDK Vibix получает `data-type="kp"` и `data-id`. Токен нужен
+только серверным командам
+синхронизации и хранится в окружении. Доступность полной версии определяют
+каталог и договор вашего аккаунта Vibix; OpenAPI не предоставляет отдельного
+надёжного поля `playable`/`licensed`.
 
 ### Синхронизация ID
 
 Команда тянет список видео из API видеосервиса и проставляет
-`kp_id`/`imdb_id`/`player_id` записям каталога по совпадению названия
-и года. Заполняются только пустые поля — вручную введённые ID
-не затираются. Параллельно запись обогащается данными карточки API:
+`kp_id`/`imdb_id`/`player_id`. Сначала сопоставляет точные KP/IMDb ID,
+затем — только однозначное совпадение названия и года. Неоднозначный
+результат пропускается. `player_id` берётся исключительно из `embed_code`,
+а не из внутреннего ID API-ресурса. Заполняются только пустые поля —
+вручную введённые данные не затираются. Параллельно запись обогащается данными карточки API:
 описание, рейтинги Кинопоиска/IMDb, длительность и оригинальное
 название (тоже только пустые поля), а жанры и страны заводятся
 в справочники, если их ещё нет. Первый прогон фильтрует каталог
@@ -348,18 +355,22 @@ docker compose exec web python manage.py createsuperuser
 `updated_from` и подхватывает только новые/изменённые видео.
 
 ```bash
-docker compose exec web python manage.py sync_video_service            # инкрементально
-docker compose exec web python manage.py sync_video_service --full     # весь каталог
-docker compose exec web python manage.py sync_video_service --dry-run  # только отчёт
+docker compose exec web python manage.py sync_vibix            # инкрементально
+docker compose exec web python manage.py sync_vibix --full     # весь каталог
+docker compose exec web python manage.py sync_vibix --dry-run  # только отчёт
+docker compose exec web python manage.py sync_vibix --title <slug>
+docker compose exec web python manage.py sync_vibix --voiceovers
+docker compose exec web python manage.py sync_vibix --episodes
 ```
 
-По расписанию задачу запускает Celery beat раз в сутки
-(`sync_video_service`); без `VIDEO_SERVICE_API_KEY` она пропускается.
+По расписанию задачи запускает Celery beat раз в сутки; без
+`VIBIX_API_TOKEN` они безопасно пропускаются.
 
-Серии сериалов (сезоны и эпизоды) импортируются отдельной командой
-`sync_episodes` — она тянет `GET /serials/kp|imdb/{id}` для записей
-без единой серии и создаёт недостающие, повторный запуск ничего
-не дублирует:
+Серии сериалов (сезоны и эпизоды) синхронизируются режимом
+`sync_vibix --episodes` или совместимой старой командой `sync_episodes`.
+Они тянут `GET /serials/kp|imdb/{id}` для сериалов и создают только
+недостающие пары сезон/серия. Повторный запуск не даёт дублей, но добавляет
+новый сезон к уже заполненной записи:
 
 ```bash
 docker compose exec web python manage.py sync_episodes            # импортировать серии
@@ -374,17 +385,19 @@ docker compose exec web python manage.py sync_episodes --dry-run  # только
 | Переменная | Назначение |
 |---|---|
 | `VIBIX_API_TOKEN` | Ключ API Vibix (`Authorization: Bearer`). Без него синк невозможен; старое имя `VIDEO_SERVICE_API_KEY` поддерживается как fallback |
-| `VIBIX_PUBLISHER_ID` | ID издателя для плеера (тег `data-publisher-id`); старое имя `VIDEO_SERVICE_PUBLISHER_ID` поддерживается как fallback |
-| `VIBIX_API_BASE_URL` | Корень API, по умолчанию `https://vibix.org/api/v1` |
+| `VIBIX_PUBLISHER_ID` | Обязательный для плеера ID издателя из кабинета (тег `data-publisher-id`); безопасного default нет, старое имя `VIDEO_SERVICE_PUBLISHER_ID` поддерживается как fallback |
+| `VIBIX_API_BASE_URL` | Корень API, по умолчанию `https://api.vibix.org/api/v1` |
 | `VIDEO_SERVICE_DESIGN`, `VIDEO_SERVICE_COLOR1..5` | Оформление внешнего плеера (дизайн 1–6 и цвета для кастомизируемых) |
 | `VIDEO_SERVICE_AUTOPLAY` | Автовоспроизведение внешнего плеера (`data-autoplay`), выключено |
-| `VIDEO_SERVICE_WATCH_PARTY` | Совместный просмотр (`data-sync` + sync-lib + WatchParty, комната — адрес записи), выключено |
 | `VIDEO_SERVICE_TRAILER` | Трейлер для kp/imdb-эмбедов (`data-trailer`): `true` — если полного видео нет, `only` — всегда трейлер, пусто — без параметра |
-| `ADS_NETWORK_ENABLED` | Рекламная сеть, по умолчанию выключена |
+| `ADS_NETWORK_ENABLED` | Отдельная рекламная сеть, по умолчанию выключена; не является частью безопасного ядра Vibix |
 | `ADS_NETWORK_PUBLISHER_ID`, `ADS_NETWORK_ADD_TYPES` | Параметры рекламной сети |
 
-Ключ хранится только в `.env` или окружении сервера — в код и репозиторий
-он не попадает.
+Ключ должен храниться только в локальном `.env` или секретах платформы.
+Если значение когда-либо попадало в Git, его нужно немедленно ротировать.
+WatchParty намеренно не подключён: его WebSocket/postMessage-контракт требует
+отдельной проверки origin и privacy. Рекламный loader также нельзя включать
+одним согласием на аналитику — он требует отдельного consent/legal review.
 
 ---
 
@@ -427,7 +440,7 @@ ID Кинопоиска/IMDb и `player_id` (внешний плеер) запо
 docker compose exec web python manage.py test apps
 ```
 
-**648 тестов** (3 отмечены skip), около минуты. Ожидаемый результат — `OK`.
+**764 теста** (3 отмечены skip), около минуты. Ожидаемый результат — `OK`.
 
 Тесты создают собственную временную базу и удаляют её после прогона —
 ваши данные не пострадают.

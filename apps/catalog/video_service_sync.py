@@ -32,6 +32,7 @@ sync_series_episodes через detail-эндпоинты GET /serials/kp|imdb/{
 """
 
 import re
+from dataclasses import dataclass
 from decimal import Decimal, InvalidOperation
 
 from django.db.models import Q
@@ -66,17 +67,18 @@ def _embed_player(item):
     """
     (player_id, player_type) записи API из её embed_code.
 
-    Поле id в списке — внутренний ID записи в базе сервиса, и он не
-    совпадает с ID контента плеера (data-id из embed_code): проверено
-    на всех 160 записях первых страниц — расхождение у каждой. Плеер
-    ждёт именно data-id, поэтому при наличии embed_code берём ID из
-    него, иначе (вдруг сервис уберёт поле) — внутренний id записи.
-    Тип маппим так же, как у обычного item.
+    Поле id в списке — внутренний ID ресурса API, и оно не обязано
+    совпадать с ID контента плеера. Плеер ждёт именно data-id из
+    embed_code; если кода нет, player_id не заполняем и используем
+    безопасный KP/IMDb fallback. Тип маппим к значениям SDK.
     """
     match = re.search(r'data-id="(\d+)"', item.get("embed_code") or "")
     if match:
         return match.group(1), _API_TO_TAG_TYPE.get(item.get("type"))
-    return str(item.get("id") or ""), _API_TO_TAG_TYPE.get(item.get("type"))
+    # Поле item.id — ID ресурса API, а не контракт плеера. Подставлять его
+    # как data-id нельзя: при отсутствии embed_code оставляем player_id
+    # пустым, и страница безопасно использует kp/imdb fallback.
+    return "", _API_TO_TAG_TYPE.get(item.get("type"))
 
 
 def normalize_name(name):
@@ -86,72 +88,88 @@ def normalize_name(name):
     return _WS.sub(" ", _NON_WORD.sub(" ", str(name))).strip().lower()
 
 
-def build_title_index():
-    """
-    Индекс названий записей, которым ещё нужен внешний ID.
+@dataclass
+class TitleMatchIndex:
+    """Индексы локального каталога для однозначного сопоставления."""
 
-    В индексе только те тайтлы, где пуст хотя бы один из идентификаторов:
-    полностью заполненные записи пропускаем ещё до загрузки списка. Каждое
-    название (русское и оригинальное) ведёт на список кандидатов — одно имя
-    могут носить разные фильмы, решает год.
+    titles: list[Title]
+    by_name: dict[str, list[Title]]
+    by_kp: dict[str, list[Title]]
+    by_imdb: dict[str, list[Title]]
+
+
+def _append_candidate(index, key, title):
+    if not key:
+        return
+    candidates = index.setdefault(key, [])
+    if all(candidate.pk != title.pk for candidate in candidates):
+        candidates.append(title)
+
+
+def build_title_index():
+    """Индексы записей, которым ещё нужны данные Vibix.
+
+    KP/IMDb являются первичными ключами сопоставления. Название и год —
+    только fallback для записей без внешних ID; неоднозначное совпадение
+    намеренно пропускается вместо назначения чужого видео.
     """
-    index = {}
-    titles = Title.objects.filter(
-        Q(kp_id="") | Q(imdb_id="") | Q(player_id="")
-    ).only(
-        "pk", "name", "original_name", "release_year", "kp_id", "imdb_id",
-        "player_id", "player_type", "description", "short_description",
-        "duration_minutes", "kp_rating", "imdb_rating",
+    titles = list(
+        Title.objects.filter(Q(kp_id="") | Q(imdb_id="") | Q(player_id=""))
+        .only(
+            "pk", "name", "original_name", "release_year", "kp_id", "imdb_id",
+            "player_id", "player_type", "description", "short_description",
+            "duration_minutes", "kp_rating", "imdb_rating",
+        )
     )
+    result = TitleMatchIndex(titles=titles, by_name={}, by_kp={}, by_imdb={})
     for title in titles:
+        _append_candidate(result.by_kp, title.kp_id.strip(), title)
+        _append_candidate(result.by_imdb, title.imdb_id.strip().lower(), title)
         for candidate in (title.name, title.original_name):
-            norm = normalize_name(candidate)
-            if not norm:
-                continue
-            candidates = index.setdefault(norm, [])
-            # Тайтл может один раз попасть в список: оба поля (name и
-            # original_name) иногда нормализуются в одно и то же значение.
-            if not candidates or candidates[-1].pk != title.pk:
-                candidates.append(title)
-    return index
+            _append_candidate(result.by_name, normalize_name(candidate), title)
+    return result
 
 
 def _filter_years(index):
-    """
-    Годы для фильтра year[], если им можно доверять, иначе None.
-
-    Фильтр отсекает видео несовпадающих лет ещё на стороне API — первый
-    полный прогон тогда обходит не весь каталог (десятки тысяч видео),
-    а только его часть. Но год — стоп-фактор сопоставления: если хоть
-    у одной записи каталога год не известен, фильтровать нельзя — под
-    него видео нашлось бы и с любым другим годом. Возвращаем None,
-    и синк обходит весь список, как раньше.
-    """
-    if not index:
+    """Годы локальных записей для серверного фильтра ``year[]``."""
+    titles = index.titles if isinstance(index, TitleMatchIndex) else []
+    if not titles:
         return None
-    years = set()
-    for candidates in index.values():
-        for title in candidates:
-            if not title.release_year:
-                return None
-            years.add(title.release_year)
-    return sorted(years)
+    if any(not title.release_year for title in titles):
+        return None
+    return sorted({title.release_year for title in titles})
+
+
+def _one_candidate(candidates):
+    """Единственный кандидат или None при отсутствии/неоднозначности."""
+    return candidates[0] if len(candidates) == 1 else None
 
 
 def match_item(index, item):
-    """Возвращает тайтл для записи API или None, если совпадений нет."""
+    """Однозначно сопоставляет ресурс API с локальной записью."""
+    kp_id = str(item.get("kp_id") or item.get("kinopoisk_id") or "").strip()
+    if kp_id:
+        exact = _one_candidate(index.by_kp.get(kp_id, []))
+        if exact is not None:
+            return exact
+
+    imdb_id = str(item.get("imdb_id") or "").strip().lower()
+    if imdb_id:
+        exact = _one_candidate(index.by_imdb.get(imdb_id, []))
+        if exact is not None:
+            return exact
+
     year_value = item.get("year")
     year = int(year_value) if str(year_value).isdigit() else None
-
+    matched = {}
     for field in ("name", "name_rus", "name_eng", "name_original"):
         norm = normalize_name(item.get(field))
-        if not norm:
-            continue
-        for title in index.get(norm, []):
+        for title in index.by_name.get(norm, []):
             if year and title.release_year and title.release_year != year:
                 continue
-            return title
-    return None
+            matched[title.pk] = title
+
+    return _one_candidate(list(matched.values()))
 
 
 def sync_title(title, *, dry_run=False):
@@ -173,7 +191,7 @@ def sync_title(title, *, dry_run=False):
     api_key = get_vibix_api_token()
     if not api_key:
         raise VideoServiceAPIError(
-            "VIDEO_SERVICE_API_KEY не задан — синхронизацию невозможно запустить"
+            "VIBIX_API_TOKEN не задан — синхронизацию невозможно запустить"
         )
 
     kp_id = title.kp_id.strip()
@@ -276,11 +294,15 @@ def sync_video_service_ids(*, full=False, dry_run=False, page_size=100, max_page
         from apps.catalog.video_service_api import VideoServiceAPIError
 
         raise VideoServiceAPIError(
-            "VIDEO_SERVICE_API_KEY не задан — синхронизацию невозможно запустить"
+            "VIBIX_API_TOKEN не задан — синхронизацию невозможно запустить"
         )
 
-    state = VideoServiceSyncState.get_solo()
-    updated_from = None if full else state.last_updated_from
+    # Watermark фиксируем ДО обхода страниц. Если ресурс изменится во время
+    # долгой синхронизации, следующий запуск снова его увидит; отметка
+    # «время окончания» могла бы навсегда пропустить такое изменение.
+    sync_started_at = timezone.now()
+    state = VideoServiceSyncState.objects.filter(key="default").first()
+    updated_from = None if full or state is None else state.last_updated_from
 
     index = build_title_index()
     # Быстрый путь: все записи каталога знают свой год — передаём их в API
@@ -360,8 +382,10 @@ def sync_video_service_ids(*, full=False, dry_run=False, page_size=100, max_page
             stats["player_filled"] += 1
 
     if not dry_run:
-        state.last_updated_from = timezone.now()
-        state.save(update_fields=["last_updated_from", "updated_at"])
+        VideoServiceSyncState.objects.update_or_create(
+            key="default",
+            defaults={"last_updated_from": sync_started_at},
+        )
 
     return stats
 
@@ -464,11 +488,9 @@ def _ensure_reference(model, name, fallback):
 
 
 def _parse_season_number(value, index):
-    """Номер сезона: число из названия сезона API или порядковый номер."""
-    text = str(value or "").strip()
-    if text.isdigit():
-        return int(text)
-    return index
+    """Номер сезона из ``1``/``Сезон 1`` или порядковый fallback."""
+    match = re.search(r"\d+", str(value or ""))
+    return int(match.group()) if match else index
 
 
 def _import_episodes(title, payload, *, dry_run):
@@ -507,9 +529,10 @@ def sync_series_episodes(*, dry_run=False, limit=None):
     """
     Импортирует серии сериалов из API (GET /serials/kp|imdb/{id}).
 
-    Обрабатывает записи каталога с kp_id/imdb_id, у которых нет ни одной
-    серии. Эндпоинт живёт без префикса /publisher — см. комментарий
-    в video_service_api.py; с верным адресом он отдаёт сезоны и серии.
+    Обрабатывает все сериалы с kp_id/imdb_id. Уже существующие пары
+    «сезон + серия» пропускаются, поэтому повторный запуск не создаёт
+    дубли, но способен добавить новый сезон к ранее синхронизированной
+    записи. Эндпоинт живёт без префикса /publisher.
 
     dry_run=True ничего не пишет в базу. Возвращает словарь счётчиков:
     processed (записей каталога), created (созданных серий), not_found
@@ -518,12 +541,12 @@ def sync_series_episodes(*, dry_run=False, limit=None):
     api_key = get_vibix_api_token()
     if not api_key:
         raise VideoServiceAPIError(
-            "VIDEO_SERVICE_API_KEY не задан — синхронизацию невозможно запустить"
+            "VIBIX_API_TOKEN не задан — синхронизацию невозможно запустить"
         )
 
     titles = (
-        Title.objects.filter(Q(kp_id__gt="") | Q(imdb_id__gt=""))
-        .filter(episodes__isnull=True)
+        Title.objects.series()
+        .filter(Q(kp_id__gt="") | Q(imdb_id__gt=""))
         .order_by("pk")
     )
     if limit is not None:

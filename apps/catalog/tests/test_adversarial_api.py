@@ -1,21 +1,9 @@
-"""Adversarial tests for the REST API (apps.api.v1).
+"""Adversarial regression tests for the REST API (apps.api.v1).
 
-Attack surface: the API is the only place where a remote client can send
-arbitrary typed data (JSON body), so it is where validation gaps turn
-into real bugs.
-
-Confirmed bugs (tests FAIL on purpose):
-- RateTitleView returns 500 on any non-dict JSON body (list, string,
-  number): request.data.get("rating") raises AttributeError.
-- RateTitleView accepts JSON booleans as ratings (bool is an int in
-  Python): {"rating": true} is stored as 1 instead of being rejected.
-- CommentViewSet lets a client reply to a HIDDEN (moderated) comment:
-  the reply is published but invisible, an orphaned thread.
-- CommentViewSet silently drops a cross-title parent instead of
-  rejecting the request: the client believes it replied but gets a
-  root comment.
-
-Everything else in this file is blocked by existing defenses.
+The API accepts arbitrary JSON types, identifiers and boundary values.
+Every case in this module is expected to pass: malformed bodies return
+controlled 4xx responses, moderation rules remain enforced, and no input
+may turn into an unhandled server error.
 """
 
 import json
@@ -41,7 +29,7 @@ class RateTitleViewCrashTests(TestCase):
         self.title = create_title()
         self.url = f"{API_V1}/titles/{self.title.slug}/rate/"
 
-    def test_rate_title_500_on_json_array_body(self):
+    def test_rate_title_rejects_json_array_body(self):
         # ATTACK: JSON array body -> request.data is a list -> .get() crash
         response = self.client.post(
             self.url,
@@ -55,7 +43,7 @@ class RateTitleViewCrashTests(TestCase):
             "Malformed body (JSON array) must be a client error, not 500",
         )
 
-    def test_rate_title_500_on_json_string_body(self):
+    def test_rate_title_rejects_json_string_body(self):
         # ATTACK: JSON string body -> request.data is a str -> .get() crash
         response = self.client.post(
             self.url,
@@ -69,7 +57,7 @@ class RateTitleViewCrashTests(TestCase):
             "Malformed body (JSON string) must be a client error, not 500",
         )
 
-    def test_rate_title_500_on_json_number_body(self):
+    def test_rate_title_rejects_json_number_body(self):
         # ATTACK: bare JSON number body -> request.data is an int -> .get() crash
         response = self.client.post(
             self.url,
@@ -83,7 +71,7 @@ class RateTitleViewCrashTests(TestCase):
             "Malformed body (JSON number) must be a client error, not 500",
         )
 
-    def test_rate_title_accepts_boolean_rating(self):
+    def test_rate_title_rejects_boolean_rating(self):
         # ATTACK: bool passes isinstance(int) and the range check (True == 1)
         response = self.client.post(
             self.url,
@@ -159,7 +147,7 @@ class CommentApiModerationTests(TestCase):
         self.title = create_title()
         self.url = f"{API_V1}/titles/{self.title.slug}/comments/"
 
-    def test_comment_reply_to_hidden_parent_allowed(self):
+    def test_comment_reply_to_hidden_parent_rejected(self):
         # ATTACK: parent is hidden by moderation, reply via API is accepted
         hidden = Comment.objects.create(
             user=self.author, title=self.title, text="bad comment",
@@ -183,7 +171,7 @@ class CommentApiModerationTests(TestCase):
             "No published reply may hang under a hidden comment",
         )
 
-    def test_comment_cross_title_parent_silently_dropped(self):
+    def test_comment_cross_title_parent_rejected(self):
         # ATTACK: parent belongs to another title; API must reject, not
         # silently create a root comment the client thinks is a reply
         other_title = create_title()
@@ -279,7 +267,7 @@ class WatchProgressBoundaryTests(TestCase):
             "Fractional position must be rejected, not silently truncated",
         )
 
-    def test_watch_progress_accepts_absurd_position(self):
+    def test_watch_progress_rejects_absurd_position(self):
         # ATTACK: position far beyond PositiveIntegerField range (2**31-1).
         # On SQLite it is stored; on PostgreSQL the INSERT would raise
         # DataError -> 500. Either way the API must reject it.

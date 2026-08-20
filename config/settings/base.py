@@ -29,12 +29,16 @@ env = environ.Env(
     # чтобы существующий .env продолжал работать без правок. Пустая строка
     # отключает интеграцию: вкладка не появится, SDK не загрузится.
     VIBIX_API_TOKEN=(str, ""),
-    VIBIX_PUBLISHER_ID=(str, "678503345"),
-    # Корень публичного API: /publisher/... живут под ним же, сериалы —
-    # напрямую (GET /api/v1/serials/...).
-    VIBIX_API_BASE_URL=(str, "https://vibix.org/api/v1"),
+    # Publisher ID выдаёт кабинет и он привязан к аккаунту/домену. Без
+    # явной настройки плеер не рендерится: использовать чужой example ID
+    # как production default нельзя.
+    VIBIX_PUBLISHER_ID=(str, ""),
+    # Выделенный production API. Те же OpenAPI-маршруты проксируются через
+    # vibix.org, но api.vibix.org — самостоятельный API-контур с рабочей
+    # страницей входа; адрес всё равно можно переопределить для аккаунта.
+    VIBIX_API_BASE_URL=(str, "https://api.vibix.org/api/v1"),
     # Устаревшие имена переменных — остаются для обратной совместимости.
-    VIDEO_SERVICE_PUBLISHER_ID=(str, "678503345"),
+    VIDEO_SERVICE_PUBLISHER_ID=(str, ""),
     # Рекламная сеть (стикеры, баннеры). Флаг включает её на всех страницах;
     # publisher_id и add_types пробрасываются в тег <ins id="vibix_union">
     # (id фиксированный — его ищет внешний скрипт-лоадер). Форматы:
@@ -61,10 +65,6 @@ env = environ.Env(
     # блокируют запуск со звуком без действия зрителя, поэтому
     # по умолчанию выключено.
     VIDEO_SERVICE_AUTOPLAY=(bool, False),
-    # Совместный просмотр (data-sync): зрители одной страницы смотрят
-    # синхронно. Подключает sync-lib.js и инициализирует WatchParty
-    # с комнатой по адресу записи. По умолчанию выключено.
-    VIDEO_SERVICE_WATCH_PARTY=(bool, False),
     # Показ трейлера для kp/imdb-эмбедов (data-trailer). Значения:
     # "true" — трейлер, когда полное видео в каталоге сервиса отсутствует
     # (запасной сценарий: вместо заглушки зритель увидит трейлер);
@@ -266,7 +266,6 @@ VIDEO_SERVICE_COLOR3 = env("VIDEO_SERVICE_COLOR3")
 VIDEO_SERVICE_COLOR4 = env("VIDEO_SERVICE_COLOR4")
 VIDEO_SERVICE_COLOR5 = env("VIDEO_SERVICE_COLOR5")
 VIDEO_SERVICE_AUTOPLAY = env("VIDEO_SERVICE_AUTOPLAY")
-VIDEO_SERVICE_WATCH_PARTY = env("VIDEO_SERVICE_WATCH_PARTY")
 VIDEO_SERVICE_TRAILER = env("VIDEO_SERVICE_TRAILER")
 
 if REDIS_URL:

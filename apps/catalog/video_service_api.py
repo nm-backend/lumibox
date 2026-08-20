@@ -24,7 +24,8 @@ from django.conf import settings
 from django.utils import timezone
 
 # Базовый адрес публичного API издателя: корень VIBIX_API_BASE_URL
-# (по умолчанию https://vibix.org/api/v1) + сегмент /publisher.
+# (по умолчанию выделенный production host https://api.vibix.org/api/v1)
+# + сегмент /publisher.
 VIDEO_SERVICE_API_BASE = f"{settings.VIBIX_API_BASE_URL.rstrip('/')}/publisher"
 
 # Сериалы живут на отдельном хосте API без сегмента /publisher:
@@ -32,8 +33,10 @@ VIDEO_SERVICE_API_BASE = f"{settings.VIBIX_API_BASE_URL.rstrip('/')}/publisher"
 # и запросы к /api/v1/publisher/serials/... сервис отвечает 404.
 VIDEO_SERVICE_SERIALS_API_BASE = settings.VIBIX_API_BASE_URL.rstrip("/")
 
-# Таймаут на запрос: каталог большой, но зависнуть навсегда не должен.
-REQUEST_TIMEOUT = 30
+# Раздельные таймауты соединения и чтения. Недоступный DNS/хост не должен
+# держать воркер 30 секунд до начала ответа; объёмный JSON при этом получает
+# достаточно времени на чтение.
+REQUEST_TIMEOUT = (5, 30)
 
 # Сколько раз повторяем запрос при 429/5xx и сетевых ошибках.
 MAX_RETRIES = 6
@@ -49,6 +52,18 @@ class VideoServiceAPIError(RuntimeError):
 
 class VideoServiceNotFoundError(VideoServiceAPIError):
     """HTTP 404: записи нет в каталоге издателя."""
+
+
+class VideoServiceAuthenticationError(VideoServiceAPIError):
+    """Токен отсутствует, отозван или API перенаправил запрос на форму входа."""
+
+
+class VideoServicePermissionError(VideoServiceAPIError):
+    """HTTP 403: аккаунту недоступен запрошенный ресурс."""
+
+
+class VideoServiceValidationError(VideoServiceAPIError):
+    """HTTP 422: API отклонил параметры запроса."""
 
 
 def get_vibix_api_token():
@@ -85,43 +100,83 @@ def _retryable(status_code):
 
 
 def _request_json(api_key, path, params, base=VIDEO_SERVICE_API_BASE):
-    """GET с Bearer-авторизацией и ретраями; возвращает распарсенный JSON."""
+    """GET с Bearer-авторизацией и ретраями; возвращает JSON-объект.
+
+    Редиректы отключены намеренно. Без токена Vibix может отправить клиента
+    на HTML-форму входа; requests по умолчанию следует туда, и конечный 404
+    ошибочно выглядел как «видео не найдено». Авторизационная ошибка должна
+    останавливать синхронизацию, а не записывать ложный not_found.
+    """
+    if not str(api_key or "").strip():
+        raise VideoServiceAuthenticationError("VIBIX_API_TOKEN не задан")
+
     last_error = None
     for attempt in range(MAX_RETRIES):
         try:
             response = requests.get(
                 f"{base}{path}",
                 params=params,
-                headers={"Authorization": f"Bearer {api_key}"},
+                headers={
+                    "Authorization": f"Bearer {api_key}",
+                    "Accept": "application/json",
+                },
                 timeout=REQUEST_TIMEOUT,
+                allow_redirects=False,
             )
         except requests.RequestException as exc:
             last_error = exc
             if attempt < MAX_RETRIES - 1:
                 time.sleep(_retry_delay(attempt))
                 continue
-            break
-
-        if _retryable(response.status_code) and attempt < MAX_RETRIES - 1:
-            time.sleep(_retry_delay(attempt, response))
-            continue
-        # 404 — штатный ответ detail-эндпоинтов на «записи нет»: отдельный
-        # класс, чтобы вызывающий код мог отличить её от прочих ошибок.
-        if response.status_code == 404:
-            raise VideoServiceNotFoundError(f"Сервис не нашёл запись ({path})")
-        if response.status_code != 200:
             raise VideoServiceAPIError(
-                f"API видеосервиса вернул HTTP {response.status_code} для {path} "
+                f"Не удалось обратиться к API видеосервиса ({path})"
+            ) from exc
+
+        status = response.status_code
+        if _retryable(status):
+            if attempt < MAX_RETRIES - 1:
+                time.sleep(_retry_delay(attempt, response))
+                continue
+            raise VideoServiceAPIError(
+                f"API видеосервиса вернул HTTP {status} для {path} "
                 f"после {attempt + 1} попыток"
             )
 
+        if status in (301, 302, 303, 307, 308):
+            raise VideoServiceAuthenticationError(
+                f"API видеосервиса перенаправил запрос {path}; проверьте токен и API URL"
+            )
+        if status == 401:
+            raise VideoServiceAuthenticationError("VIBIX_API_TOKEN отклонён сервисом")
+        if status == 403:
+            raise VideoServicePermissionError(
+                f"Аккаунту Vibix недоступен ресурс {path}"
+            )
+        if status == 404:
+            raise VideoServiceNotFoundError(f"Сервис не нашёл запись ({path})")
+        if status == 422:
+            raise VideoServiceValidationError(
+                f"API видеосервиса отклонил параметры запроса {path}"
+            )
+        if status != 200:
+            raise VideoServiceAPIError(
+                f"API видеосервиса вернул HTTP {status} для {path}"
+            )
+
         try:
-            return response.json()
+            payload = response.json()
         except ValueError as exc:
             raise VideoServiceAPIError(
                 f"API видеосервиса вернул не-JSON ответ для {path}"
             ) from exc
+        if not isinstance(payload, dict):
+            raise VideoServiceAPIError(
+                f"API видеосервиса вернул JSON не в виде объекта для {path}"
+            )
+        return payload
 
+    # Недостижимая страховка для статических анализаторов: цикл либо
+    # возвращает payload, либо поднимает конкретное исключение.
     raise VideoServiceAPIError(
         f"Не удалось обратиться к API видеосервиса ({path}): {last_error}"
     )
@@ -141,6 +196,20 @@ def _get_unwrapped(api_key, path, params, base=VIDEO_SERVICE_API_BASE):
     return _request_json(api_key, path, params, base=base)
 
 
+def _kinopoisk_id(value):
+    value = str(value or "").strip()
+    if not value.isdigit():
+        raise VideoServiceValidationError("Kinopoisk ID должен состоять из цифр")
+    return value
+
+
+def _imdb_id(value):
+    value = str(value or "").strip().lower()
+    if not value.startswith("tt") or not value[2:].isdigit():
+        raise VideoServiceValidationError("IMDb ID должен иметь формат tt1234567")
+    return value
+
+
 def fetch_video_by_kp(api_key, kp_id):
     """
     Полная карточка видео по Kinopoisk ID (GET /videos/kp/{kpId}).
@@ -149,7 +218,7 @@ def fetch_video_by_kp(api_key, kp_id):
     рейтинги, жанры, озвучки и теги. Возвращает словарь видео.
     Кидает VideoServiceNotFoundError, если видео отсутствует в каталоге.
     """
-    return _get_unwrapped(api_key, f"/videos/kp/{kp_id}", {})
+    return _get_unwrapped(api_key, f"/videos/kp/{_kinopoisk_id(kp_id)}", {})
 
 
 def fetch_video_by_imdb(api_key, imdb_id):
@@ -158,7 +227,7 @@ def fetch_video_by_imdb(api_key, imdb_id):
 
     См. fetch_video_by_kp: форма ответа та же.
     """
-    return _get_unwrapped(api_key, f"/videos/imdb/{imdb_id}", {})
+    return _get_unwrapped(api_key, f"/videos/imdb/{_imdb_id(imdb_id)}", {})
 
 
 def fetch_serial_by_kp(api_key, kp_id):
@@ -174,7 +243,7 @@ def fetch_serial_by_kp(api_key, kp_id):
     """
     return _get_unwrapped(
         api_key,
-        f"/serials/kp/{kp_id}",
+        f"/serials/kp/{_kinopoisk_id(kp_id)}",
         {},
         base=VIDEO_SERVICE_SERIALS_API_BASE,
     )
@@ -189,7 +258,7 @@ def fetch_serial_by_imdb(api_key, imdb_id):
     """
     return _get_unwrapped(
         api_key,
-        f"/serials/imdb/{imdb_id}",
+        f"/serials/imdb/{_imdb_id(imdb_id)}",
         {},
         base=VIDEO_SERVICE_SERIALS_API_BASE,
     )
@@ -296,71 +365,3 @@ def iter_video_links(api_key, *, limit=100, updated_from=None, years=None, max_p
             return
         page += 1
         time.sleep(PAGE_DELAY)
-
-
-# Кэш доступности видео: video_key -> (is_playable, timestamp)
-# video_key: "kp:{kp_id}" или "imdb:{imdb_id}" или "player:{player_id}"
-_video_availability_cache = {}
-_AVAILABILITY_CACHE_TTL = 60 * 60  # 1 час
-
-
-def check_video_playable(api_key, *, kp_id=None, imdb_id=None, player_id=None, player_type=None):
-    """
-    Проверяет, доступно ли видео для воспроизведения (есть ли лицензия на стриминг).
-
-    Возвращает кортеж: (is_playable: bool, video_detail: dict|None, error: str|None)
-
-    Логика:
-    1. Сначала проверяем кэш
-    2. Пытаемся получить детальную карточку через /videos/kp|imdb/{id}
-    3. Если видео есть в каталоге (200), но у него нет embed_code или он не играет — считаем недоступным
-    4. Кэшируем результат на 1 час
-
-    Примечание: API Vibix отдаёт 200 даже для нелицензированного контента.
-    Настоящая проверка лицензии возможна только клиентски (iframe загрузится или нет).
-    Здесь мы проверяем наличие видео в каталоге издателя.
-    """
-    # Формируем ключ кэша
-    if kp_id:
-        cache_key = f"kp:{kp_id}"
-    elif imdb_id:
-        cache_key = f"imdb:{imdb_id}"
-    elif player_id and player_type:
-        cache_key = f"player:{player_id}"
-    else:
-        return False, None, "Не указан идентификатор видео"
-
-    # Проверяем кэш
-    if cache_key in _video_availability_cache:
-        is_playable, detail, cached_at = _video_availability_cache[cache_key]
-        if time.time() - cached_at < _AVAILABILITY_CACHE_TTL:
-            return is_playable, detail, None
-
-    # Пытаемся получить детальную карточку
-    try:
-        if kp_id:
-            detail = fetch_video_by_kp(api_key, kp_id)
-        elif imdb_id:
-            detail = fetch_video_by_imdb(api_key, imdb_id)
-        else:
-            # Для player_id пытаемся через kp_id если есть
-            return False, None, "Неподдерживаемый тип идентификатора для проверки"
-
-        # Видео есть в каталоге — проверяем наличие embed_code
-        # (признак того, что плеер может его открыть)
-        embed_code = detail.get("embed_code")
-        if embed_code and 'data-id="' in embed_code:
-            # Видео есть в каталоге и есть embed_code — потенциально играемо
-            # Но реальная лицензия проверяется только клиентски
-            _video_availability_cache[cache_key] = (True, detail, time.time())
-            return True, detail, None
-        else:
-            _video_availability_cache[cache_key] = (False, detail, time.time())
-            return False, detail, "Нет embed_code в ответе API"
-
-    except VideoServiceNotFoundError:
-        _video_availability_cache[cache_key] = (False, None, time.time())
-        return False, None, "Видео не найдено в каталоге Vibix"
-    except VideoServiceAPIError as e:
-        # При ошибке API не кэшируем, возвращаем ошибку
-        return False, None, f"Ошибка API: {e}"

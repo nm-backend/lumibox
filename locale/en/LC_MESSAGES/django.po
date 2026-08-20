@@ -248,6 +248,25 @@ msgstr "Watch"
 msgid "Трейлер"
 msgstr "Trailer"
 
+msgid "Запустить плеер Vibix"
+msgstr "Start Vibix player"
+
+msgid "Плеер загрузится с внешнего сервиса только после нажатия."
+msgstr "The player loads from an external service only after you click."
+
+msgid "Загружаем внешний плеер…"
+msgstr "Loading external player…"
+
+msgid "Плеер не ответил. Проверьте соединение и обновите страницу."
+msgstr ""
+"The player did not respond. Check your connection and reload the page."
+
+msgid "Обновить страницу"
+msgstr "Reload page"
+
+msgid "Для запуска плеера включите JavaScript."
+msgstr "Enable JavaScript to start the player."
+
 msgid "В избранном"
 msgstr "In favorites"
 

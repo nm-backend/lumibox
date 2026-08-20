@@ -1,13 +1,19 @@
 # Инструкция по работе с Vibix
 
-Переведённая из Google Docs — **официальная документация Vibix** для DLE-плагина.
+Архивная выжимка из предоставленной документации DLE-плагина и публичного
+OpenAPI Vibix. Это справочный материал, а не единственный источник контракта:
+актуальная native Django-архитектура и полная карта контуров зафиксированы в
+`docs/LUMIBOX_ARCHITECTURE.md`.
 
 ---
 
 ## 1. Установка и обновление плагина DLE
 
 ### Загрузка плагина
-Перейти по ссылке `https://plugins.vibix.org/v1/vibix.zip` и сохранить архив.
+Историческая инструкция указывала
+`https://plugins.vibix.org/v1/vibix.zip`. На 20 августа 2026 года публичная
+выдача актуального архива не подтверждена (`/v1/` закрыт); пакет следует
+получать только из авторизованного кабинета Vibix. LumiBox плагин не использует.
 
 ### Установка
 1. Открыть панель DLE → **Утилиты → Управление плагинами → Загрузить плагин**.
@@ -107,7 +113,12 @@
 ```
 
 **Поддерживаемые форматы `data-add_types`:**
-`sticker`, `pcsticker`, `banners`, `brand`, `flyroll`.
+`sticker`, `pcsticker`, `banners`, `brand`, `flyroll` (runtime-код также
+содержит preroll/clickunder/popunder и другие варианты).
+
+> Этот код не входит в безопасное ядро LumiBox. Исследованный loader выполняет
+> browser fingerprinting и загружает сторонние tracking/VAST/VPAID creatives.
+> Не включать без отдельного consent, privacy/legal/security review.
 
 ---
 
@@ -120,8 +131,8 @@
 
 **Пример использования:**
 ```html
-<!-- data-type="movie" data-id="1" — реальный Video ID -->
-<ins data-publisher-id="678503345" data-type="movie" data-id="1"></ins>
+<!-- Внутренний Video ID берите только из embed_code вашего кабинета -->
+<ins data-publisher-id="YOUR_PUBLISHER_ID" data-type="movie" data-id="VIDEO_ID"></ins>
 
 <!-- data-type="kp" data-id="326" — Kinopoisk ID (Шоошенк), browser-side резолвинг -->
 <ins data-publisher-id="678503345" data-type="kp" data-id="326"></ins>
@@ -153,10 +164,13 @@
 ## 10. API документация
 
 ### Базовые URL
-- **Swagger / OpenAPI:** `https://vibix.org/api/external/documentation`
-- **API base:** `https://vibix.org/api/v1`
+- **Canonical production Swagger:** `https://api.vibix.org/api/external/documentation`
+- **OpenAPI JSON:** `https://api.vibix.org/api/external/docs/external-api-docs.json`
+- **API base:** `https://api.vibix.org/api/v1`
+- Та же схема публично проксируется через `vibix.org/api/...`, но LumiBox
+  использует выделенный API host по умолчанию.
 - **Auth header:** `Authorization: Bearer {API_KEY}`
-  - Токен из `.env.example`: `29756|4yaXH5dIT0A2EtB27D55qUlYmfc28MzM3875wtj4800a4f63`
+  - Токен генерируется в кабинете Vibix и задаётся только через `VIBIX_API_TOKEN` в окружении.
 
 ### GET-методы
 
@@ -179,13 +193,16 @@
 
 ---
 
-## 11. Совместный просмотр (WatchParty)
+## 11. Совместный просмотр (WatchParty) — только историческая справка
+
+Следующий пример **не подключён в LumiBox**. Исследованный postMessage/
+WebSocket-контракт не прошёл origin/auth/privacy review.
 
 ```html
 <ins id="vibix-frame-id"
-  data-publisher-id="678503345"
+  data-publisher-id="YOUR_PUBLISHER_ID"
   data-type="movie"
-  data-id="1"
+  data-id="VIDEO_ID"
   data-sync="true"></ins>
 
 <script src="https://graphicslab.io/sdk/v2/rendex-sdk.min.js"></script>
@@ -201,13 +218,12 @@ new WatchParty({ iframe: '#vibix-frame-id' });
 
 | Инструкция | Реализация в LumiBox |
 |---|---|
-| `https://vibix.org/api/v1` | Правильный URL — только в `render.yaml`/`render.paid.yaml`; **default `base.py` = `api.vibix.org` (баг!)** |
-| `https://api.vibix.org/api/v1` | `.env.example` и `.env` — **НЕВЕРНО**, корень ошибки 8.2! |
+| `https://api.vibix.org/api/v1` | Единый default в `base.py`, `.env.example` и deploy-конфигах |
 | `/publisher/videos/kp/{id}` | `fetch_video_by_kp()` в `video_service_api.py` |
 | `/serials/kp/{id}` (без /publisher) | `fetch_serial_by_kp()` + `VIDEO_SERVICE_SERIALS_API_BASE` |
-| `Authorization: Bearer {API_KEY}` | `get_vibix_api_token()` в `video_service_api.py` |
-| `rendex-sdk.min.js` | Подключается в `title_detail.html` через `static/js/title-detail.js` |
-| `data-type="kp" data-id="326"` | Fallback в `_get_external_player()` когда `player_id` пуст |
-| `data-design` (1–6) | `VIDEO_SERVICE_DESIGN` в settings |
-| `vibix_union` реклама | **реализовано** (`ADS_NETWORK_*` + `base.html` + `ad_slot.html` + CSP) |
-| Микроразметка | **не реализована** в LumiBox |
+| `Authorization: Bearer {API_KEY}` | `get_vibix_api_token()`; токен только из окружения |
+| `rendex-sdk.min.js` | `vibix-player.js` добавляет SDK в `<head>` только после клика зрителя |
+| `data-type="kp" data-id="326"` | Fallback в `_get_external_player()`, когда нет проверенного `player_id` |
+| `data-design` (1–6) | Валидируется и берётся из `VIDEO_SERVICE_DESIGN` |
+| `vibix_union` реклама | Отдельный legacy-контур, выключен (`ADS_NETWORK_ENABLED=False`) и не входит в ядро |
+| Микроразметка | Общая Movie/TVSeries JSON-LD реализована; специальные поля Vibix не хранятся |

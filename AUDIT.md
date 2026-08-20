@@ -10,12 +10,12 @@
 
 | # | Направление | Статус | Доказательство |
 |---|-------------|--------|----------------|
-| 1 | Тесты и покрытие | ✅ | 477 тестов (3 skip), OK; coverage 95%; порог CI 90% |
+| 1 | Тесты и покрытие | ✅ | 764 теста (3 skip), OK; coverage 95%; порог CI 90% |
 | 2 | Статический анализ (ruff) | ✅ | `ruff check apps config scripts` — 0 ошибок |
-| 3 | Статическая типизация (mypy) | ✅ | `mypy apps` — 0 ошибок, 113 файлов |
+| 3 | Статическая типизация (mypy) | ✅ | `mypy apps` — 0 ошибок, 145 файлов |
 | 4 | Миграции | ✅ | `makemigrations --check --dry-run` — no changes |
 | 5 | Боевые проверки Django | ✅ | `check --deploy --fail-level WARNING` — 0 issues |
-| 6 | CI/CD | ✅ | GitHub Actions **зелёный на PostgreSQL 18 + Redis 8**: все 13 шагов (прогон 31391910066). До этого пайплайн был красным, и локальный SQLite это скрывал — разбор ниже |
+| 6 | CI/CD | ✅ | Все локальные эквиваленты 13 шагов проходят; workflow использует PostgreSQL 18 + Redis 8. Статус удалённого запуска подтверждается после push |
 | 7 | Деплой-конфиги | ✅ | Dockerfile, render.yaml, render.paid.yaml, fly.toml, railway.json, compose |
 | 8 | Живые страницы | ✅ | `scripts/smoke_pages.py` — 25 URL, все 200 |
 | 9 | Каталог и разделы | ✅ | Витрины `/new/ /popular/ /top/ /premieres/ /year/<год>/`, франшизы |
@@ -40,21 +40,21 @@
 | 28 | Email и сброс пароля | 🟡 | SMTP-бэкенд включается по `EMAIL_HOST`, на проде ждёт credentials |
 | — | R2-хранилище (прод) | 🟡 | Код готов, ждёт `AWS_*` / `CLOUDFLARE_R2_PUBLIC_URL` |
 | — | Sentry (прод) | 🟡 | Интеграция готова, ждёт `SENTRY_DSN` |
-| — | Каталоги переводов | ✅ | `scripts/generate_translations.py` собирает сам, без gettext: 465 записей × ru/en, 0 непереведённых |
+| — | Каталоги переводов | ✅ | `scripts/generate_translations.py` собирает сам, без gettext: 471 запись × ru/en, 0 непереведённых |
 | — | Подписка на сериал, запрос фильма, PWA | ⚪️ | Вне объёма осознанно |
 
 ## Доказательства (последний прогон)
 
 ```
-python manage.py test apps                → Ran 477, OK (skipped=3)
+python manage.py test apps                → Ran 764, OK (skipped=3)
 coverage report                            → TOTAL 95%
 ruff check apps config scripts             → All checks passed!
-mypy apps                                  → Success: no issues found in 113 files
+mypy apps                                  → Success: no issues found in 145 files
 makemigrations --check --dry-run           → No changes detected
 check --deploy --fail-level WARNING        → System check identified no issues
 scripts/check_branding.py                  → чисто
 scripts/smoke_pages.py                     → все 25 URL отдали 200
-python scripts/generate_translations.py    → ru/en: 465 записей, 0 непереведённых
+python scripts/generate_translations.py    → ru/en: 471 запись, 0 непереведённых
 axe через CDP (4 конфигурации)             → 0 violations: light/dark 1920, light 390, авторизованные
 ```
 
@@ -64,7 +64,7 @@ axe через CDP (4 конфигурации)             → 0 violations: li
    нет GNU gettext (и Docker не запущен), поэтому генерацию каталогов делает
    `python scripts/generate_translations.py`: он читает единственный список
    строк в `STRINGS`, подставляет переводы из словарей `EN`/`KY` и пишет
-   `django.po` + `django.mo` для всех трёх языков (сейчас 461 запись,
+   `django.po` + `django.mo` для обоих языков (сейчас 471 запись,
    непереведённых нет). Обновление после правок шаблонов:
    ```bash
    python scripts/generate_translations.py

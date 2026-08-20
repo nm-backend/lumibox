@@ -21,6 +21,7 @@ from apps.api.v1.serializers import (
     CommentSerializer,
     CountrySerializer,
     GenreSerializer,
+    RateRequestSerializer,
     ReviewSerializer,
     TitleDetailSerializer,
     TitleListSerializer,
@@ -61,12 +62,6 @@ class StableOrderingFilter(filters.OrderingFilter):
         return result
 
 
-class RateRequestSerializer(serializers.Serializer):
-    """Оценка фильма или сериала от 1 до 10."""
-
-    rating = serializers.IntegerField(min_value=1, max_value=10)
-
-
 class EpisodeWatchRequestSerializer(serializers.Serializer):
     """
     Прогресс просмотра, который присылает плеер.
@@ -77,8 +72,14 @@ class EpisodeWatchRequestSerializer(serializers.Serializer):
     """
 
     episode = serializers.IntegerField(required=False, allow_null=True)
-    position = serializers.IntegerField(required=False, min_value=0)
-    duration = serializers.IntegerField(required=False, min_value=0)
+    # PostgreSQL PositiveIntegerField хранит максимум 2^31-1. Верхняя
+    # граница на API не даёт превратить пользовательский ввод в DataError.
+    position = serializers.IntegerField(
+        required=False, min_value=0, max_value=2_147_483_647
+    )
+    duration = serializers.IntegerField(
+        required=False, min_value=0, max_value=2_147_483_647
+    )
 
 
 class SearchResultSerializer(serializers.Serializer):
@@ -560,9 +561,10 @@ class RateTitleView(APIView):
         except Title.DoesNotExist:
             return Response({"detail": "Запись не найдена."}, status=404)
 
-        rating = request.data.get("rating")
-        if not isinstance(rating, int) or rating < 1 or rating > 10:
+        serializer = RateRequestSerializer(data=request.data)
+        if not serializer.is_valid():
             return Response({"detail": "Оценка от 1 до 10."}, status=400)
+        rating = serializer.validated_data["rating"]
 
         review, created = Review.objects.update_or_create(
             user=request.user,

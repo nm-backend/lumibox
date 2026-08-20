@@ -1,4 +1,4 @@
-﻿{% extends "base.html" %}
+{% extends "base.html" %}
 {% load static i18n lumibox_urls icons catalog_filters %}
 
 {% block page_title %}{% blocktranslate with name=title.name year=title.release_year %}{{ name }} ({{ year }}) — LumiBox{% endblocktranslate %}{% endblock %}
@@ -73,20 +73,11 @@
        при старте, а этот только рисует состояние. Оба работают через один
        и тот же элемент video и друг друга не трогают. {% endcomment %}
     <script src="{% static 'js/player.js' %}?v={{ static_version }}" defer></script>
-    {% comment %} SDK внешнего плеера грузим только там, где есть его вкладка:
-       глобальный <script> во всех <head> тащил бы 113 КБ чужого кода на
-       каждую страницу каталога, где плеер не нужен. defer — чтобы скрипт
-       выполнился после разметки и нашёл тег <ins>. {% endcomment %}
+    {% comment %} Локальный загрузчик присутствует только на странице с Vibix.
+       Сам сторонний SDK он добавляет в <head> после явного нажатия зрителя:
+       обычный просмотр карточки не отправляет Vibix URL и метаданные страницы. {% endcomment %}
     {% if external_player %}
-        <script src="https://graphicslab.io/sdk/v2/rendex-sdk.min.js" defer></script>
-        {% comment %} Совместный просмотр: sync-lib рисует синхронизацию поверх
-           iframe внешнего плеера, watch-party.js ждёт, пока SDK создаст
-           iframe, и инициализирует WatchParty. Включено настройкой
-           VIDEO_SERVICE_WATCH_PARTY, по умолчанию выключено. {% endcomment %}
-        {% if external_player.sync %}
-            <script src="https://sync.videoframe2.com/sync-lib.js" defer></script>
-            <script src="{% static 'js/watch-party.js' %}?v={{ static_version }}" defer></script>
-        {% endif %}
+        <script src="{% static 'js/vibix-player.js' %}?v={{ static_version }}" defer></script>
     {% endif %}
 {% endblock %}
 
@@ -395,13 +386,7 @@
                            версии: вкладки YouTube и своих файлов не рисуем,
                            чтобы на странице было ровно два плеера —
                            фильм и трейлер. {% endcomment %}
-                        <button class="player-tabs__tab player-tabs__tab--active" type="button" data-player-tab="external" role="tab" aria-selected="true">
-                            {% if external_player.force_trailer_only %}
-                                {% trans "Только трейлер" %}
-                            {% else %}
-                                {% trans "Смотреть фильм" %}
-                            {% endif %}
-                        </button>
+                        <button class="player-tabs__tab player-tabs__tab--active" type="button" data-player-tab="external" role="tab" aria-selected="true">{% trans "Смотреть фильм" %}</button>
                     {% elif has_youtube %}
                         {% comment %} Полная версия на YouTube — источник MVP,
                            когда внешний плеер не настроен. {% endcomment %}
@@ -567,20 +552,29 @@
             {% endif %}
 
             {% if external_player %}
-                {% comment %} data-sync-room/data-sync-user — для watch-party.js:
-                   данные висят на панели, а не на теге <ins>, потому что SDK
-                   внешнего плеера заменяет <ins> на iframe раньше, чем
-                   отработает наш скрипт. Само data-sync="true" остаётся
-                   на <ins> — его читает SDK сервиса. Это основной плеер
-                   страницы «Смотреть фильм», поэтому панель открыта. {% endcomment %}
-                <div class="player" data-player-pane="external"
-                     {% if external_player.sync %}data-sync-room="{{ external_player.sync_room }}"{% if external_player.sync_user %} data-sync-user="{{ external_player.sync_user }}"{% endif %}{% endif %}>
-                    {% if external_player.force_trailer_only %}
-                        <div class="player__unavailable">
-                            <p>{% trans "Полная версия недоступна для просмотра." %}</p>
-                            <p class="player__unavailable-hint">{% trans "Доступен только трейлер." %}</p>
-                        </div>
-                    {% endif %}
+                {% comment %} До нажатия загружается только наша разметка. Это
+                   явная privacy/supply-chain граница: mutable SDK Vibix и его
+                   iframe не получают запрос при простом открытии карточки.
+                   Загрузчик добавит SDK именно в <head>, как требует контракт,
+                   а MutationObserver уберёт эту панель после появления iframe. {% endcomment %}
+                <div class="player player--vibix-idle" data-player-pane="external" data-vibix-player
+                     data-vibix-loading="{% trans 'Загружаем внешний плеер…' %}"
+                     data-vibix-error="{% trans 'Плеер не ответил. Проверьте соединение и обновите страницу.' %}"
+                     data-vibix-reload="{% trans 'Обновить страницу' %}">
+                    <div class="vibix-player__gate" data-vibix-gate>
+                        <button class="button button--primary vibix-player__load"
+                                type="button" data-vibix-load>
+                            {% trans "Запустить плеер Vibix" %}
+                        </button>
+                        <p class="vibix-player__notice">
+                            {% trans "Плеер загрузится с внешнего сервиса только после нажатия." %}
+                        </p>
+                        <p class="vibix-player__status" data-vibix-status
+                           role="status" aria-live="polite"></p>
+                        <noscript>
+                            <p class="vibix-player__status">{% trans "Для запуска плеера включите JavaScript." %}</p>
+                        </noscript>
+                    </div>
                     <ins data-publisher-id="{{ external_player.publisher_id }}"
                          data-type="{{ external_player.type }}"
                          data-id="{{ external_player.id }}"
@@ -591,8 +585,7 @@
                          {% if external_player.episodes %}data-episodes="{{ external_player.episodes }}"{% endif %}
                          {% if external_player.voiceover %}data-voiceover="{{ external_player.voiceover }}"{% endif %}
                          {% if external_player.voiceover_only %}data-voiceover-only="true"{% endif %}
-                         {% if external_player.autoplay %}data-autoplay="true"{% endif %}
-                         {% if external_player.sync %}data-sync="true"{% endif %}></ins>
+                         {% if external_player.autoplay %}data-autoplay="true"{% endif %}></ins>
                 </div>
             {% endif %}
 

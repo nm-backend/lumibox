@@ -15,9 +15,9 @@
       "CLOUDFLARE_R2_ENDPOINT_URL": null,
       "CLOUDFLARE_R2_REGION_NAME": "auto",
       "CLOUDFLARE_R2_PUBLIC_URL": null,
-      "VIBIX_PUBLISHER_ID": "678503345",
+      "VIBIX_PUBLISHER_ID": null,
       "VIBIX_API_TOKEN": null,
-      "VIBIX_API_BASE_URL": "https://vibix.org/api/v1",
+      "VIBIX_API_BASE_URL": "https://api.vibix.org/api/v1",
       "VIDEO_SERVICE_TRAILER": "true"
     },
     "restartPolicyType": "ON_FAILURE",

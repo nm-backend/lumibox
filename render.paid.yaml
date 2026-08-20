@@ -64,11 +64,11 @@ services:
 
       # --- Vibix (реальный внешний плеер) ---
       - key: VIBIX_PUBLISHER_ID
-        value: "678503345"
+        sync: false
       - key: VIBIX_API_TOKEN
         sync: false
       - key: VIBIX_API_BASE_URL
-        value: https://vibix.org/api/v1
+        value: https://api.vibix.org/api/v1
       - key: VIDEO_SERVICE_TRAILER
         value: "true"
 
@@ -121,11 +121,14 @@ services:
       # Планировщик синхронизации должен видеть ту же конфигурацию Vibix,
       # что и web-процесс. Секрет не дублируется — берётся у web-сервиса.
       - key: VIBIX_PUBLISHER_ID
-        value: "678503345"
+        fromService:
+          type: web
+          name: lumibox-web
+          envVarKey: VIBIX_PUBLISHER_ID
       - key: VIBIX_API_TOKEN
         fromService:
           type: web
           name: lumibox-web
           envVarKey: VIBIX_API_TOKEN
       - key: VIBIX_API_BASE_URL
-        value: https://vibix.org/api/v1
+        value: https://api.vibix.org/api/v1

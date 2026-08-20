@@ -72,11 +72,11 @@ services:
       # Publisher ID участвует только в публичном теге плеера. API-токен —
       # секрет: задайте его в Render Dashboard, в HTML он не попадает.
       - key: VIBIX_PUBLISHER_ID
-        value: "678503345"
+        sync: false
       - key: VIBIX_API_TOKEN
         sync: false
       - key: VIBIX_API_BASE_URL
-        value: https://vibix.org/api/v1
+        value: https://api.vibix.org/api/v1
       - key: VIDEO_SERVICE_TRAILER
         value: "true"
 

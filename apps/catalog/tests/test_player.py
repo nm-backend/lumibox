@@ -8,7 +8,7 @@
 
 import json
 
-from django.test import TestCase
+from django.test import TestCase, override_settings
 
 from apps.catalog.models import Participation, PlaybackSource, Title, VoiceOver
 from apps.catalog.tests.test_episodes import create_episode, create_source
@@ -152,6 +152,7 @@ class TrailerRenderingTests(TestCase):
         self.assertContains(response, "Трейлер размещён на стороннем сервисе.")
 
 
+@override_settings(VIDEO_SERVICE_PUBLISHER_ID="678503345")
 class ExternalPlayerRenderingTests(TestCase):
     """Внешний плеер Vibix: тег <ins> с data-атрибутами и защита ключа.
 
@@ -229,15 +230,22 @@ class ExternalPlayerRenderingTests(TestCase):
         response = self.client.get(title.get_absolute_url())
 
         self.assertNotContains(response, "data-publisher-id")
-        self.assertNotContains(response, "rendex-sdk.min.js")
+        self.assertNotContains(response, "vibix-player.js")
 
-    def test_sdk_script_only_with_external_player(self):
+    def test_lazy_loader_only_with_external_player(self):
         with_player = create_title(name="С плеером", player_id="5", player_type="movie")
         response = self.client.get(with_player.get_absolute_url())
-        self.assertContains(response, "rendex-sdk.min.js")
+        self.assertContains(response, "vibix-player.js")
+        self.assertContains(response, "data-vibix-load")
+        # Mutable SDK не выполняется при простом открытии страницы.
+        self.assertNotContains(
+            response,
+            '<script src="https://graphicslab.io/sdk/v2/rendex-sdk.min.js"',
+            html=False,
+        )
 
         without_player = create_title(name="Без плеера", player_id="", player_type="")
-        self.assertNotContains(self.client.get(without_player.get_absolute_url()), "rendex-sdk")
+        self.assertNotContains(self.client.get(without_player.get_absolute_url()), "vibix-player.js")
 
     def test_api_token_never_reaches_html(self):
         title = create_title(name="Секретный плеер", player_id="5", player_type="movie")
