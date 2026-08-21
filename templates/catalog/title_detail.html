@@ -562,18 +562,33 @@
                      data-vibix-error="{% trans 'Плеер не ответил. Проверьте соединение и обновите страницу.' %}"
                      data-vibix-reload="{% trans 'Обновить страницу' %}">
                     <div class="vibix-player__gate" data-vibix-gate>
-                        <button class="button button--primary vibix-player__load"
-                                type="button" data-vibix-load>
-                            {% trans "Запустить плеер Vibix" %}
-                        </button>
-                        <p class="vibix-player__notice">
-                            {% trans "Плеер загрузится с внешнего сервиса только после нажатия." %}
-                        </p>
-                        <p class="vibix-player__status" data-vibix-status
-                           role="status" aria-live="polite"></p>
-                        <noscript>
-                            <p class="vibix-player__status">{% trans "Для запуска плеера включите JavaScript." %}</p>
-                        </noscript>
+                        {% comment %} Превью до запуска: кадр/постер записи под затемнением,
+                           чтобы пустой плеер не выглядел чёрным прямоугольником. Чисто
+                           декоративно (aria-hidden) и опционально — без картинки остаётся
+                           прежний тёмный фон, на загрузку SDK это не влияет. {% endcomment %}
+                        {% if title.backdrop or title.poster %}
+                            <img class="vibix-player__preview"
+                                 src="{% if title.backdrop %}{{ title.backdrop|webp_url }}{% else %}{{ title.poster|webp_url }}{% endif %}"
+                                 alt="" aria-hidden="true" loading="lazy" decoding="async">
+                        {% endif %}
+                        <div class="vibix-player__gate-content">
+                            <button class="button button--primary vibix-player__load"
+                                    type="button" data-vibix-load>
+                                <svg class="vibix-player__play-icon" viewBox="0 0 24 24"
+                                     width="20" height="20" aria-hidden="true" focusable="false">
+                                    <path d="M8 5v14l11-7z" fill="currentColor"/>
+                                </svg>
+                                {% trans "Запустить плеер Vibix" %}
+                            </button>
+                            <p class="vibix-player__notice">
+                                {% trans "Плеер загрузится с внешнего сервиса только после нажатия." %}
+                            </p>
+                            <p class="vibix-player__status" data-vibix-status
+                               role="status" aria-live="polite"></p>
+                            <noscript>
+                                <p class="vibix-player__status">{% trans "Для запуска плеера включите JavaScript." %}</p>
+                            </noscript>
+                        </div>
                     </div>
                     <ins data-publisher-id="{{ external_player.publisher_id }}"
                          data-type="{{ external_player.type }}"

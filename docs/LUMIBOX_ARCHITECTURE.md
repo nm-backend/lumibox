@@ -213,7 +213,17 @@ python manage.py sync_vibix --title <slug>
 python manage.py sync_vibix --voiceovers
 python manage.py sync_vibix --episodes
 python manage.py sync_vibix --episodes --limit 10 --dry-run
+
+# Создать НОВЫЕ записи по списку Kinopoisk ID (метаданные из API)
+python manage.py create_from_vibix 447301 258687 361
+python manage.py create_from_vibix --file kp_ids.txt
+python manage.py create_from_vibix 447301 --dry-run
 ```
+
+`sync_vibix` обогащает уже существующие записи (совпадение по названию и
+году), `create_from_vibix` — заводит новые по точному Kinopoisk ID: название,
+год, imdb_id, player_id, описание, рейтинги, длительность, жанры и страны.
+Идемпотентна: ID с уже существующей записью пропускается.
 
 Старые `sync_video_service`, `sync_voiceovers`, `sync_episodes` оставлены для
 совместимости и вызывают то же ядро. В админке есть действия sync/dry-run для

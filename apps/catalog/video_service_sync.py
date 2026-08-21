@@ -298,6 +298,101 @@ def sync_title(title, *, dry_run=False):
     return stats
 
 
+def _parse_year(value):
+    """
+    Год выпуска из ответа API в диапазон, допустимый моделью, иначе None.
+
+    API отдаёт год строкой ("2010") и изредка мусором. Модель принимает
+    1888–2100 (см. Title.release_year), выход за границы — не год, а брак
+    данных: такую карточку заводить нельзя, год обязателен.
+    """
+    match = re.search(r"\d{4}", str(value or ""))
+    if not match:
+        return None
+    year = int(match.group())
+    return year if 1888 <= year <= 2100 else None
+
+
+def create_title_from_vibix(api_key, kp_id, *, dry_run=False):
+    """
+    Заводит запись каталога из карточки видеосервиса по Kinopoisk ID.
+
+    В отличие от sync_video_service_ids (обогащает уже существующие записи),
+    здесь запись создаётся с нуля по ответу /videos/kp/{id}: название, год,
+    kp_id/imdb_id, player_id из embed_code, а также описание, рейтинги,
+    длительность, жанры и страны — тем же набором правил, что и обогащение.
+    Так каталог наполняется по списку Kinopoisk ID без ручного ввода.
+
+    Возвращает (title|None, outcome), где outcome — одно из:
+    'created' | 'exists' | 'not_found' | 'no_name' | 'no_year'.
+
+    Идемпотентно: если запись с таким kp_id уже есть, возвращает её
+    с outcome='exists' и ничего не меняет — повторный прогон списка
+    не плодит дубли. dry_run=True не пишет в базу и возвращает title=None.
+    """
+    kp_id = str(kp_id or "").strip()
+    if not kp_id:
+        return None, "no_name"
+
+    existing = Title.objects.filter(kp_id=kp_id).first()
+    if existing is not None:
+        return existing, "exists"
+
+    try:
+        item = fetch_video_by_kp(api_key, kp_id)
+    except VideoServiceNotFoundError:
+        return None, "not_found"
+
+    # Русское название приоритетнее: каталог русскоязычный. name — запасной
+    # вариант (API кладёт в него ru либо en), name_eng уходит в оригинальное.
+    name = (item.get("name_rus") or item.get("name") or "").strip()
+    if not name:
+        return None, "no_name"
+
+    year = _parse_year(item.get("year"))
+    if year is None:
+        return None, "no_year"
+
+    if dry_run:
+        return None, "created"
+
+    title = Title(
+        type=Title.Type.SERIES if item.get("type") == "serial" else Title.Type.MOVIE,
+        name=name,
+        release_year=year,
+        kp_id=kp_id,
+        imdb_id=(item.get("imdb_id") or "").strip(),
+        status=Title.Status.PUBLISHED,
+        slug=_unique_slug(Title, name, kp_id),
+    )
+
+    # player_id из embed_code — точный ID контента плеера; при его отсутствии
+    # поле пустое, и страница безопасно резолвит контент по kp_id (тот же
+    # fallback, что у обогащения существующих записей).
+    player_id, embed_type = _embed_player(item)
+    if player_id:
+        title.player_id = player_id
+        if embed_type:
+            title.player_type = embed_type
+
+    enrich_fields, genre_names, country_names = _collect_enrichment(title, item)
+    for field, value in enrich_fields.items():
+        setattr(title, field, value)
+
+    title.save()
+
+    for genre_name in genre_names:
+        genre = _ensure_reference(Genre, genre_name, "genre")
+        if genre is not None:
+            title.genres.add(genre)
+    for country_name in country_names:
+        country = _ensure_reference(Country, country_name, "country")
+        if country is not None:
+            title.countries.add(country)
+
+    return title, "created"
+
+
 def sync_video_service_ids(*, full=False, dry_run=False, page_size=100, max_pages=None):
     """
     Прогоняет синхронизацию и возвращает статистику.

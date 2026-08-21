@@ -254,6 +254,30 @@ class ExternalPlayerRenderingTests(TestCase):
 
         self.assertNotContains(response, "super-secret-token-abc")
 
+    def test_gate_has_content_wrapper_and_play_icon(self):
+        title = create_title(name="С плеером", player_id="5", player_type="movie")
+        response = self.client.get(title.get_absolute_url())
+        self.assertContains(response, "vibix-player__gate-content")
+        self.assertContains(response, "vibix-player__play-icon")
+
+    def test_gate_shows_poster_preview_when_image_present(self):
+        """Есть кадр/постер — до запуска он виден за кнопкой (превью плеера)."""
+        title = create_title(name="С постером", player_id="5", player_type="movie")
+        Title.objects.filter(pk=title.pk).update(backdrop="backdrops/test.jpg")
+
+        response = self.client.get(title.get_absolute_url())
+
+        self.assertContains(response, "vibix-player__preview")
+        self.assertContains(response, "backdrops/test.jpg")
+
+    def test_gate_without_image_has_no_preview(self):
+        """Без картинок превью не рендерится — остаётся прежний тёмный фон."""
+        title = create_title(name="Без картинок", player_id="5", player_type="movie")
+
+        response = self.client.get(title.get_absolute_url())
+
+        self.assertNotContains(response, "vibix-player__preview")
+
     def test_episode_buttons_carry_season_and_number(self):
         title = create_title(
             name="Сериал с кнопками", type=Title.Type.SERIES, player_id="7", player_type="serial"
