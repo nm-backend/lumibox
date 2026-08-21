@@ -13,14 +13,14 @@
 
 .film-feed {
     display: grid;
-    gap: var(--space-4);
+    gap: var(--space-3);
 }
 
 .film-card {
     background: var(--glass-bg);
     border: 1px solid var(--glass-border);
     border-radius: var(--radius-lg);
-    padding: var(--space-4) var(--space-5);
+    padding: var(--space-3) var(--space-4);
     transition: border-color var(--transition-fast);
 }
 
@@ -38,7 +38,7 @@
 
 .film-card__name {
     margin: 0;
-    font-size: var(--text-xl);
+    font-size: var(--text-lg);
     font-weight: 800;
     letter-spacing: var(--tracking-tight);
     line-height: var(--leading-snug);
@@ -118,8 +118,8 @@
 
 .film-card__body {
     display: grid;
-    grid-template-columns: 180px minmax(0, 1fr);
-    gap: var(--space-5);
+    grid-template-columns: 140px minmax(0, 1fr);
+    gap: var(--space-4);
     align-items: start;
 }
 
@@ -206,7 +206,7 @@
     color: var(--color-text-muted);
     overflow: hidden;
     display: -webkit-box;
-    -webkit-line-clamp: 3;
+    -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
 }
 
@@ -218,8 +218,8 @@
 
 .film-card__meta-row {
     display: grid;
-    grid-template-columns: 84px minmax(0, 1fr);
-    gap: var(--space-3);
+    grid-template-columns: 72px minmax(0, 1fr);
+    gap: var(--space-2);
 }
 
 .film-card__meta-row dt {
@@ -238,8 +238,8 @@
 }
 
 .film-card__foot {
-    margin-top: var(--space-4);
-    padding-top: var(--space-4);
+    margin-top: var(--space-3);
+    padding-top: var(--space-3);
     border-top: 1px solid var(--color-border-soft);
     display: flex;
     align-items: center;
@@ -291,7 +291,7 @@
 
 @media (max-width: 700px) {
     .film-card {
-        padding: var(--space-4);
+        padding: var(--space-3);
     }
 
     .film-card__head {
@@ -300,8 +300,8 @@
     }
 
     .film-card__body {
-        grid-template-columns: 110px minmax(0, 1fr);
-        gap: var(--space-4);
+        grid-template-columns: 100px minmax(0, 1fr);
+        gap: var(--space-3);
     }
 
     .film-card__rating {

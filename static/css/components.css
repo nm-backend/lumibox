@@ -8,7 +8,7 @@
 
 .carousel__track {
     display: flex;
-    gap: var(--space-4);
+    gap: var(--space-3);
     overflow-x: auto;
     scroll-snap-type: x mandatory;
     scrollbar-width: none;
@@ -23,7 +23,7 @@
 .carousel__track > * {
     flex: 0 0 auto;
     scroll-snap-align: start;
-    width: 165px;
+    width: 145px;
 }
 
 .carousel__btn {
@@ -79,10 +79,10 @@
 /* Ultra-wide: more carousel items visible */
 @media (min-width: 1640px) {
     .carousel__track {
-        gap: var(--space-5);
+        gap: var(--space-4);
     }
     .carousel__track > * {
-        width: 140px;
+        width: 130px;
     }
 }
 
@@ -482,14 +482,26 @@
     left: 0;
     right: 0;
     z-index: 50;
-    justify-content: space-around;
-    padding: var(--space-2) 0;
+    justify-content: center;
+    align-items: center;
+    gap: var(--space-1);
+    padding: var(--space-2) var(--space-3);
     padding-bottom: max(var(--space-2), env(safe-area-inset-bottom));
     background: var(--glass-bg);
     backdrop-filter: blur(var(--glass-blur));
     -webkit-backdrop-filter: blur(var(--glass-blur));
     border-top: 1px solid var(--glass-border);
     animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    /* Горизонтальный скролл если не помещается */
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+
+.bottom-nav::-webkit-scrollbar {
+    display: none;
 }
 
 .bottom-nav__link {
@@ -506,6 +518,8 @@
     padding: var(--space-2) var(--space-3);
     min-height: var(--touch-target);
     min-width: var(--touch-target);
+    flex-shrink: 0;
+    scroll-snap-align: center;
 }
 
 .bottom-nav__link::after {
@@ -526,7 +540,7 @@
     transform: translateY(-2px);
 }
 
-/* Active state for bottom nav вЂ” filled icon */
+/* Active state for bottom nav — filled icon */
 .bottom-nav__link--active {
     color: var(--color-accent);
 }
@@ -552,10 +566,6 @@
         display: flex;
     }
 
-    /* Отступ под нижнюю панель считаем от её реальной высоты, а не от числа:
-       зашито было 72px при фактических 76px, и панель накрывала последние
-       строки страницы — на подвале это съедало ссылку. Держать число вручную
-       в синхронизации с вёрсткой панели всё равно не получалось. */
     body {
         padding-bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom, 0px));
     }
@@ -1820,24 +1830,22 @@
     /* auto-fill, а не auto-fit: при трёх найденных фильмах карточки
        остаются нормального размера, а не растягиваются на всю ширину.
 
-       Минимум 132px, а не 150: на экране 320px при 150px в строку
-       помещалась одна колонка, и каталог превращался в ленту огромных
-       постеров по одному. Две колонки по 136px — привычный вид телефона. */
-    grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
-    gap: var(--space-4) var(--space-2);
-    margin-bottom: var(--space-5);
+       Минимум 120px для плотной сетки по референсу. */
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: var(--space-3) var(--space-2);
+    margin-bottom: var(--space-4);
 }
 
 @media (min-width: 480px) {
     .poster-grid {
-        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-        gap: var(--space-4) var(--space-3);
+        grid-template-columns: repeat(auto-fill, minmax(135px, 1fr));
+        gap: var(--space-3) var(--space-2);
     }
 }
 
 @media (min-width: 768px) {
     .poster-grid {
-        grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
     }
 }
 

@@ -98,7 +98,7 @@ body {
     background-color: var(--color-bg);
     color: var(--color-text);
     font-family: var(--font-base);
-    font-size: var(--text-md);
+    font-size: 15px;
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;

@@ -194,37 +194,37 @@
        занимала 45px на каждом экране и была первым, что видел посетитель.
     {% endcomment %}
 
-    <header class="site-header">
+<header class="site-header">
         <div class="container site-header__inner">
             <a class="logo" href="{% url 'catalog:home' %}">
                 <span class="logo__mark"></span>
                 <span>Lumi<span class="logo__accent">Box</span></span>
             </a>
 
-            <div class="site-header__actions">
-                <div class="search-wrapper site-header__search">
-                    {% comment %} Отправка ведёт на страницу поиска, а не в каталог:
-                       каталог искал только по названию, а здесь зритель ждёт, что
-                       найдутся и жанр, и студия, и человек. {% endcomment %}
-                    <form class="search" action="{% url 'catalog:search' %}" method="get" role="search" data-search-form>
-                        <label class="visually-hidden" for="search-input">{% trans "Поиск по каталогу" %}</label>
-                        <input class="search__input"
-                               id="search-input"
-                               type="search"
-                               name="q"
-                               value="{{ request.GET.q|default:'' }}"
-                               placeholder="{% trans 'Поиск...' %}"
-                               autocomplete="off"
-                               data-search-input>
-                        <button class="search__submit" type="submit" aria-label="{% trans 'Найти' %}">{% icon "search" size=16 %}</button>
-                    </form>
-                    {% comment %} data-empty-msg — подпись пустой выдачи. Через
-                       разметку, а не строкой в скрипте: перевод умеет шаблон. {% endcomment %}
-                    <div class="search__dropdown" data-search-dropdown
-                         data-empty-msg="{% trans 'Ничего не найдено' %}"
-                         data-error-msg="{% trans 'Не удалось выполнить поиск. Проверьте соединение.' %}"></div>
-                </div>
+            <div class="search-wrapper site-header__search">
+                {% comment %} Отправка ведёт на страницу поиска, а не в каталог:
+                   каталог искал только по названию, а здесь зритель ждёт, что
+                   найдутся и жанр, и студия, и человек. {% endcomment %}
+                <form class="search" action="{% url 'catalog:search' %}" method="get" role="search" data-search-form>
+                    <label class="visually-hidden" for="search-input">{% trans "Поиск по каталогу" %}</label>
+                    <input class="search__input"
+                           id="search-input"
+                           type="search"
+                           name="q"
+                           value="{{ request.GET.q|default:'' }}"
+                           placeholder="{% trans 'Поиск...' %}"
+                           autocomplete="off"
+                           data-search-input>
+                    <button class="search__submit" type="submit" aria-label="{% trans 'Найти' %}">{% icon "search" size=16 %}</button>
+                </form>
+                {% comment %} data-empty-msg — подпись пустой выдачи. Через
+                   разметку, а не строкой в скрипте: перевод умеет шаблон. {% endcomment %}
+                <div class="search__dropdown" data-search-dropdown
+                     data-empty-msg="{% trans 'Ничего не найдено' %}"
+                     data-error-msg="{% trans 'Не удалось выполнить поиск. Проверьте соединение.' %}"></div>
+            </div>
 
+            <div class="site-header__actions">
                 <button class="search-toggle" type="button" data-search-toggle aria-label="{% trans 'Поиск' %}" aria-expanded="false">{% icon "search" size=18 %}</button>
 
                 <button class="theme-toggle" type="button" data-theme-toggle
@@ -269,7 +269,7 @@
                         </div>
                     </details>
                 {% else %}
-                    <a class="button button--primary site-header__login" href="{% url 'users:login' %}" aria-label="{% trans 'Войти' %}">
+                    <a class="button button--primary site-header__login site-header__login--mobile-hidden" href="{% url 'users:login' %}" aria-label="{% trans 'Войти' %}">
                         {% icon "user" size=16 class_name="site-header__login-icon" %}
                         <span class="site-header__login-text">{% trans "Войти" %}</span>
                     </a>
