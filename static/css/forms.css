@@ -86,7 +86,7 @@
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-glass);
     position: relative;
-    overflow: hidden;
+    overflow: clip;
 }
 
 .auth-card::before {
@@ -380,7 +380,7 @@
    ничего, и на медленной сети человек не понимал, нажалась ли кнопка. */
 .is-loading {
     position: relative;
-    color: transparent !important;
+    color: transparent;
     pointer-events: none;
 }
 

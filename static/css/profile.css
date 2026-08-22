@@ -67,7 +67,7 @@
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
     gap: 1px;
-    overflow: hidden;
+    overflow: clip;
     padding: var(--space-4);
     text-align: center;
     box-shadow: var(--shadow-sm);
@@ -125,7 +125,7 @@
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-sm), 0 0 20px var(--color-accent-glow);
     position: relative;
-    overflow: hidden;
+    overflow: clip;
 }
 
 /* Subtle gradient accent at the top of the profile header */

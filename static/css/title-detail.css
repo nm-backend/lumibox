@@ -7,7 +7,7 @@
 
 .film-hero {
     position: relative;
-    overflow: hidden;
+    overflow: clip;
     /* Отрицательный отступ убран: он подтягивал шапку фильма под навигацию,
        пока над ней ничего не было. Теперь выше стоят хлебные крошки, и шапка
        наезжала на них — строка пути пропадала под тёмным фоном. */
@@ -60,13 +60,14 @@
 
 .film-hero__poster {
     aspect-ratio: 2 / 3;
-    overflow: hidden;
+    overflow: clip;
     display: grid;
     place-items: center;
     background-color: var(--color-surface);
     border-radius: var(--radius-lg);
     box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55), 0 2px 8px rgba(0, 0, 0, 0.4);
     transition: box-shadow var(--transition), transform var(--transition);
+    will-change: transform;
 }
 
 .film-hero__poster:hover {
@@ -238,7 +239,7 @@
     /* Ограничение по ширине снято: правая колонка страницы убрана, и упор
        в 900px оставлял справа полосу пустоты в треть экрана. */
     aspect-ratio: 16 / 9;
-    overflow: hidden;
+    overflow: clip;
     background-color: var(--color-dark-bg);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
@@ -252,10 +253,11 @@
 
 /* Внешний плеер приходит от SDK как iframe с фиксированной высотой 370px и
    инлайн-шириной 100%. Растягиваем его на всю панель 16:9, как и остальные
-   кадры, иначе под ним останется чёрная полоса. */
+   кадры, иначе под ним останется чёрная полоса. height: 100% !important нужен
+   для переопределения инлайн-стиля SDK (height: 370px). */
 [data-player-pane="external"] iframe {
-    width: 100% !important;
-    height: 100%;
+    width: 100%;
+    height: 100% !important;
     border: 0;
     display: block;
 }
@@ -313,7 +315,7 @@
     width: 100%;
     padding: 0;
     aspect-ratio: 16 / 9;
-    overflow: hidden;
+    overflow: clip;
     border-radius: var(--radius-md);
     border: 1px solid var(--color-border);
     background: var(--color-surface);
@@ -564,7 +566,6 @@
     overflow-x: auto;
     padding-bottom: var(--space-2);
     scroll-snap-type: x mandatory;
-    -webkit-overflow-scrolling: touch;
     scrollbar-width: thin;
 }
 
@@ -587,7 +588,7 @@
 .similar-card__poster {
     aspect-ratio: 2 / 3;
     border-radius: var(--radius-sm);
-    overflow: hidden;
+    overflow: clip;
     background-color: var(--color-surface);
     display: grid;
     place-items: center;
@@ -644,7 +645,7 @@
 .trailer-modal {
     position: fixed;
     inset: 0;
-    z-index: 200;
+    z-index: var(--z-overlay);
     display: grid;
     place-items: center;
     padding: var(--space-4);
@@ -693,7 +694,7 @@
     aspect-ratio: 16 / 9;
     background: var(--color-dark-bg);
     border-radius: var(--radius-md);
-    overflow: hidden;
+    overflow: clip;
     box-shadow: 0 24px 80px rgba(0, 0, 0, 0.6);
 }
 
@@ -806,7 +807,7 @@
 .player {
     background: #000;
     border-radius: var(--radius-lg);
-    overflow: hidden;
+    overflow: clip;
     aspect-ratio: 16 / 9;
 }
 
@@ -828,7 +829,7 @@
 
 .vibix-player__gate {
     position: absolute;
-    z-index: 2;
+    z-index: var(--z-raised);
     inset: 0;
     display: flex;
     flex-direction: column;

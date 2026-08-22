@@ -10,7 +10,7 @@
 .ad-rail {
     display: block;
     position: fixed;
-    z-index: 1;
+    z-index: var(--z-raised);
     width: 160px;
     pointer-events: auto;
     visibility: hidden;
@@ -50,7 +50,7 @@
 }
 
 .ad-rail__disclaimer {
-    font-size: 10px;
+    font-size: var(--text-2xs);
     color: var(--color-text-muted);
 }
 
@@ -78,7 +78,7 @@
 
 .ad-rail__placeholder-size {
     color: var(--color-text-dim);
-    font-size: 10px;
+    font-size: var(--text-2xs);
 }
 
 /* ===== Горизонтальный блок между секциями ===== */

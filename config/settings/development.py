@@ -16,6 +16,14 @@ from .base import *  # noqa: F401,F403
 
 DEBUG = True
 
+# Middleware, который убивает кэширование браузера при разработке.
+# Без него даже Ctrl+F5 и incognito могут отдать старый CSS.
+# В продакшене не используется (DEBUG=False).
+MIDDLEWARE = [
+    "apps.core.middleware_dev.NoCacheDevMiddleware",
+    *MIDDLEWARE,
+]
+
 ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
 
 # Письма не отправляем по-настоящему, а печатаем в консоль.

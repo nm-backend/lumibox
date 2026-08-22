@@ -1,10 +1,9 @@
 """
 Тесты стабильного cache-busting статики.
 
-Раньше static_version был int(time.time()) — номер менялся каждую секунду,
-и браузер перекачивал CSS/JS при каждом визите. Теперь версия считается
-от mtime самого свежего файла в static/ и обязана быть стабильной между
-запросами, меняясь только вместе с ассетами.
+Версия считается по хешу MD5 содержимого CSS/JS файлов (не по mtime,
+так как mtime в Docker bind mounts на macOS/Windows не всегда обновляется).
+Версия стабильна между запросами, меняясь только вместе с ассетами.
 """
 
 from unittest.mock import patch
@@ -25,26 +24,39 @@ class StaticVersionTests(SimpleTestCase):
         second = static_version(None)["static_version"]
         self.assertEqual(first, second)
 
-    def test_version_is_short_stable_string(self):
-        """Версия — короткая строка, пригодная для URL в ?v=."""
+    def test_version_is_short_hex_string(self):
+        """Версия — короткая hex-строка (хеш содержимого), пригодная для ?v=."""
         version = static_version(None)["static_version"]
         self.assertIsInstance(version, str)
-        self.assertTrue(version.startswith("m"))
+        self.assertEqual(len(version), 12)
+        # Должна быть валидной hex-строкой (MD5[:12])
+        int(version, 16)
         self.assertNotIn(" ", version)
 
     @patch("apps.core.context_processors.os.walk")
-    @patch("apps.core.context_processors.os.path.getmtime")
-    def test_version_changes_when_asset_changes(self, mock_mtime, mock_walk):
+    def test_version_changes_when_content_changes(self, mock_walk):
         """Правка файла в static/ должна менять версию и инвалидировать кэш."""
-        mock_walk.return_value = [("static/css", (), ("base.css",))]
-        mock_mtime.return_value = 1000.0
-        first = _cached_static_version()
+        import os
+        import tempfile
 
-        mock_mtime.return_value = 2000.0
-        _cached_static_version.cache_clear()
-        second = _cached_static_version()
+        # Создаём временные файлы с разным содержимым
+        with tempfile.TemporaryDirectory() as tmp:
+            css1 = os.path.join(tmp, "a.css")
+            css2 = os.path.join(tmp, "b.css")
+            with open(css1, "w") as f:
+                f.write("body{color:red}")
+            with open(css2, "w") as f:
+                f.write("body{color:blue}")
 
-        self.assertNotEqual(first, second)
+            mock_walk.return_value = [(tmp, (), ("a.css",))]
+            _cached_static_version.cache_clear()
+            first = _cached_static_version()
+
+            mock_walk.return_value = [(tmp, (), ("b.css",))]
+            _cached_static_version.cache_clear()
+            second = _cached_static_version()
+
+            self.assertNotEqual(first, second)
 
 
 class AdsNetworkContextTests(SimpleTestCase):

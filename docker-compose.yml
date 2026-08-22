@@ -63,7 +63,9 @@ services:
       DJANGO_SUPERUSER_PASSWORD: ${DJANGO_SUPERUSER_PASSWORD:-}
     volumes:
       # Папка проекта примонтирована: правки видны без пересборки.
-      - .:/app
+      # Суффикс :z нужен для rootless Podman на Fedora с SELinux:
+      # без него контейнер не может прочитать bind-mounted файлы.
+      - .:/app:z
       # Именованный том поверх .venv — иначе виндовый venv с хоста
       # перекрыл бы пакеты, установленные в образе для Linux.
       - venv_guard:/app/.venv
@@ -94,7 +96,7 @@ services:
       DATABASE_URL: postgres://${POSTGRES_USER:-lumibox}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-lumibox}
       REDIS_URL: redis://redis:6379/0
     volumes:
-      - .:/app
+      - .:/app:z
       - venv_guard:/app/.venv
     depends_on:
       db:

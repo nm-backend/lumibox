@@ -17,13 +17,18 @@ echo "  LumiBox — запуск"
 echo "  ================="
 echo ""
 
-# ---------- 1. Docker ----------
-if ! docker info >/dev/null 2>&1; then
-    echo "  [ОШИБКА] Docker не запущен."
-    echo "  Запустите Docker Desktop и повторите."
+# ---------- 1. Docker / Podman ----------
+COMPOSE_CMD=""
+if docker info >/dev/null 2>&1; then
+    COMPOSE_CMD="docker compose"
+elif podman info >/dev/null 2>&1; then
+    COMPOSE_CMD="podman-compose"
+else
+    echo "  [ОШИБКА] Ни Docker, ни Podman не запущены."
+    echo "  Запустите Docker Desktop / Podman и повторите."
     exit 1
 fi
-echo "  [OK] Docker запущен"
+echo "  [OK] $COMPOSE_CMD доступен"
 
 # ---------- 2. Файл .env ----------
 if [ -f .env ]; then
@@ -32,6 +37,7 @@ else
     echo "  [..] Создаю .env и генерирую пароли..."
     SECRET=$(docker run --rm python:3.13-slim python -c "import secrets; print(secrets.token_urlsafe(50))")
     DBPASS=$(docker run --rm python:3.13-slim python -c "import secrets; print(secrets.token_hex(16))")
+    ADMINPASS=$(docker run --rm python:3.13-slim python -c "import secrets; print(secrets.token_urlsafe(18))")
 
     cat > .env <<EOF
 # Создан автоматически файлом start.sh. В git не попадает.
@@ -60,7 +66,7 @@ fi
 echo ""
 echo "  [..] Собираю и запускаю контейнеры (первый раз 2-5 минут)..."
 echo ""
-docker compose up --build -d
+$COMPOSE_CMD up --build -d
 
 # ---------- 4. Ждём готовности ----------
 echo ""
@@ -71,7 +77,7 @@ until curl -s -o /dev/null http://localhost:8001/ 2>/dev/null; do
     if [ "$attempt" -ge 60 ]; then
         echo ""
         echo "  [ВНИМАНИЕ] Сайт не ответил за 2 минуты."
-        echo "  Смотрите логи: docker compose logs web"
+        echo "  Смотрите логи: $COMPOSE_CMD logs web"
         exit 1
     fi
     printf "."
@@ -90,6 +96,5 @@ echo "    Swagger:   http://localhost:8001/api/docs/"
 echo "    ReDoc:     http://localhost:8001/api/redoc/"
 echo ""
 echo "    Вход в админку — данные из файла .env"
-echo ""
-echo "    Остановить: docker compose stop"
+echo ""    echo "    Остановить: $COMPOSE_CMD stop"
 echo ""

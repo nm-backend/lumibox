@@ -53,26 +53,35 @@ def _cached_static_version() -> str:
 
 def _scan_static_version() -> str:
     """
-    Номер от времени изменения самого свежего файла в static/.
+    Версия статики, рассчитанная по хешу содержимого CSS/JS файлов.
 
-    Раньше здесь стоял int(time.time()): номер менялся каждую секунду,
-    и браузер перекачивал все CSS и JS при каждом визите вместо того,
-    чтобы взять их из кэша. Теперь версия меняется только когда меняются
-    сами ассеты. Git-ревизию не берём: в образе .git отсутствует
-    (.dockerignore), а mtime работает везде — и в разработке, и в контейнере.
+    Раньше использовался mtime (время модификации), но в Docker bind mounts
+    на macOS/Windows mtime не всегда обновляется корректно — файл на хосте
+    меняется, а внутри контейнера (и в заголовке Last-Modified) остаётся
+    старое значение. Браузер получает тот же ?v=… и отдаёт кэшированный CSS.
+
+    Хеш MD5 от содержимого файлов надёжнее: он меняется только когда файл
+    реально изменился, и не зависит от файловой системы. Берём только
+    CSS/JS — шрифты, изображения и прочее не влияют на UI-версию.
     """
-    latest = 0.0
+    import hashlib
+
+    h = hashlib.md5()
+    extensions = {".css", ".js"}
     for entry in getattr(settings, "STATICFILES_DIRS", ()):
-        # В STATICFILES_DIRS могут лежать пары (префикс, путь).
         base = entry[1] if isinstance(entry, (list, tuple)) else entry
         for dirpath, _dirnames, filenames in os.walk(base):
-            for filename in filenames:
+            for filename in sorted(filenames):
+                if os.path.splitext(filename)[1].lower() not in extensions:
+                    continue
+                filepath = os.path.join(dirpath, filename)
                 try:
-                    mtime = os.path.getmtime(os.path.join(dirpath, filename))
+                    with open(filepath, "rb") as f:
+                        for chunk in iter(lambda: f.read(8192), b""):
+                            h.update(chunk)
                 except OSError:
                     continue
-                latest = max(latest, mtime)
-    return f"m{int(latest)}"
+    return h.hexdigest()[:12]
 
 
 def lb_topnav(request):

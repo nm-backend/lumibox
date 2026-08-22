@@ -19,9 +19,13 @@
 .film-card {
     background: var(--glass-bg);
     border: 1px solid var(--glass-border);
-    border-radius: var(--radius-lg);
-    padding: var(--space-3) var(--space-4);
-    transition: border-color var(--transition-fast);
+    border-radius: 12px;
+    padding: var(--space-4);
+    transition: border-color var(--transition-fast), transform var(--transition-fast);
+}
+
+.film-card:hover {
+    transform: translateY(-2px);
 }
 
 .film-card:hover {
@@ -118,7 +122,7 @@
 
 .film-card__body {
     display: grid;
-    grid-template-columns: 140px minmax(0, 1fr);
+    grid-template-columns: minmax(100px, 160px) minmax(0, 1fr);
     gap: var(--space-4);
     align-items: start;
 }
@@ -132,8 +136,8 @@
     display: block;
     width: 100%;
     aspect-ratio: 2 / 3;
-    border-radius: var(--radius-md);
-    overflow: hidden;
+    border-radius: 12px;
+    overflow: clip;
     background: var(--color-surface-hover);
     border: 1px solid var(--color-border-soft);
 }
@@ -149,9 +153,22 @@
 .film-card__fallback {
     position: absolute;
     inset: 0;
-    display: grid;
-    place-items: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
     color: var(--color-text-dim);
+    background: linear-gradient(135deg, #0e0e1a 0%, #1a1a2e 100%);
+}
+
+.film-card__fallback::before {
+    content: "Нет постера";
+    font-size: var(--text-2xs);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--color-text-faint);
 }
 
 .film-card__play {
@@ -300,7 +317,7 @@
     }
 
     .film-card__body {
-        grid-template-columns: 100px minmax(0, 1fr);
+        grid-template-columns: minmax(80px, 120px) minmax(0, 1fr);
         gap: var(--space-3);
     }
 
