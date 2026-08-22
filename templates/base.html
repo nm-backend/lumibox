@@ -52,7 +52,7 @@
     <link rel="stylesheet" href="{% static 'css/ads.css' %}?v={{ static_version }}">
     <link rel="stylesheet" href="{% static 'css/lumibox.css' %}?v={{ static_version }}">
 
-    <link rel="icon" type="image/svg+xml" href="{% static 'img/favicon.svg' %}">
+    <link rel="icon" type="image/svg+xml" href="{% static 'img/favicon.svg' %}?v={{ static_version }}">
 
     {# CSRF-токен для JS (X-CSRFToken): cookie в проде HttpOnly, читаем из meta #}
     <meta name="csrf-token" content="{{ csrf_token }}">
