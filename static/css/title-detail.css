@@ -204,6 +204,20 @@
     border-radius: var(--radius-full);
 }
 
+/* Исправление: кнопка "Смотреть" на странице фильма должна быть розовой */
+.button--primary.button--large {
+    background: linear-gradient(135deg, var(--color-accent-hover) 0%, var(--color-accent) 55%, var(--color-accent-deep) 100%);
+    color: var(--color-on-accent);
+    box-shadow: 0 4px 16px rgba(var(--color-accent-rgb), 0.3);
+}
+
+.button--primary.button--large:hover {
+    background: linear-gradient(135deg, var(--color-accent-soft) 0%, var(--color-accent-hover) 60%, var(--color-accent) 100%);
+    color: var(--color-on-accent);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 24px rgba(var(--color-accent-rgb), 0.4);
+}
+
 /* ---------- Оценка ---------- */
 
 .score {

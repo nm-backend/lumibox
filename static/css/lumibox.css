@@ -227,7 +227,7 @@
 .lb-topnav__link--active,
 .lb-topnav__link--active:hover {
     border-color: transparent;
-    background: linear-gradient(180deg, #d1362a 0%, #b3271d 100%);
+    background: linear-gradient(180deg, var(--color-accent) 0%, var(--color-accent-deep) 100%);
     color: #fff;
 }
 
