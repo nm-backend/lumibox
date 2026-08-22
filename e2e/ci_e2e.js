@@ -187,3 +187,18 @@ async function run() {
         } finally {
             await browser.close();
         
+        }
+
+    } finally {
+        django.kill();
+        django.on('exit', function () {
+            console.log('\n=== E2E Results: ' + (failures === 0 ? 'ALL PASSED' : failures + ' FAILURES') + ' ===');
+            process.exit(failures > 0 ? 1 : 0);
+        });
+    }
+}
+
+run().catch(function (err) {
+    console.error('Fatal E2E error:', err);
+    process.exit(1);
+});
