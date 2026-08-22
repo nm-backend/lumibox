@@ -50,7 +50,7 @@ async function run() {
         env: {
             ...process.env,
             DJANGO_SECRET_KEY: 'e2e-test-key-not-production-7f3a9d2e5b8c1046af93de27bc5081',
-            DATABASE_URL: 'sqlite:///tmp/lumibox_e2e.db',
+            DATABASE_URL: 'sqlite:////tmp/lumibox_e2e.db',
             DJANGO_ALLOWED_HOSTS: 'localhost,127.0.0.1',
         },
     });
