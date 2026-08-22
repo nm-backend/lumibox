@@ -19,7 +19,7 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           script: |
             set -e
-            cd /mvp/lumibox
+            cd /root/mvp/lumibox
             cp .env .env.backup 2>/dev/null || true
             git fetch origin main
             git reset --hard origin/main
