@@ -90,8 +90,8 @@ EMAIL_PORT = env.int("EMAIL_PORT", default=587)
 EMAIL_HOST_USER = env("EMAIL_HOST_USER", default="")
 EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", default="")
 EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS", default=True)
-DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="LumiBox <noreply@lumibox.app>")
-SERVER_EMAIL = env("SERVER_EMAIL", default="root@lumibox.app")
+DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="LumiBox <noreply@lumibox.site>")
+SERVER_EMAIL = env("SERVER_EMAIL", default="root@lumibox.site")
 
 # Таймаут SMTP-соединения, секунды. preflight на старте контейнера открывает
 # живое соединение с почтовым сервером: без таймаута недоступный хост
@@ -397,8 +397,8 @@ REST_FRAMEWORK = {
         "rest_framework.throttling.UserRateThrottle",
     ],
     "DEFAULT_THROTTLE_RATES": {
-        "anon": "60/minute",
-        "user": "300/minute",
+        "anon": env("DRF_THROTTLE_ANON_RATE", default="60/minute"),
+        "user": env("DRF_THROTTLE_USER_RATE", default="300/minute"),
     },
     # Сколько доверенных прокси стоит перед приложением.
     # Задать обязательно: при значении по умолчанию (None) DRF берёт ключ

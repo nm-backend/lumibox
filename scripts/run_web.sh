@@ -47,6 +47,9 @@ python manage.py ensure_demo_data || echo "[boot] ensure_demo_data: сбой —
 echo "[boot] preflight: предполётная проверка"
 python manage.py preflight --skip-storage || echo "[boot] preflight: есть замечания — смотрите вывод выше"
 
+echo "[boot] check_vibix: проверка интеграции Vibix"
+python manage.py check_vibix || echo "[boot] check_vibix: есть замечания — смотрите вывод выше"
+
 # Администратор. Создаётся только если владелец задал DJANGO_SUPERUSER_EMAIL
 # и DJANGO_SUPERUSER_PASSWORD в панели хостинга — пароля в репозитории нет
 # и быть не должно. Повторные выкладки существующего админа не трогают

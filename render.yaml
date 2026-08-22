@@ -76,7 +76,7 @@ services:
       - key: VIBIX_API_TOKEN
         sync: false
       - key: VIBIX_API_BASE_URL
-        value: https://vibix.org/api/v1
+        value: https://api.vibix.org/api/v1
       - key: VIDEO_SERVICE_TRAILER
         value: "true"
 
@@ -120,4 +120,4 @@ services:
       - key: EMAIL_USE_TLS
         value: "True"
       - key: DEFAULT_FROM_EMAIL
-        value: "LumiBox <noreply@lumibox.app>"
+        value: "LumiBox <noreply@lumibox.site>"

@@ -82,7 +82,7 @@ pg_dump "$DATABASE_URL" > lumibox-$(date +%F).sql
 
 ---
 
-## Выкладка на собственный домен (lumibox.com)
+## Выкладка на собственный домен (lumibox.site)
 
 Ниже — то, что нужно сделать руками. Код к домену готов: `ALLOWED_HOSTS`
 читается из переменной, `CSRF_TRUSTED_ORIGINS` собирается из неё сама
@@ -95,7 +95,7 @@ pg_dump "$DATABASE_URL" > lumibox-$(date +%F).sql
 |---|---|
 | `DJANGO_SETTINGS_MODULE` | `config.settings.production` |
 | `DJANGO_SECRET_KEY` | сгенерировать: `python -c "import secrets; print(secrets.token_urlsafe(50))"` |
-| `DJANGO_ALLOWED_HOSTS` | `lumibox.com,www.lumibox.com` |
+| `DJANGO_ALLOWED_HOSTS` | `lumibox.site,www.lumibox.site` |
 | `DJANGO_NUM_PROXIES` | `1` — за одним доверенным прокси (Render, Railway, свой Nginx) |
 | `DATABASE_URL` | строка подключения к боевой PostgreSQL |
 | `REDIS_URL` | строка Redis; без неё кэш в памяти процесса, а задачи выполняются на месте |
@@ -138,7 +138,7 @@ python manage.py sync_vibix --episodes
 
 ### 2. DNS
 
-Апекс `lumibox.com` и `www` направить на хостинг — конкретные записи
+Апекс `lumibox.site` и `www` направить на хостинг — конкретные записи
 покажет панель (у Render это `ALIAS`/`A` для апекса и `CNAME` для `www`).
 Сертификат выпускается автоматически после того, как записи разойдутся.
 
@@ -152,12 +152,12 @@ python manage.py sync_vibix --episodes
 3. Выкатить образ. `scripts/run_web.sh` сам применит миграции, наполнит
    витрину демоданными (если каталог пуст) и создаст администратора.
 4. Подключить домен, дождаться сертификата.
-5. Проверить: `https://lumibox.com/healthz/` отдаёт
+5. Проверить: `https://lumibox.site/healthz/` отдаёт
    `{"status": "ok", "database": "ok", "cache": "ok"}`.
 
 ### 4. Что проверить после первого выката
 
-- `https://lumibox.com/` открывается, `http://` уводит на `https://`;
+- `https://lumibox.site/` открывается, `http://` уводит на `https://`;
 - вход в `/admin/` под созданным администратором;
 - добавление фильма и сериала с сериями и источниками видео;
 - у фильма заполнены `trailer_url` и `video_url` (YouTube), у серий —
