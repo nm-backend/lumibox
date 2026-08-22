@@ -1,18 +1,24 @@
 /**
  * CI E2E test — lightweight Playwright checks for regression protection.
  *
- * Runs against the Django dev server with seeded demo data.
+ * Runs against the Django dev server with empty database (migrations applied).
  * Focuses on catching template/JS regressions, not Vibix playback.
  *
  * Exit code != 0 on failure → CI fails.
  */
 
 const { chromium } = require('playwright');
-const { spawn } = require('child_process');
-const path = require('path');
+const { spawn, execSync } = require('child_process');
 
 const BASE = 'http://127.0.0.1:8000';
 const TIMEOUT = 15000;
+
+const DJANGO_ENV = {
+    ...process.env,
+    DJANGO_SECRET_KEY: 'e2e-test-key-not-production-7f3a9d2e5b8c1046af93de27bc5081',
+    DATABASE_URL: 'sqlite:////tmp/lumibox_e2e.db',
+    DJANGO_ALLOWED_HOSTS: 'localhost,127.0.0.1',
+};
 
 let failures = 0;
 
@@ -41,24 +47,32 @@ async function waitForDjango(proc, timeoutMs = 30000) {
 }
 
 async function run() {
+    // Run migrations before starting the server
+    console.log('Running migrations...');
+    try {
+        execSync('python manage.py migrate --run-syncdb --settings=config.settings.development', {
+            env: DJANGO_ENV,
+            stdio: 'inherit',
+        });
+        console.log('Migrations complete.\n');
+    } catch (e) {
+        console.error('Migrations failed:', e.message);
+        process.exit(1);
+    }
+
     console.log('Starting Django dev server...');
     const django = spawn('python', [
         'manage.py', 'runserver', '127.0.0.1:8000', '--noreload',
         '--settings=config.settings.development',
     ], {
         stdio: 'pipe',
-        env: {
-            ...process.env,
-            DJANGO_SECRET_KEY: 'e2e-test-key-not-production-7f3a9d2e5b8c1046af93de27bc5081',
-            DATABASE_URL: 'sqlite:////tmp/lumibox_e2e.db',
-            DJANGO_ALLOWED_HOSTS: 'localhost,127.0.0.1',
-        },
+        env: DJANGO_ENV,
     });
 
     django.stderr.on('data', d => {
         const text = d.toString();
         if (text.includes('Traceback') || text.includes('Error')) {
-            console.error('[DJANGO]', text.slice(0, 200));
+            console.error('[DJANGO]', text.slice(0, 300));
         }
     });
 
@@ -93,7 +107,6 @@ async function run() {
             // --- Test 3: Search page ---
             console.log('3. Search page');
             await page.goto(`${BASE}/search/?q=test`, { waitUntil: 'networkidle', timeout: TIMEOUT });
-            const searchStatus = await page.$('.search-results, .empty-state, [class*="empty"]');
             assert(true, 'Search page loads without crash');
 
             // --- Test 4: Genre list ---
@@ -173,18 +186,4 @@ async function run() {
 
         } finally {
             await browser.close();
-        }
-
-    } finally {
-        django.kill();
-        django.on('exit', () => {
-            console.log(`\n=== E2E Results: ${failures === 0 ? 'ALL PASSED' : `${failures} FAILURES`} ===`);
-            process.exit(failures > 0 ? 1 : 0);
-        });
-    }
-}
-
-run().catch(err => {
-    console.error('Fatal E2E error:', err);
-    process.exit(1);
-});
+        
