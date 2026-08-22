@@ -1,1 +1,30 @@
-
+# CD Pipeline — LumiBox
+#
+# Deployment is handled by the hosting platform (Render, Railway, or Fly.io),
+# not by GitHub Actions. Each platform watches the main branch and deploys
+# automatically on push (Render auto-deploy, Railway auto-deploy, Fly.io
+# fly deploy).
+#
+# Why not GitHub Actions CD:
+# - Render: uses its own webhook → builds Docker image → deploys.
+#   CI.yml already validates the build (lint, tests, security checks).
+#   Duplicating the build in GH Actions would waste minutes and add
+#   a second failure point.
+# - Railway: same model — Dockerfile + auto-deploy on push to main.
+# - Fly.io: `fly deploy` from CI is possible but adds secrets management
+#   complexity for no benefit when the platform already watches the repo.
+#
+# When CI passes on main, the deployment platform picks up the commit.
+# No explicit "deploy" step is needed.
+name: CD
+on:
+  push:
+    branches: [main]
+    # Intentionally does nothing — deployment is automatic via platform webhooks.
+    # This file exists to document the deployment strategy and prevent
+    # someone from assuming "there's no CD" and adding a broken one.
+jobs:
+  noop:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Deployment is handled by the hosting platform (Render/Railway/Fly.io)."

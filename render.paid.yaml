@@ -11,7 +11,7 @@ databases:
     databaseName: lumibox
     user: lumibox
     plan: starter
-    postgresMajorVersion: "16"
+    postgresMajorVersion: "18"
 
 services:
   - type: keyvalue
@@ -92,7 +92,7 @@ services:
       - key: EMAIL_USE_TLS
         value: "True"
       - key: DEFAULT_FROM_EMAIL
-        value: "LumiBox <noreply@lumibox.app>"
+        value: "LumiBox <noreply@lumibox.site>"
 
   - type: worker
     name: lumibox-worker
