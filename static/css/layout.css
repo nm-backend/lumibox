@@ -264,11 +264,9 @@
 
 .site-main {
     flex: 1;
-    /* Исправление #2: Прилипание к шапке.
-       padding-top: шапка (sticky, не fixed) + зазор.
-       На мобильных --header-height = 56px (media query ниже),
-       на десктопе 64px. */
-    padding-top: calc(var(--header-height, 64px) + 32px);
+    /* Плотный зазор у шапки чаще режет ощущение воздуха на странице,
+       поэтому оставляем только небольшой отступ после sticky-шапки. */
+    padding-top: calc(var(--header-height, 64px) + var(--space-4));
     padding-bottom: var(--space-10);
     /* padding-left/right задаётся в base.css для ultra-wide контейнера */
 }

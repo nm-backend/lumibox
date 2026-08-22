@@ -609,8 +609,9 @@
     width: var(--touch-target);
     height: var(--touch-target);
     padding: 10px 8px;
-    border: 0;
-    background: none;
+    border: 1px solid var(--color-border);
+    border-radius: 50%;
+    background: var(--color-surface);
     cursor: pointer;
     flex-direction: column;
     justify-content: space-between;
@@ -624,6 +625,10 @@
     border-radius: 2px;
     transition: transform var(--transition), opacity var(--transition);
     transform-origin: center;
+}
+
+[data-theme="light"] .hamburger__line {
+    background: #1d1d1f;
 }
 
 .hamburger--active .hamburger__line:nth-child(1) {
@@ -1273,6 +1278,7 @@
 /* Subtle section divider with cinema beam effect */
 .section {
     margin-bottom: var(--space-8);
+    padding-top: var(--space-1);
     position: relative;
     content-visibility: auto;
     contain-intrinsic-size: 400px;
