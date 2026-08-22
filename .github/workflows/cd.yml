@@ -1,0 +1,28 @@
+name: CD-Deploy
+on:
+  push:
+    branches:
+      - main
+concurrency:
+  group: production-deploy
+  cancel-in-progress: true
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          port: ${{ secrets.VPS_PORT }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            set -e
+            cd /root/mvp/lumibox
+            cp .env .env.backup 2>/dev/null || true
+            git fetch origin main
+            git reset --hard origin/main
+            cp .env.backup .env 2>/dev/null || true
+            docker compose -f docker-compose.prod.yml up -d --build --remove-orphans
+            docker image prune -f

@@ -50,7 +50,7 @@ class BootstrapAdminTests(TestCase):
     def test_without_password_refuses(self):
         """Пароль не придумываем — иначе владелец не будет знать свой же."""
         with self.assertRaises(CommandError) as error:
-            self.run_command(DJANGO_SUPERUSER_EMAIL="boss@lumibox.com")
+            self.run_command(DJANGO_SUPERUSER_EMAIL="boss@lumibox.site")
 
         self.assertIn("DJANGO_SUPERUSER_PASSWORD", str(error.exception))
         self.assertEqual(User.objects.count(), 0)
@@ -58,7 +58,7 @@ class BootstrapAdminTests(TestCase):
     def test_weak_password_refused(self):
         with self.assertRaises(CommandError):
             self.run_command(
-                DJANGO_SUPERUSER_EMAIL="boss@lumibox.com",
+                DJANGO_SUPERUSER_EMAIL="boss@lumibox.site",
                 DJANGO_SUPERUSER_PASSWORD="12345",
             )
 
@@ -80,7 +80,7 @@ class BootstrapAdminTests(TestCase):
     def test_password_never_printed(self):
         """Вывод уходит в логи сборки — пароля там быть не должно."""
         output = self.run_command(
-            DJANGO_SUPERUSER_EMAIL="boss@lumibox.com",
+            DJANGO_SUPERUSER_EMAIL="boss@lumibox.site",
             DJANGO_SUPERUSER_PASSWORD=STRONG,
         )
 
@@ -89,16 +89,16 @@ class BootstrapAdminTests(TestCase):
     def test_second_run_creates_no_duplicate(self):
         for _ in range(2):
             self.run_command(
-                DJANGO_SUPERUSER_EMAIL="boss@lumibox.com",
+                DJANGO_SUPERUSER_EMAIL="boss@lumibox.site",
                 DJANGO_SUPERUSER_PASSWORD=STRONG,
             )
 
-        self.assertEqual(User.objects.filter(email="boss@lumibox.com").count(), 1)
+        self.assertEqual(User.objects.filter(email="boss@lumibox.site").count(), 1)
 
     def test_existing_password_not_reset(self):
         """Владелец мог сменить пароль руками — выкладка не должна его затирать."""
         self.run_command(
-            DJANGO_SUPERUSER_EMAIL="boss@lumibox.com",
+            DJANGO_SUPERUSER_EMAIL="boss@lumibox.site",
             DJANGO_SUPERUSER_PASSWORD=STRONG,
         )
         user = User.objects.get()
@@ -106,7 +106,7 @@ class BootstrapAdminTests(TestCase):
         user.save()
 
         self.run_command(
-            DJANGO_SUPERUSER_EMAIL="boss@lumibox.com",
+            DJANGO_SUPERUSER_EMAIL="boss@lumibox.site",
             DJANGO_SUPERUSER_PASSWORD=STRONG,
         )
 
@@ -115,18 +115,18 @@ class BootstrapAdminTests(TestCase):
 
     def test_promote_grants_rights_to_existing_user(self):
         User.objects.create_user(
-            email="editor@lumibox.com", username="editor", password=STRONG
+            email="editor@lumibox.site", username="editor", password=STRONG
         )
 
         import os
 
-        os.environ["DJANGO_SUPERUSER_EMAIL"] = "editor@lumibox.com"
+        os.environ["DJANGO_SUPERUSER_EMAIL"] = "editor@lumibox.site"
         try:
             call_command("bootstrap_admin", "--promote", stdout=StringIO())
         finally:
             os.environ.pop("DJANGO_SUPERUSER_EMAIL", None)
 
-        user = User.objects.get(email="editor@lumibox.com")
+        user = User.objects.get(email="editor@lumibox.site")
         self.assertTrue(user.is_staff)
         self.assertTrue(user.is_superuser)
 
@@ -137,7 +137,7 @@ class AdminAccessTests(TestCase):
     def test_login_and_admin_pages(self):
         import os
 
-        os.environ["DJANGO_SUPERUSER_EMAIL"] = "boss@lumibox.com"
+        os.environ["DJANGO_SUPERUSER_EMAIL"] = "boss@lumibox.site"
         os.environ["DJANGO_SUPERUSER_PASSWORD"] = STRONG
         try:
             call_command("bootstrap_admin", stdout=StringIO())
@@ -146,7 +146,7 @@ class AdminAccessTests(TestCase):
             os.environ.pop("DJANGO_SUPERUSER_PASSWORD", None)
 
         response = self.client.post(
-            "/login/", {"username": "boss@lumibox.com", "password": STRONG}
+            "/login/", {"username": "boss@lumibox.site", "password": STRONG}
         )
         self.assertEqual(response.status_code, 302)
 

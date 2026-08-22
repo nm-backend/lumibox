@@ -37,10 +37,16 @@ class StaticVersionTests(SimpleTestCase):
     def test_version_changes_when_content_changes(self, mock_walk):
         """Правка файла в static/ должна менять версию и инвалидировать кэш."""
         import os
+        import shutil
         import tempfile
 
-        # Создаём временные файлы с разным содержимым
-        with tempfile.TemporaryDirectory() as tmp:
+        # Создаём временные файлы с разным содержимым.
+        # На Windows TemporaryDirectory.cleanup() падает с PermissionError,
+        # если файл ещё открыт: Python 3.14 отдаёт handle в ORC, а Windows
+        # не выпускает его мгновенно. Решение: явно удаляем файлы перед
+        # выходом из контекста, а рmdir — best-effort.
+        tmp = tempfile.mkdtemp(prefix="lumibox-staticver-test-")
+        try:
             css1 = os.path.join(tmp, "a.css")
             css2 = os.path.join(tmp, "b.css")
             with open(css1, "w") as f:
@@ -57,6 +63,8 @@ class StaticVersionTests(SimpleTestCase):
             second = _cached_static_version()
 
             self.assertNotEqual(first, second)
+        finally:
+            shutil.rmtree(tmp, ignore_errors=True)
 
 
 class AdsNetworkContextTests(SimpleTestCase):
