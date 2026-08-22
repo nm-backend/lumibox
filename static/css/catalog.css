@@ -75,6 +75,11 @@
     padding: var(--space-3) var(--space-4);
     background: var(--color-surface);
     border: 1px solid var(--color-border);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
 }
 
 .filters__summary {
@@ -126,8 +131,11 @@
 .filters__active {
     display: flex;
     flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
     gap: var(--space-1);
     margin-bottom: var(--space-3);
+    width: 100%;
 }
 
 .filters__body {
@@ -137,6 +145,8 @@
     margin-top: var(--space-3);
     padding-top: var(--space-3);
     border-top: 1px solid var(--color-border);
+    width: 100%;
+    flex-basis: 100%;
 }
 
 .filters__field {
@@ -147,7 +157,7 @@
 
 .filters__label {
     color: var(--color-text-dim);
-    font-size: 11px;
+    font-size: var(--text-xs);
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.05em;
@@ -207,7 +217,7 @@
     background: var(--color-accent);
     border-radius: var(--radius-full);
     color: var(--color-on-accent);
-    font-size: 11px;
+    font-size: var(--text-xs);
     font-weight: 700;
     line-height: 1;
 }
@@ -407,7 +417,7 @@
     top: calc(100% + var(--space-2));
     left: 0;
     right: 0;
-    z-index: 30;
+    z-index: var(--z-dropdown);
     display: none;
     padding: var(--space-2);
     background: var(--glass-bg);

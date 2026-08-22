@@ -113,12 +113,34 @@
    arena сюда не переносим: разметки с этим классом в проекте больше нет,
    они стали бы мёртвым CSS. */
 
-/* Поиск на десктопе: занимает всё свободное место между логотипом и действиями */
-@media (min-width: 1024px) {
+/* Планшет: поиск 400px */
+@media (min-width: 768px) and (max-width: 1023px) {
     .site-header__search {
-        flex: 1 1 auto;
+        flex: 0 1 auto;
         min-width: 0;
-        max-width: 720px;
+        max-width: 400px;
+        display: flex;
+        justify-content: center;
+    }
+}
+
+/* Десктоп: поиск 500px */
+@media (min-width: 1024px) and (max-width: 1439px) {
+    .site-header__search {
+        flex: 0 1 auto;
+        min-width: 0;
+        max-width: 500px;
+        display: flex;
+        justify-content: center;
+    }
+}
+
+/* Широкий десктоп: поиск 600px */
+@media (min-width: 1440px) {
+    .site-header__search {
+        flex: 0 1 auto;
+        min-width: 0;
+        max-width: 600px;
         display: flex;
         justify-content: center;
     }
@@ -202,7 +224,7 @@
     position: absolute;
     top: calc(100% + var(--space-2));
     right: 0;
-    z-index: 20;
+    z-index: var(--z-dropdown);
     min-width: 140px;
     padding: var(--space-2);
     background: var(--glass-bg);
@@ -242,7 +264,13 @@
 
 .site-main {
     flex: 1;
-    padding: var(--space-6) 0 var(--space-8);
+    /* Исправление #2: Прилипание к шапке.
+       padding-top: шапка (sticky, не fixed) + зазор.
+       На мобильных --header-height = 56px (media query ниже),
+       на десктопе 64px. */
+    padding-top: calc(var(--header-height, 64px) + 32px);
+    padding-bottom: var(--space-10);
+    /* padding-left/right задаётся в base.css для ultra-wide контейнера */
 }
 
 /*
@@ -298,6 +326,14 @@
     transform: rotate(15deg);
 }
 
+/* ---------- Мобильные: высота шапки 56px ---------- */
+/* На маленьких экранах шапка компактнее — 56px вместо 64px. */
+@media (max-width: 480px) {
+    :root {
+        --header-height: 56px;
+    }
+}
+
 /* ---------- Телефоны ---------- */
 
 /* Лупа поиска: 32px хватает мыши, но не пальцу. Условие по указателю,
@@ -311,7 +347,8 @@
 }
 
 /* Компактная шапка до 1024px: три колонки — логотип | поиск (центр) | действия (право).
-   На узких экранах скрываем telegram, язык и кнопку входа (она есть в bottom-nav). */
+   На узких экранах скрываем telegram, язык и кнопку входа (она есть в bottom-nav).
+   Поиск растягивается на доступное пространство — ширина ~70% от шапки. */
 @media (max-width: 1023px) {
     .site-header__inner {
         flex-wrap: nowrap;
@@ -325,7 +362,7 @@
     }
 
     .site-header__search {
-        flex: 1 1 auto;
+        flex: 1 1 60%;
         min-width: 0;
         display: flex;
         justify-content: center;
@@ -342,8 +379,10 @@
         display: none;
     }
 
-    /* Скрываем кнопку входа в шапке на мобильном — она есть в bottom-nav */
-    .site-header__login--mobile-hidden {
+    /* Скрываем кнопку входа в шапке на мобильном — она есть в bottom-nav.
+       Увеличиваем specificity (.site-header .), чтобы перебить
+       display: inline-flex из .button в components.css. */
+    .site-header .site-header__login--mobile-hidden {
         display: none;
     }
 
@@ -407,14 +446,23 @@
    по бокам, а не длина строки. Это и есть «просторно», в отличие от
    «растянуто». */
 
-@media (min-width: 1024px) {
+/* Планшеты: отступы 32px */
+@media (min-width: 768px) {
     .container {
         padding-inline: var(--space-6);
     }
 }
 
-@media (min-width: 1600px) {
+/* Десктоп: отступы 40px */
+@media (min-width: 1024px) {
     .container {
-        padding-inline: var(--space-8);
+        padding-inline: var(--space-10);
+    }
+}
+
+/* Широкий десктоп: отступы 48px */
+@media (min-width: 1440px) {
+    .container {
+        padding-inline: var(--space-10);
     }
 }
