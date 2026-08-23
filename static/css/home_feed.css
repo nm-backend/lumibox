@@ -344,6 +344,7 @@
     .film-card__body {
         grid-template-columns: minmax(90px, 130px) minmax(0, 1fr);
         gap: var(--space-4);
+        min-height: auto;
     }
 
     .film-card__info {
