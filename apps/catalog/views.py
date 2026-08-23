@@ -754,6 +754,16 @@ class TitleDetailView(DetailView):
         """
         sources = list(self.object.playback_sources.all())
 
+        if not sources:
+            return {
+                "playback_voices": [],
+                "title_sources": [],
+                "title_players": [],
+                "primary_source": None,
+                "has_playback": False,
+                "playback_data": [],
+            }
+
         by_episode = {}
         title_sources = []
         for source in sources:
@@ -787,7 +797,7 @@ class TitleDetailView(DetailView):
             "title_sources": title_sources,
             "title_players": title_players,
             "primary_source": primary,
-            "has_playback": bool(sources),
+            "has_playback": True,
             "playback_data": self._playback_data(sources),
         }
 

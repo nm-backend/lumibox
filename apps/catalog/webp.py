@@ -24,6 +24,7 @@ import os
 from django.core.files.base import ContentFile
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from PIL import UnidentifiedImageError
 
 logger = logging.getLogger("apps.catalog.webp")
 
@@ -110,7 +111,11 @@ def convert_field(field, widths: tuple[int, ...] = ()) -> str | None:
 
     try:
         with storage.open(name, "rb") as source:
-            image: Image.Image = Image.open(source)
+            try:
+                image: Image.Image = Image.open(source)
+            except UnidentifiedImageError:
+                logger.warning("WebP: невозможно прочитать изображение %s (невалидный формат)", name)
+                return None
             # Пиксели читаем до закрытия файла: PIL по умолчанию ленив,
             # и после выхода из with картинка окажется без данных.
             image.load()

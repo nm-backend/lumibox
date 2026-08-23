@@ -58,6 +58,32 @@
     align-items: start;
 }
 
+/* На узких экранах плашка с постером и описанием идет в одну колонку:
+   260px постера + 24px gap не влезают в 320px вьюпорт с полями контейнера. */
+@media (max-width: 560px) {
+    .film-hero__inner {
+        grid-template-columns: 1fr;
+        gap: var(--space-4);
+    }
+    
+    .film-hero__poster {
+        max-width: 260px;
+        margin-inline: auto;
+    }
+    
+    .film-hero__body {
+        width: 100%;
+        max-width: 100%;
+    }
+    
+    .film-hero__name,
+    .film-hero__original {
+        max-width: 100%;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+    }
+}
+
 .film-hero__poster {
     aspect-ratio: 2 / 3;
     overflow: clip;
