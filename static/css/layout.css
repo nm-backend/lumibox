@@ -272,27 +272,17 @@
 
 .site-main {
     flex: 1;
-    /* Единый page top spacing: header + space-6 = 96px воздуха */
-    padding-top: calc(var(--header-height, 64px) + var(--space-6));
+    /* Page top: header 60 + 32 = 92px воздуха, как у Kinogo но с современным ритмом */
+    padding-top: calc(var(--header-height, 60px) + var(--space-6));
     padding-bottom: var(--space-10);
     overflow-x: clip;
     width: 100%;
     max-width: var(--container-width);
     margin-inline: auto;
-    padding-inline: var(--space-4);
     box-sizing: border-box;
-}
-
-@media (min-width: 768px) {
-    .site-main {
-        padding-inline: var(--space-6);
-    }
-}
-
-@media (min-width: 1024px) {
-    .site-main {
-        padding-inline: var(--space-10);
-    }
+    /* Горизонтальные отступы — через .container, не здесь, чтобы не дублировать:
+       было container 16px + site-main 16px = 32px двойной, на десктопе 64+64=128px */
+    padding-inline: 0;
 }
 
 /*
