@@ -284,25 +284,24 @@
     --transition-spring: 400ms cubic-bezier(0.34, 1.56, 0.64, 1);
     --transition-exit: 200ms cubic-bezier(0.4, 0, 1, 1);
 
-    /* --- Макет --- */
-    /*
-      Одна ширина колонки. Их было две и они спорили: --container-width 1211px
-      и жёсткий max-width 1360px в медиазапросе от 1440px — на широком мониторе
-      побеждало число, а токен переставал что-либо значить.
-    */
-    --container-width: 1320px;
-    --header-height: 64px;
+    /* --- Макет — геометрия Kinogo: компактный контейнер, header 60px,
+       sidebar ~300px, gap 20-24px как у Kinogo movie__card gap 20px --- */
+    --container-width: 1080px;
+    --header-height: 60px;
     --touch-target: 44px;
-    /* Высота нижней панели на телефоне: 44px тач-таргет + подпись + отступы.
-       Токеном, а не числом по месту, потому что от неё зависит нижний отступ
-       страницы — иначе панель накрывает последние строки контента. */
     --bottom-nav-height: 68px;
 
-    /* --- Сайдбар и карточки (плотная сетка) --- */
-    --sidebar-width: 240px;
-    --sidebar-gap: 12px;
-    --card-gap: 10px;
-    --card-padding: 14px;
+    /* --- Сайдбар и карточки — геометрия Kinogo ---
+       Kinogo: wrapper 976px, content 640px, sidebar 331px, movie__card 200px poster gap 20px
+       LumiBox: 1080px container, sidebar 300px, content ~ 760px, poster 200px gap 20px
+       Сохраняем LumiBox branding, только размеры как Kinogo.
+    */
+    --sidebar-width: 300px;
+    --sidebar-gap: 20px;
+    --card-gap: 20px;
+    --card-padding: 16px;
+    --film-card-gap: 16px;
+    --film-card-section-gap: 20px;
 
     /* Выделение текста — цвет кинопроектора */
     --color-selection-bg: rgba(var(--color-accent-rgb), 0.28);

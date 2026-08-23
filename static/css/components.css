@@ -1918,29 +1918,25 @@
    Отступы через --space-* */
 .poster-grid {
     display: grid;
-    /* 320-479px: 2 колонки */
     grid-template-columns: repeat(2, minmax(150px, 1fr));
-    gap: var(--space-3);
-    margin-bottom: var(--space-6);
+    gap: var(--space-4);
+    margin-bottom: var(--space-8);
 }
 
-/* 480-767px: 2-3 колонки */
 @media (min-width: 480px) {
     .poster-grid {
-        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-        gap: var(--space-4);
-    }
-}
-
-/* Планшеты: 3-4 колонки (180px) */
-@media (min-width: 768px) {
-    .poster-grid {
-        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
         gap: var(--space-5);
     }
 }
 
-/* Десктоп: 4-5 колонок (200px) */
+@media (min-width: 768px) {
+    .poster-grid {
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: var(--space-6);
+    }
+}
+
 @media (min-width: 1024px) {
     .poster-grid {
         grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -1948,18 +1944,17 @@
     }
 }
 
-/* Широкий десктоп (1440+): 5-6 колонок (220px) */
 @media (min-width: 1440px) {
     .poster-grid {
         grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-        gap: var(--space-6);
+        gap: var(--space-7);
     }
 }
 
 .poster-card {
     display: flex;
     flex-direction: column;
-    gap: var(--space-2);
+    gap: var(--space-3);
     min-width: 0;
     animation: fadeUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) both;
 }
@@ -1967,7 +1962,7 @@
 .poster-card__link {
     display: flex;
     flex-direction: column;
-    gap: var(--space-2);
+    gap: var(--space-3);
     color: inherit;
     text-decoration: none;
     border-radius: var(--radius-lg);

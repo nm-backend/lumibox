@@ -16,31 +16,6 @@ html {
        до десятков пикселей. clip (не hidden!) не создаёт scroll
        container, поэтому position: sticky в шапке продолжает работать. */
     overflow-x: clip;
-    /* Prevent any element from causing horizontal overflow */
-    max-width: 100vw;
-}
-
-/* Global safety net: prevent any element from exceeding viewport width */
-@media (max-width: 768px) {
-    * {
-        max-width: 100vw;
-        box-sizing: border-box;
-    }
-    
-    /* Ensure containers don't exceed viewport */
-    .container,
-    .site-main,
-    main,
-    section,
-    nav,
-    div,
-    header,
-    footer,
-    article,
-    aside {
-        max-width: 100vw;
-        overflow-x: clip;
-    }
 }
 
 /* Мягкое появление страницы. Класс навешивает app.js после загрузки.
@@ -515,32 +490,5 @@ img[data-loaded] {
     }
 }
 
-/* ---------- Ultra-wide ---------- */
-
-/* Колонка фиксированная: на ультра-широких экранах
-   контент остаётся по центру, поля по бокам расширяются. */
-
-/* Исправление #1: Ultra-wide экраны — контент разлетается.
-   Ограничиваем только основной контент (.site-main), так как
-   header и footer уже имеют внутренние .container с max-width */
-.site-main {
-    max-width: var(--container-width);
-    margin-left: auto;
-    margin-right: auto;
-    padding-left: var(--space-4);
-    padding-right: var(--space-4);
-}
-
-@media (min-width: 768px) {
-    .site-main {
-        padding-left: var(--space-6);
-        padding-right: var(--space-6);
-    }
-}
-
-@media (min-width: 1024px) {
-    .site-main {
-        padding-left: var(--space-10);
-        padding-right: var(--space-10);
-    }
-}
+/* ---------- Ultra-wide — теперь в layout.css единый site-main,
+   здесь не дублируем чтобы не спорить с токенами ---------- */
