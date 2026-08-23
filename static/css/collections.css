@@ -1,6 +1,6 @@
 /* Collections: grid of collection cards */
 
-/* Геометрия Kinogo: компактная сетка, gap 20px */
+/* Геометрия reference: компактная сетка, gap 20px */
 .collection-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));

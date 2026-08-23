@@ -284,17 +284,17 @@
     --transition-spring: 400ms cubic-bezier(0.34, 1.56, 0.64, 1);
     --transition-exit: 200ms cubic-bezier(0.4, 0, 1, 1);
 
-    /* --- Макет — геометрия Kinogo: компактный контейнер, header 60px,
-       sidebar ~300px, gap 20-24px как у Kinogo movie__card gap 20px --- */
+    /* --- Макет — геометрия reference: компактный контейнер, header 60px,
+       sidebar ~300px, gap 20-24px как у reference movie__card gap 20px --- */
     --container-width: 1080px;
     --header-height: 60px;
     --touch-target: 44px;
     --bottom-nav-height: 68px;
 
-    /* --- Сайдбар и карточки — геометрия Kinogo ---
-       Kinogo: wrapper 976px, content 640px, sidebar 331px, movie__card 200px poster gap 20px
+    /* --- Сайдбар и карточки — геометрия reference ---
+       reference: wrapper 976px, content 640px, sidebar 331px, movie__card 200px poster gap 20px
        LumiBox: 1080px container, sidebar 300px, content ~ 760px, poster 200px gap 20px
-       Сохраняем LumiBox branding, только размеры как Kinogo.
+       Сохраняем LumiBox branding, только размеры как reference.
     */
     --sidebar-width: 300px;
     --sidebar-gap: 20px;
