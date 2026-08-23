@@ -1,9 +1,10 @@
 /* Полноценный подвал: бренд, навигация, инфо, реквизиты, ©. */
 
+/* Геометрия Kinogo: компактный футер, меньше пустых дыр, как у Kinogo */
 .site-footer {
     position: relative;
-    margin-top: var(--space-8);
-    padding-top: var(--space-8);
+    margin-top: var(--space-6);
+    padding-top: var(--space-6);
     border-top: 1px solid var(--color-border);
     background:
         radial-gradient(900px 260px at 15% 0%, var(--color-accent-glow), transparent 60%),

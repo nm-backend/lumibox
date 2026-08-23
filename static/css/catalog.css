@@ -66,20 +66,20 @@
    в свёрнутом виде у неё нет ни фона, ни рамки. Поверхность появляется
    только когда панель раскрыта и внутри действительно есть форма. */
 .filters {
-    margin-bottom: var(--space-4);
+    margin-bottom: var(--space-5);
     border-radius: var(--radius-md);
     transition: background var(--transition-fast);
 }
 
 .filters[open] {
-    padding: var(--space-3) var(--space-4);
+    padding: var(--space-4) var(--space-5);
     background: var(--color-surface);
     border: 1px solid var(--color-border);
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
-    gap: var(--space-3);
+    gap: var(--space-4);
 }
 
 .filters__summary {
@@ -132,18 +132,17 @@
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    justify-content: space-between;
-    gap: var(--space-1);
-    margin-bottom: var(--space-3);
+    gap: var(--space-2);
+    margin-bottom: var(--space-4);
     width: 100%;
 }
 
 .filters__body {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: var(--space-2);
-    margin-top: var(--space-3);
-    padding-top: var(--space-3);
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: var(--space-4);
+    margin-top: var(--space-4);
+    padding-top: var(--space-4);
     border-top: 1px solid var(--color-border);
     width: 100%;
     flex-basis: 100%;
@@ -152,7 +151,7 @@
 .filters__field {
     display: flex;
     flex-direction: column;
-    gap: var(--space-1);
+    gap: var(--space-2);
 }
 
 .filters__label {
@@ -245,25 +244,28 @@
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: var(--space-3);
-    margin-bottom: var(--space-3);
+    gap: var(--space-4);
+    margin-bottom: var(--space-5);
+    padding-bottom: var(--space-3);
+    border-bottom: 1px solid var(--color-border-soft);
 }
 
 .catalog-controls__count {
     margin-right: auto;
     color: var(--color-text-muted);
     font-size: var(--text-sm);
+    font-weight: 500;
 }
 
-/* Сортировка — лента ссылок. На узком экране прокручивается вбок,
-   системный скроллбар скрыт, край подсказывает затемнением. */
+/* Сортировка — лента ссылок с равномерными интервалами */
 .catalog-sort {
     display: flex;
-    gap: var(--space-1);
+    gap: var(--space-2);
     max-width: 100%;
     overflow-x: auto;
     scrollbar-width: none;
     scroll-snap-type: x proximity;
+    padding: var(--space-1) 0;
 }
 
 .catalog-sort::-webkit-scrollbar {
@@ -275,13 +277,16 @@
     scroll-snap-align: start;
     display: inline-flex;
     align-items: center;
-    min-height: var(--touch-target);
-    padding: var(--space-2) var(--space-3);
-    border-radius: var(--radius-sm);
+    justify-content: center;
+    min-height: 36px;
+    padding: var(--space-2) var(--space-4);
+    border-radius: var(--radius-full);
+    border: 1px solid transparent;
     color: var(--color-text-muted);
     font-size: var(--text-sm);
+    font-weight: 500;
     white-space: nowrap;
-    transition: color var(--transition-fast), background var(--transition-fast);
+    transition: color var(--transition-fast), background var(--transition-fast), border-color var(--transition-fast);
 }
 
 @media (hover: hover) {
@@ -305,16 +310,16 @@
 
 .reference-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: var(--space-2);
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: var(--space-4);
 }
 
 .reference-card {
     display: flex;
     align-items: baseline;
     justify-content: space-between;
-    gap: var(--space-2);
-    padding: var(--space-3) var(--space-4);
+    gap: var(--space-3);
+    padding: var(--space-4) var(--space-5);
 
     background: var(--card-bg);
     border: var(--card-border);

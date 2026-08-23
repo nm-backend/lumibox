@@ -1,7 +1,8 @@
 /* Формы: поля, ошибки, карточка входа и регистрации. */
 
+/* Единый ритм форм: label→input, input→error/help, field→field, form→button */
 .form__field {
-    margin-bottom: var(--space-4);
+    margin-bottom: var(--space-5);
 }
 
 .form__label {
@@ -10,6 +11,7 @@
     color: var(--color-text-muted);
     font-size: var(--text-sm);
     font-weight: 500;
+    line-height: var(--leading-normal);
 }
 
 .form__required {

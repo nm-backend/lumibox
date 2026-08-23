@@ -182,10 +182,11 @@
 .lb-topnav-bar__inner {
     display: flex;
     align-items: center;
-    justify-content: space-evenly;
-    gap: 4px;
+    justify-content: flex-start;
+    gap: var(--space-2);
     overflow-x: auto;
     scrollbar-width: none;
+    padding: var(--space-2) 0;
 }
 
 .lb-topnav-bar__inner::-webkit-scrollbar {
@@ -195,28 +196,30 @@
 .lb-topnav {
     display: flex;
     align-items: center;
-    gap: 4px;
-    padding: 4px 0;
+    gap: var(--space-2);
+    padding: var(--space-1) 0;
     background: transparent;
     border: 0;
     border-radius: 0;
 }
 
 .lb-topnav__link {
-    display: block;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     flex-shrink: 0;
-    margin: 2px 0;
-    padding: 0 12px;
-    font-size: 0.75rem;
+    padding: 0 14px;
+    min-height: 32px;
+    font-size: 0.8125rem;
     font-weight: 600;
-    line-height: 28px;
+    line-height: 1;
     color: #fff;
     text-decoration: none;
     border: 1px solid var(--color-border-soft);
     border-radius: var(--radius-full);
     background: linear-gradient(180deg, #4a4a4f 0%, #3c3c41 100%);
     white-space: nowrap;
-    transition: background var(--transition-fast), color var(--transition-fast);
+    transition: background var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast);
 }
 
 .lb-topnav__link:hover {
@@ -1920,24 +1923,26 @@
    Сайдбар нужен и на каталоге (структура кино-портала), 
    поэтому сетка и виджеты переехали сюда. 
    В home_feed.css осталась только лента детальных карточек. */
+/* Двухколоночная сетка — геометрия Kinogo: wrapper 976 = content 640 + sidebar 331 gap ~5px
+   LumiBox: 1080 container = 300 sidebar + 756 main + 24 gap — компактно как Kinogo */
 .lb-contentwrap--home {
     display: grid;
     grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
-    gap: var(--space-5);
+    gap: var(--space-6);
     align-items: start;
-    margin-top: var(--space-2);
+    margin-top: var(--space-4);
 }
 
 .lb-contentwrap--home .lb-sidebar {
     grid-column: 1;
     grid-row: auto;
     position: sticky;
-    top: calc(var(--header-height) + var(--space-3));
+    top: calc(var(--header-height) + var(--space-4));
     display: grid;
-    gap: 8px;
+    gap: var(--space-4);
 }
 
-/* ---------- Сайдбар: стеклянные виджеты ---------- */
+/* ---------- Сайдбар: стеклянные виджеты — единый ритм ---------- */
 
     /* Блочные панели без blur: blur на двадцати карточках заставляет
        браузер перерисовывать подложку при каждом кадре прокрутки.
@@ -1946,15 +1951,17 @@
         background: var(--glass-bg);
         border: 1px solid var(--glass-border);
         border-radius: var(--radius-md);
-        padding: var(--space-3);
+        padding: var(--space-4);
     }
 
     .sb-card__title {
-        margin: 0 0 var(--space-2);
+        margin: 0 0 var(--space-3);
         font-size: 0.8125rem;
         font-weight: 700;
-        letter-spacing: 0.02em;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
         color: var(--color-text-muted);
+        line-height: var(--leading-snug);
     }
 
 .sb-card__title--row {
@@ -1981,7 +1988,7 @@
     padding: 0;
     list-style: none;
     display: grid;
-    gap: 2px;
+    gap: var(--space-1);
 }
 
 .sb-list__item {
@@ -1992,14 +1999,15 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: var(--space-2);
-    padding: 6px var(--space-2);
+    gap: var(--space-3);
+    padding: 8px 12px;
     border-radius: var(--radius-sm);
     font-size: var(--text-sm);
     line-height: var(--leading-snug);
-    color: var(--color-text);
+    color: var(--color-text-soft);
     text-decoration: none;
     transition: background var(--transition-fast), color var(--transition-fast);
+    min-height: 36px;
 }
 
 .sb-list__link:hover {
@@ -2011,22 +2019,28 @@
     flex-shrink: 0;
     font-size: var(--text-xs);
     color: var(--color-text-dim);
+    background: var(--color-surface-hover);
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
+    min-width: 24px;
+    text-align: center;
 }
 
-/* Компактные списки ссылок (годы, страны, сериалы, подборки) — плотнее */
+/* Компактные списки — чуть плотнее, но с воздухом */
 .sb-list--compact .sb-list__link {
-    padding-top: 3px;
-    padding-bottom: 3px;
+    padding-top: 6px;
+    padding-bottom: 6px;
+    min-height: 32px;
 }
 
-/* ---------- Списки фильмов в сайдбаре ---------- */
+/* ---------- Списки фильмов в сайдбаре — равномерный ритм ---------- */
 
 .sb-films {
     margin: 0;
     padding: 0;
     list-style: none;
     display: grid;
-    gap: 2px;
+    gap: var(--space-2);
 }
 
 .sb-films__item {
@@ -2036,8 +2050,8 @@
 .sb-films__link {
     display: flex;
     align-items: center;
-    gap: var(--space-2);
-    padding: 6px;
+    gap: var(--space-3);
+    padding: 8px;
     border-radius: var(--radius-sm);
     text-decoration: none;
     transition: background var(--transition-fast);
@@ -2049,8 +2063,8 @@
 
 .sb-films__rank {
     flex-shrink: 0;
-    width: 16px;
-    font-size: var(--text-xs);
+    width: 20px;
+    font-size: var(--text-sm);
     font-weight: 700;
     color: var(--color-text-dim);
     text-align: center;
@@ -2058,8 +2072,8 @@
 
 .sb-films__poster {
     flex-shrink: 0;
-    width: 46px;
-    height: 56px;
+    width: 48px;
+    height: 64px;
     object-fit: cover;
     border-radius: var(--radius-sm);
     border: 1px solid var(--color-border-soft);
@@ -2068,6 +2082,9 @@
 .sb-films__main {
     min-width: 0;
     flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
 }
 
 .sb-films__name {
@@ -2090,9 +2107,9 @@
 
 .sb-films__meta {
     display: block;
-    margin-top: 2px;
     font-size: var(--text-xs);
     color: var(--color-text-dim);
+    line-height: var(--leading-normal);
 }
 
 /* Плашка «10 сезон 5 серия» в «Обновлениях сериалов» — как бейдж на карточке */
