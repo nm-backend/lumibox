@@ -1598,22 +1598,6 @@
     margin-bottom: var(--space-3);
     font-size: var(--text-xs);
     color: var(--color-text-dim);
-    /* Prevent overflow from long breadcrumb text */
-    overflow-wrap: anywhere;
-    word-break: break-word;
-    /* Force wrapping of breadcrumb items */
-    width: 100%;
-    max-width: 100%;
-    /* Ensure breadcrumb links wrap properly */
-    flex-wrap: wrap;
-}
-
-.breadcrumbs a,
-.breadcrumbs span {
-    flex: 0 0 auto;
-    max-width: 100%;
-    overflow-wrap: anywhere;
-    word-break: break-word;
 }
 
 .breadcrumbs a {

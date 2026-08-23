@@ -81,35 +81,6 @@ async function runE2ETests() {
             });
 
             console.log(`Viewport ${vp.name}: hasOverflow = ${hasOverflow}`);
-
-            // Find the overflowing element
-            if (hasOverflow) {
-                const overflowInfo = await page.evaluate(() => {
-                    const viewportWidth = document.documentElement.clientWidth;
-                    const overflowingElements = [];
-                    
-                    // Check all elements
-                    const allElements = document.querySelectorAll('*');
-                    for (const el of allElements) {
-                        const rect = el.getBoundingClientRect();
-                        const style = window.getComputedStyle(el);
-                        if (rect.right > viewportWidth + 1 || rect.width > viewportWidth + 1) {
-                            overflowingElements.push({
-                                tag: el.tagName,
-                                class: el.className,
-                                id: el.id,
-                                width: rect.width,
-                                right: rect.right,
-                                viewportWidth: viewportWidth,
-                                outerHTML: el.outerHTML.substring(0, 200)
-                            });
-                        }
-                    }
-                    return overflowingElements.slice(0, 10);
-                });
-                
-                console.log('Overflowing elements:', JSON.stringify(overflowInfo, null, 2));
-            }
             await page.screenshot({ path: `screenshot_${vp.width}.png` });
         }
 

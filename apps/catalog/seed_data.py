@@ -68,7 +68,6 @@ TITLES = [
         "short_description": "История создания самой известной соцсети планеты.",
         "description": "Гарвардский студент запускает сайт, который за несколько лет меняет представление о том, как люди общаются. Драма по мотивам реальных событий.",
         "trailer_url": "https://www.youtube.com/watch?v=lB95KLmpLR4",
-        "video_url": "https://www.youtube.com/watch?v=lB95KLmpLR4",
         "voice_acting": "dubbed",
         "views_count": 1240,
         "quality": "Blu-ray",

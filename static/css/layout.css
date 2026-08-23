@@ -5,9 +5,6 @@
     max-width: var(--container-width);
     margin: 0 auto;
     padding-inline: var(--space-4);
-    /* Prevent horizontal overflow from child elements */
-    overflow-x: clip;
-    box-sizing: border-box;
 }
 
 /* ---------- Шапка ---------- */
@@ -271,11 +268,7 @@
        поэтому оставляем только небольшой отступ после sticky-шапки. */
     padding-top: calc(var(--header-height, 64px) + var(--space-4));
     padding-bottom: var(--space-10);
-    /* Prevent horizontal overflow */
-    overflow-x: clip;
-    max-width: 100vw;
-    width: 100%;
-    box-sizing: border-box;
+    /* padding-left/right задаётся в base.css для ultra-wide контейнера */
 }
 
 /*
