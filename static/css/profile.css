@@ -1,6 +1,6 @@
 /* Profile page — tabbed layout with sidebar stats */
 
-/* Геометрия Kinogo: sidebar 300px + content gap 24px */
+/* Геометрия reference: sidebar 300px + content gap 24px */
 .profile-layout {
     display: grid;
     grid-template-columns: var(--sidebar-width) 1fr;

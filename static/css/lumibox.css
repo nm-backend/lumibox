@@ -1923,8 +1923,8 @@
    Сайдбар нужен и на каталоге (структура кино-портала), 
    поэтому сетка и виджеты переехали сюда. 
    В home_feed.css осталась только лента детальных карточек. */
-/* Двухколоночная сетка — геометрия Kinogo: wrapper 976 = content 640 + sidebar 331 gap ~5px
-   LumiBox: 1080 container = 300 sidebar + 756 main + 24 gap — компактно как Kinogo */
+/* Двухколоночная сетка — геометрия reference: wrapper 976 = content 640 + sidebar 331 gap ~5px
+   LumiBox: 1080 container = 300 sidebar + 756 main + 24 gap — компактно как reference */
 .lb-contentwrap--home {
     display: grid;
     grid-template-columns: var(--sidebar-width) minmax(0, 1fr);

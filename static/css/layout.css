@@ -272,7 +272,7 @@
 
 .site-main {
     flex: 1;
-    /* Page top: header 60 + 32 = 92px воздуха, как у Kinogo но с современным ритмом */
+    /* Page top: header 60 + 32 = 92px воздуха, как у reference но с современным ритмом */
     padding-top: calc(var(--header-height, 60px) + var(--space-6));
     padding-bottom: var(--space-10);
     overflow-x: clip;
