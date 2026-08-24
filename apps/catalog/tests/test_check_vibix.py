@@ -8,10 +8,14 @@ from django.test import TestCase, override_settings
 
 
 class CheckVibixCommandTests(TestCase):
+    @override_settings(VIBIX_API_TOKEN="", VIDEO_SERVICE_API_KEY="")
     def test_no_credentials_warns_but_succeeds(self):
         """Without credentials, command warns but exits cleanly (exit code 0)."""
         out = StringIO()
-        call_command("check_vibix", stdout=out, stderr=StringIO())
+        # Явно пустые настройки и запрет живого логина: иначе тест ловил бы
+        # реальные креды машины (.env) и ходил бы в сеть.
+        with patch("apps.catalog.video_service_api.login_vibix", return_value={}):
+            call_command("check_vibix", stdout=out, stderr=StringIO())
         output = out.getvalue()
         self.assertIn("API Token", output)
         self.assertIn("не задан", output)
@@ -56,12 +60,14 @@ class CheckVibixCommandTests(TestCase):
         self.assertEqual(ctx.exception.code, 1)
         self.assertIn("СБОЙ", out.getvalue())
 
-    @override_settings(VIBIX_API_TOKEN="", VIBIX_PUBLISHER_ID="")
+    @override_settings(VIBIX_API_TOKEN="", VIDEO_SERVICE_API_KEY="", VIBIX_PUBLISHER_ID="")
     def test_all_empty_shows_warnings_not_errors(self):
         """With all empty, 4 warnings, 0 failures, exit code 0."""
         out = StringIO()
         err = StringIO()
-        call_command("check_vibix", stdout=out, stderr=err)
+        # Тот же запрет живого логина: тест не зависит от окружения машины.
+        with patch("apps.catalog.video_service_api.login_vibix", return_value={}):
+            call_command("check_vibix", stdout=out, stderr=err)
         output = out.getvalue()
         self.assertIn("Предупреждений: 4", output)
         self.assertNotIn("СБОЙ", output)

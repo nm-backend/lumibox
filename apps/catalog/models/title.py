@@ -199,6 +199,23 @@ class Title(SeoModel, TimeStampedModel):
         validators=[validate_image_file],
         help_text="Широкое горизонтальное изображение (16:9) для шапки страницы фильма. Необязательно.",
     )
+
+    # Внешние адреса постера и фона из каталога видеосервиса. Картинки
+    # намеренно не скачиваются: чужой трафик и чужие права. Адрес хранится,
+    # чтобы будущая загрузка не требовала повторного обхода API, а редактор
+    # видел источник и мог приложить файл вручную.
+    poster_url = models.URLField(
+        "Адрес постера (внешний)",
+        max_length=500,
+        blank=True,
+        help_text="Ссылка на постер в каталоге видеосервиса. Заполняется синхронизацией.",
+    )
+    backdrop_url = models.URLField(
+        "Адрес фона (внешний)",
+        max_length=500,
+        blank=True,
+        help_text="Ссылка на широкоформатный постер в каталоге видеосервиса.",
+    )
     logo = models.ImageField(
         "Логотип",
         upload_to="logos/%Y/%m",
@@ -383,6 +400,19 @@ class Title(SeoModel, TimeStampedModel):
             models.Index(
                 fields=["status", "-rating_average", "-rating_count"],
                 name="title_status_rating_idx",
+            ),
+        ]
+        constraints = [
+            # kp_id — первичный ключ сопоставления с видеосервисом. Частичный
+            # уникальный индекс защищает от дублей на уровне БД даже при
+            # двух параллельных прогонах импорта: второй вставщик получает
+            # IntegrityError, а не тихую копию записи. Условие исключает
+            # пустые строки: записей без внешнего ID может быть сколько
+            # угодно.
+            models.UniqueConstraint(
+                fields=["kp_id"],
+                condition=~models.Q(kp_id=""),
+                name="title_kp_id_uniq_when_filled",
             ),
         ]
 

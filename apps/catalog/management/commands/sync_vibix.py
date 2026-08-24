@@ -11,9 +11,22 @@ sync_voiceovers — остаются для обратной совместим�
     python manage.py sync_vibix --episodes     # новые сезоны и серии
     python manage.py sync_vibix --dry-run      # ничего не пишет в базу
 
+Наполнение каталога с нуля (массовый импорт всего списка издателя):
+
+    python manage.py sync_vibix --create-missing --dry-run
+        # план: сколько записей будет создано, без записи в базу
+    python manage.py sync_vibix --create-missing
+        # создать отсутствующие записи (черновики по умолчанию)
+    python manage.py sync_vibix --create-missing --type serial
+        # только сериалы; фильмы отдельно: --type movie
+    python manage.py sync_vibix --unlock
+        # снять зависшую блокировку массового импорта
+
 Повторный запуск идемпотентен: заполняются только пустые поля, серии
-не дублируются, существующие данные не удаляются. Без VIBIX_API_TOKEN
-команда завершается с понятной ошибкой, ничего не трогая.
+не дублируются, существующие данные не удаляются. Массовый импорт можно
+безопасно перезапускать после обрыва — существующие записи (дедуп по
+kp_id) пропускаются, продолжение идёт с места остановки. Без
+VIBIX_API_TOKEN команда завершается с понятной ошибкой, ничего не трогая.
 """
 
 from django.core.management.base import BaseCommand, CommandError
@@ -21,6 +34,8 @@ from django.core.management.base import BaseCommand, CommandError
 from apps.catalog.models import Title
 from apps.catalog.video_service_api import VideoServiceAPIError
 from apps.catalog.video_service_sync import (
+    bulk_create_from_catalog,
+    release_bulk_import_lock,
     sync_series_episodes,
     sync_title,
     sync_video_service_ids,
@@ -73,14 +88,69 @@ class Command(BaseCommand):
             type=int,
             help="Ограничение числа страниц списка (для отладки).",
         )
+        parser.add_argument(
+            "--create-missing",
+            action="store_true",
+            help=(
+                "Массовый импорт: создать записи для видео издателя, которых "
+                "ещё нет в каталоге. Новые записи — черновики."
+            ),
+        )
+        parser.add_argument(
+            "--type",
+            dest="content_type",
+            choices=["movie", "serial"],
+            help="Только с --create-missing: обойти фильмы или сериалы раздельно.",
+        )
+        parser.add_argument(
+            "--status",
+            choices=["draft", "published"],
+            default="draft",
+            help="Только с --create-missing: статус новых записей (по умолчанию draft).",
+        )
+        parser.add_argument(
+            "--batch-size",
+            type=int,
+            default=500,
+            help="Только с --create-missing: размер батча записи в базу (по умолчанию 500).",
+        )
+        parser.add_argument(
+            "--unlock",
+            action="store_true",
+            help="Снять блокировку массового импорта (если прошлый процесс умер).",
+        )
 
     def handle(self, *args, **options):
         dry_run = options["dry_run"]
-        selected_modes = sum(bool(options[name]) for name in ("title", "voiceovers", "episodes"))
+
+        if options["unlock"]:
+            if any(options[name] for name in ("title", "voiceovers", "episodes", "create_missing")):
+                raise CommandError("--unlock используется отдельно.")
+            if release_bulk_import_lock():
+                self.stdout.write(self.style.SUCCESS("Блокировка массового импорта снята."))
+            else:
+                self.stdout.write("Активной блокировки массового импорта нет.")
+            return
+
+        modes = ("title", "voiceovers", "episodes", "create_missing")
+        selected_modes = sum(bool(options[name]) for name in modes)
         if selected_modes > 1:
-            raise CommandError("--title, --voiceovers и --episodes нельзя использовать вместе.")
+            raise CommandError(
+                "--title, --voiceovers, --episodes и --create-missing "
+                "нельзя использовать вместе."
+            )
         if options["limit"] is not None and not options["episodes"]:
             raise CommandError("--limit применяется только вместе с --episodes.")
+
+        create_only = ("content_type", "status", "batch_size")
+        if not options["create_missing"] and any(
+            options[name] != default
+            for name, default in (("content_type", None), ("status", "draft"), ("batch_size", 500))
+        ):
+            raise CommandError(
+                f"{', '.join(('--' + name.replace('_', '-')) for name in create_only)} "
+                "применяются только вместе с --create-missing."
+            )
 
         if options["title"]:
             self._sync_one_title(options["title"], dry_run=dry_run)
@@ -92,6 +162,17 @@ class Command(BaseCommand):
 
         if options["episodes"]:
             self._sync_episodes(dry_run=dry_run, limit=options["limit"])
+            return
+
+        if options["create_missing"]:
+            self._create_missing(
+                content_type=options["content_type"],
+                status=options["status"],
+                batch_size=options["batch_size"],
+                dry_run=dry_run,
+                page_size=options["page_size"],
+                max_pages=options["max_pages"],
+            )
             return
 
         self._sync_catalog(
@@ -174,3 +255,71 @@ class Command(BaseCommand):
         ))
         if dry_run:
             self.stdout.write(self.style.WARNING("Сухой прогон: в базу ничего не записано."))
+
+    def _create_missing(
+        self, *, content_type, status, batch_size, dry_run, page_size, max_pages
+    ):
+        if batch_size < 1:
+            raise CommandError("--batch-size должен быть положительным числом.")
+
+        type_label = {"movie": "фильмы", "serial": "сериалы", None: "весь каталог"}[
+            content_type
+        ]
+        self.stdout.write(
+            f"Массовый импорт ({type_label}, статус новых записей: {status})..."
+        )
+
+        last_page = [0]
+
+        def progress(snapshot):
+            if snapshot["fetched"] // max(page_size, 1) <= last_page[0]:
+                return
+            last_page[0] = snapshot["fetched"] // max(page_size, 1)
+            self.stdout.write(
+                f"  … получено {snapshot['fetched']}, создано "
+                f"{snapshot['created']}, уже есть {snapshot['skipped_existing']}"
+            )
+
+        try:
+            stats = bulk_create_from_catalog(
+                content_type=content_type,
+                status=(
+                    Title.Status.PUBLISHED if status == "published" else Title.Status.DRAFT
+                ),
+                dry_run=dry_run,
+                page_size=page_size,
+                max_pages=max_pages,
+                batch_size=batch_size,
+                progress=progress,
+            )
+        except VideoServiceAPIError as exc:
+            raise CommandError(str(exc)) from exc
+        except ValueError as exc:
+            raise CommandError(str(exc)) from exc
+
+        prefix = "План (без записи в базу)" if dry_run else "Импорт завершён"
+        verb = "будет создано" if dry_run else "создано"
+        self.stdout.write(self.style.SUCCESS(
+            f"{prefix}: получено карточек {stats['fetched']}, {verb} "
+            f"{stats['created']} (батчей {stats['batches']}); пропущено как "
+            f"существующие {stats['skipped_existing']}; без kp_id "
+            f"{stats['no_kp_id']}, без названия {stats['no_name']}, "
+            f"без года {stats['no_year']}; ошибок {stats['errors']}."
+        ))
+        self.stdout.write(
+            f"Справочники: жанров +{stats['genres_created']}, "
+            f"стран +{stats['countries_created']}."
+        )
+        for label, samples in (
+            ("Без названия", stats["samples_no_name"]),
+            ("Без года", stats["samples_no_year"]),
+            ("Ошибки", stats["errors_log"]),
+        ):
+            for sample in samples:
+                self.stdout.write(f"  · {label}: {sample}")
+        if dry_run:
+            self.stdout.write(self.style.WARNING("Сухой прогон: в базу ничего не записано."))
+        elif stats["created"]:
+            self.stdout.write(
+                "Следующий шаг для сериалов: python manage.py sync_vibix --episodes"
+            )

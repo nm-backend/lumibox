@@ -46,26 +46,7 @@ from django.db import transaction
 from django.utils.text import slugify
 
 from apps.catalog.models import Country, Episode, Genre, Studio, Title
-
-# Кириллица → латиница для адресов.
-#
-# Адреса в маршрутах описаны как <slug:...>, а этот преобразователь принимает
-# только [-a-zA-Z0-9_]. Кириллический адрес формально сохраняется в базу, но
-# ссылку на такую запись собрать уже нельзя: reverse() падает с NoReverseMatch,
-# и страница со списком, где эта запись попадается, перестаёт открываться
-# целиком. Поэтому русские названия транслитерируем, а не оставляем как есть.
-TRANSLIT = {
-    "а": "a", "б": "b", "в": "v", "г": "g", "д": "d", "е": "e", "ё": "e",
-    "ж": "zh", "з": "z", "и": "i", "й": "y", "к": "k", "л": "l", "м": "m",
-    "н": "n", "о": "o", "п": "p", "р": "r", "с": "s", "т": "t", "у": "u",
-    "ф": "f", "х": "h", "ц": "ts", "ч": "ch", "ш": "sh", "щ": "sch",
-    "ъ": "", "ы": "y", "ь": "", "э": "e", "ю": "yu", "я": "ya",
-}
-
-
-def transliterate(text: str) -> str:
-    """Русский текст латиницей: «Тьма» → «tma»."""
-    return "".join(TRANSLIT.get(char, TRANSLIT.get(char.lower(), char)) for char in text.lower())
+from apps.catalog.translit import transliterate
 
 
 class Command(BaseCommand):
