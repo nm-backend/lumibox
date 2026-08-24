@@ -16,7 +16,9 @@ header {
     width: 100%;
     height: auto;
     min-height: var(--header-height);
-    background-color: var(--glass-bg);
+    /* Непрозрачный фон чтобы контент при прокрутке не просвечивал
+       через стеклянную шапку. --glass-bg был полупрозрачным (0.94). */
+    background-color: var(--color-surface);
     -webkit-backdrop-filter: blur(20px) saturate(180%);
     backdrop-filter: blur(20px) saturate(180%);
     border-bottom: 1px solid var(--color-border);
@@ -269,8 +271,8 @@ header > .container {
 
 .site-main {
     flex: 1;
-    /* Page top: header + topnav bar + воздух. Topnav ~48px, итого 60+32+32=124px */
-    padding-top: calc(var(--header-height, 60px) + var(--space-6) + var(--space-6));
+    /* Page top: header + topnav bar + воздух. Topnav ~48px */
+    padding-top: calc(var(--header-height, 60px) + var(--space-4));
     padding-bottom: var(--space-10);
     overflow-x: clip;
     width: 100%;
@@ -347,7 +349,7 @@ header > .container {
 /* ---------- Светлая тема: шапка и внутренние элементы ---------- */
 
 [data-theme="light"] header {
-    background-color: var(--glass-bg);
+    background-color: var(--color-surface);
     color: var(--color-text);
 }
 

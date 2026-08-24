@@ -8,8 +8,8 @@
 .film-hero {
     position: relative;
     overflow: clip;
-    margin-top: var(--space-5);
-    padding: var(--space-8) 0 var(--space-7);
+    margin-top: var(--space-2);
+    padding: var(--space-8) var(--space-5) var(--space-7);
     background-color: var(--color-surface);
 }
 
@@ -53,6 +53,7 @@
     grid-template-columns: 280px 1fr;
     gap: var(--space-7);
     align-items: start;
+    padding: 0 var(--space-2);
 }
 
 .film-hero__poster {
@@ -167,17 +168,18 @@
     display: flex;
     flex-wrap: wrap;
     gap: var(--space-4);
-    margin-top: var(--space-6);
+    margin-top: var(--space-7);
+    padding-bottom: var(--space-2);
 }
 
 .film-hero__specs {
     display: flex;
     flex-wrap: wrap;
     gap: var(--space-4);
-    margin-top: var(--space-6);
+    margin-top: var(--space-7);
     font-size: var(--text-sm);
     color: var(--color-text-muted);
-    line-height: var(--leading-normal);
+    line-height: var(--leading-relaxed);
 }
 
 .film-hero__spec {
@@ -302,14 +304,14 @@
 .spec-list__label {
     color: var(--color-text-dim);
     font-size: var(--text-sm);
-    padding: var(--space-2) 0;
+    padding: var(--space-3) 0 var(--space-2);
     font-weight: 500;
 }
 
 .spec-list__value {
     font-size: var(--text-sm);
-    padding: var(--space-2) 0;
-    line-height: var(--leading-normal);
+    padding: var(--space-3) 0 var(--space-2);
+    line-height: var(--leading-relaxed);
 }
 
 /* ---------- Съёмочная группа ----------
@@ -537,6 +539,8 @@
 @media (max-width: 900px) {
     .film-hero {
         padding-top: var(--space-6);
+        padding-left: var(--space-3);
+        padding-right: var(--space-3);
     }
 
     .film-hero__inner {
