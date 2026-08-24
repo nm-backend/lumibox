@@ -71,7 +71,8 @@
 }
 
 .lb-body .site-main {
-    padding-top: calc(var(--header-height, 60px) + var(--space-4));
+    /* Поправка на topnav-bar (~48px) + воздух под ней */
+    padding-top: calc(var(--header-height, 60px) + var(--space-8) + var(--space-4));
 }
 
 /* ---------- Тонкая тёмная полоса вверху ---------- */
@@ -1993,14 +1994,14 @@ nav.lb-topnav-bar a:hover {
     align-items: center;
     justify-content: space-between;
     gap: var(--space-3);
-    padding: 10px 12px;
+    padding: 12px 14px;
     border-radius: var(--radius-sm);
     font-size: var(--text-sm);
     line-height: var(--leading-snug);
     color: var(--color-text-soft);
     text-decoration: none;
     transition: background var(--transition-fast), color var(--transition-fast);
-    min-height: 40px;
+    min-height: 44px;
 }
 
 .sb-list__link:hover {
@@ -2021,9 +2022,9 @@ nav.lb-topnav-bar a:hover {
 
 /* Компактные списки — увеличенные зоны для тач-таргетов */
 .sb-list--compact .sb-list__link {
-    padding-top: 10px;
-    padding-bottom: 10px;
-    min-height: 40px;
+    padding-top: 12px;
+    padding-bottom: 12px;
+    min-height: 44px;
 }
 
 /* ---------- Списки фильмов в сайдбаре — равномерный ритм ---------- */

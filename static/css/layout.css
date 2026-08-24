@@ -271,8 +271,8 @@ header > .container {
 
 .site-main {
     flex: 1;
-    /* Page top: header + topnav bar + воздух. Topnav ~48px */
-    padding-top: calc(var(--header-height, 60px) + var(--space-4));
+    /* Page top: header (60px) + topnav bar (~48px) + воздух */
+    padding-top: calc(var(--header-height, 60px) + var(--space-8) + var(--space-4));
     padding-bottom: var(--space-10);
     overflow-x: clip;
     width: 100%;
