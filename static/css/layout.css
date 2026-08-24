@@ -269,8 +269,8 @@ header > .container {
 
 .site-main {
     flex: 1;
-    /* Page top: header (60px) + 24px воздух */
-    padding-top: 84px;
+    /* Page top: header (60px) + topnav (44px) + 12px gap = 116px desktop */
+    padding-top: 116px;
     padding-bottom: var(--space-10);
     overflow-x: clip;
     width: 100%;
@@ -280,6 +280,19 @@ header > .container {
     /* Горизонтальные отступы — через .container, не здесь, чтобы не дублировать:
        было container 16px + site-main 16px = 32px двойной, на десктопе 64+64=128px */
     padding-inline: 0;
+}
+
+/* Mobile: no topnav, header is 56px */
+@media (max-width: 1024px) {
+    .site-main {
+        padding-top: 68px; /* header (56px) + 12px gap */
+    }
+}
+
+@media (max-width: 480px) {
+    .site-main {
+        padding-top: 68px; /* header (56px) + 12px gap */
+    }
 }
 
 /*

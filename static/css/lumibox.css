@@ -71,7 +71,13 @@
 }
 
 .lb-body .site-main {
-    padding-top: 84px;
+    padding-top: 116px;
+}
+
+@media (max-width: 1024px) {
+    .lb-body .site-main {
+        padding-top: 68px;
+    }
 }
 
 /* ---------- Тонкая тёмная полоса вверху ---------- */
