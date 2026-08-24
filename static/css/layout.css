@@ -39,8 +39,9 @@
     position: relative;
     min-height: var(--header-height);
     display: flex;
-    align-items: center;
-    gap: var(--space-4);
+    flex-direction: column;
+    gap: var(--space-3);
+    padding-bottom: var(--space-3);
 }
 
 /* Логотип — слева, не сжимается */
@@ -58,8 +59,7 @@
 
 /* Поиск — по центру, растягивается */
 .site-header__search {
-    flex: 1 1 auto;
-    min-width: 0;
+    width: 100%;
     display: flex;
     justify-content: center;
 }

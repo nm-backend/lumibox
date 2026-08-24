@@ -54,6 +54,8 @@ body {
     display: flex;
     flex-direction: column;
     font-family: var(--font-base);
+    background-color: var(--color-bg);
+    color: var(--color-text);
 }
 
 /* Открытое мобильное меню — модальный слой: страница под ним не должна
