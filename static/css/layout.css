@@ -12,13 +12,12 @@
 header {
     position: sticky;
     top: 0;
-    z-index: var(--z-header);
+    z-index: 9999 !important;
     width: 100%;
     height: auto;
     min-height: var(--header-height);
-    /* Непрозрачный фон чтобы контент при прокрутке не просвечивал
-       через стеклянную шапку. --glass-bg был полупрозрачным (0.94). */
-    background-color: var(--color-surface);
+    background: var(--color-surface, #ffffff) !important;
+    background-color: var(--color-surface) !important;
     -webkit-backdrop-filter: blur(20px) saturate(180%);
     backdrop-filter: blur(20px) saturate(180%);
     border-bottom: 1px solid var(--color-border);
@@ -272,7 +271,7 @@ header > .container {
 .site-main {
     flex: 1;
     /* Page top: header (60px) + 24px воздух */
-    padding-top: calc(var(--header-height, 60px) + 24px);
+    padding-top: 84px;
     padding-bottom: var(--space-10);
     overflow-x: clip;
     width: 100%;

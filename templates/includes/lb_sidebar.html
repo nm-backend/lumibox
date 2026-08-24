@@ -74,7 +74,7 @@
                         {% for year in lb_years|slice:":9" %}
                             <li class="sb-list__item">
                                 <a class="sb-list__link" href="{% url 'catalog:year_titles' year %}"
-                                   title="{{ year }}">{{ year }}</a>
+                                   title="{% blocktranslate %}Фильмы и сериалы {{ year }} года{% endblocktranslate %}">{{ year }}</a>
                             </li>
                         {% endfor %}
                     </ul>

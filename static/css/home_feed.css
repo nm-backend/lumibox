@@ -18,12 +18,15 @@
 }
 
 .film-card {
-    background: var(--glass-bg);
-    border: 1px solid var(--glass-border);
-    border-radius: var(--radius-md);
-    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background-color: var(--color-surface, #ffffff) !important;
+    padding: 20px 24px;
+    border-radius: 12px;
+    max-width: 840px;
+    border: 1px solid var(--color-border);
     transition: border-color var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast);
-    /* reference min-height 281px для стабильности layout при разной высоте метаданных */
     min-height: 0;
 }
 
@@ -48,6 +51,9 @@
     font-weight: 800;
     letter-spacing: var(--tracking-tight);
     line-height: var(--leading-snug);
+    background: transparent !important;
+    padding: 0 !important;
+    box-shadow: none !important;
 }
 
 .film-card__year {
@@ -126,8 +132,8 @@
 
 .film-card__body {
     display: grid;
-    grid-template-columns: minmax(150px, 180px) 1fr;
-    gap: 20px;
+    grid-template-columns: 180px 1fr;
+    gap: 24px;
     align-items: start;
 }
 
@@ -267,13 +273,12 @@
 }
 
 .film-card__foot {
-    margin-top: 20px;
-    padding-top: 12px;
-    padding-bottom: 8px;
-    border-top: 1px solid var(--color-border-soft);
     display: flex;
-    align-items: center;
     justify-content: space-between;
+    align-items: center;
+    margin-top: auto;
+    padding-top: 16px;
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
     flex-wrap: wrap;
     gap: var(--space-4);
 }
@@ -327,7 +332,7 @@
 
 @media (max-width: 700px) {
     .film-card {
-        padding: 16px;
+        padding: 16px 18px;
     }
 
     .film-card__head {
