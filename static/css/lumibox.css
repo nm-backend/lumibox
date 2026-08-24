@@ -1598,9 +1598,6 @@
     }
 
     /* --- Сайдбар: выделенные заголовки блоков --- */
-    .site-header {
-        background-color: rgba(22, 22, 22, 0.97);
-    }
 
     .lb-aheader {
         color: var(--color-accent);

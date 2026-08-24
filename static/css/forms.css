@@ -2,14 +2,10 @@
 
 /* Единый ритм форм: label→input, input→error/help, field→field, form→button */
 .form__field {
-<<<<<<< HEAD
     display: flex;
     flex-direction: column;
     gap: var(--space-2);
     margin-bottom: var(--space-4);
-=======
-    margin-bottom: var(--space-5);
->>>>>>> daabfa1eca1e070905751b470552e9f2479de099
 }
 
 .form__label {
@@ -26,7 +22,7 @@
 
 /* Одно правило на все типы полей: не придётся дописывать сюда
    каждый новый тип, который появится в формах. */
-.form__field input:not([type="checkbox"]):not([type="file"]),
+.form__field input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
 .form__field select,
 .form__field textarea {
     width: 100%;
@@ -40,6 +36,21 @@
     transition: border-color var(--transition), box-shadow var(--transition);
     appearance: none;
     -webkit-appearance: none;
+}
+
+/* Светлая тема: поля форм с белым фоном и темным текстом */
+[data-theme="light"] .form__field input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+[data-theme="light"] .form__field select,
+[data-theme="light"] .form__field textarea {
+    background-color: #ffffff;
+    color: #1d1d1f;
+    border-color: rgba(0, 0, 0, 0.12);
+}
+
+[data-theme="light"] .form__field input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):focus-visible,
+[data-theme="light"] .form__field select:focus-visible,
+[data-theme="light"] .form__field textarea:focus-visible {
+    border-color: var(--color-accent);
 }
 
 .form__field textarea {
@@ -61,6 +72,7 @@
     display: none;
 }
 
+/* Кастомная кнопка для загрузки файла */
 .form__file-label {
     display: inline-flex;
     align-items: center;
@@ -76,8 +88,19 @@
     transition: background-color var(--transition), border-color var(--transition);
 }
 
+[data-theme="light"] .form__file-label {
+    background-color: #ffffff;
+    color: #1d1d1f;
+    border-color: rgba(0, 0, 0, 0.12);
+}
+
 .form__file-label:hover {
     background-color: var(--color-surface-hover);
+    border-color: var(--color-accent);
+}
+
+[data-theme="light"] .form__file-label:hover {
+    background-color: #f5f5f7;
     border-color: var(--color-accent);
 }
 

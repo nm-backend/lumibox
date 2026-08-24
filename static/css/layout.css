@@ -37,16 +37,12 @@
 
 .site-header__inner {
     position: relative;
+    height: auto;
     min-height: var(--header-height);
     display: flex;
-<<<<<<< HEAD
     flex-direction: column;
     gap: var(--space-3);
     padding-bottom: var(--space-3);
-=======
-    align-items: center;
-    gap: var(--space-6);
->>>>>>> daabfa1eca1e070905751b470552e9f2479de099
 }
 
 /* Логотип — слева, не сжимается, стабильная ширина */
