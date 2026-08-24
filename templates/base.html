@@ -6,25 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="color-scheme" content="dark light">
     <meta name="google-site-verification" content="Beb92S80HsDx9yPqG_jm6gUWPfXCBzmSxf5gGCsKHWc" />
-    {% comment %} theme-color красит адресную строку браузера в цвет фона —
-       страница перестаёт выглядеть вклеенной в чужой интерфейс. {% endcomment %}
+    
     <meta name="theme-color" content="#0b0b0c" media="(prefers-color-scheme: dark)">
     <meta name="theme-color" content="#f5f5f7" media="(prefers-color-scheme: light)">
-    <meta property="og:site_name" content="LumiBox" />
-    <meta property="og:title" content="LumiBox — каталог фильмов и сериалов" />
 
-    
-    {% comment %} Тема — до первой отрисовки.
-
-       Атрибут data-theme читает и ставит app.js, но он подключён с defer,
-       то есть выполняется после разбора документа. Без этого скрипта
-       посетитель успевал увидеть страницу в одной теме и её перерисовку
-       в другую — и так на каждой навигации. Скрипт синхронный и стоит
-       в <head> именно поэтому: несколько строк в обмен на отсутствие вспышки.
-
-       Тёмная тема — основная, поэтому она стоит в разметке (пустое значение
-       атрибута означает тёмную: так сложилось исторически). Проверка на null
-       отличает «выбрал светлую» от «ещё не выбирал». {% endcomment %}
     <script>
         (function () {
             try {
@@ -39,10 +24,6 @@
 
     <link rel="stylesheet" href="{% static 'css/fonts.css' %}?v={{ static_version }}">
 
-    {% comment %} Preload критичных шрифтов: Inter 600 и 700 — для интерфейса
-       и H1 (LCP-элемент на каталоге). font-display: swap всё равно покажет
-       текст fallback-шрифтом, но preload ускоряет замену на шрифт.
-       Кириллица нужна для русского текста, поэтому обе подмножества. {% endcomment %}
     <link rel="preload" href="{% static 'fonts/Inter-600-latin.woff2' %}" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="{% static 'fonts/Inter-600-cyrillic.woff2' %}" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="{% static 'fonts/Inter-700-latin.woff2' %}" as="font" type="font/woff2" crossorigin>
@@ -58,16 +39,8 @@
 
     <link rel="icon" type="image/svg+xml" href="{% static 'img/favicon.svg' %}?v={{ static_version }}">
 
-    {# CSRF-токен для JS (X-CSRFToken): cookie в проде HttpOnly, читаем из meta #}
     <meta name="csrf-token" content="{{ csrf_token }}">
 
-    {% comment %}
-       Канонический адрес — без строки запроса: /catalog/?page=2&sort=name и
-       /catalog/ это для поисковика одна и та же страница в разных сочетаниях
-       фильтров, и без canonical он делит её вес между сотнями почти
-       одинаковых адресов. Страница может переопределить блок, если у неё
-       есть свой основной адрес.
-    {% endcomment %}
     <link rel="canonical" href="{% block canonical_url %}{% if request %}{% absolute_url request.path %}{% endif %}{% endblock %}">
 
     {# Open Graph / Social sharing #}
@@ -88,123 +61,61 @@
     {% block extra_meta %}{% endblock %}
     {% block extra_css %}{% endblock %}
 
-    {# Organization Schema — основная информация о сайте для поисковиков #}
+    {# Schema.org #}
     {% if request %}
     <script type="application/ld+json">
-    {
+    [
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "LumiBox",
+        "alternateName": ["Lumi Box", "LumiBox — каталог фильмов и сериалов"],
+        "url": "{{ request.scheme }}://{{ request.get_host }}/"
+      },
+      {
         "@context": "https://schema.org",
         "@type": "Organization",
         "name": "LumiBox",
-        "url": "{{ request.build_absolute_uri|cut:request.get_full_path }}",
+        "url": "{{ request.scheme }}://{{ request.get_host }}/",
         "description": "{% trans 'Каталог фильмов и сериалов: поиск, фильтры, подборки.' %}",
         "logo": "{% absolute_static 'img/favicon.svg' %}",
         "sameAs": [
             "https://t.me/lumiboxxx",
             "https://github.com/nm-backend/lumibox"
         ]
-    }
+      }
+    ]
     </script>
     {% endif %}
 
-    
-           
+    {% block breadcrumb_schema %}{% endblock %}
 
-    {# BreadcrumbList Schema — навигационная цепочка для поисковиков #}
-    {% block breadcrumb_schema %}
-        {% if request %}
-            <script type="application/ld+json">
-            [
-              {
-                "@context": "https://schema.org",
-                "@type": "WebSite",
-                "name": "LumiBox",
-                "alternateName": ["Lumi Box", "LumiBox — каталог фильмов и сериалов"],
-                "url": "{{ request.build_absolute_uri|cut:request.get_full_path }}"
-              },
-              {
-                "@context": "https://schema.org",
-                "@type": "Organization",
-                "name": "LumiBox",
-                "url": "{{ request.build_absolute_uri|cut:request.get_full_path }}",
-                "description": "{% trans 'Каталог фильмов и сериалов: поиск, фильтры, подборки.' %}",
-                "logo": "{% absolute_static 'img/favicon.svg' %}",
-                "sameAs": [
-                    "https://t.me/lumiboxxx",
-                    "https://github.com/nm-backend/lumibox"
-                ]
-              }
-            ]
-            </script>
-        {% endif %}
-    {% endblock %}
-
-    {% comment %} Google Analytics / Google Tag Manager — вставляется только когда
-       GA_MEASUREMENT_ID задан через переменную окружения, и только после
-       явного согласия посетителя (static/js/analytics.js). Без него
-       на странице нет ни лишних байт, ни запросов к Google.
-    {% endcomment %}
     {% if ga_measurement_id %}
     <script>window.lbGaId = '{{ ga_measurement_id }}';</script>
     {% endif %}
 
-    {% comment %} Рекламная сеть — лоадер рекламных форматов
-       (стикеры, баннеры). Подключается только когда ADS_NETWORK_ENABLED=true,
-       иначе на странице нет ни скрипта, ни тега, ни лишних запросов.
-    {% endcomment %}
     {% if ads_network.enabled %}
     <script type="text/javascript" src="https://v-js-menu.run/public/lib.en.min.js"></script>
     {% endif %}
 </head>
-{% comment %} data-authenticated — признак входа для скриптов. Полностраничного
-   кэша в проекте нет, поэтому атрибут всегда соответствует текущему посетителю.
-   Нужен, чтобы гость не слал запросы, на которые сервер заведомо ответит 403. {% endcomment %}
 <body class="{% block body_class %}{% endblock %}"
       data-authenticated="{{ user.is_authenticated|yesno:"1,0" }}"
       data-ui-close="{% trans 'Закрыть' %}"
       data-ui-scroll-top="{% trans 'Наверх' %}">
-    {% comment %} Два декоративных слоя фона. Стили для них в проекте уже были,
-       а разметки не было — то есть правила лежали мёртвым грузом.
 
-       cinema-glow — тёплое свечение проектора снизу справа, даёт глубину
-       вместо плоской заливки. grain-overlay — едва заметное зерно плёнки
-       (прозрачность 0.025), из-за которого чёрный перестаёт выглядеть
-       «цифровым». Оба слоя не перехватывают события мыши, а зерно
-       отключается при prefers-reduced-motion.
-    {% endcomment %}
     <div class="cinema-glow" aria-hidden="true"></div>
     <div class="grain-overlay" aria-hidden="true"></div>
 
-    {% comment %} Точка подключения рекламной сети. Скрипт-лоадер
-       из <head> ищет этот тег по id и сам вешает стикеры (catfish) в углы
-       экрана и баннеры в слоты <ins data-pm-b="...">. Рендерится только
-       при ADS_NETWORK_ENABLED=true.
-    {% endcomment %}
     {% if ads_network.enabled %}
-    {# id="vibix_union" фиксированный: его жёстко ищет внешний скрипт-лоадер (getElementById), менять нельзя #}
     <ins id="vibix_union" data-publisher_id="{{ ads_network.publisher_id }}" data-add_types="{{ ads_network.add_types }}"></ins>
     {% endif %}
 
-    {% comment %} Боковые рекламные рельсы. Видны только на широких экранах
-       (≥1640px) — там, где контейнер не занимает всю ширину окна. Сейчас
-       это плейсхолдеры: вёрстка и размеры (160×600) финальные, подставить
-       реальные баннеры можно без изменения разметки.
-    {% endcomment %}
     {% include "includes/ad_rail.html" with side="left" %}
     {% include "includes/ad_rail.html" with side="right" %}
 
-    {% comment %} Skip-to-content: скринридеры и навигация с клавиатуры пропускают
-       повторяющиеся блоки шапки и сразу переходят к основному контенту.
-       Ссылка визуально скрыта и появляется при фокусе с клавиатуры.
-    {% endcomment %}
     <a class="skip-link" href="#main-content">{% trans "К содержанию" %}</a>
 
-    {% comment %} Верхняя чёрная полоса убрана. В ней жили рекламная строка
-       «Онлайн-кинотеатр LumiBox — фильмы и сериалы бесплатно» и одна ссылка
-       «Новинки», которая есть в основной навигации строкой ниже. Полоса
-       занимала 45px на каждом экране и была первым, что видел посетитель.
-    {% endcomment %}
-
-<header class="site-header">
+    <header class="site-header">
         <div class="container site-header__inner">
             <a class="logo" href="{% url 'catalog:home' %}">
                 <span class="logo__mark"></span>
@@ -212,9 +123,6 @@
             </a>
 
             <div class="search-wrapper site-header__search">
-                {% comment %} Отправка ведёт на страницу поиска, а не в каталог:
-                   каталог искал только по названию, а здесь зритель ждёт, что
-                   найдутся и жанр, и студия, и человек. {% endcomment %}
                 <form class="search" action="{% url 'catalog:search' %}" method="get" role="search" data-search-form>
                     <label class="visually-hidden" for="search-input">{% trans "Поиск по каталогу" %}</label>
                     <input class="search__input"
@@ -227,8 +135,6 @@
                            data-search-input>
                     <button class="search__submit" type="submit" aria-label="{% trans 'Найти' %}">{% icon "search" size=16 %}</button>
                 </form>
-                {% comment %} data-empty-msg — подпись пустой выдачи. Через
-                   разметку, а не строкой в скрипте: перевод умеет шаблон. {% endcomment %}
                 <div class="search__dropdown" data-search-dropdown
                      data-empty-msg="{% trans 'Ничего не найдено' %}"
                      data-error-msg="{% trans 'Не удалось выполнить поиск. Проверьте соединение.' %}"></div>
@@ -288,11 +194,7 @@
         </div>
     </header>
 
-    {% comment %} Строка разделов — отдельной полосой под шапкой, как на
-       кино-портале: компактная шапка несёт логотип, поиск и действия,
-       а навигация живёт строкой ниже. Стеклянная полоса продолжает
-       шапку, чтобы две линии читались одним целым. {% endcomment %}
-    <nav class="lb-topnav-bar" aria-label="{% trans "Основная навигация" %}">
+    <nav class="lb-topnav-bar" aria-label="{% trans 'Основная навигация' %}">
         <div class="container lb-topnav-bar__inner">
             {% for label, url, is_active in lb_topnav %}
                 <a class="lb-topnav__link{% if is_active %} lb-topnav__link--active{% endif %}"
@@ -301,15 +203,6 @@
         </div>
     </nav>
 
-    {% comment %} Выдвижное меню — полный список разделов. Нижняя панель
-       (bottom-nav) даёт четыре самых частых адреса под большой палец,
-       а сюда попадает всё остальное: типы, витрины, случайный фильм.
-
-       Раньше «Новинки» отсюда вели на каталог с сортировкой по дате, а тот же
-       пункт в верхней строке разделов — на собственную страницу /new/. Один
-       ярлык, два разных адреса: страницы витрин с телефона были недостижимы
-       вовсе. Теперь ссылка одна и та же в обоих меню.
-    {% endcomment %}
     <nav id="mobile-nav" class="mobile-nav" data-mobile-nav aria-label="{% trans 'Мобильная навигация' %}">
         <a class="mobile-nav__link" href="{% url 'catalog:home' %}">{% trans "Главная" %}</a>
         <a class="mobile-nav__link" href="{% url 'catalog:title_list' %}">{% trans "Весь каталог" %}</a>
@@ -342,9 +235,6 @@
     <main id="main-content" class="site-main{% if messages %} site-main--with-messages{% endif %}">
         {% if messages %}
             <div class="container">
-                {% comment %} Сюда попадают ответы на отправку отзыва и
-                   комментария. Без live-региона о них узнавал только тот,
-                   кто видит экран. {% endcomment %}
                 <ul class="messages" role="status" aria-live="polite">
                     {% for message in messages %}
                         <li class="message message--{{ message.tags }}">{{ message }}</li>
@@ -360,26 +250,14 @@
         </div>
     </main>
 
-    {% comment %} Уведомления. role="status" и aria-live обязательны: тост —
-       единственный ответ на добавление в избранное, и без live-региона
-       пользователь скринридера не узнавал о нём вовсе. polite, а не
-       assertive: сообщение не настолько срочное, чтобы перебивать
-       читаемый текст. {% endcomment %}
     <div class="toast-container" data-toast-container
          role="status" aria-live="polite" aria-atomic="false"></div>
 
-    {# Lightbox #}
     <div class="lightbox" data-lightbox role="dialog" aria-modal="true" aria-label="{% trans 'Просмотр изображения' %}">
         <button class="lightbox__close" type="button" data-lightbox-close aria-label="{% trans 'Закрыть' %}">{% icon "close" size=24 %}</button>
         <img class="lightbox__img" alt="" data-lightbox-img>
     </div>
 
-    {% comment %}
-       Нижнее меню для мобильных. Без кэша сознательно: последний пункт
-       зависит от того, вошёл ли посетитель, а ключ фрагмента этого не
-       учитывал — вошедший видел «Войти» вместо «Избранного», если кэш
-       до него прогрел гость.
-    {% endcomment %}
     <nav class="bottom-nav" aria-label="{% trans 'Быстрая навигация' %}">
         <a class="bottom-nav__link" href="{% url 'catalog:home' %}">
             <span class="bottom-nav__icon">{% icon "home" %}</span>
@@ -408,10 +286,6 @@
 
     {% include "includes/footer.html" %}
 
-    {% comment %} Баннер согласия на аналитику. Показывается только когда
-       GA_MEASUREMENT_ID задан, и только пока посетитель не нажал «Принять»
-       (решение хранится в localStorage, статический js/analytics.js).
-    {% endcomment %}
     <div class="cookie-consent" id="cookie-consent" role="dialog" aria-labelledby="cookie-consent-title" aria-hidden="true">
         <p class="cookie-consent__text" id="cookie-consent-title">
             {% trans "Мы используем cookies для аналитики посещаемости. Продолжая пользоваться сайтом, вы соглашаетесь с этим." %}
