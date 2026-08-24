@@ -8,8 +8,8 @@
 .film-hero {
     position: relative;
     overflow: clip;
-    margin-top: var(--space-5);
-    padding: var(--space-8) 0 var(--space-7);
+    margin-top: var(--space-3);
+    padding: var(--space-6) 0 var(--space-5);
     background-color: var(--color-surface);
 }
 
@@ -64,7 +64,6 @@
     border-radius: var(--radius-lg);
     box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55), 0 2px 8px rgba(0, 0, 0, 0.4);
     transition: box-shadow var(--transition), transform var(--transition);
-    will-change: transform;
 }
 
 .film-hero__poster:hover {
@@ -166,15 +165,15 @@
 .film-hero__actions {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--space-4);
-    margin-top: var(--space-6);
+    gap: var(--space-3);
+    margin-top: var(--space-4);
 }
 
 .film-hero__specs {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--space-4);
-    margin-top: var(--space-6);
+    gap: var(--space-3);
+    margin-top: var(--space-4);
     font-size: var(--text-sm);
     color: var(--color-text-muted);
     line-height: var(--leading-normal);
@@ -888,9 +887,9 @@
 /* ---------- Плеер серий («Смотреть онлайн») ---------- */
 
 .player-section {
-    margin: var(--space-6) 0;
+    margin: var(--space-5) 0;
     display: grid;
-    gap: var(--space-4);
+    gap: var(--space-3);
 }
 
 .player {
@@ -1136,11 +1135,14 @@
     }
 
     .film-hero__name { order: 1; }
-    .film-hero__tagline { order: 2; }
-    .film-hero__actions { order: 3; margin-top: var(--space-4); }
-    .film-hero__meta { order: 4; }
-    .film-hero__description { order: 5; }
-    .film-hero__specs { order: 6; }
+    .film-hero__original { order: 2; }
+    .film-hero__tagline { order: 3; }
+    .film-hero__actions { order: 4; margin-top: var(--space-4); }
+    .film-hero__meta { order: 5; }
+    .film-hero__genres { order: 6; }
+    .film-hero__rating-section { order: 7; }
+    .film-hero__description { order: 8; }
+    .film-hero__specs { order: 9; }
 
     /* Главная кнопка на всю ширину: в неё надо попадать не целясь. */
     .film-hero__actions > .button--large {
@@ -1714,7 +1716,7 @@
 }
 
 .detail-layout .section {
-    margin-bottom: var(--space-7);
+    margin-bottom: var(--space-5);
     padding: var(--space-2) 0;
 }
 

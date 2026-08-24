@@ -138,12 +138,14 @@
 
 /* ---------- Поиск с автодополнением ---------- */
 
-/* Обёртка поиска: overflow:hidden + border-radius:9999px — акцент по :focus-within
-   подсвечивает всю обёртку, а не только поле ввода. */
+/* Обёртка поиска держит и поле, и выпадающие подсказки.
+   overflow:hidden здесь обрезал .search__dropdown (position:absolute
+   ниже поля) — на десктопе автодополнение открывалось, но было невидимо.
+   Скругление и обрезка фона живут на .search, а не на обёртке. */
 .search-wrapper {
     position: relative;
     width: 100%;
-    overflow: hidden;
+    overflow: visible;
     border: 1px solid var(--color-border);
     border-radius: var(--radius-full);
     transition: border-color var(--transition), box-shadow var(--transition);
@@ -163,14 +165,22 @@
     background-color: var(--color-surface);
     border: none;
     border-radius: var(--radius-full);
+    overflow: hidden;
     transition: background-color var(--transition);
-    height: 48px;
-    min-height: 44px;
+    height: var(--search-height);
+    min-height: var(--search-height);
     box-sizing: border-box;
 }
 
 .search:focus-within {
     background-color: var(--color-surface-hover);
+}
+
+@media (max-width: 1024px) {
+    .search {
+        height: var(--touch-target);
+        min-height: var(--touch-target);
+    }
 }
 
 .search__input {
@@ -266,7 +276,6 @@
 .search__suggestion:hover {
     background: var(--color-surface-hover);
     color: var(--color-text);
-    transform: translateX(4px);
 }
 
 .search__suggestion-poster {
@@ -831,8 +840,6 @@
     gap: var(--space-1);
     min-width: 0;
     contain: layout style;
-    /* Исправление #13: Анимация fadeUp для карточек (0.5s ease) */
-    animation: fadeUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) both;
 }
 
 .card__poster {
@@ -1375,7 +1382,7 @@
 
 /* Subtle section divider with cinema beam effect */
 .section {
-    margin-bottom: var(--space-8);
+    margin-bottom: var(--space-6);
     padding-top: var(--space-1);
     position: relative;
     content-visibility: auto;
@@ -1385,7 +1392,7 @@
 .section::after {
     content: "";
     position: absolute;
-    bottom: calc(-1 * var(--space-8) / 2);
+    bottom: calc(-1 * var(--space-6) / 2);
     left: 10%;
     right: 10%;
     height: 1px;
@@ -1986,6 +1993,16 @@
     transition: opacity 0.2s ease;
 }
 
+/* Нижняя панель на телефоне занимает ~68px: баннер над ней, иначе
+   кнопка «Принять» прячется за навигацией. */
+@media (max-width: 720px) {
+    .cookie-consent {
+        bottom: calc(var(--bottom-nav-height) + var(--space-3));
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+}
+
 .cookie-consent--visible {
     visibility: visible;
     opacity: 1;
@@ -2025,9 +2042,9 @@
    Отступы через --space-* */
 .poster-grid {
     display: grid;
-    grid-template-columns: repeat(2, minmax(150px, 1fr));
-    gap: var(--space-4);
-    margin-bottom: var(--space-8);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-3);
+    margin-bottom: var(--space-6);
 }
 
 @media (min-width: 480px) {
@@ -2063,7 +2080,6 @@
     flex-direction: column;
     gap: var(--space-3);
     min-width: 0;
-    animation: fadeUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) both;
 }
 
 .poster-card__link {
@@ -2086,7 +2102,6 @@
     background: var(--color-surface);
     box-shadow: var(--shadow-sm);
     transition: box-shadow var(--transition), transform var(--transition);
-    will-change: transform;
 }
 
 .poster-card__image {

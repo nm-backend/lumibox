@@ -3,8 +3,8 @@
 /* Геометрия reference: компактный футер, меньше пустых дыр, как у reference */
 .site-footer {
     position: relative;
-    margin-top: var(--space-6);
-    padding-top: var(--space-6);
+    margin-top: var(--space-5);
+    padding-top: var(--space-5);
     border-top: 1px solid var(--color-border);
     background:
         radial-gradient(900px 260px at 15% 0%, var(--color-accent-glow), transparent 60%),
@@ -20,15 +20,12 @@
 }
 
 .site-footer .container {
-    padding-bottom: var(--space-6);
+    padding-bottom: var(--space-5);
 }
 
-/* Футер наследует ширину и боковые поля обычного .container (16px,
-   32px от 1024px, 48px от 1600px) — подвал совпадает с колонкой контента
-   на всех страницах. Исключение — главная: там контент идёт впритык
-   (lb-wrap, ровно 16px), и футеру возвращаем те же 16px. */
+/* Футер делит потолок с .container: 976 внутри + 16px поля. */
 .site-footer .container {
-    max-width: var(--container-width);
+    max-width: calc(var(--container-width) + 2 * var(--space-4));
 }
 
 .lb-body .site-footer .container {
@@ -41,7 +38,7 @@
 .footer-grid {
     display: grid;
     grid-template-columns: minmax(220px, 1.4fr) repeat(3, minmax(150px, 1fr));
-    gap: var(--space-6) var(--space-8);
+    gap: var(--space-5) var(--space-6);
 }
 
 .footer-brand__text {
@@ -110,8 +107,8 @@
     flex-wrap: wrap;
     align-items: center;
     gap: var(--space-2) var(--space-4);
-    margin-top: var(--space-6);
-    padding: var(--space-4) 0;
+    margin-top: var(--space-4);
+    padding: var(--space-3) 0;
     border-top: 1px solid var(--color-border);
     border-bottom: 1px solid var(--color-border);
 }

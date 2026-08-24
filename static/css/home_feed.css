@@ -21,9 +21,8 @@
     background: var(--glass-bg);
     border: 1px solid var(--glass-border);
     border-radius: var(--radius-md);
-    padding: var(--space-3) var(--space-5) var(--space-4);
+    padding: 8px var(--card-padding) 10px;
     transition: border-color var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast);
-    /* reference min-height 281px для стабильности layout при разной высоте метаданных */
     min-height: 0;
 }
 
@@ -44,7 +43,7 @@
 
 .film-card__name {
     margin: 0;
-    font-size: var(--text-lg);
+    font-size: 1rem;
     font-weight: 800;
     letter-spacing: var(--tracking-tight);
     line-height: var(--leading-snug);
@@ -97,7 +96,7 @@
 
 /* Badge — reference: компактный uppercase, title→badge 8px, badge→content 16px */
 .film-card__badges {
-    margin: 0 0 var(--space-4);
+    margin: 0 0 var(--space-2);
     display: flex;
     flex-wrap: wrap;
     gap: var(--space-2);
@@ -114,6 +113,12 @@
     color: var(--color-text-muted);
     letter-spacing: 0.04em;
     text-transform: uppercase;
+}
+
+.film-card__badge:first-child {
+    color: var(--color-accent);
+    border-color: rgba(var(--color-accent-rgb), 0.4);
+    background: var(--color-accent-dim);
 }
 
 [data-theme="light"] .film-card__badge {
@@ -193,7 +198,6 @@
     background: var(--glass-bg);
     border: 1px solid var(--glass-border);
     border-radius: 50%;
-    backdrop-filter: blur(var(--glass-blur));
 }
 
 .film-card__poster:hover .film-card__play,
@@ -221,7 +225,7 @@
     min-width: 0;
     display: flex;
     flex-direction: column;
-    gap: var(--space-4);
+    gap: var(--space-2);
 }
 
 .film-card__desc {

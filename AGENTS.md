@@ -46,6 +46,9 @@ podman-compose logs web    # entrypoint: миграции → каталог →
 
 ## Recent Changes
 
+- **UI-референс Kinogo-геометрия обязателен.** Зафиксирован в `FRONTEND.md` и Session Memory. Геометрия/плотность/ритм — как Kinogo; цвет/лого/шрифт — LumiBox. Не рестайлить существующие токены без явной задачи.
+
+
 - **Массовый импорт каталога Vibix (`--create-missing`)**: новый режим в `sync_vibix` обходит весь список издателя и создаёт отсутствующие записи. Дедуп по kp_id (снимок + частичный уникальный индекс `title_kp_id_uniq_when_filled`, миграция 0026 с дедупликацией старых дублей), батчи по 500 через bulk_create, блокировка от параллельных прогонов (`VideoServiceSyncState.locked_at`, TTL 12 ч, `--unlock`), DRAFT по умолчанию, постеры через URL-поля `poster_url/backdrop_url` (без скачивания), серверный фильтр `type movie|serial` в клиенте, dry-run, прогресс, детальный отчёт, Celery-задача `create_missing_catalog`. Ядро: `bulk_create_from_catalog()` в `video_service_sync.py`. Проверено: 821 тест, ruff/mypy чистые, масштабный тест 5000 записей ≈2500 зап/с, возобновление после обрыва, живой импорт страниц каталога.
 - **Секреты**: из `.env.example` удалён реальный Vibix-токен (считать скомпрометированным — ротировать!), исправлен `VIBIX_API_BASE_URL` на `https://api.vibix.org/api/v1`.
 - **Vibix Integration & Auto-Recovery**: Refreshed Vibix API bearer token authentication, implemented `login_vibix` automatic authentication fallback, sanitized `fetch_video_links` limit parameter (20, 50, 100), and added graceful fallback from 403 detail endpoints to `/videos/links` catalog lookup.
@@ -53,6 +56,18 @@ podman-compose logs web    # entrypoint: миграции → каталог →
 - **Automated Verification**: Added comprehensive test suite `apps/catalog/tests/test_vibix_e2e.py` and Playwright browser E2E test `tests_e2e_playwright.js` verifying player gate button, SDK injection, and 6 mobile viewports (320px–1440px) with zero overflow.
 
 ## Session Memory
+
+### ОБЯЗАТЕЛЬНЫЙ UI-референс (2026-08-24)
+
+Полный контракт: `FRONTEND.md` → раздел «геометрия Kinogo × брендинг LumiBox».
+
+- Геометрия = Kinogo (container ~976, content ~640, sidebar ~331, header ~44–45, search ~240 / input 170×22, poster ~200, card gap 20, card pad 20 / 5–10, meta 8, menu ~22).
+- Брендинг = LumiBox (цвет, лого, шрифт, акцент). Не копировать визуал Kinogo.
+- Цепочка: Header → nav → container → sidebar+content → section → card → poster+meta → description → actions → footer.
+- Не переписывать то, что уже в пропорциях. Конфликт «красиво vs геометрия» — геометрия.
+- Не: огромные поля, случайные gap, разные кнопки одного типа, двойной padding контейнера, overflow-хаки, DOM ради CSS, ломка `data-*`.
+- После frontend-правок: 320 / 360 / 375 / 390 / 414 / 480 / 768 / 1024 / 1280 / 1440 / 1920.
+- Текущие токены геометрии (задача 2026-08-24): `--container-width: 976`, `--header-height: 48` (56 на ≤1024), `--sidebar-width: 331`, `--sidebar-gap: 12`, `--search-width: 240`, `--search-height: 32`. Внутренняя колонка = 976 (container max-width = 976 + 32 padding). Не сдвигать без новой явной задачи.
 
 - Vibix API base URL: `https://api.vibix.org/api/v1`
 - Publisher ID: `678503345` (User ID `1184`)

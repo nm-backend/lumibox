@@ -1,4 +1,4 @@
-﻿{% extends "base.html" %}
+{% extends "base.html" %}
 {% load static i18n catalog_filters icons %}
 
 {% block body_class %}lb-body{% endblock %}
@@ -44,10 +44,8 @@
 
         </div>
 
-            {# ---------- Горизонтальное рекламное место (между лентой и SEO) ---------- #}
-            {% include "includes/ad_slot.html" %}
-
-        </div>
+        {# ---------- Горизонтальное рекламное место (между лентой и SEO) ---------- #}
+        {% include "includes/ad_slot.html" %}
 
         {# ---------- SEO-текст (footerText) ---------- #}
         <div class="lb-seo">

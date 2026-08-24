@@ -278,6 +278,26 @@ class ExternalPlayerRenderingTests(TestCase):
 
         self.assertNotContains(response, "vibix-player__preview")
 
+    def test_series_cta_says_watch_episodes(self):
+        """Сериал с внешним плеером не должен называться «Смотреть фильм»."""
+        title = create_title(
+            name="Сериал с кнопкой",
+            type=Title.Type.SERIES,
+            player_id="8285",
+            player_type="serial",
+        )
+        create_episode(title, season=1, episode=1)
+
+        html = self.client.get(title.get_absolute_url()).content.decode("utf-8")
+
+        self.assertIn("Смотреть серии", html)
+        self.assertIn('href="#player"', html)
+        self.assertIn('data-player-tab="external"', html)
+        self.assertRegex(
+            html,
+            r'data-player-tab="external"[^>]*>\s*Смотреть серии',
+        )
+
     def test_episode_buttons_carry_season_and_number(self):
         title = create_title(
             name="Сериал с кнопками", type=Title.Type.SERIES, player_id="7", player_type="serial"

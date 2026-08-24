@@ -229,14 +229,14 @@
                        главный источник: кнопка ведёт на его вкладку. {% endcomment %}
                     <a class="button button--primary button--large" href="#player">
                         {% icon "play" size=14 %}
-                        {% trans "Смотреть фильм" %}
+                        {% if title.is_series %}{% trans "Смотреть серии" %}{% else %}{% trans "Смотреть фильм" %}{% endif %}
                     </a>
                 {% elif youtube_video_url %}
                     {% comment %} Полная версия на YouTube — главный источник MVP:
                        кнопка ведёт на вкладку плеера с этим роликом. {% endcomment %}
                     <a class="button button--primary button--large" href="#player">
                         {% icon "play" size=14 %}
-                        {% trans "Смотреть фильм" %}
+                        {% if title.is_series %}{% trans "Смотреть серии" %}{% else %}{% trans "Смотреть фильм" %}{% endif %}
                     </a>
                 {% elif has_playback %}
                     <a class="button button--primary button--large" href="#player">
@@ -331,7 +331,9 @@
                 {% if title.views_count %}
                     <span class="film-hero__spec">
                         <span class="film-hero__spec-icon">{% icon "target" size=16 %}</span>
-                        <span>{{ title.views_count }} {% trans "просмотров" %}</span>
+                        {% with word=title.views_count|ru_plural:"просмотр,просмотра,просмотров" %}
+                        <span>{% blocktranslate with count=title.views_count word=word %}{{ count }} {{ word }}{% endblocktranslate %}</span>
+                        {% endwith %}
                     </span>
                 {% endif %}
                 {% if title.kp_rating or title.imdb_rating %}
@@ -386,7 +388,7 @@
                            версии: вкладки YouTube и своих файлов не рисуем,
                            чтобы на странице было ровно два плеера —
                            фильм и трейлер. {% endcomment %}
-                        <button class="player-tabs__tab player-tabs__tab--active" type="button" data-player-tab="external" role="tab" aria-selected="true">{% trans "Смотреть фильм" %}</button>
+                        <button class="player-tabs__tab player-tabs__tab--active" type="button" data-player-tab="external" role="tab" aria-selected="true">{% if title.is_series %}{% trans "Смотреть серии" %}{% else %}{% trans "Смотреть фильм" %}{% endif %}</button>
                     {% elif has_youtube %}
                         {% comment %} Полная версия на YouTube — источник MVP,
                            когда внешний плеер не настроен. {% endcomment %}

@@ -620,6 +620,18 @@ class BlockTranslatePlaceholderTests(TestCase):
 
         self.assertContains(response, "1 оценка")
 
+    def test_title_detail_shows_declined_views_word(self):
+        title = create_title(name="Фильм со счётчиком")
+
+        # TemplateResponse ленивый: increment_views() в get() успевает
+        # прибавить единицу до отрисовки. С нуля страница покажет «1 просмотр».
+        response = self.client.get(title.get_absolute_url())
+        self.assertContains(response, "1 просмотр")
+
+        Title.objects.filter(pk=title.pk).update(views_count=2)
+        response = self.client.get(title.get_absolute_url())
+        self.assertContains(response, "2 просмотра")
+
     def test_star_rating_labels_carry_numbers(self):
         title = create_title(name="Фильм для оценки")
         self.client.force_login(create_user())

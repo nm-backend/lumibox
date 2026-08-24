@@ -4,7 +4,7 @@
 .profile-layout {
     display: grid;
     grid-template-columns: var(--sidebar-width) 1fr;
-    gap: var(--space-6);
+    gap: var(--sidebar-gap);
     align-items: start;
     margin-top: var(--space-4);
     padding-top: 0;
@@ -260,7 +260,7 @@
    это такая же страница каталога, а не отдельная система. */
 .profile-main__title {
     margin-bottom: var(--space-4);
-    font-size: var(--font-title);
+    font-size: var(--text-title);
 }
 
 /* Счётчик над списком истории. Раньше он носил класс пустого состояния —

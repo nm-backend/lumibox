@@ -109,6 +109,46 @@ class PlayerAnchorTests(TestCase):
         self.assertNotContains(response, 'href="#player"')
 
 
+class CookieConsentMarkupTests(TestCase):
+    """Кнопка баннера должна быть настоящей .button, а не мёртвым .btn."""
+
+    def test_accept_uses_project_button_classes(self):
+        html = self.client.get(reverse("catalog:home")).content.decode()
+
+        self.assertIn("cookie-consent__accept", html)
+        self.assertIn("button button--primary", html)
+        self.assertNotIn("btn btn--primary", html)
+
+
+class HomeMarkupTests(TestCase):
+    """Лишний </div> на главной закрывал .container из base.html."""
+
+    def test_seo_block_stays_inside_home_wrap(self):
+        html = self.client.get(reverse("catalog:home")).content.decode()
+        start = html.index('<div class="lb-home">')
+        depth = 0
+        end = None
+        i = start
+        while i < len(html):
+            if html.startswith("<div", i):
+                depth += 1
+                i += 4
+                continue
+            if html.startswith("</div>", i):
+                depth -= 1
+                i += 6
+                if depth == 0:
+                    end = i
+                    break
+                continue
+            i += 1
+
+        self.assertIsNotNone(end)
+        home = html[start:end]
+        self.assertIn('class="lb-seo"', home)
+        self.assertLess(home.index("lb-contentwrap"), home.index("lb-seo"))
+
+
 class AdsNetworkMarkupTests(TestCase):
     """Реклама появляется на странице только по флагу."""
 

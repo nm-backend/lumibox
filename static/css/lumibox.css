@@ -34,7 +34,7 @@
 
 .lb-wrap {
     width: 100%;
-    max-width: var(--container-width);
+    max-width: calc(var(--container-width) + 2 * var(--space-4));
     margin: 0 auto;
     padding: 0 var(--space-4);
 }
@@ -50,28 +50,14 @@
     padding: 0;
 }
 
-/* Шапка и строка разделов на главной: как футер, возвращаем им обычную
-   ширину контейнера, а боковые паддинги — те же 16px, что у колонки
-   контента (lb-wrap). Иначе они не совпадают с контентом: на широких
-   экранах .container добавляет шапке 32px, а колонка держит 16px. */
-.lb-body .site-header__inner {
-    max-width: var(--container-width);
-    padding-left: var(--space-4);
-    padding-right: var(--space-4);
-}
-
-.lb-body .lb-topnav-bar__inner {
-    max-width: none;
-    padding-left: var(--space-6);
-    padding-right: var(--space-6);
-}
-
+/* Шапка и строка разделов делят один .container с колонкой контента.
+   Отдельные max-width/паддинги здесь снова разъезжали бы сетку. */
 .site-header__inner {
     min-height: var(--header-height);
 }
 
 .lb-body .site-main {
-    padding-top: calc(var(--header-height, 60px) + var(--space-6) + var(--space-6));
+    padding-top: var(--space-4);
 }
 
 /* ---------- Тонкая тёмная полоса вверху ---------- */
@@ -83,7 +69,7 @@
 
 .lb-topbar__inner {
     width: 100%;
-    max-width: var(--container-width);
+    max-width: calc(var(--container-width) + 2 * var(--space-4));
     margin: 0 auto;
     display: flex;
     align-items: center;
@@ -179,23 +165,23 @@
     top: var(--header-height);
     z-index: calc(var(--z-header) - 1);
     width: 100%;
+    /* Сплошная заливка без второго полноширинного blur: шапка уже
+       размывает подложку, дубль на каждой прокрутке дорог. */
     background-color: var(--glass-bg);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
-    backdrop-filter: blur(20px) saturate(180%);
     border-bottom: 1px solid var(--color-border);
     transition: background-color var(--transition), border-bottom-color var(--transition);
     box-sizing: border-box;
 }
 
 .lb-topnav-bar__inner {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    width: 100% !important;
-    gap: 16px !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    gap: 8px;
     overflow-x: auto;
     scrollbar-width: none;
-    padding: 12px 0 !important;
+    padding-block: 6px;
 }
 
 .lb-topnav-bar__inner::-webkit-scrollbar {
@@ -206,7 +192,7 @@
     display: flex;
     align-items: center;
     gap: var(--space-2);
-    padding: var(--space-1) 0;
+    padding: 0;
     background: transparent;
     border: 0;
     border-radius: 0;
@@ -217,8 +203,8 @@ nav.lb-topnav-bar a {
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    padding: 0 14px;
-    min-height: 32px;
+    padding: 0 10px;
+    min-height: 24px;
     font-size: 0.8125rem;
     font-weight: 600;
     line-height: 1;
@@ -1107,7 +1093,9 @@ nav.lb-topnav-bar a:hover {
         z-index: var(--z-dropdown);
         padding: var(--space-2) var(--space-4) var(--space-3);
         background: var(--color-card);
+        border: 0;
         border-bottom: 1px solid var(--color-border);
+        border-radius: 0;
         box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
     }
 
@@ -1921,9 +1909,9 @@ nav.lb-topnav-bar a:hover {
 .lb-contentwrap--home {
     display: grid;
     grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
-    gap: var(--space-6);
+    gap: var(--sidebar-gap);
     align-items: start;
-    margin-top: var(--space-4);
+    margin-top: var(--space-3);
 }
 
 .lb-contentwrap--home .lb-sidebar {
@@ -2216,12 +2204,6 @@ nav.lb-topnav-bar a:hover {
     display: -webkit-box;
     -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
-}
-
-@media (max-width: 1280px) {
-    .lb-contentwrap--home {
-        grid-template-columns: calc(var(--sidebar-width) - 30px) minmax(0, 1fr);
-    }
 }
 
 @media (max-width: 1024px) {

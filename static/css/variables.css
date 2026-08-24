@@ -284,22 +284,25 @@
     --transition-spring: 400ms cubic-bezier(0.34, 1.56, 0.64, 1);
     --transition-exit: 200ms cubic-bezier(0.4, 0, 1, 1);
 
-    /* --- Макет — геометрия reference: компактный контейнер, header 60px,
-       sidebar ~300px, gap 20-24px как у reference movie__card gap 20px --- */
-    --container-width: 1080px;
-    --header-height: 60px;
+    /* --- Макет. Референс геометрии — Kinogo (FRONTEND.md).
+       976 = 331 sidebar + 12 gap + 633 content (~640).
+       Header 48px — компромисс 44–45 референса и 36px десктопных иконок.
+       На ≤1024 шапка 56px, тач-кнопки 44px. --- */
+    --container-width: 976px;
+    --header-height: 48px;
     --touch-target: 44px;
     --bottom-nav-height: 68px;
+    --search-width: 240px;
+    --search-height: 32px;
 
-    /* --- Сайдбар и карточки — геометрия reference ---
-       reference: wrapper 976px, content 640px, sidebar 331px, movie__card 200px poster gap 20px
-       LumiBox: 1080px container, sidebar 300px, content ~ 760px, poster 200px gap 20px
-       Сохраняем LumiBox branding, только размеры как reference.
+    /* --- Сайдбар и карточки ---
+       Kinogo: poster 200, card gap 20, card pad 20 / 5–10, meta row 8.
+       Poster и card-gap уже совпадали — не трогаем.
     */
-    --sidebar-width: 300px;
-    --sidebar-gap: 20px;
+    --sidebar-width: 331px;
+    --sidebar-gap: 12px;
     --card-gap: 20px;
-    --card-padding: 16px;
+    --card-padding: 20px;
     --film-card-gap: 16px;
     --film-card-section-gap: 20px;
 
