@@ -10,14 +10,13 @@
 /* ---------- Шапка ---------- */
 
 header {
-    position: sticky;
-    top: 0;
+    position: sticky !important;
+    top: 0 !important;
     z-index: 9999 !important;
     width: 100%;
     height: auto;
     min-height: var(--header-height);
-    background: var(--color-surface, #ffffff) !important;
-    background-color: var(--color-surface) !important;
+    background-color: var(--color-surface, #ffffff) !important;
     -webkit-backdrop-filter: blur(20px) saturate(180%);
     backdrop-filter: blur(20px) saturate(180%);
     border-bottom: 1px solid var(--color-border);

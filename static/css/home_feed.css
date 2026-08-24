@@ -18,14 +18,15 @@
 }
 
 .film-card {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    background-color: var(--color-surface, #ffffff) !important;
-    padding: 20px 24px;
-    border-radius: 12px;
-    max-width: 840px;
-    border: 1px solid var(--color-border);
+    background: var(--color-surface, #ffffff) !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 12px !important;
+    padding: 20px 24px !important;
+    margin-bottom: 24px !important;
+    max-width: 860px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 16px !important;
     transition: border-color var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast);
     min-height: 0;
 }
@@ -46,14 +47,15 @@
 }
 
 .film-card__name {
-    margin: 0;
+    background: transparent !important;
+    background-color: transparent !important;
+    padding: 0 !important;
+    margin: 0 0 12px 0 !important;
+    box-shadow: none !important;
     font-size: var(--text-lg);
     font-weight: 800;
     letter-spacing: var(--tracking-tight);
     line-height: var(--leading-snug);
-    background: transparent !important;
-    padding: 0 !important;
-    box-shadow: none !important;
 }
 
 .film-card__year {
@@ -131,10 +133,10 @@
 }
 
 .film-card__body {
-    display: grid;
-    grid-template-columns: 180px 1fr;
-    gap: 24px;
-    align-items: start;
+    display: grid !important;
+    grid-template-columns: 180px 1fr !important;
+    gap: 24px !important;
+    align-items: start !important;
 }
 
 .film-card__poster-wrap {
@@ -144,9 +146,9 @@
 .film-card__poster {
     position: relative;
     display: block;
-    width: 100%;
+    width: 100% !important;
     aspect-ratio: 2 / 3;
-    border-radius: 12px;
+    border-radius: 8px !important;
     overflow: clip;
     background: var(--color-surface-hover);
     border: 1px solid var(--color-border-soft);
@@ -273,12 +275,12 @@
 }
 
 .film-card__foot {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: auto;
-    padding-top: 16px;
-    border-top: 1px solid rgba(0, 0, 0, 0.05);
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    margin-top: auto !important;
+    padding-top: 16px !important;
+    border-top: 1px solid #f1f5f9 !important;
     flex-wrap: wrap;
     gap: var(--space-4);
 }
