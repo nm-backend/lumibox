@@ -739,76 +739,149 @@
     to { opacity: 1; transform: scale(1); }
 }
 
-/* ---------- Светлая тема ----------
-   Шапка фильма — «кинотеатральный зал»: тёмная подложка остаётся тёмной
-   даже на светлой странице (как верхняя полоса и промо-зона), поэтому
-   скрим и тексты не переключаются на светлые токены. */
+/* ---------- Светлая тема ---------- */
+
 [data-theme="light"] .film-hero {
-    background-color: var(--color-dark-bg);
+    background-color: var(--color-surface);
 }
 
 [data-theme="light"] .film-hero__scrim {
     background:
-        linear-gradient(180deg, rgba(7, 8, 13, 0.35) 0%, var(--color-dark-bg) 100%),
-        linear-gradient(90deg, rgba(7, 8, 13, 0.93) 0%, rgba(7, 8, 13, 0.18) 65%);
-    box-shadow: inset 0 0 120px rgba(7, 8, 13, 0.3);
+        linear-gradient(180deg, rgba(245, 245, 247, 0.4) 0%, var(--color-surface) 100%),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.7) 0%, rgba(255, 255, 255, 0.1) 65%);
+    box-shadow: inset 0 0 120px rgba(0, 0, 0, 0.06);
 }
 
 [data-theme="light"] .film-hero__name {
-    color: var(--color-dark-text-bright);
+    color: var(--color-text);
+    text-shadow: none;
 }
 
 [data-theme="light"] .film-hero__tagline {
-    color: var(--color-dark-text-soft);
+    color: var(--color-text-soft);
+    text-shadow: none;
 }
 
 [data-theme="light"] .film-hero__original {
-    color: var(--color-dark-text);
+    color: var(--color-text-muted);
 }
 
 [data-theme="light"] .film-hero__meta {
-    color: var(--color-dark-text-soft);
+    color: var(--color-text-muted);
+    text-shadow: none;
 }
 
 [data-theme="light"] .film-hero__dot {
-    color: var(--color-dark-text);
+    color: var(--color-text-dim);
 }
 
 [data-theme="light"] .film-hero__age {
-    border-color: var(--color-dark-border);
+    border-color: var(--color-border);
+    color: var(--color-text-muted);
 }
 
 [data-theme="light"] .film-hero__description {
-    color: var(--color-dark-text-soft);
+    color: var(--color-text-muted);
+    text-shadow: none;
 }
 
 [data-theme="light"] .film-hero__specs {
-    color: var(--color-dark-text);
+    color: var(--color-text-muted);
 }
 
 [data-theme="light"] .film-hero__spec a {
-    color: var(--color-dark-text);
-}
-
-[data-theme="light"] .film-hero__rating-section {
-    border-top-color: var(--color-dark-border);
-}
-
-[data-theme="light"] .film-hero__rating-label {
-    color: var(--color-dark-text);
-}
-
-[data-theme="light"] .star-rating__star {
-    color: var(--color-dark-border);
+    color: var(--color-text-muted);
 }
 
 [data-theme="light"] .film-hero__spec-icon {
-    color: var(--color-dark-text);
+    color: var(--color-text-muted);
+}
+
+[data-theme="light"] .film-hero__rating-section {
+    border-top-color: var(--color-border);
+}
+
+[data-theme="light"] .film-hero__rating-label {
+    color: var(--color-text-dim);
+}
+
+[data-theme="light"] .star-rating__star {
+    color: var(--color-border);
+}
+
+[data-theme="light"] .film-hero__poster {
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="light"] .similar-card__name {
+    color: var(--color-text-soft);
+}
+
+[data-theme="light"] .spec-list {
+    background: var(--color-surface);
+    border-color: var(--color-border);
+}
+
+[data-theme="light"] .spec-list__label {
+    color: var(--color-text-dim);
+}
+
+[data-theme="light"] .spec-list__value {
+    color: var(--color-text);
+}
+
+[data-theme="light"] .detail-secondary {
+    border-top-color: var(--color-border);
+}
+
+[data-theme="light"] .detail-secondary__link {
+    color: var(--color-text-dim);
+}
+
+[data-theme="light"] .player-season {
+    border-color: var(--color-border);
+}
+
+[data-theme="light"] .player-episode {
+    color: var(--color-text-soft);
+}
+
+[data-theme="light"] .player-episode:hover {
+    background: var(--color-surface-hover);
+    color: var(--color-text);
+}
+
+[data-theme="light"] .player-episode--active {
+    background: var(--color-accent-dim);
+    border-color: rgba(var(--color-accent-rgb), 0.3);
+    color: var(--color-accent);
+}
+
+[data-theme="light"] .player-episode__duration {
+    color: var(--color-text-muted);
+}
+
+[data-theme="light"] .player-panel__title {
+    color: var(--color-text);
+}
+
+[data-theme="light"] .player-panel__current {
+    color: var(--color-text-muted);
+}
+
+[data-theme="light"] .frames__item {
+    border-color: var(--color-border);
+    background: var(--color-surface);
+}
+
+[data-theme="light"] .vibix-player__notice,
+[data-theme="light"] .vibix-player__status {
+    color: var(--color-text-muted);
 }
 
 @media (max-width: 900px) {
     [data-theme="light"] .film-hero__scrim {
-        background: linear-gradient(180deg, rgba(11, 13, 18, 0.6) 0%, var(--color-dark-bg) 100%);
+        background: linear-gradient(180deg, rgba(245, 245, 247, 0.6) 0%, var(--color-surface) 100%);
     }
 }
 

@@ -181,13 +181,14 @@
 }
 
 .lb-topnav-bar__inner {
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    gap: var(--space-2);
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100% !important;
+    gap: 16px !important;
     overflow-x: auto;
     scrollbar-width: none;
-    padding: var(--space-2) 0;
+    padding: 12px 0 !important;
 }
 
 .lb-topnav-bar__inner::-webkit-scrollbar {

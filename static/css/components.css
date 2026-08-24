@@ -1934,8 +1934,33 @@
     text-overflow: ellipsis;
 }
 
+[data-theme="light"] .genre-chip {
+    background: var(--color-surface);
+    border-color: var(--color-border);
+    color: var(--color-text-muted);
+}
+
+[data-theme="light"] .genre-chip:hover {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+    background: var(--color-accent-dim);
+}
+
 [data-theme="light"] .genre-chip--active {
     color: var(--color-accent-deep);
+    background: var(--color-accent-dim);
+    border-color: var(--color-accent);
+}
+
+[data-theme="light"] .genre-chips {
+    background:
+        linear-gradient(to right, var(--color-bg) 30%, rgba(0, 0, 0, 0)) left center,
+        linear-gradient(to left, var(--color-bg) 30%, rgba(0, 0, 0, 0)) right center,
+        radial-gradient(farthest-side at 0 50%, rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0)) left center,
+        radial-gradient(farthest-side at 100% 50%, rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0)) right center;
+    background-repeat: no-repeat;
+    background-size: 32px 100%, 32px 100%, 14px 100%, 14px 100%;
+    background-attachment: local, local, scroll, scroll;
 }
 
 
