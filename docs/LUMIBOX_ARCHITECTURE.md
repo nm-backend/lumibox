@@ -218,12 +218,45 @@ python manage.py sync_vibix --episodes --limit 10 --dry-run
 python manage.py create_from_vibix 447301 258687 361
 python manage.py create_from_vibix --file kp_ids.txt
 python manage.py create_from_vibix 447301 --dry-run
+
+# Массовый импорт всего каталога издателя (наполнение с нуля)
+python manage.py sync_vibix --create-missing --dry-run          # план без записи
+python manage.py sync_vibix --create-missing                    # все, черновики
+python manage.py sync_vibix --create-missing --type serial      # только сериалы
+python manage.py sync_vibix --create-missing --type movie       # потом фильмы
+python manage.py sync_vibix --create-missing --status published # сразу опубликовать
+python manage.py sync_vibix --unlock                            # снять зависший лок
 ```
 
 `sync_vibix` обогащает уже существующие записи (совпадение по названию и
 году), `create_from_vibix` — заводит новые по точному Kinopoisk ID: название,
 год, imdb_id, player_id, описание, рейтинги, длительность, жанры и страны.
 Идемпотентна: ID с уже существующей записью пропускается.
+
+### Массовый импорт (--create-missing)
+
+Обходит весь список издателя `GET /publisher/videos/links` и создаёт записи,
+которых ещё нет. Ключевые свойства:
+
+- **Дедуп по kp_id**: перед запуском снимок существующих ID одним запросом;
+  повторный прогон после обрыва продолжает с места остановки. Дубль
+  невозможен и на уровне БД — частичный уникальный индекс
+  `title_kp_id_uniq_when_filled` (миграция 0026).
+- **Карточки без kp_id пропускаются** (счётчик no_kp_id в отчёте): без
+  внешнего ID невозможен ни дедуп, ни сопоставление серий.
+- **Батчи по `--batch-size`** (по умолчанию 500) через bulk_create, связи
+  с жанрами/странами — массово через through-таблицу; коммит на батч.
+- **Параллельные прогоны** отсекаются блокировкой строки в
+  `VideoServiceSyncState` (ключ `bulk-import`, протухает через 12 ч,
+  снимается `--unlock`).
+- **Новые записи — черновики** (`--status published` публикует сразу);
+  постеры не скачиваются: адреса сохраняются в `poster_url`/`backdrop_url`.
+- **Память O(1)**: каталог читается генератором постранично, состояние —
+  три множества ID/слагов на весь прогон.
+- Серии сериалов тянутся вторым этапом: `sync_vibix --episodes`.
+
+Celery-задача `create_missing_catalog` дублирует команду для запуска через
+воркер (в расписание не внесена).
 
 Старые `sync_video_service`, `sync_voiceovers`, `sync_episodes` оставлены для
 совместимости и вызывают то же ядро. В админке есть действия sync/dry-run для

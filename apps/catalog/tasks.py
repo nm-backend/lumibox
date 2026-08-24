@@ -110,6 +110,41 @@ def sync_series_episodes():
 
 
 @shared_task
+def create_missing_catalog(content_type=None, status="draft"):
+    """
+    Массовый импорт отсутствующих записей каталога из видеосервиса.
+
+    Ручная операция (в расписание не внесена): тысячи записей за один
+    прогон создаются осознанно, командой ``sync_vibix --create-missing``
+    или этой задачей для запуска через воркер. Повторный запуск безопасен —
+    существующие записи пропускаются по kp_id. Без токена тихо
+    пропускается, ошибки API и блокировки не роняют вызывающий процесс.
+    """
+    from apps.catalog.video_service_api import VideoServiceAPIError
+    from apps.catalog.video_service_sync import bulk_create_from_catalog as run
+
+    if not get_vibix_api_token():
+        return "VIBIX_API_TOKEN не задан — импорт пропущен"
+
+    try:
+        stats = run(
+            content_type=content_type,
+            status=(
+                Title.Status.PUBLISHED if status == "published" else Title.Status.DRAFT
+            ),
+        )
+    except VideoServiceAPIError as exc:
+        return f"Ошибка массового импорта каталога: {exc}"
+    except ValueError as exc:
+        return f"Некорректные параметры импорта: {exc}"
+
+    return (
+        f"Массовый импорт: получено {stats['fetched']}, создано {stats['created']}, "
+        f"уже было {stats['skipped_existing']}, ошибок {stats['errors']}"
+    )
+
+
+@shared_task
 def refresh_title_ratings():
     """
     Пересчитывает рейтинги всех записей разом.

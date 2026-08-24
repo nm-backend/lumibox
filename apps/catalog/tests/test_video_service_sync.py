@@ -5,7 +5,7 @@
 а сама синхронизация — на уровне генератора iter_video_links.
 """
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from decimal import Decimal
 from io import StringIO
 from types import SimpleNamespace
@@ -13,6 +13,7 @@ from unittest.mock import Mock, patch
 
 from django.core.management import call_command
 from django.core.management.base import CommandError
+from django.db import IntegrityError
 from django.test import TestCase, override_settings
 from django.utils import timezone
 
@@ -46,11 +47,14 @@ from apps.catalog.video_service_api import (
     iter_video_links,
 )
 from apps.catalog.video_service_sync import (
+    BULK_IMPORT_LOCK_KEY,
     TitleMatchIndex,
     _filter_years,
+    bulk_create_from_catalog,
     create_title_from_vibix,
     match_item,
     normalize_name,
+    release_bulk_import_lock,
     sync_series_episodes,
     sync_title,
     sync_video_service_ids,
@@ -166,7 +170,7 @@ class SyncVideoServiceIdsTests(TestCase):
 
     @staticmethod
     def _fake_links(items):
-        def generator(api_key, *, limit=100, updated_from=None, years=None, max_pages=None):
+        def generator(api_key, *, limit=100, updated_from=None, years=None, max_pages=None, content_type=None):
             yield from items
 
         return generator
@@ -335,7 +339,7 @@ class SyncVideoServiceIdsTests(TestCase):
 
         captured = {}
 
-        def generator(api_key, *, limit=100, updated_from=None, years=None, max_pages=None):
+        def generator(api_key, *, limit=100, updated_from=None, years=None, max_pages=None, content_type=None):
             captured["updated_from"] = updated_from
             captured["years"] = years
             return iter(())
@@ -359,7 +363,7 @@ class SyncVideoServiceIdsTests(TestCase):
 
         captured = {}
 
-        def generator(api_key, *, limit=100, updated_from=None, years=None, max_pages=None):
+        def generator(api_key, *, limit=100, updated_from=None, years=None, max_pages=None, content_type=None):
             captured["updated_from"] = updated_from
             return iter(())
 
@@ -387,7 +391,7 @@ class SyncVideoServiceCommandTests(TestCase):
             {"name": "Inception", "year": "2010", "kp_id": 27205, "imdb_id": "tt1375666"}
         ]
 
-        def generator(api_key, *, limit=100, updated_from=None, years=None, max_pages=None):
+        def generator(api_key, *, limit=100, updated_from=None, years=None, max_pages=None, content_type=None):
             yield from items
 
         out = StringIO()
@@ -519,7 +523,7 @@ class TitleEnrichmentTests(TestCase):
         self.assertEqual(Country.objects.count(), 0)
 
     def _fake_links(self, items):
-        def generator(api_key, *, limit=100, updated_from=None, years=None, max_pages=None):
+        def generator(api_key, *, limit=100, updated_from=None, years=None, max_pages=None, content_type=None):
             yield from items
 
         return generator
@@ -814,7 +818,7 @@ class VideoServiceAPIClientTests(TestCase):
             ]
         )
 
-        def fake_fetch(api_key, *, page, limit, updated_from, years=None):
+        def fake_fetch(api_key, *, page, limit, updated_from, years=None, content_type=None):
             return next(pages)
 
         with patch("apps.catalog.video_service_api.fetch_video_links", fake_fetch), patch(
@@ -827,7 +831,7 @@ class VideoServiceAPIClientTests(TestCase):
     def test_iter_forwards_years(self):
         captured = {}
 
-        def fake_fetch(api_key, *, page, limit, updated_from, years=None):
+        def fake_fetch(api_key, *, page, limit, updated_from, years=None, content_type=None):
             captured["years"] = years
             return [], {"last_page": 1}
 
@@ -844,7 +848,7 @@ class VideoServiceAPIClientTests(TestCase):
             ]
         )
 
-        def fake_fetch(api_key, *, page, limit, updated_from, years=None):
+        def fake_fetch(api_key, *, page, limit, updated_from, years=None, content_type=None):
             return next(pages)
 
         with patch("apps.catalog.video_service_api.fetch_video_links", fake_fetch), patch(
@@ -1687,3 +1691,510 @@ class CreateFromVibixCommandTests(TestCase):
     def test_missing_token_raises(self):
         with self.assertRaises(CommandError):
             call_command("create_from_vibix", "447301", stdout=StringIO())
+
+
+class TitleKpIdUniquenessTests(TestCase):
+    """Частичный уникальный индекс по kp_id: дублей нет на уровне БД."""
+
+    def test_duplicate_kp_id_rejected(self):
+        create_title(name="Первая", kp_id="447301")
+        with self.assertRaises(IntegrityError):
+            Title.objects.create(name="Вторая", slug="vtoraya", kp_id="447301")
+
+    def test_empty_kp_ids_are_not_unique(self):
+        create_title(name="Без ID раз", kp_id="")
+        create_title(name="Без ID два", kp_id="")
+        self.assertEqual(Title.objects.filter(kp_id="").count(), 2)
+
+
+class VideoLinkTypeFilterTests(TestCase):
+    """Серверный фильтр type для раздельного обхода фильмов и сериалов."""
+
+    @staticmethod
+    def _ok_payload():
+        return {"success": True, "data": [], "meta": {"last_page": 1, "total": 0}}
+
+    def test_fetch_sends_type_filter(self):
+        with patch("apps.catalog.video_service_api.requests.get") as get:
+            get.return_value.status_code = 200
+            get.return_value.json.return_value = self._ok_payload()
+            fetch_video_links("secret-key", content_type="serial")
+
+        self.assertEqual(get.call_args.kwargs["params"]["type"], "serial")
+
+    def test_fetch_omits_type_filter_when_not_given(self):
+        with patch("apps.catalog.video_service_api.requests.get") as get:
+            get.return_value.status_code = 200
+            get.return_value.json.return_value = self._ok_payload()
+            fetch_video_links("secret-key")
+
+        self.assertNotIn("type", get.call_args.kwargs["params"])
+
+    def test_invalid_type_rejected_before_request(self):
+        with patch("apps.catalog.video_service_api.requests.get") as get:
+            with self.assertRaises(VideoServiceValidationError):
+                fetch_video_links("secret-key", content_type="cartoon")
+
+        get.assert_not_called()
+
+    def test_iter_forwards_type_to_pages(self):
+        pages = iter(
+            [
+                self._ok_payload(),
+                self._ok_payload(),
+            ]
+        )
+
+        def fake_get(url, **kwargs):
+            try:
+                response = Mock()
+                response.status_code = 200
+                response.json.return_value = next(pages)
+                return response
+            except StopIteration:
+                self.fail("iter_video_links запросил больше страниц, чем ожидалось")
+
+        with patch("apps.catalog.video_service_api.time.sleep"), patch(
+            "apps.catalog.video_service_api.requests.get", side_effect=fake_get
+        ):
+            items = list(
+                iter_video_links("secret-key", limit=100, content_type="movie")
+            )
+
+        self.assertEqual(items, [])
+
+
+def make_catalog_item(**overrides):
+    """Карточка списка /publisher/videos/links с полями из живого OpenAPI."""
+    item = {
+        "id": 4427,
+        "name": "Inception",
+        "name_rus": "Начало",
+        "name_original": "Inception",
+        "type": "movie",
+        "year": "2010",
+        "kp_id": 27205,
+        "imdb_id": "tt1375666",
+        "kp_rating": "8.6",
+        "imdb_rating": "8.8",
+        "quality": "WEB-DL",
+        "duration": 148,
+        "description": "Описание фильма",
+        "poster_url": "https://cdn.example/poster.jpg",
+        "backdrop_url": "",
+        "genre": ["фантастика", "триллер"],
+        "country": ["США"],
+        "embed_code": (
+            'data-publisher-id="678503345" data-type="movie" data-id="4427"'
+        ),
+    }
+    item.update(overrides)
+    return item
+
+
+@override_settings(VIBIX_API_TOKEN="test-key", VIDEO_SERVICE_API_KEY="test-key")
+class BulkCreateFromCatalogTests(TestCase):
+    """Массовый импорт: батчи, дедуп по kp_id, dry-run, блокировка."""
+
+    @staticmethod
+    def _fake_links(items):
+        def generator(api_key, *, limit=100, updated_from=None, years=None, max_pages=None, content_type=None):
+            yield from items
+
+        return generator
+
+    def test_creates_drafts_with_metadata_and_references(self):
+        items = [
+            make_catalog_item(),
+            make_catalog_item(
+                id=8285,
+                name_rus="Игра в кальмара",
+                name="Squid Game",
+                name_original="Squid Game",
+                type="serial",
+                year=2021,
+                kp_id=56835,
+                imdb_id="tt10919420",
+                quality="4K",
+                embed_code='data-type="serial" data-id="8285"',
+            ),
+        ]
+
+        with patch(
+            "apps.catalog.video_service_sync.iter_video_links",
+            self._fake_links(items),
+        ):
+            stats = bulk_create_from_catalog()
+
+        self.assertEqual(stats["created"], 2)
+        self.assertEqual(stats["fetched"], 2)
+        self.assertEqual(Title.objects.count(), 2)
+
+        movie = Title.objects.get(kp_id="27205")
+        self.assertEqual(movie.status, Title.Status.DRAFT)
+        self.assertIsNone(movie.published_at)
+        self.assertEqual(movie.slug, "inception-2010")
+        self.assertEqual(movie.player_id, "4427")
+        self.assertEqual(movie.player_type, "movie")
+        self.assertEqual(movie.quality, Title.Quality.WEB_DL)
+        self.assertEqual(movie.description, "Описание фильма")
+        self.assertEqual(movie.poster_url, "https://cdn.example/poster.jpg")
+        self.assertEqual(movie.backdrop_url, "")
+        self.assertEqual(movie.kp_rating, Decimal("8.6"))
+        self.assertCountEqual(
+            movie.genres.values_list("name", flat=True), ["фантастика", "триллер"]
+        )
+        self.assertCountEqual(
+            movie.countries.values_list("name", flat=True), ["США"]
+        )
+        # Кириллические названия жанров транслитерации не получают —
+        # адрес уходит на фолбэк, главное что он латиница и не пустой.
+        for genre in Genre.objects.all():
+            self.assertTrue(genre.slug and genre.slug.isascii())
+
+        series = Title.objects.get(kp_id="56835")
+        self.assertEqual(series.type, Title.Type.SERIES)
+        # Некаталожное значение качества не попадает в запись.
+        self.assertEqual(series.quality, "")
+        # Кириллическое название транслитерируется.
+        self.assertEqual(series.slug, "squid-game-2021")
+        self.assertEqual(series.player_id, "8285")
+        self.assertEqual(series.player_type, "series")
+
+    def test_slug_collision_within_run_gets_suffix(self):
+        items = [
+            make_catalog_item(),
+            make_catalog_item(id=4428, kp_id=27206),
+        ]
+        with patch(
+            "apps.catalog.video_service_sync.iter_video_links",
+            self._fake_links(items),
+        ):
+            stats = bulk_create_from_catalog()
+
+        self.assertEqual(stats["created"], 2)
+        slugs = set(Title.objects.values_list("slug", flat=True))
+        self.assertEqual(len(slugs), 2)
+        self.assertIn("inception-2010-2", slugs)
+
+    def test_rerun_is_idempotent(self):
+        items = [make_catalog_item(), make_catalog_item(id=8285, kp_id=56835)]
+
+        for _ in range(2):
+            with patch(
+                "apps.catalog.video_service_sync.iter_video_links",
+                self._fake_links(items),
+            ):
+                stats = bulk_create_from_catalog()
+
+        self.assertEqual(Title.objects.count(), 2)
+        self.assertEqual(stats["created"], 0)
+        self.assertEqual(stats["skipped_existing"], 2)
+
+    def test_resume_after_interrupted_import(self):
+        # Первый прогон упал после одной карточки (эмуляция обрыва),
+        # второй проходит весь список: докидывает только недостающее.
+        first = [make_catalog_item()]
+        full = [
+            make_catalog_item(),
+            make_catalog_item(id=8285, kp_id=56835, name_rus="Игра в кальмара", name="Squid Game"),
+        ]
+        with patch(
+            "apps.catalog.video_service_sync.iter_video_links",
+            self._fake_links(first),
+        ):
+            bulk_create_from_catalog()
+
+        with patch(
+            "apps.catalog.video_service_sync.iter_video_links",
+            self._fake_links(full),
+        ):
+            stats = bulk_create_from_catalog()
+
+        self.assertEqual(Title.objects.count(), 2)
+        self.assertEqual(stats["created"], 1)
+        self.assertEqual(stats["skipped_existing"], 1)
+
+    def test_dry_run_counts_without_writing(self):
+        items = [make_catalog_item(), make_catalog_item(id=8285, kp_id=56835)]
+        seen = []
+
+        with patch(
+            "apps.catalog.video_service_sync.iter_video_links",
+            self._fake_links(items),
+        ):
+            stats = bulk_create_from_catalog(dry_run=True, progress=seen.append)
+
+        self.assertEqual(stats["created"], 2)
+        self.assertEqual(Title.objects.count(), 0)
+        self.assertFalse(Genre.objects.exists())
+        # Финальный слепок счётчиков дошёл до колбэка.
+        self.assertEqual(seen[-1]["created"], 2)
+
+    def test_batches_flush_by_batch_size(self):
+        items = [
+            make_catalog_item(id=index, kp_id=index, name_rus=f"Фильм {index}", name=f"Film {index}")
+            for index in range(1, 6)
+        ]
+        with patch(
+            "apps.catalog.video_service_sync.iter_video_links",
+            self._fake_links(items),
+        ):
+            stats = bulk_create_from_catalog(batch_size=2)
+
+        self.assertEqual(stats["created"], 5)
+        self.assertEqual(stats["batches"], 3)  # 2 + 2 + 1
+        self.assertEqual(Title.objects.count(), 5)
+
+    def test_race_fallback_saves_records_one_by_one(self):
+        # Другой процесс вставил часть батча между нашим снимком kp_id и
+        # записью: bulk_create падает целиком, спасение — по одной записи.
+        items = [
+            make_catalog_item(),
+            make_catalog_item(id=8285, kp_id=56835, name_rus="Игра в кальмара", name="Squid Game"),
+        ]
+        real_bulk_create = Title.objects.bulk_create
+        attempts = {"count": 0}
+
+        def flaky_bulk_create(*args, **kwargs):
+            if attempts["count"] == 0:
+                attempts["count"] += 1
+                raise IntegrityError("title_kp_id_uniq_when_filled")
+            return real_bulk_create(*args, **kwargs)
+
+        with patch(
+            "apps.catalog.video_service_sync.iter_video_links",
+            self._fake_links(items),
+        ), patch.object(Title.objects, "bulk_create", side_effect=flaky_bulk_create):
+            stats = bulk_create_from_catalog()
+
+        self.assertEqual(attempts["count"], 1)
+        self.assertEqual(Title.objects.count(), 2)
+        self.assertEqual(stats["created"], 2)
+
+    def test_reference_link_failure_does_not_miscount_created_rows(self):
+        # Регрессия: сбой связки жанров после успешной вставки батча раньше
+        # приводил к тому, что созданные записи считались дублями.
+        items = [make_catalog_item(), make_catalog_item(id=8285, kp_id=56835)]
+        with patch(
+            "apps.catalog.video_service_sync.iter_video_links",
+            self._fake_links(items),
+        ), patch.object(
+            Title.genres.through.objects,
+            "bulk_create",
+            side_effect=IntegrityError("жанровая гонка"),
+        ):
+            stats = bulk_create_from_catalog()
+
+        self.assertEqual(stats["created"], 2)
+        self.assertEqual(stats["skipped_existing"], 0)
+        self.assertEqual(Title.objects.count(), 2)
+
+    def test_lock_blocks_parallel_run(self):
+        state, _ = VideoServiceSyncState.objects.get_or_create(key=BULK_IMPORT_LOCK_KEY)
+        state.locked_at = timezone.now()
+        state.save(update_fields=["locked_at"])
+
+        with patch(
+            "apps.catalog.video_service_sync.iter_video_links",
+            self._fake_links([make_catalog_item()]),
+        ):
+            with self.assertRaises(VideoServiceAPIError):
+                bulk_create_from_catalog()
+
+        self.assertEqual(Title.objects.count(), 0)
+
+    def test_stale_lock_is_overridden(self):
+        state, _ = VideoServiceSyncState.objects.get_or_create(key=BULK_IMPORT_LOCK_KEY)
+        state.locked_at = timezone.now() - timedelta(hours=13)
+        state.save(update_fields=["locked_at"])
+
+        with patch(
+            "apps.catalog.video_service_sync.iter_video_links",
+            self._fake_links([make_catalog_item()]),
+        ):
+            stats = bulk_create_from_catalog()
+
+        self.assertEqual(stats["created"], 1)
+
+    def test_lock_released_after_success_and_after_crash(self):
+        items = [make_catalog_item()]
+
+        with patch(
+            "apps.catalog.video_service_sync.iter_video_links",
+            self._fake_links(items),
+        ):
+            bulk_create_from_catalog()
+        self.assertIsNone(
+            VideoServiceSyncState.objects.get(key=BULK_IMPORT_LOCK_KEY).locked_at
+        )
+
+        def exploding_generator(api_key, **kwargs):
+            yield make_catalog_item(id=99, kp_id=999999)
+            raise RuntimeError("обрыв соединения")
+
+        with patch(
+            "apps.catalog.video_service_sync.iter_video_links",
+            exploding_generator,
+        ):
+            with self.assertRaises(RuntimeError):
+                bulk_create_from_catalog()
+        self.assertIsNone(
+            VideoServiceSyncState.objects.get(key=BULK_IMPORT_LOCK_KEY).locked_at
+        )
+
+    def test_release_bulk_import_lock(self):
+        state, _ = VideoServiceSyncState.objects.get_or_create(key=BULK_IMPORT_LOCK_KEY)
+        state.locked_at = timezone.now()
+        state.save(update_fields=["locked_at"])
+
+        self.assertTrue(release_bulk_import_lock())
+        self.assertFalse(release_bulk_import_lock())
+        self.assertIsNone(
+            VideoServiceSyncState.objects.get(key=BULK_IMPORT_LOCK_KEY).locked_at
+        )
+
+    def test_invalid_status_and_type_raise(self):
+        with self.assertRaises(ValueError):
+            bulk_create_from_catalog(status="archived")
+        with self.assertRaises(ValueError):
+            bulk_create_from_catalog(content_type="cartoon")
+
+    def test_missing_items_are_counted_with_samples(self):
+        items = [
+            make_catalog_item(kp_id="", name_rus="Нет ID"),
+            make_catalog_item(id=2, kp_id=2, name_rus="", name="", name_original="NoName"),
+            make_catalog_item(id=3, kp_id=3, name_rus="Без года", year=""),
+        ]
+        with patch(
+            "apps.catalog.video_service_sync.iter_video_links",
+            self._fake_links(items),
+        ):
+            stats = bulk_create_from_catalog()
+
+        self.assertEqual(stats["no_kp_id"], 1)
+        self.assertEqual(stats["no_name"], 1)
+        self.assertEqual(stats["no_year"], 1)
+        self.assertEqual(stats["samples_no_name"], ["NoName"])
+        self.assertEqual(stats["samples_no_year"], ["Без года"])
+        self.assertEqual(Title.objects.count(), 0)
+
+
+@override_settings(VIBIX_API_TOKEN="test-key", VIDEO_SERVICE_API_KEY="test-key")
+class CreateMissingCommandTests(TestCase):
+    """Команда sync_vibix --create-missing: отчёт, dry-run, валидация флагов."""
+
+    @staticmethod
+    def _fake_links(items):
+        def generator(api_key, *, limit=100, updated_from=None, years=None, max_pages=None, content_type=None):
+            yield from items
+
+        return generator
+
+    def test_dry_run_prints_plan_and_writes_nothing(self):
+        items = [make_catalog_item()]
+        out = StringIO()
+        with patch(
+            "apps.catalog.video_service_sync.iter_video_links",
+            self._fake_links(items),
+        ):
+            call_command(
+                "sync_vibix", "--create-missing", "--dry-run", "--max-pages", "1",
+                stdout=out,
+            )
+
+        self.assertEqual(Title.objects.count(), 0)
+        text = out.getvalue()
+        self.assertIn("будет создано 1", text)
+        self.assertIn("ничего не записано", text)
+
+    def test_published_status_sets_published_at(self):
+        items = [make_catalog_item()]
+        with patch(
+            "apps.catalog.video_service_sync.iter_video_links",
+            self._fake_links(items),
+        ):
+            call_command("sync_vibix", "--create-missing", "--status", "published", stdout=StringIO())
+
+        title = Title.objects.get(kp_id="27205")
+        self.assertEqual(title.status, Title.Status.PUBLISHED)
+        self.assertIsNotNone(title.published_at)
+
+    def test_type_filter_passed_to_api_layer(self):
+        captured = {}
+
+        def generator(api_key, *, content_type=None, **kwargs):
+            captured["content_type"] = content_type
+            return iter([])
+
+        with patch("apps.catalog.video_service_sync.iter_video_links", generator):
+            call_command("sync_vibix", "--create-missing", "--type", "serial", stdout=StringIO())
+
+        self.assertEqual(captured["content_type"], "serial")
+
+    def test_flags_require_create_missing(self):
+        for args in (
+            ["--status", "published"],
+            ["--batch-size", "100"],
+            ["--type", "serial"],
+        ):
+            with self.assertRaises(CommandError):
+                call_command("sync_vibix", *args, stdout=StringIO())
+
+    def test_modes_are_mutually_exclusive(self):
+        with self.assertRaises(CommandError):
+            call_command("sync_vibix", "--create-missing", "--episodes", stdout=StringIO())
+
+    def test_unlock_releases_lock(self):
+        state, _ = VideoServiceSyncState.objects.get_or_create(key=BULK_IMPORT_LOCK_KEY)
+        state.locked_at = timezone.now()
+        state.save(update_fields=["locked_at"])
+
+        call_command("sync_vibix", "--unlock", stdout=StringIO())
+        state.refresh_from_db()
+        self.assertIsNone(state.locked_at)
+
+    def test_unlock_rejects_other_modes(self):
+        with self.assertRaises(CommandError):
+            call_command("sync_vibix", "--unlock", "--create-missing", stdout=StringIO())
+
+
+@override_settings(VIBIX_API_TOKEN="test-key", VIDEO_SERVICE_API_KEY="test-key")
+class CreateMissingCatalogTaskTests(TestCase):
+    """Celery-задача массового импорта: отчёт строкой, ошибки не роняют."""
+
+    def test_skips_without_api_key(self):
+        from apps.catalog.tasks import create_missing_catalog
+
+        with override_settings(VIBIX_API_TOKEN="", VIDEO_SERVICE_API_KEY=""):
+            self.assertIn("пропущен", create_missing_catalog())
+
+    def test_reports_statistics(self):
+        from apps.catalog.tasks import create_missing_catalog
+
+        stats = {
+            "fetched": 10, "created": 7, "skipped_existing": 3, "errors": 0,
+            "genres_created": 0, "countries_created": 0, "batches": 1,
+            "no_kp_id": 0, "no_name": 0, "no_year": 0,
+            "samples_no_name": [], "samples_no_year": [], "errors_log": [],
+        }
+        with patch(
+            "apps.catalog.video_service_sync.bulk_create_from_catalog",
+            return_value=stats,
+        ) as run:
+            report = create_missing_catalog()
+
+        run.assert_called_once()
+        self.assertIn("создано 7", report)
+        self.assertIn("уже было 3", report)
+
+    def test_api_error_returns_message(self):
+        from apps.catalog.tasks import create_missing_catalog
+
+        with patch(
+            "apps.catalog.video_service_sync.bulk_create_from_catalog",
+            side_effect=VideoServiceAPIError("блокировка активна"),
+        ):
+            report = create_missing_catalog()
+
+        self.assertIn("Ошибка массового импорта", report)

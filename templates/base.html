@@ -10,6 +10,9 @@
        страница перестаёт выглядеть вклеенной в чужой интерфейс. {% endcomment %}
     <meta name="theme-color" content="#0b0b0c" media="(prefers-color-scheme: dark)">
     <meta name="theme-color" content="#f5f5f7" media="(prefers-color-scheme: light)">
+    <meta property="og:site_name" content="LumiBox" />
+    <meta property="og:title" content="LumiBox — каталог фильмов и сериалов" />
+
     
     {% comment %} Тема — до первой отрисовки.
 
@@ -103,30 +106,36 @@
     </script>
     {% endif %}
 
+    
+           
+
     {# BreadcrumbList Schema — навигационная цепочка для поисковиков #}
     {% block breadcrumb_schema %}
-    {% if request %}
-    <script type="application/ld+json">
-    {
-        "@context": "https://schema.org",
-        "@type": "BreadcrumbList",
-        "itemListElement": [
-            {
-                "@type": "ListItem",
-                "position": 1,
-                "name": "{% trans 'Главная' %}",
-                "item": "{% absolute_url '/' %}"
-            }{% if request.resolver_match and request.resolver_match.url_name and request.resolver_match.url_name != 'home' %},
-            {
-                "@type": "ListItem",
-                "position": 2,
-                "name": "{% block breadcrumb_2_name %}{% trans 'Каталог' %}{% endblock %}",
-                "item": "{% block breadcrumb_2_url %}{% absolute_url request.path %}{% endblock %}"
-            }{% endif %}
-        ]
-    }
-    </script>
-    {% endif %}
+        {% if request %}
+            <script type="application/ld+json">
+            [
+              {
+                "@context": "https://schema.org",
+                "@type": "WebSite",
+                "name": "LumiBox",
+                "alternateName": ["Lumi Box", "LumiBox — каталог фильмов и сериалов"],
+                "url": "{{ request.build_absolute_uri|cut:request.get_full_path }}"
+              },
+              {
+                "@context": "https://schema.org",
+                "@type": "Organization",
+                "name": "LumiBox",
+                "url": "{{ request.build_absolute_uri|cut:request.get_full_path }}",
+                "description": "{% trans 'Каталог фильмов и сериалов: поиск, фильтры, подборки.' %}",
+                "logo": "{% absolute_static 'img/favicon.svg' %}",
+                "sameAs": [
+                    "https://t.me/lumiboxxx",
+                    "https://github.com/nm-backend/lumibox"
+                ]
+              }
+            ]
+            </script>
+        {% endif %}
     {% endblock %}
 
     {% comment %} Google Analytics / Google Tag Manager — вставляется только когда

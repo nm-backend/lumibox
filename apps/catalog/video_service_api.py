@@ -304,7 +304,15 @@ def fetch_serial_by_imdb(api_key, imdb_id):
     )
 
 
-def fetch_video_links(api_key, *, page=1, limit=100, updated_from=None, years=None):
+def fetch_video_links(
+    api_key,
+    *,
+    page=1,
+    limit=100,
+    updated_from=None,
+    years=None,
+    content_type=None,
+):
     """
     Одна страница списка видео.
 
@@ -315,11 +323,22 @@ def fetch_video_links(api_key, *, page=1, limit=100, updated_from=None, years=No
     years — набор годов для фильтра `year[]`: API вернёт только видео
     этих лет. Полезно, когда известен год записи каталога: не нужно
     обходить весь список в десятки тысяч записей. None — без фильтра.
+
+    content_type — серверный фильтр `type` ("movie" или "serial"):
+    массовый импорт обходит фильмы и сериалы раздельно (серии сериалов
+    тянутся отдельным этапом), и фильтр на стороне API экономит обход
+    половины каталога.
     """
     valid_limits = (20, 50, 100)
     if limit not in valid_limits:
         limit = min(valid_limits, key=lambda x: abs(x - limit))
-    params = {"page": page, "limit": limit}
+    params: dict[str, object] = {"page": page, "limit": limit}
+    if content_type is not None:
+        if content_type not in ("movie", "serial"):
+            raise VideoServiceValidationError(
+                "Фильтр type принимает только movie или serial"
+            )
+        params["type"] = content_type
     if updated_from is not None:
         params["updated_from"] = timezone.localtime(updated_from).strftime(
             "%Y-%m-%dT%H:%M:%S"
@@ -384,7 +403,15 @@ def fetch_voiceovers(api_key):
     return payload.get("data") or []
 
 
-def iter_video_links(api_key, *, limit=100, updated_from=None, years=None, max_pages=None):
+def iter_video_links(
+    api_key,
+    *,
+    limit=100,
+    updated_from=None,
+    years=None,
+    max_pages=None,
+    content_type=None,
+):
     """
     Генератор по всем страницам списка видео.
 
@@ -394,11 +421,17 @@ def iter_video_links(api_key, *, limit=100, updated_from=None, years=None, max_p
     чтобы не упереться в троттлинг API.
 
     years — пробрасывается в year[] фильтр каждой страницы (см. выше).
+    content_type — пробрасывается в серверный фильтр type (см. выше).
     """
     page = 1
     while True:
         data, meta = fetch_video_links(
-            api_key, page=page, limit=limit, updated_from=updated_from, years=years
+            api_key,
+            page=page,
+            limit=limit,
+            updated_from=updated_from,
+            years=years,
+            content_type=content_type,
         )
         yield from data
         last_page = meta.get("last_page") or page

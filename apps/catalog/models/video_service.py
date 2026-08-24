@@ -22,6 +22,15 @@ class VideoServiceSyncState(models.Model):
         blank=True,
         help_text="Значение параметра updated_from для следующего запуска.",
     )
+    locked_at = models.DateTimeField(
+        "Заблокировано до",
+        null=True,
+        blank=True,
+        help_text=(
+            "Отметка захвата длительной операции (массовый импорт). "
+            "Не пустая — второй запуск отклоняется до снятия блокировки."
+        ),
+    )
     updated_at = models.DateTimeField("Обновлено", auto_now=True)
 
     class Meta:
