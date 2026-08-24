@@ -213,36 +213,36 @@
     font-size: 0.8125rem;
     font-weight: 600;
     line-height: 1;
-    color: #fff;
+    color: var(--color-text);
     text-decoration: none;
     border: 1px solid var(--color-border-soft);
     border-radius: var(--radius-full);
-    background: linear-gradient(180deg, #4a4a4f 0%, #3c3c41 100%);
+    background: var(--color-surface);
     white-space: nowrap;
     transition: background var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast);
 }
 
 .lb-topnav__link:hover {
-    background: linear-gradient(180deg, #55555b 0%, #47474d 100%);
-    color: #fff;
+    background: var(--color-surface-hover);
+    color: var(--color-text);
 }
 
 .lb-topnav__link--active,
 .lb-topnav__link--active:hover {
     border-color: transparent;
     background: linear-gradient(180deg, var(--color-accent) 0%, var(--color-accent-deep) 100%);
-    color: #fff;
+    color: var(--color-on-accent);
 }
 
 /* Светлая тема: серые пилюли с тёмным текстом, активная — Apple-синяя. */
 [data-theme="light"] .lb-topnav__link {
-    background: linear-gradient(180deg, #e9e9ee 0%, #dcdce2 100%);
-    color: var(--color-text-strong);
+    background: var(--color-surface);
+    color: var(--color-text);
 }
 
 [data-theme="light"] .lb-topnav__link:hover {
-    background: linear-gradient(180deg, #dedee4 0%, #d2d2d8 100%);
-    color: var(--color-text-strong);
+    background: var(--color-surface-hover);
+    color: var(--color-text);
 }
 
 [data-theme="light"] .lb-topnav__link--active,
