@@ -8,7 +8,7 @@
 .film-hero {
     position: relative;
     overflow: clip;
-    margin-top: var(--space-4);
+    margin-top: var(--space-1);
     padding: var(--space-8) var(--space-5) var(--space-7);
     background-color: var(--color-surface);
 }

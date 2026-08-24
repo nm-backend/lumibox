@@ -10,12 +10,20 @@
 
 html {
     scroll-behavior: smooth;
+    scroll-padding-top: 124px; /* header (67px) + topnav (57px) */
     font-family: var(--font-base);
     /* Декоративные fixed-элементы (cinema-glow и пр.) выходят за край
        вьюпорта и расширяли scrollWidth документа на мобильных — от 1px
        до десятков пикселей. clip (не hidden!) не создаёт scroll
        container, поэтому position: sticky в шапке продолжает работать. */
     overflow-x: clip;
+}
+
+/* Mobile: no topnav, header is ~61px */
+@media (max-width: 1024px) {
+    html {
+        scroll-padding-top: 61px;
+    }
 }
 
 /* Мягкое появление страницы. Класс навешивает app.js после загрузки.

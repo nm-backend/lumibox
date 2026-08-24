@@ -71,12 +71,12 @@
 }
 
 .lb-body .site-main {
-    padding-top: 116px;
+    padding-top: var(--space-3);
 }
 
 @media (max-width: 1024px) {
     .lb-body .site-main {
-        padding-top: 68px;
+        padding-top: var(--space-3);
     }
 }
 
@@ -472,7 +472,7 @@ nav.lb-topnav-bar a:hover {
    дублировала жанры, годы и страны, которые и так есть в фильтрах, и отнимала
    у выдачи 280px на каждом экране — на 1440px это две колонки постеров. */
 .lb-contentwrap {
-    margin-top: var(--space-3);
+    margin-top: var(--space-1);
 }
 
 .lb-main {
@@ -927,7 +927,8 @@ nav.lb-topnav-bar a:hover {
     }
 
 
-    .lb-contentwrap {
+    .lb-contentwrap,
+    .lb-contentwrap--home {
         grid-template-columns: minmax(0, 1fr);
     }
 
@@ -940,6 +941,12 @@ nav.lb-topnav-bar a:hover {
         position: static;
         max-height: none;
         overflow: visible;
+    }
+
+    /* Сайдбар на мобильном скрыт: навигация доступна через гамбургер/дровера.
+       Иначе он съедает экран и толкает контент вниз. */
+    .lb-sidebar {
+        display: none;
     }
 
     .lb-promo__inner {
@@ -1929,7 +1936,7 @@ nav.lb-topnav-bar a:hover {
     grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
     gap: var(--space-6);
     align-items: start;
-    margin-top: var(--space-4);
+    margin-top: var(--space-1);
 }
 
 .lb-contentwrap--home .lb-sidebar {

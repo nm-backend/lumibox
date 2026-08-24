@@ -35,11 +35,14 @@ header > .container {
     padding-bottom: var(--space-2);
 }
 
-/* При прокрутке шапка отделяется от контента тенью — это её единственная
-   работа, поэтому и тень ровно одна, общая. */
+/* При прокрутке шапка становится непрозрачной и отбрасывает тень —
+   контент не должен просвечивать сквозь полупрозрачный фон. */
 .site-header--scrolled {
+    background-color: var(--color-surface) !important;
     box-shadow: var(--shadow-raise);
     border-bottom-color: transparent;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
 }
 
 
@@ -269,8 +272,10 @@ header > .container {
 
 .site-main {
     flex: 1;
-    /* Page top: header (60px) + topnav (44px) + 12px gap = 116px desktop */
-    padding-top: 116px;
+    /* Gap between sticky header+topnav and content: 12px only.
+       Header and topnav are in normal flow before site-main, so they already
+       occupy their space. Only the gap is needed here. */
+    padding-top: var(--space-3);
     padding-bottom: var(--space-10);
     overflow-x: clip;
     width: 100%;
@@ -282,16 +287,17 @@ header > .container {
     padding-inline: 0;
 }
 
-/* Mobile: no topnav, header is 56px */
+/* Mobile: no topnav, header is ~61px (actual rendered height).
+   Header and topnav are in normal flow before site-main, so only gap is needed. */
 @media (max-width: 1024px) {
     .site-main {
-        padding-top: 68px; /* header (56px) + 12px gap */
+        padding-top: var(--space-3); /* 12px gap only */
     }
 }
 
 @media (max-width: 480px) {
     .site-main {
-        padding-top: 68px; /* header (56px) + 12px gap */
+        padding-top: var(--space-3); /* 12px gap only */
     }
 }
 
