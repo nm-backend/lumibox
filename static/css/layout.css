@@ -21,13 +21,16 @@ header {
     border-bottom: 1px solid var(--color-border);
     transition: box-shadow var(--transition), border-bottom-color var(--transition),
                 background-color var(--transition);
+    color: var(--color-text);
 }
 
 header > .container {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    align-items: center;
     gap: var(--space-3);
-    padding-bottom: var(--space-3);
+    padding-top: var(--space-2);
+    padding-bottom: var(--space-2);
 }
 
 /* При прокрутке шапка отделяется от контента тенью — это её единственная
@@ -263,9 +266,8 @@ header > .container {
 
 .site-main {
     flex: 1;
-    /* Page top: header 60 + 32 = 92px воздуха, как у reference но с современным ритмом */
-    /* Page top: header 60 + 32 = 92px воздуха, как у reference но с современным ритмом */
-    padding-top: calc(var(--header-height, 60px) + var(--space-6));
+    /* Page top: header + topnav bar + воздух. Topnav ~48px, итого 60+32+32=124px */
+    padding-top: calc(var(--header-height, 60px) + var(--space-6) + var(--space-6));
     padding-bottom: var(--space-10);
     overflow-x: clip;
     width: 100%;
@@ -337,6 +339,63 @@ header > .container {
     :root {
         --header-height: 56px;
     }
+}
+
+/* ---------- Светлая тема: шапка и внутренние элементы ---------- */
+
+[data-theme="light"] header {
+    background-color: var(--glass-bg);
+    color: var(--color-text);
+}
+
+[data-theme="light"] .search-wrapper {
+    border-color: var(--color-border);
+}
+
+[data-theme="light"] .search {
+    background-color: var(--color-surface);
+}
+
+[data-theme="light"] .search:focus-within {
+    background-color: var(--color-surface-hover);
+}
+
+[data-theme="light"] .search__input {
+    color: var(--color-text);
+}
+
+[data-theme="light"] .search__input::placeholder {
+    color: var(--color-text-dim);
+}
+
+[data-theme="light"] .search__submit {
+    color: var(--color-text-muted);
+}
+
+[data-theme="light"] .theme-toggle {
+    background: var(--color-surface);
+    border-color: var(--color-border);
+    color: var(--color-text-muted);
+}
+
+[data-theme="light"] .telegram-header-link {
+    background: var(--color-surface);
+    border-color: var(--color-border);
+}
+
+[data-theme="light"] .lang-menu__trigger {
+    background: var(--color-surface);
+    border-color: var(--color-border);
+    color: var(--color-text-muted);
+}
+
+[data-theme="light"] .hamburger {
+    background: var(--color-surface);
+    border-color: var(--color-border);
+}
+
+[data-theme="light"] .hamburger__line {
+    background: var(--color-text);
 }
 
 /* ---------- Телефоны ---------- */

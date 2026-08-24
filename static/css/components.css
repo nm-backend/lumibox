@@ -337,6 +337,104 @@
     font-size: var(--text-sm);
 }
 
+/* ---------- Глобальные стили полей форм ----------
+   Файлы forms.css загружаются только на отдельных страницах (вход, регистрация,
+   контакты). Отзывы (title_detail) и настройки профиля (profile) используют
+   form_fields.html, но не подключают forms.css — и поля рендерятся
+   дефолтными браузерными. Эти правила дают базовый вид ВСЕМ формам
+   проекта, а forms.css перебивает их более специфичными селекторами. */
+
+.form__field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+}
+
+.form__label {
+    display: block;
+    margin-bottom: 0;
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    line-height: var(--leading-normal);
+}
+
+.form__required {
+    color: var(--color-accent);
+    margin-left: var(--space-0);
+}
+
+.form__field input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not(.search__input),
+.form__field select,
+.form__field textarea {
+    display: block;
+    width: 100%;
+    padding: var(--space-3);
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    color: var(--color-text);
+    font-size: var(--text-sm);
+    line-height: var(--leading-normal);
+    transition: border-color var(--transition), box-shadow var(--transition),
+                background-color var(--transition), color var(--transition);
+    appearance: none;
+    -webkit-appearance: none;
+}
+
+.form__field input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not(.search__input):hover,
+.form__field select:hover,
+.form__field textarea:hover {
+    border-color: var(--color-border-strong);
+}
+
+.form__field input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not(.search__input):focus-visible,
+.form__field select:focus-visible,
+.form__field textarea:focus-visible {
+    outline: none;
+    border-color: var(--color-accent);
+    box-shadow: var(--focus-ring);
+}
+
+.form__field textarea {
+    resize: vertical;
+    min-height: 96px;
+}
+
+.form__field select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2386868b' d='M2 4l4 4 4-4'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right var(--space-3) center;
+    padding-right: var(--space-8);
+}
+
+.form__field--invalid input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not(.search__input),
+.form__field--invalid select,
+.form__field--invalid textarea {
+    border-color: var(--color-error);
+}
+
+/* Светлая тема */
+[data-theme="light"] .form__field input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not(.search__input),
+[data-theme="light"] .form__field select,
+[data-theme="light"] .form__field textarea {
+    background-color: #ffffff;
+    color: #1d1d1f;
+    border-color: rgba(0, 0, 0, 0.12);
+}
+
+[data-theme="light"] .form__field input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not(.search__input):hover,
+[data-theme="light"] .form__field select:hover,
+[data-theme="light"] .form__field textarea:hover {
+    border-color: rgba(0, 0, 0, 0.22);
+}
+
+[data-theme="light"] .form__field input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not(.search__input):focus-visible,
+[data-theme="light"] .form__field select:focus-visible,
+[data-theme="light"] .form__field textarea:focus-visible {
+    border-color: var(--color-accent);
+}
+
 /* ---------- Scroll Reveal ---------- */
 
 @keyframes fadeUp {
