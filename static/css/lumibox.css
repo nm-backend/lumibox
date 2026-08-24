@@ -203,7 +203,7 @@
     border-radius: 0;
 }
 
-.lb-topnav__link {
+nav.lb-topnav-bar a {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -222,34 +222,20 @@
     transition: background var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast);
 }
 
-.lb-topnav__link:hover {
+nav.lb-topnav-bar a:hover {
     background: var(--color-surface-hover);
     color: var(--color-text);
 }
 
-.lb-topnav__link--active,
-.lb-topnav__link--active:hover {
-    border-color: transparent;
-    background: linear-gradient(180deg, var(--color-accent) 0%, var(--color-accent-deep) 100%);
-    color: var(--color-on-accent);
-}
-
-/* Светлая тема: серые пилюли с тёмным текстом, активная — Apple-синяя. */
-[data-theme="light"] .lb-topnav__link {
+/* Светлая тема */
+[data-theme="light"] nav.lb-topnav-bar a {
     background: var(--color-surface);
     color: var(--color-text);
 }
 
-[data-theme="light"] .lb-topnav__link:hover {
+[data-theme="light"] nav.lb-topnav-bar a:hover {
     background: var(--color-surface-hover);
     color: var(--color-text);
-}
-
-[data-theme="light"] .lb-topnav__link--active,
-[data-theme="light"] .lb-topnav__link--active:hover {
-    border-color: transparent;
-    background: linear-gradient(180deg, var(--color-accent) 0%, var(--color-accent-deep) 100%);
-    color: #fff;
 }
 
 /* ---------- Промо-зона на месте рекламного баннера ---------- */

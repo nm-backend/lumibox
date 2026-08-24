@@ -1,33 +1,27 @@
 /* Формы: поля, ошибки, карточка входа и регистрации. */
 
-/* Единый ритм форм: label→input, input→error/help, field→field, form→button */
-.form__field {
+form {
     display: flex;
     flex-direction: column;
-    gap: var(--space-2);
-    margin-bottom: var(--space-4);
+    gap: var(--space-4);
 }
 
-.form__label {
+form label {
     display: block;
+    margin-bottom: var(--space-2);
     color: var(--color-text-muted);
     font-size: var(--text-sm);
     font-weight: 500;
     line-height: var(--leading-normal);
 }
 
-.form__required {
-    color: var(--color-accent);
-}
-
-/* Одно правило на все типы полей: не придётся дописывать сюда
-   каждый новый тип, который появится в формах. */
-.form__field input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
-.form__field select,
-.form__field textarea {
+form input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+form select,
+form textarea {
+    display: block;
     width: 100%;
     padding: var(--space-3);
-
+    margin-bottom: var(--space-4);
     background-color: var(--color-surface);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
@@ -38,18 +32,61 @@
     -webkit-appearance: none;
 }
 
-/* Светлая тема: поля форм с белым фоном и темным текстом */
-[data-theme="light"] .form__field input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
-[data-theme="light"] .form__field select,
-[data-theme="light"] .form__field textarea {
+form input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):focus-visible,
+form select:focus-visible,
+form textarea:focus-visible {
+    outline: none;
+    border-color: var(--color-accent);
+    box-shadow: var(--focus-ring);
+}
+
+/* Светлая тема */
+[data-theme="light"] form input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+[data-theme="light"] form select,
+[data-theme="light"] form textarea {
     background-color: #ffffff;
     color: #1d1d1f;
     border-color: rgba(0, 0, 0, 0.12);
 }
 
-[data-theme="light"] .form__field input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):focus-visible,
-[data-theme="light"] .form__field select:focus-visible,
-[data-theme="light"] .form__field textarea:focus-visible {
+[data-theme="light"] form input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):focus-visible,
+[data-theme="light"] form select:focus-visible,
+[data-theme="light"] form textarea:focus-visible {
+    border-color: var(--color-accent);
+}
+
+form input[type="file"] {
+    display: none;
+}
+
+form label[for*="file"] {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-4);
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    color: var(--color-text);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color var(--transition), border-color var(--transition);
+}
+
+[data-theme="light"] form label[for*="file"] {
+    background-color: #ffffff;
+    color: #1d1d1f;
+    border-color: rgba(0, 0, 0, 0.12);
+}
+
+form label[for*="file"]:hover {
+    background-color: var(--color-surface-hover);
+    border-color: var(--color-accent);
+}
+
+[data-theme="light"] form label[for*="file"]:hover {
+    background-color: #f5f5f7;
     border-color: var(--color-accent);
 }
 
