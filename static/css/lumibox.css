@@ -71,8 +71,7 @@
 }
 
 .lb-body .site-main {
-    /* Поправка на topnav-bar (~48px) + воздух под ней */
-    padding-top: calc(var(--header-height, 60px) + var(--space-8) + var(--space-4));
+    padding-top: calc(var(--header-height, 60px) + 24px);
 }
 
 /* ---------- Тонкая тёмная полоса вверху ---------- */
@@ -1982,7 +1981,7 @@ nav.lb-topnav-bar a:hover {
     padding: 0;
     list-style: none;
     display: grid;
-    gap: var(--space-3);
+    gap: 6px;
 }
 
 .sb-list__item {
@@ -1994,14 +1993,14 @@ nav.lb-topnav-bar a:hover {
     align-items: center;
     justify-content: space-between;
     gap: var(--space-3);
-    padding: 12px 14px;
+    padding: 6px 12px;
     border-radius: var(--radius-sm);
     font-size: var(--text-sm);
     line-height: var(--leading-snug);
     color: var(--color-text-soft);
     text-decoration: none;
     transition: background var(--transition-fast), color var(--transition-fast);
-    min-height: 44px;
+    min-height: 36px;
 }
 
 .sb-list__link:hover {
@@ -2020,11 +2019,11 @@ nav.lb-topnav-bar a:hover {
     text-align: center;
 }
 
-/* Компактные списки — увеличенные зоны для тач-таргетов */
+/* Компактные списки */
 .sb-list--compact .sb-list__link {
-    padding-top: 12px;
-    padding-bottom: 12px;
-    min-height: 44px;
+    padding-top: 6px;
+    padding-bottom: 6px;
+    min-height: 36px;
 }
 
 /* ---------- Списки фильмов в сайдбаре — равномерный ритм ---------- */

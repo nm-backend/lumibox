@@ -21,8 +21,7 @@
     background: var(--glass-bg);
     border: 1px solid var(--glass-border);
     border-radius: var(--radius-md);
-    /* Симметричные отступы: 24px по всем краям */
-    padding: var(--space-6);
+    padding: 20px;
     transition: border-color var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast);
     /* reference min-height 281px для стабильности layout при разной высоте метаданных */
     min-height: 0;
@@ -125,11 +124,10 @@
     color: var(--color-text);
 }
 
-/* Poster → metadata — reference: 200px poster + 20px gap = movie__card */
 .film-card__body {
     display: grid;
-    grid-template-columns: 220px minmax(0, 1fr);
-    gap: var(--space-6);
+    grid-template-columns: minmax(150px, 180px) 1fr;
+    gap: 20px;
     align-items: start;
 }
 
@@ -236,11 +234,11 @@
     -webkit-box-orient: vertical;
 }
 
-/* Метаданные: равномерный ритм, одинаковые отступы */
 .film-card__meta {
     margin: 0;
     display: grid;
-    gap: var(--space-4);
+    gap: 6px;
+    line-height: 1.4;
 }
 
 .film-card__meta-row {
@@ -268,11 +266,10 @@
     line-height: var(--leading-normal);
 }
 
-/* Footer: content → footer = space-6 + space-4 + border */
 .film-card__foot {
-    margin-top: var(--space-6);
-    padding-top: var(--space-5);
-    padding-bottom: var(--space-4);
+    margin-top: 20px;
+    padding-top: 12px;
+    padding-bottom: 8px;
     border-top: 1px solid var(--color-border-soft);
     display: flex;
     align-items: center;
@@ -330,7 +327,7 @@
 
 @media (max-width: 700px) {
     .film-card {
-        padding: var(--space-5);
+        padding: 16px;
     }
 
     .film-card__head {
@@ -370,15 +367,15 @@
 
 @media (max-width: 400px) {
     .film-feed {
-        gap: var(--space-4);
+        gap: 12px;
     }
 
     .film-card {
-        padding: var(--space-4);
+        padding: 14px;
     }
 
     .film-card__body {
-        grid-template-columns: minmax(80px, 110px) minmax(0, 1fr);
-        gap: var(--space-3);
+        grid-template-columns: minmax(100px, 140px) 1fr;
+        gap: 14px;
     }
 }
