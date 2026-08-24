@@ -13,6 +13,7 @@ header {
     position: sticky;
     top: 0;
     z-index: var(--z-header);
+    width: 100%;
     height: auto;
     min-height: var(--header-height);
     background-color: var(--glass-bg);
@@ -22,6 +23,7 @@ header {
     transition: box-shadow var(--transition), border-bottom-color var(--transition),
                 background-color var(--transition);
     color: var(--color-text);
+    box-sizing: border-box;
 }
 
 header > .container {
@@ -57,10 +59,11 @@ header > .container {
 
 /* Поиск — большой, по центру, основной элемент шапки */
 .site-header__search {
-    width: 100%;
+    flex: 1 1 auto;
+    min-width: 0;
     display: flex;
     justify-content: center;
-    margin-inline: var(--space-6);
+    margin-inline: var(--space-4);
 }
 
 /* Правая группа действий — прижата вправо, равномерный ритм */
