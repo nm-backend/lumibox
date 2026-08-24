@@ -8,11 +8,8 @@
 .film-hero {
     position: relative;
     overflow: clip;
-    /* Отрицательный отступ убран: он подтягивал шапку фильма под навигацию,
-       пока над ней ничего не было. Теперь выше стоят хлебные крошки, и шапка
-       наезжала на них — строка пути пропадала под тёмным фоном. */
-    margin-top: var(--space-4);
-    padding: var(--space-7) 0 var(--space-6);
+    margin-top: var(--space-5);
+    padding: var(--space-8) 0 var(--space-7);
     background-color: var(--color-surface);
 }
 
@@ -53,8 +50,8 @@
 .film-hero__inner {
     position: relative;
     display: grid;
-    grid-template-columns: 260px 1fr;
-    gap: var(--space-6);
+    grid-template-columns: 280px 1fr;
+    gap: var(--space-7);
     align-items: start;
 }
 
@@ -114,31 +111,33 @@
 }
 
 .film-hero__tagline {
-    margin-top: var(--space-3);
+    margin-top: var(--space-4);
     max-width: 52ch;
     color: var(--color-text);
     font-size: var(--text-lg);
     font-weight: 500;
-    line-height: 1.4;
+    line-height: 1.5;
     text-wrap: balance;
     text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
 }
 
 .film-hero__original {
-    margin-top: var(--space-2);
+    margin-top: var(--space-3);
     color: var(--color-text-dim);
     font-size: var(--text-md);
+    line-height: var(--leading-normal);
 }
 
 .film-hero__meta {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: var(--space-2);
-    margin-top: var(--space-4);
+    gap: var(--space-3);
+    margin-top: var(--space-5);
     color: var(--color-text-muted);
     font-size: var(--text-sm);
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    line-height: var(--leading-normal);
 }
 
 .film-hero__dot {
@@ -153,31 +152,32 @@
 }
 
 .film-hero__genres {
-    margin-top: var(--space-4);
+    margin-top: var(--space-5);
 }
 
 .film-hero__description {
-    margin-top: var(--space-4);
+    margin-top: var(--space-5);
     max-width: 62ch;
     color: var(--color-text-muted);
-    line-height: 1.7;
+    line-height: var(--leading-relaxed);
     text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
 .film-hero__actions {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--space-3);
-    margin-top: var(--space-5);
+    gap: var(--space-4);
+    margin-top: var(--space-6);
 }
 
 .film-hero__specs {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--space-3);
-    margin-top: var(--space-4);
+    gap: var(--space-4);
+    margin-top: var(--space-6);
     font-size: var(--text-sm);
     color: var(--color-text-muted);
+    line-height: var(--leading-normal);
 }
 
 .film-hero__spec {
@@ -290,9 +290,9 @@
 .spec-list {
     display: grid;
     grid-template-columns: max-content 1fr;
-    gap: var(--space-2) var(--space-4);
+    gap: var(--space-3) var(--space-5);
     align-items: baseline;
-    padding: var(--space-3);
+    padding: var(--space-5);
     background: var(--color-surface);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
@@ -302,12 +302,14 @@
 .spec-list__label {
     color: var(--color-text-dim);
     font-size: var(--text-sm);
-    padding: var(--space-1) 0;
+    padding: var(--space-2) 0;
+    font-weight: 500;
 }
 
 .spec-list__value {
     font-size: var(--text-sm);
-    padding: var(--space-1) 0;
+    padding: var(--space-2) 0;
+    line-height: var(--leading-normal);
 }
 
 /* ---------- Съёмочная группа ----------
@@ -813,9 +815,9 @@
 /* ---------- Плеер серий («Смотреть онлайн») ---------- */
 
 .player-section {
-    margin: var(--space-4) 0;
+    margin: var(--space-6) 0;
     display: grid;
-    gap: var(--space-3);
+    gap: var(--space-4);
 }
 
 .player {
@@ -1619,31 +1621,28 @@
     }
 }
 
-/* Заголовок секции плеера. Стоит над кадром: подпись под видео объясняла
-   зрителю то, что он уже увидел. */
+/* Заголовок секции плеера — единый ритм секций */
 .player-section__title {
-    margin-bottom: var(--space-3);
-    font-size: var(--font-heading);
+    margin-bottom: var(--space-5);
+    font-size: var(--text-heading);
+    font-weight: 700;
+    letter-spacing: var(--tracking-tight);
+    line-height: var(--leading-tight);
 }
 
-/* ---------- Компактность детальной (кино-портальный стиль) ----------
-   Общие классы (.tabs/.tab/.section/.section__title/.crew-*) живут в
-   components.css и используются и на других страницах (профиль, поиск,
-   person_list). Поэтому компактные значения задаём здесь, в title-detail.css,
-   под скоупом .detail-layout — единственный, кто его имеет, это
-   детальная страница тайтла. person_detail этот файл тоже грузит, но у него
-   нет .detail-layout, так что правки его не касаются. */
+/* ---------- Детальная страница — вертикальный ритм секций ---------- */
 
 .detail-layout .tabs {
-    margin-bottom: var(--space-3);
+    margin-bottom: var(--space-6);
 }
 
 .detail-layout .tab {
-    padding: var(--space-2) var(--space-4);
+    padding: var(--space-3) var(--space-5);
 }
 
 .detail-layout .section {
-    margin-bottom: var(--space-5);
+    margin-bottom: var(--space-7);
+    padding: var(--space-2) 0;
 }
 
 /* Декоративный градиент-разделитель .section::after стоит на -24px под
@@ -1655,19 +1654,20 @@
 }
 
 .detail-layout .section__title {
-    margin-bottom: var(--space-3);
+    margin-bottom: var(--space-5);
+    font-size: var(--text-heading);
 }
 
 .detail-layout .crew-group {
-    margin-bottom: var(--space-4);
+    margin-bottom: var(--space-6);
 }
 
 .detail-layout .crew-list {
-    gap: var(--space-2);
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: var(--space-3);
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
 }
 
 .detail-layout .crew {
-    padding: var(--space-2) var(--space-3);
-    gap: var(--space-2);
+    padding: var(--space-3) var(--space-4);
+    gap: var(--space-3);
 }

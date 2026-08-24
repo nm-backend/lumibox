@@ -490,32 +490,5 @@ img[data-loaded] {
     }
 }
 
-/* ---------- Ultra-wide ---------- */
-
-/* Колонка фиксированная: на ультра-широких экранах
-   контент остаётся по центру, поля по бокам расширяются. */
-
-/* Исправление #1: Ultra-wide экраны — контент разлетается.
-   Ограничиваем только основной контент (.site-main), так как
-   header и footer уже имеют внутренние .container с max-width */
-.site-main {
-    max-width: var(--container-width);
-    margin-left: auto;
-    margin-right: auto;
-    padding-left: var(--space-4);
-    padding-right: var(--space-4);
-}
-
-@media (min-width: 768px) {
-    .site-main {
-        padding-left: var(--space-6);
-        padding-right: var(--space-6);
-    }
-}
-
-@media (min-width: 1024px) {
-    .site-main {
-        padding-left: var(--space-10);
-        padding-right: var(--space-10);
-    }
-}
+/* ---------- Ultra-wide — теперь в layout.css единый site-main,
+   здесь не дублируем чтобы не спорить с токенами ---------- */

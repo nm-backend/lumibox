@@ -39,36 +39,43 @@
     position: relative;
     min-height: var(--header-height);
     display: flex;
+<<<<<<< HEAD
     flex-direction: column;
     gap: var(--space-3);
     padding-bottom: var(--space-3);
+=======
+    align-items: center;
+    gap: var(--space-6);
+>>>>>>> daabfa1eca1e070905751b470552e9f2479de099
 }
 
-/* Логотип — слева, не сжимается */
+/* Логотип — слева, не сжимается, стабильная ширина */
 .logo {
     display: flex;
     align-items: center;
-    gap: var(--space-2);
+    gap: var(--space-3);
     flex: 0 0 auto;
 
     font-size: var(--text-lg);
     font-weight: 700;
     letter-spacing: -0.02em;
     white-space: nowrap;
+    padding: var(--space-1) 0;
 }
 
-/* Поиск — по центру, растягивается */
+/* Поиск — большой, по центру, основной элемент шапки */
 .site-header__search {
     width: 100%;
     display: flex;
     justify-content: center;
+    margin-inline: var(--space-6);
 }
 
-/* Правая группа действий — прижата вправо */
+/* Правая группа действий — прижата вправо, равномерный ритм */
 .site-header__actions {
     display: flex;
     align-items: center;
-    gap: var(--space-3);
+    gap: var(--space-2);
     flex: 0 0 auto;
     margin-left: auto;
 }
@@ -113,36 +120,39 @@
    arena сюда не переносим: разметки с этим классом в проекте больше нет,
    они стали бы мёртвым CSS. */
 
-/* Планшет: поиск 400px */
+/* Планшет: поиск 440px, больше воздуха */
 @media (min-width: 768px) and (max-width: 1023px) {
     .site-header__search {
         flex: 0 1 auto;
         min-width: 0;
-        max-width: 400px;
+        max-width: 440px;
         display: flex;
         justify-content: center;
+        margin-inline: var(--space-4);
     }
 }
 
-/* Десктоп: поиск 500px */
+/* Десктоп: поиск 560px — основной элемент */
 @media (min-width: 1024px) and (max-width: 1439px) {
     .site-header__search {
         flex: 0 1 auto;
         min-width: 0;
-        max-width: 500px;
+        max-width: 560px;
         display: flex;
         justify-content: center;
+        margin-inline: var(--space-6);
     }
 }
 
-/* Широкий десктоп: поиск 600px */
+/* Широкий десктоп: поиск 640px */
 @media (min-width: 1440px) {
     .site-header__search {
         flex: 0 1 auto;
         min-width: 0;
-        max-width: 600px;
+        max-width: 640px;
         display: flex;
         justify-content: center;
+        margin-inline: var(--space-8);
     }
 }
 
@@ -264,11 +274,18 @@
 
 .site-main {
     flex: 1;
-    /* Плотный зазор у шапки чаще режет ощущение воздуха на странице,
-       поэтому оставляем только небольшой отступ после sticky-шапки. */
-    padding-top: calc(var(--header-height, 64px) + var(--space-4));
+    /* Page top: header 60 + 32 = 92px воздуха, как у reference но с современным ритмом */
+    /* Page top: header 60 + 32 = 92px воздуха, как у reference но с современным ритмом */
+    padding-top: calc(var(--header-height, 60px) + var(--space-6));
     padding-bottom: var(--space-10);
-    /* padding-left/right задаётся в base.css для ultra-wide контейнера */
+    overflow-x: clip;
+    width: 100%;
+    max-width: var(--container-width);
+    margin-inline: auto;
+    box-sizing: border-box;
+    /* Горизонтальные отступы — через .container, не здесь, чтобы не дублировать:
+       было container 16px + site-main 16px = 32px двойной, на десктопе 64+64=128px */
+    padding-inline: 0;
 }
 
 /*
@@ -280,8 +297,9 @@
 }
 
 .page-header {
-    margin-bottom: var(--space-4);
+    margin-bottom: var(--space-6);
     position: relative;
+    padding-bottom: var(--space-2);
 }
 
 /* Размер приходит от h1 из variables.css. Здесь стоял литерал 1.625rem,
