@@ -193,6 +193,16 @@
     box-sizing: border-box;
 }
 
+/* При прокрутке топнав становится непрозрачным — синхронно с шапкой
+   (класс ставит тот же обработчик scroll в app.js). Стеклянный фон
+   пропускает 6% света: заголовок фильма, проезжающий под навигацией,
+   просвечивал сквозь него и выглядел напечатанным поверх шапки. */
+.lb-topnav-bar--scrolled {
+    background-color: var(--color-surface);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+}
+
 .lb-topnav-bar__inner {
     display: flex !important;
     align-items: center !important;

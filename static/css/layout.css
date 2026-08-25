@@ -7,16 +7,20 @@
     padding-inline: var(--space-4);
 }
 
-/* ---------- Шапка ---------- */
+/* ---------- Шапка ----------
+   Селектор — класс, а не тег: на странице есть другие <header>
+   (например .film-card__head внутри карточек главной). Селектор по тегу
+   вешал на них sticky top:0 и z-index:9999 — заголовок карточки
+   прилипал к верху окна и наезжал на шапку сайта. */
 
-header {
-    position: sticky !important;
-    top: 0 !important;
-    z-index: 9999 !important;
+.site-header {
+    position: sticky;
+    top: 0;
+    z-index: var(--z-header);
     width: 100%;
     height: auto;
     min-height: var(--header-height);
-    background-color: var(--color-surface, #ffffff) !important;
+    background-color: var(--color-surface);
     -webkit-backdrop-filter: blur(20px) saturate(180%);
     backdrop-filter: blur(20px) saturate(180%);
     border-bottom: 1px solid var(--color-border);
@@ -26,7 +30,7 @@ header {
     box-sizing: border-box;
 }
 
-header > .container {
+.site-header > .container {
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -36,9 +40,10 @@ header > .container {
 }
 
 /* При прокрутке шапка становится непрозрачной и отбрасывает тень —
-   контент не должен просвечивать сквозь полупрозрачный фон. */
+   контент не должен просвечивать сквозь полупрозрачный фон.
+   Идёт после .site-header, поэтому !important не нужен. */
 .site-header--scrolled {
-    background-color: var(--color-surface) !important;
+    background-color: var(--color-surface);
     box-shadow: var(--shadow-raise);
     border-bottom-color: transparent;
     -webkit-backdrop-filter: none;
@@ -355,17 +360,17 @@ header > .container {
     transform: rotate(15deg);
 }
 
-/* ---------- Мобильные: высота шапки 56px ---------- */
-/* На маленьких экранах шапка компактнее — 56px вместо 64px. */
+/* ---------- Мобильные: высота шапки 61px ---------- */
+/* На маленьких экранах шапка компактнее — 61px вместо 67px. */
 @media (max-width: 480px) {
     :root {
-        --header-height: 56px;
+        --header-height: 61px;
     }
 }
 
 /* ---------- Светлая тема: шапка и внутренние элементы ---------- */
 
-[data-theme="light"] header {
+[data-theme="light"] .site-header {
     background-color: var(--color-surface);
     color: var(--color-text);
 }

@@ -10,7 +10,9 @@
 
 html {
     scroll-behavior: smooth;
-    scroll-padding-top: 124px; /* header (67px) + topnav (57px) */
+    /* Реальная зона: header 67px + topnav 57px = 124px. +4px запаса:
+       при якорном переходе дробный scrollY давал -0.3px наезда плеера. */
+    scroll-padding-top: 128px;
     font-family: var(--font-base);
     /* Декоративные fixed-элементы (cinema-glow и пр.) выходят за край
        вьюпорта и расширяли scrollWidth документа на мобильных — от 1px
@@ -19,10 +21,10 @@ html {
     overflow-x: clip;
 }
 
-/* Mobile: no topnav, header is ~61px */
+/* Mobile: топнава нет, шапка ~61px (измерено) + 4px запаса */
 @media (max-width: 1024px) {
     html {
-        scroll-padding-top: 61px;
+        scroll-padding-top: 65px;
     }
 }
 

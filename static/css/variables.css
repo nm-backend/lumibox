@@ -284,10 +284,11 @@
     --transition-spring: 400ms cubic-bezier(0.34, 1.56, 0.64, 1);
     --transition-exit: 200ms cubic-bezier(0.4, 0, 1, 1);
 
-    /* --- Макет — геометрия reference: компактный контейнер, header 60px,
-       sidebar ~300px, gap 20-24px как у reference movie__card gap 20px --- */
+    /* --- Макет — высота шапки измерена по факту: 60px min-height
+       + 8px padding сверху и снизу (.site-header > .container) = 67px.
+       От этого числа зависит sticky-позиция топнава и scroll-padding. --- */
     --container-width: 1080px;
-    --header-height: 60px;
+    --header-height: 67px;
     --touch-target: 44px;
     --bottom-nav-height: 68px;
 

@@ -615,8 +615,8 @@
         9. Unified scroll handler
     ----------------------------------------------- */
     const header = document.querySelector('.site-header');
+    const topnavBar = document.querySelector('.lb-topnav-bar');
     let isScrolled = false;
-
     const scrollBtn = document.querySelector('[data-scroll-top]');
     if (!scrollBtn) {
         const btn = document.createElement('button');
@@ -639,6 +639,11 @@
             const shouldScroll = y > 10;
             if (shouldScroll !== isScrolled) {
                 header.classList.toggle('site-header--scrolled', shouldScroll);
+                /* Топнав — стеклянная полоса: в спокойном состоянии она
+                   полупрозрачна, но при прокрутке сквозь неё просвечивает
+                   контент (заголовок фильма). Становится непрозрачной
+                   ровно вместе с шапкой, от того же порога. */
+                if (topnavBar) topnavBar.classList.toggle('lb-topnav-bar--scrolled', shouldScroll);
                 isScrolled = shouldScroll;
             }
         }
