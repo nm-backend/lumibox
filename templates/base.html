@@ -204,17 +204,20 @@
     </nav>
 
     <nav id="mobile-nav" class="mobile-nav" data-mobile-nav aria-label="{% trans 'Мобильная навигация' %}">
-        <a class="mobile-nav__link" href="{% url 'catalog:home' %}">{% trans "Главная" %}</a>
+        {% comment %} Активный раздел подсвечивается сервером (lb_topnav_active
+           из context processor lb_topnav) — та же логика, что у топнава,
+           без JS и с сохранением состояния при перезагрузке. {% endcomment %}
+        <a class="mobile-nav__link{% if lb_topnav_active == 'home' %} mobile-nav__link--active{% endif %}" href="{% url 'catalog:home' %}">{% trans "Главная" %}</a>
         <a class="mobile-nav__link" href="{% url 'catalog:title_list' %}">{% trans "Весь каталог" %}</a>
-        <a class="mobile-nav__link" href="{% url 'catalog:title_list' %}?type=movie">{% trans "Фильмы" %}</a>
-        <a class="mobile-nav__link" href="{% url 'catalog:title_list' %}?type=series">{% trans "Сериалы" %}</a>
-        <a class="mobile-nav__link" href="{% url 'catalog:title_list' %}?type=cartoon">{% trans "Мультфильмы" %}</a>
-        <a class="mobile-nav__link" href="{% url 'catalog:title_list' %}?type=tv_show">{% trans "ТВ-шоу" %}</a>
+        <a class="mobile-nav__link{% if lb_topnav_active == 'movie' %} mobile-nav__link--active{% endif %}" href="{% url 'catalog:title_list' %}?type=movie">{% trans "Фильмы" %}</a>
+        <a class="mobile-nav__link{% if lb_topnav_active == 'series' %} mobile-nav__link--active{% endif %}" href="{% url 'catalog:title_list' %}?type=series">{% trans "Сериалы" %}</a>
+        <a class="mobile-nav__link{% if lb_topnav_active == 'cartoon' %} mobile-nav__link--active{% endif %}" href="{% url 'catalog:title_list' %}?type=cartoon">{% trans "Мультфильмы" %}</a>
+        <a class="mobile-nav__link{% if lb_topnav_active == 'tv_show' %} mobile-nav__link--active{% endif %}" href="{% url 'catalog:title_list' %}?type=tv_show">{% trans "ТВ-шоу" %}</a>
         <a class="mobile-nav__link" href="{% url 'catalog:genre_list' %}">{% trans "Жанры" %}</a>
-        <a class="mobile-nav__link" href="{% url 'catalog:collection_list' %}">{% trans "Подборки" %}</a>
+        <a class="mobile-nav__link{% if lb_topnav_active == 'collections' %} mobile-nav__link--active{% endif %}" href="{% url 'catalog:collection_list' %}">{% trans "Подборки" %}</a>
         <a class="mobile-nav__link" href="{% url 'catalog:top' %}">{% trans "Высокий рейтинг" %}</a>
-        <a class="mobile-nav__link" href="{% url 'catalog:new' %}">{% trans "Новинки" %}</a>
-        <a class="mobile-nav__link" href="{% url 'catalog:premieres' %}">{% trans "Скоро" %}</a>
+        <a class="mobile-nav__link{% if lb_topnav_active == 'new' %} mobile-nav__link--active{% endif %}" href="{% url 'catalog:new' %}">{% trans "Новинки" %}</a>
+        <a class="mobile-nav__link{% if lb_topnav_active == 'premieres' %} mobile-nav__link--active{% endif %}" href="{% url 'catalog:premieres' %}">{% trans "Скоро" %}</a>
         <a class="mobile-nav__link" href="{% url 'catalog:random_title' %}">{% trans "Случайный фильм" %}</a>
         {% if user.is_authenticated %}
             <hr class="mobile-nav__divider">

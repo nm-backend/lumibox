@@ -85,14 +85,61 @@ def _scan_static_version() -> str:
 
 
 def lb_topnav(request):
-    """Верхняя навигация — одинаковая на всех страницах."""
+    """Верхняя навигация — одинаковая на всех страницах.
+
+    Активный пункт определяется сервером (без JS), чтобы подсветка
+    переживала перезагрузку и работала без скриптов:
+    - явный ?type=… в адресе решает сам;
+    - страница тайтла подсвечивает раздел своего типа;
+    - остальные страницы каталога (жанр, страна, год, студия) относятся
+      к семейству каталога — без явного типа подсвечивается «Фильмы»
+      как раздел по умолчанию;
+    - поиск и служебные списки (популярное, топ, справочники) ничего
+      не подсвечивают: они не являются пунктами этой навигации.
+    """
     from apps.catalog.models import Title
 
     catalog_url = reverse("catalog:title_list")
-    url_name = getattr(request.resolver_match, "url_name", "")
+    match = getattr(request, "resolver_match", None)
+    url_name = getattr(match, "url_name", "") or ""
     get = request.GET
+
+    valid_types = {str(value) for value, _label in Title.Type.choices}
+    active_type = get.get("type") if get.get("type") in valid_types else None
+
+    if active_type is None:
+        if url_name == "title_detail":
+            slug = (getattr(match, "kwargs", None) or {}).get("slug")
+            if slug:
+                active_type = (
+                    Title.objects.filter(slug=slug)
+                    .values_list("type", flat=True)
+                    .first()
+                )
+        elif url_name in {
+            "title_list",
+            "genre_titles",
+            "country_titles",
+            "year_titles",
+            "studio_detail",
+        }:
+            active_type = str(Title.Type.MOVIE)
+
     def by_type(label, value):
-        return (label, f"{catalog_url}?type={value}", get.get("type") == str(value))
+        return (label, f"{catalog_url}?type={value}", active_type == str(value))
+
+    # Ключ активного раздела для мобильного меню (drawer): те же правила.
+    active_key = None
+    if url_name == "home":
+        active_key = "home"
+    elif active_type:
+        active_key = active_type
+    elif url_name == "new":
+        active_key = "new"
+    elif url_name == "premieres":
+        active_key = "premieres"
+    elif url_name in ("collection_list", "collection_detail"):
+        active_key = "collections"
 
     links = [
         (_("Главная"), reverse("catalog:home"), url_name == "home"),
@@ -107,7 +154,7 @@ def lb_topnav(request):
         (_("Подборки"), reverse("catalog:collection_list"),
          url_name in ("collection_list", "collection_detail")),
     ]
-    return {"lb_topnav": links}
+    return {"lb_topnav": links, "lb_topnav_active": active_key}
 
 
 def lb_sidebar(request):

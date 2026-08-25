@@ -253,6 +253,16 @@ nav.lb-topnav-bar a:hover {
     color: var(--color-text);
 }
 
+/* Активный раздел. Стоит после hover-правил: специфичность совпадает,
+   и порядок здесь решает. Активный пункт не мигает при наведении —
+   hover и active перечислены вместе намеренно. */
+nav.lb-topnav-bar a.lb-topnav__link--active,
+nav.lb-topnav-bar a.lb-topnav__link--active:hover {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+    color: var(--color-on-accent);
+}
+
 /* Светлая тема */
 [data-theme="light"] nav.lb-topnav-bar a {
     background: var(--color-surface);
@@ -262,6 +272,13 @@ nav.lb-topnav-bar a:hover {
 [data-theme="light"] nav.lb-topnav-bar a:hover {
     background: var(--color-surface-hover);
     color: var(--color-text);
+}
+
+[data-theme="light"] nav.lb-topnav-bar a.lb-topnav__link--active,
+[data-theme="light"] nav.lb-topnav-bar a.lb-topnav__link--active:hover {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+    color: var(--color-on-accent);
 }
 
 /* ---------- Промо-зона на месте рекламного баннера ---------- */
@@ -1918,9 +1935,25 @@ nav.lb-topnav-bar a:hover {
         transform: none;
     }
 
+    /* Активный раздел в мобильном меню: сдвига при наведении на таче нет,
+       но подсветка активного пункта должна оставаться видимой. */
+    .mobile-nav__link--active {
+        transform: none;
+    }
+
     .logo:hover .logo__mark {
         transform: none;
     }
+}
+
+/* ---------- Активный раздел в мобильном меню ----------
+   Ключ приходит из context processor (lb_topnav_active) — та же
+   серверная логика, что подсвечивает топнав. Правило после
+   components.css: lumibox.css подключается последним. */
+.mobile-nav__link--active,
+.mobile-nav__link--active:hover {
+    background: var(--color-accent-dim);
+    color: var(--color-accent);
 }
 
 /* Заголовки блоков сайдбара — настоящие h3. Раньше это были <i> и <div>:
