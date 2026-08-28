@@ -1,9 +1,14 @@
-/* Безопасная граница загрузки внешнего плеера Vibix.
+/* Менеджер «затвора» перед плеером Vibix.
 
-   Сервер рендерит только публичные ID в <ins>. Mutable SDK Vibix не
-   загружается при обычном открытии карточки: запрос к graphicslab.io и
-   создание стороннего iframe начинаются после явного нажатия зрителя.
-   Скрипт SDK добавляется в <head> — это часть его публичного DOM-контракта.
+   Сервер рендерит только публичные ID в <ins>. Сам SDK Vibix подключается
+   из <head> через блок extra_head шаблона — это нужно ему, чтобы авто-
+   матически найти теги <ins> при загрузке страницы.
+
+   Этот скрипт отвечает за:
+   - скрытие кнопки «Начать» и превью, когда SDK отрисовал iframe;
+   - показ сообщения об ошибке по таймауту, если iframe не появился;
+   - предотвращение двойной загрузки SDK (если пользователь кликнул
+     кнопку, пока SDK уже загружается из <head>).
 */
 (function () {
     'use strict';
@@ -15,6 +20,13 @@
         'https://alt.graphicslab.io/sdk/v2/rendex-sdk.min.js',
     ];
     var LOAD_TIMEOUT_MS = 20000;
+
+    /* SDK, загруженный из <head>, не имеет data-lumibox-vibix-sdk.
+       Ищем по URL для профилактики двойного запроса при клике. */
+    function sdkLoaded() {
+        return !!document.querySelector('script[data-lumibox-vibix-sdk]')
+            || !!document.querySelector('script[src*="graphicslab.io"]');
+    }
 
     function initPlayer(pane) {
         var button = pane.querySelector('[data-vibix-load]');
@@ -92,8 +104,8 @@
             }
             waitForIframe();
 
-            var existing = document.querySelector('script[data-lumibox-vibix-sdk]');
-            if (existing) return;
+            /* SDK уже загружен из <head> — не дублируем запрос */
+            if (sdkLoaded()) return;
 
             appendSdkScript(0);
         }
@@ -116,7 +128,11 @@
         }
 
         button.addEventListener('click', loadSdk);
-        ready();
+        /* Если iframe уже создан SDK из <head> — показываем плеер сразу.
+           Иначе начинаем наблюдать: SDK может ещё загружаться. */
+        if (!ready()) {
+            waitForIframe();
+        }
     }
 
     document.querySelectorAll('[data-vibix-player]').forEach(initPlayer);

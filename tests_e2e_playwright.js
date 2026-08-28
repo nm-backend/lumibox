@@ -35,13 +35,17 @@ async function runE2ETests() {
         const gateBtn = await page.$('[data-vibix-load]');
         console.log('Found Vibix Load Gate Button:', !!gateBtn);
 
+        // SDK теперь загружается из <head> при загрузке страницы.
+        const sdkScript = await page.$('script[src*="rendex-sdk.min.js"]');
+        console.log('Rendex SDK present in head:', !!sdkScript);
+
         if (gateBtn) {
             console.log('Clicking Vibix gate button...');
             await gateBtn.click();
             await page.waitForTimeout(3000);
 
-            const sdkScript = await page.$('script[src*="rendex-sdk.min.js"]');
-            console.log('Rendex SDK injected in head:', !!sdkScript);
+            const sdkScriptAfter = await page.$('script[src*="rendex-sdk.min.js"]');
+            console.log('Rendex SDK injected in head after click:', !!sdkScriptAfter);
 
             const iframe = await page.$('iframe');
             console.log('Iframe element created in DOM:', !!iframe);

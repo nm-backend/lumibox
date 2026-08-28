@@ -232,17 +232,24 @@ class ExternalPlayerRenderingTests(TestCase):
         self.assertNotContains(response, "data-publisher-id")
         self.assertNotContains(response, "vibix-player.js")
 
-    def test_lazy_loader_only_with_external_player(self):
-        with_player = create_title(name="С плеером", player_id="5", player_type="movie")
-        response = self.client.get(with_player.get_absolute_url())
-        self.assertContains(response, "vibix-player.js")
-        self.assertContains(response, "data-vibix-load")
-        # Mutable SDK не выполняется при простом открытии страницы.
-        self.assertNotContains(
+    def test_player_scripts_included_with_external_player(self):
+        title = create_title(name="С плеером", player_id="5", player_type="movie")
+        response = self.client.get(title.get_absolute_url())
+
+        # SDK Vibix в <head> — система сама найдёт теги <ins> при загрузке.
+        self.assertContains(
             response,
             '<script src="https://graphicslab.io/sdk/v2/rendex-sdk.min.js"',
             html=False,
         )
+        self.assertContains(
+            response,
+            '<script src="https://alt.graphicslab.io/sdk/v2/rendex-sdk.min.js"',
+            html=False,
+        )
+        # vibix-player.js управляет затвором и fallback-загрузкой.
+        self.assertContains(response, "vibix-player.js")
+        self.assertContains(response, "data-vibix-load")
 
         without_player = create_title(name="Без плеера", player_id="", player_type="")
         self.assertNotContains(self.client.get(without_player.get_absolute_url()), "vibix-player.js")

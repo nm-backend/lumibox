@@ -97,6 +97,8 @@
     {% if ads_network.enabled %}
     <script type="text/javascript" src="https://v-js-menu.run/public/lib.en.min.js"></script>
     {% endif %}
+
+    {% block extra_head %}{% endblock %}
 </head>
 <body class="{% block body_class %}{% endblock %}"
       data-authenticated="{{ user.is_authenticated|yesno:"1,0" }}"
