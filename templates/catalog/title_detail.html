@@ -67,24 +67,15 @@
     <link rel="stylesheet" href="{% static 'css/title-detail.css' %}?v={{ static_version }}">
 {% endblock %}
 
-{% block extra_head %}
-    {% if external_player %}
-        <script src="https://graphicslab.io/sdk/v2/rendex-sdk.min.js" async></script>
-        <script src="https://alt.graphicslab.io/sdk/v2/rendex-sdk.min.js" async></script>
-    {% endif %}
-{% endblock %}
-
 {% block extra_js %}
     <script src="{% static 'js/title-detail.js' %}?v={{ static_version }}" defer></script>
     {% comment %} player.js после title-detail.js: тот подставляет источник
        при старте, а этот только рисует состояние. Оба работают через один
        и тот же элемент video и друг друга не трогают. {% endcomment %}
     <script src="{% static 'js/player.js' %}?v={{ static_version }}" defer></script>
-    {% comment %} vibix-player.js управляет «затвором» перед плеером: скрывает кнопку
-       «Начать» и превью, когда Vibix SDK уже отрисовал iframe, и показывает
-       сообщение об ошибке, если скрипт так и не загрузился. Сам SDK
-       подключается в <head> через блок extra_head — это нужно ему, чтобы
-       автоматически найти теги <ins> при загрузке страницы. {% endcomment %}
+    {% comment %} Локальный загрузчик присутствует только на странице с Vibix.
+       Сам сторонний SDK он добавляет динамически после явного нажатия зрителя:
+       обычный просмотр карточки не отправляет запросов к сторонним сервисам. {% endcomment %}
     {% if external_player %}
         <script src="{% static 'js/vibix-player.js' %}?v={{ static_version }}" defer></script>
     {% endif %}

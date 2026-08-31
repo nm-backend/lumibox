@@ -1,14 +1,15 @@
-/* Менеджер «затвора» перед плеером Vibix.
+/* Безопасная граница загрузки внешнего плеера Vibix.
 
-   Сервер рендерит только публичные ID в <ins>. Сам SDK Vibix подключается
-   из <head> через блок extra_head шаблона — это нужно ему, чтобы авто-
-   матически найти теги <ins> при загрузке страницы.
+   Сервер рендерит только публичные ID в <ins>. Mutable SDK Vibix не
+   загружается при обычном открытии карточки: запрос к graphicslab.io и
+   создание стороннего iframe начинаются после явного нажатия зрителя.
+   Скрипт SDK добавляется динамически — это часть его публичного DOM-контракта.
 
    Этот скрипт отвечает за:
+   - загрузку SDK по клику на кнопку «Начать»;
    - скрытие кнопки «Начать» и превью, когда SDK отрисовал iframe;
    - показ сообщения об ошибке по таймауту, если iframe не появился;
-   - предотвращение двойной загрузки SDK (если пользователь кликнул
-     кнопку, пока SDK уже загружается из <head>).
+   - предотвращение повторной параллельной загрузки SDK.
 */
 (function () {
     'use strict';
@@ -21,8 +22,6 @@
     ];
     var LOAD_TIMEOUT_MS = 20000;
 
-    /* SDK, загруженный из <head>, не имеет data-lumibox-vibix-sdk.
-       Ищем по URL для профилактики двойного запроса при клике. */
     function sdkLoaded() {
         return !!document.querySelector('script[data-lumibox-vibix-sdk]')
             || !!document.querySelector('script[src*="graphicslab.io"]');
@@ -34,7 +33,6 @@
         var status = pane.querySelector('[data-vibix-status]');
         var timeoutId = null;
         var observer = null;
-        var failed = false;
 
         if (!button || !gate) return;
 
@@ -69,19 +67,19 @@
 
         function showError() {
             if (ready()) return;
-            failed = true;
             clearWaiters();
             pane.classList.remove('player--vibix-idle', 'player--vibix-loading');
             pane.classList.add('player--vibix-error');
             button.disabled = false;
-            button.textContent = pane.dataset.vibixReload || 'Reload page';
+            button.textContent = pane.dataset.vibixReload || 'Обновить';
             if (status) {
-                status.textContent = pane.dataset.vibixError || 'The external player did not respond.';
+                status.textContent = pane.dataset.vibixError || 'Плеер не ответил. Проверьте соединение и попробуйте снова.';
             }
         }
 
         function waitForIframe() {
             if (ready()) return;
+            clearWaiters();
             observer = new MutationObserver(function () {
                 ready();
             });
@@ -89,28 +87,11 @@
             timeoutId = window.setTimeout(showError, LOAD_TIMEOUT_MS);
         }
 
-        function loadSdk() {
-            if (ready()) return;
-            if (failed) {
-                window.location.reload();
-                return;
-            }
-
-            button.disabled = true;
-            pane.classList.remove('player--vibix-idle', 'player--vibix-error');
-            pane.classList.add('player--vibix-loading');
-            if (status) {
-                status.textContent = pane.dataset.vibixLoading || 'Loading player…';
-            }
-            waitForIframe();
-
-            /* SDK уже загружен из <head> — не дублируем запрос */
-            if (sdkLoaded()) return;
-
-            appendSdkScript(0);
-        }
-
         function appendSdkScript(index) {
+            var existing = document.querySelector('script[data-lumibox-vibix-sdk]');
+            if (existing) {
+                existing.remove();
+            }
             var script = document.createElement('script');
             script.src = SDK_URLS[index];
             script.async = true;
@@ -127,12 +108,27 @@
             document.head.appendChild(script);
         }
 
-        button.addEventListener('click', loadSdk);
-        /* Если iframe уже создан SDK из <head> — показываем плеер сразу.
-           Иначе начинаем наблюдать: SDK может ещё загружаться. */
-        if (!ready()) {
+        function loadSdk() {
+            if (ready()) return;
+
+            button.disabled = true;
+            pane.classList.remove('player--vibix-idle', 'player--vibix-error');
+            pane.classList.add('player--vibix-loading');
+            if (status) {
+                status.textContent = pane.dataset.vibixLoading || 'Загружаем плеер…';
+            }
             waitForIframe();
+
+            if (sdkLoaded()) {
+                /* Если SDK уже был подключён ранее, даём ему шанс найти ins или реинициализировать */
+                return;
+            }
+
+            appendSdkScript(0);
         }
+
+        button.addEventListener('click', loadSdk);
+        ready();
     }
 
     document.querySelectorAll('[data-vibix-player]').forEach(initPlayer);

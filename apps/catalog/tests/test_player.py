@@ -236,20 +236,17 @@ class ExternalPlayerRenderingTests(TestCase):
         title = create_title(name="С плеером", player_id="5", player_type="movie")
         response = self.client.get(title.get_absolute_url())
 
-        # SDK Vibix в <head> — система сама найдёт теги <ins> при загрузке.
-        self.assertContains(
+        # Локальный менеджер затвора vibix-player.js подключается только при наличии плеера
+        self.assertContains(response, "vibix-player.js")
+        self.assertContains(response, "data-vibix-load")
+        self.assertContains(response, 'data-publisher-id="678503345"')
+
+        # Сторонний SDK не встраивается статически в initial HTML (безопасная динамическая граница)
+        self.assertNotContains(
             response,
             '<script src="https://graphicslab.io/sdk/v2/rendex-sdk.min.js"',
             html=False,
         )
-        self.assertContains(
-            response,
-            '<script src="https://alt.graphicslab.io/sdk/v2/rendex-sdk.min.js"',
-            html=False,
-        )
-        # vibix-player.js управляет затвором и fallback-загрузкой.
-        self.assertContains(response, "vibix-player.js")
-        self.assertContains(response, "data-vibix-load")
 
         without_player = create_title(name="Без плеера", player_id="", player_type="")
         self.assertNotContains(self.client.get(without_player.get_absolute_url()), "vibix-player.js")

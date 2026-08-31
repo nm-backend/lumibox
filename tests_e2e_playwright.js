@@ -35,9 +35,9 @@ async function runE2ETests() {
         const gateBtn = await page.$('[data-vibix-load]');
         console.log('Found Vibix Load Gate Button:', !!gateBtn);
 
-        // SDK теперь загружается из <head> при загрузке страницы.
-        const sdkScript = await page.$('script[src*="rendex-sdk.min.js"]');
-        console.log('Rendex SDK present in head:', !!sdkScript);
+        // До нажатия кнопки SDK не должен присутствовать в DOM (privacy & supply chain)
+        const sdkScriptBefore = await page.$('script[src*="rendex-sdk.min.js"]');
+        console.log('Rendex SDK absent before click:', !sdkScriptBefore);
 
         if (gateBtn) {
             console.log('Clicking Vibix gate button...');
@@ -45,7 +45,7 @@ async function runE2ETests() {
             await page.waitForTimeout(3000);
 
             const sdkScriptAfter = await page.$('script[src*="rendex-sdk.min.js"]');
-            console.log('Rendex SDK injected in head after click:', !!sdkScriptAfter);
+            console.log('Rendex SDK injected after click:', !!sdkScriptAfter);
 
             const iframe = await page.$('iframe');
             console.log('Iframe element created in DOM:', !!iframe);
@@ -85,7 +85,6 @@ async function runE2ETests() {
             });
 
             console.log(`Viewport ${vp.name}: hasOverflow = ${hasOverflow}`);
-            await page.screenshot({ path: `screenshot_${vp.width}.png` });
         }
 
         console.log('\nAll E2E checks passed successfully!');
