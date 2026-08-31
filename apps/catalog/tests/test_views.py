@@ -350,7 +350,8 @@ class TitleDetailViewTests(TestCase):
 
     def test_external_player_autoplay_off_by_default(self):
         title = create_title(player_id="4427")
-        response = self.client.get(title.get_absolute_url())
+        with self.settings(VIDEO_SERVICE_AUTOPLAY=False):
+            response = self.client.get(title.get_absolute_url())
         self.assertNotContains(response, "data-autoplay=")
 
     def test_external_player_autoplay_when_enabled(self):

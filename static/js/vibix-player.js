@@ -20,7 +20,7 @@
         'https://graphicslab.io/sdk/v2/rendex-sdk.min.js',
         'https://alt.graphicslab.io/sdk/v2/rendex-sdk.min.js',
     ];
-    var LOAD_TIMEOUT_MS = 20000;
+    var LOAD_TIMEOUT_MS = 30000;
 
     function sdkLoaded() {
         return !!document.querySelector('script[data-lumibox-vibix-sdk]')
@@ -121,6 +121,13 @@
 
             if (sdkLoaded()) {
                 /* Если SDK уже был подключён ранее, даём ему шанс найти ins или реинициализировать */
+                try {
+                    if (window.rendex && typeof window.rendex.init === 'function') {
+                        window.rendex.init();
+                    } else if (window.rendex && typeof window.rendex.scan === 'function') {
+                        window.rendex.scan();
+                    }
+                } catch (e) {}
                 return;
             }
 

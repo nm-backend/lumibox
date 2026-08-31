@@ -513,7 +513,7 @@ nav.lb-topnav-bar a.lb-topnav__link--active:hover {
 
 .lb-sidebar {
     display: block;
-    grid-column: 1;
+    grid-column: 2;
     grid-row: 1 / span 2;
     min-width: 0;
 }
@@ -1972,23 +1972,29 @@ nav.lb-topnav-bar a.lb-topnav__link--active:hover {
    Сайдбар нужен и на каталоге (структура кино-портала), 
    поэтому сетка и виджеты переехали сюда. 
    В home_feed.css осталась только лента детальных карточек. */
-/* Двухколоночная сетка — геометрия reference: wrapper 976 = content 640 + sidebar 331 gap ~5px
-   LumiBox: 1080 container = 300 sidebar + 756 main + 24 gap — компактно как reference */
+
+   /* Двухколоночная сетка: контент слева, сайдбар и фильтры справа */
 .lb-contentwrap--home {
     display: grid;
-    grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr) var(--sidebar-width);
     gap: var(--space-6);
     align-items: start;
     margin-top: var(--space-1);
 }
 
-.lb-contentwrap--home .lb-sidebar {
+.lb-contentwrap--home .lb-main {
     grid-column: 1;
+    min-width: 0;
+}
+
+.lb-contentwrap--home .lb-sidebar {
+    grid-column: 2;
     grid-row: auto;
     position: sticky;
     top: calc(var(--header-height) + var(--space-4));
     display: grid;
     gap: var(--space-4);
+    min-width: 0;
 }
 
 /* ---------- Сайдбар: стеклянные виджеты — единый ритм ---------- */
@@ -2276,7 +2282,7 @@ nav.lb-topnav-bar a.lb-topnav__link--active:hover {
 
 @media (max-width: 1280px) {
     .lb-contentwrap--home {
-        grid-template-columns: calc(var(--sidebar-width) - 30px) minmax(0, 1fr);
+        grid-template-columns: minmax(0, 1fr) calc(var(--sidebar-width) - 30px);
     }
 }
 
@@ -2285,6 +2291,10 @@ nav.lb-topnav-bar a.lb-topnav__link--active:hover {
        разделы и фильтры доступны из меню (hamburger). */
     .lb-contentwrap--home {
         grid-template-columns: minmax(0, 1fr);
+    }
+
+    .lb-contentwrap--home .lb-main {
+        grid-column: 1;
     }
 
     .lb-contentwrap--home .lb-sidebar {

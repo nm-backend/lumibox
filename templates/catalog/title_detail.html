@@ -675,6 +675,48 @@
             </div>
             {% endif %}
         </section>
+    {% else %}
+        {% if title.trailer_source %}
+            <section class="player-section"
+                     id="player"
+                     data-player-section
+                     data-title-slug="{{ title.slug }}"
+                     aria-label="{% trans 'Трейлер' %}">
+                <h2 class="player-section__title">{% trans "Трейлер" %}</h2>
+                <div class="player" data-player-pane="trailer">
+                    {% if title.trailer_source == "file" %}
+                        <video class="player__video" controls preload="metadata">
+                            <source src="{{ title.trailer_file.url }}">
+                        </video>
+                    {% else %}
+                        <iframe class="player__frame player__frame--embed"
+                                src="{{ title.trailer_embed_url }}"
+                                title="{% blocktranslate with name=title.name %}Трейлер: {{ name }}{% endblocktranslate %}"
+                                loading="lazy"
+                                referrerpolicy="strict-origin-when-cross-origin"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; picture-in-picture"
+                                allowfullscreen></iframe>
+                    {% endif %}
+                </div>
+            </section>
+        {% else %}
+            <section class="player-section"
+                     id="player"
+                     data-player-section
+                     data-title-slug="{{ title.slug }}"
+                     aria-label="{% trans 'Смотреть онлайн' %}">
+                <h2 class="player-section__title">{% trans "Смотреть онлайн" %}</h2>
+                <div class="player player--empty">
+                    <div class="player-empty-state">
+                        <svg class="player-empty-icon" viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                        </svg>
+                        <p class="player-empty-title">{% trans "Видео скоро появится" %}</p>
+                        <p class="player-empty-desc">{% trans "Плеер станет доступен после завершения обработки видео сервисом." %}</p>
+                    </div>
+                </div>
+            </section>
+        {% endif %}
     {% endif %}
 
 

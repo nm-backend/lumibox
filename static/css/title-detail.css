@@ -912,6 +912,44 @@
     background: #000;
 }
 
+.player--empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #07080d;
+    border: 1px solid var(--color-border);
+}
+
+.player-empty-state {
+    text-align: center;
+    padding: var(--space-6);
+    max-width: 480px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.player-empty-icon {
+    color: var(--color-text-dim);
+    margin-bottom: var(--space-2);
+    opacity: 0.5;
+}
+
+.player-empty-title {
+    font-size: var(--text-lg);
+    font-weight: 600;
+    color: var(--color-text);
+    margin: 0;
+}
+
+.player-empty-desc {
+    font-size: var(--text-sm);
+    color: var(--color-text-muted);
+    margin: 0;
+    line-height: var(--leading-relaxed);
+}
+
 /* Vibix загружается только по действию зрителя. До нажатия поверх пустого
    <ins> лежит понятная privacy-граница; во время загрузки остаются статус и
    спиннер. После появления iframe локальный JS скрывает gate без :has(),
