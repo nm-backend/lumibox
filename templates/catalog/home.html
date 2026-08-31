@@ -13,26 +13,6 @@
 <div class="lb-home">
     <div class="lb-wrap">
 
-        {% if new_titles %}
-        <section class="lb-hot" aria-labelledby="lb-hot-title">
-            <div class="lb-aheader lb-aheader--row">
-                <h2 id="lb-hot-title">{% trans "Горячие новинки" %}</h2>
-                <a class="lb-more" href="{% url 'catalog:new' %}">{% trans "Все новинки" %}</a>
-            </div>
-            <div class="carousel">
-                <button class="carousel__btn carousel__btn--prev" type="button"
-                        aria-label="{% trans 'Назад' %}">&#8249;</button>
-                <div class="carousel__track">
-                    {% for title in new_titles %}
-                        {% include "includes/title_card.html" %}
-                    {% endfor %}
-                </div>
-                <button class="carousel__btn carousel__btn--next" type="button"
-                        aria-label="{% trans 'Вперёд' %}">&#8250;</button>
-            </div>
-        </section>
-        {% endif %}
-
         <h1 class="visually-hidden">{% trans "Смотреть фильмы и сериалы онлайн бесплатно" %}</h1>
 
         {# ---------- Сайдбар слева + лента детальных карточек справа ---------- #}

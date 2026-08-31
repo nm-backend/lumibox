@@ -9,7 +9,7 @@
                сетью список фильмов из-за этого прыгал под пальцем. 2:3 — те же
                пропорции, что и у постеров в story_card. {% endcomment %}
             <img class="card__image"
-                 src="{% if title.poster %}{{ title.poster.url }}{% elif title.poster_url %}{{ title.poster_url }}{% endif %}"
+                 src="{{ title.poster.url }}"
                  width="200" height="300"
                  alt="{% blocktranslate with name=title.name %}Постер: {{ name }}{% endblocktranslate %}"
                  loading="lazy"

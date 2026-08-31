@@ -54,14 +54,13 @@ env = environ.Env(
     VIDEO_SERVICE_API_KEY=(str, ""),
     # Оформление внешнего плеера: дизайн (1-6 по документации сервиса)
     # и цвета для кастомизируемых дизайнов (1 и 6). Умолчания повторяют
-    # тёмную кино-палитру с акцентом LumiBox pink #e94560: глубокий
-    # фон плеера, тёмная панель и светлый текст.
+    # фирменную палитру LumiBox: тёмный фон #0b0b0c и акцент LumiBox pink #e94560.
     VIDEO_SERVICE_DESIGN=(str, "1"),
-    VIDEO_SERVICE_COLOR1=(str, "#181a1b"),
+    VIDEO_SERVICE_COLOR1=(str, "#e94560"),
     VIDEO_SERVICE_COLOR2=(str, "#ffffff"),
-    VIDEO_SERVICE_COLOR3=(str, "#2b2e31"),
-    VIDEO_SERVICE_COLOR4=(str, "#e94560"),
-    VIDEO_SERVICE_COLOR5=(str, "#111213"),
+    VIDEO_SERVICE_COLOR3=(str, "#ff758f"),
+    VIDEO_SERVICE_COLOR4=(str, "#c92a42"),
+    VIDEO_SERVICE_COLOR5=(str, "#0b0b0c"),
     # Автовоспроизведение внешнего плеера (data-autoplay). Браузеры
     # блокируют запуск со звуком без действия зрителя, поэтому
     # по умолчанию выключено.
@@ -259,8 +258,7 @@ ADS_NETWORK_ADD_TYPES = env("ADS_NETWORK_ADD_TYPES")
 # окружение сервера.
 
 # Оформление внешнего плеера. Цвета color1-5 применяются для дизайнов 1 и 6;
-# пустая строка у цвета убирает атрибут data-colorN из тега. Умолчания выше
-# из Environ; здесь значения читаются из окружения с теми же fallback-ами.
+# пустая строка у цвета убирает атрибут data-colorN из тега.
 VIDEO_SERVICE_DESIGN = env("VIDEO_SERVICE_DESIGN")
 VIDEO_SERVICE_COLOR1 = env("VIDEO_SERVICE_COLOR1")
 VIDEO_SERVICE_COLOR2 = env("VIDEO_SERVICE_COLOR2")

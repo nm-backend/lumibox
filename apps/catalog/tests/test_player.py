@@ -241,14 +241,12 @@ class ExternalPlayerRenderingTests(TestCase):
         self.assertContains(response, "data-vibix-load")
         self.assertContains(response, 'data-publisher-id="678503345"')
 
-        # Rendex SDK подключён глобально в <head> (base.html): атрибутов
-        # достаточно, чтобы браузер начал загрузку сразу.
-        self.assertContains(
+        # Сторонний SDK не встраивается статически в initial HTML (безопасная динамическая граница)
+        self.assertNotContains(
             response,
-            "https://graphicslab.io/sdk/v2/rendex-sdk.min.js",
+            '<script src="https://graphicslab.io/sdk/v2/rendex-sdk.min.js"',
+            html=False,
         )
-        self.assertContains(response, 'data-poster="true"')
-        self.assertContains(response, 'data-nopreload="true"')
 
         without_player = create_title(name="Без плеера", player_id="", player_type="")
         self.assertNotContains(self.client.get(without_player.get_absolute_url()), "vibix-player.js")

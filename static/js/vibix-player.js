@@ -120,16 +120,7 @@
             waitForIframe();
 
             if (sdkLoaded()) {
-                /* SDK уже на странице (подключён глобально в <head> из base.html).
-                   Даём ему шанс доинициализировать <ins>, созданный/обновлённый
-                   выбранной серией, и уходим — параллельную загрузку не дублируем. */
-                try {
-                    if (window.rendex && typeof window.rendex.init === 'function') {
-                        window.rendex.init();
-                    } else if (window.rendex && typeof window.rendex.scan === 'function') {
-                        window.rendex.scan();
-                    }
-                } catch (e) { /* инициализация SDK не должна ломать клик */ }
+                /* Если SDK уже был подключён ранее, даём ему шанс найти ins или реинициализировать */
                 return;
             }
 

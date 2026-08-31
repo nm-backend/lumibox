@@ -222,8 +222,8 @@ new WatchParty({ iframe: '#vibix-frame-id' });
 | `/publisher/videos/kp/{id}` | `fetch_video_by_kp()` в `video_service_api.py` |
 | `/serials/kp/{id}` (без /publisher) | `fetch_serial_by_kp()` + `VIDEO_SERVICE_SERIALS_API_BASE` |
 | `Authorization: Bearer {API_KEY}` | `get_vibix_api_token()`; токен только из окружения |
-| `rendex-sdk.min.js` | Глобально в `<head>` из `base.html` (`async`); `vibix-player.js` управляет privacy-gate и скрывает его после появления iframe |
+| `rendex-sdk.min.js` | `vibix-player.js` добавляет SDK в `<head>` только после клика зрителя |
 | `data-type="kp" data-id="326"` | Fallback в `_get_external_player()`, когда нет проверенного `player_id` |
 | `data-design` (1–6) | Валидируется и берётся из `VIDEO_SERVICE_DESIGN` |
 | `vibix_union` реклама | Отдельный legacy-контур, выключен (`ADS_NETWORK_ENABLED=False`) и не входит в ядро |
-| Микроразметка | Общая Movie/TVSeries JSON-LD (`kp_rating`, `poster_url`) и Open Graph «…смотреть онлайн на LumiBox» реализованы |
+| Микроразметка | Общая Movie/TVSeries JSON-LD реализована; специальные поля Vibix не хранятся |

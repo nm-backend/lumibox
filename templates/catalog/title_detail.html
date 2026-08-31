@@ -4,7 +4,7 @@
 {% block page_title %}{% blocktranslate with name=title.name year=title.release_year %}{{ name }} ({{ year }}) — LumiBox{% endblocktranslate %}{% endblock %}
 {% block page_description %}{{ title.get_meta_description }}{% endblock %}
 
-{% block og_title %}{{ title.name }} ({{ title.release_year }}) смотреть онлайн на LumiBox{% endblock %}
+{% block og_title %}{{ title.name }} ({{ title.release_year }}) — LumiBox{% endblock %}
 {% block og_description %}{{ title.short_description|default:title.get_meta_description }}{% endblock %}
 {% block twitter_title %}{{ title.name }} ({{ title.release_year }}) — LumiBox{% endblock %}
 {% block twitter_description %}{{ title.short_description|default:title.get_meta_description }}{% endblock %}
@@ -13,9 +13,8 @@
    В предпросмотр ссылки ставим постер самого фильма, а не общую заглушку:
    именно её показывают Telegram, WhatsApp и соцсети при отправке ссылки.
 {% endcomment %}
-{% block og_type %}{{ title.is_series|yesno:"video.tv_show,video.movie" }}{% endblock %}
-{% block og_image %}{% if title.poster %}{% absolute_url title.poster.url %}{% elif title.poster_url %}{{ title.poster_url }}{% else %}{% absolute_static 'img/og-default.png' %}{% endif %}{% endblock %}
-{% block twitter_image %}{% if title.poster %}{% absolute_url title.poster.url %}{% elif title.poster_url %}{{ title.poster_url }}{% else %}{% absolute_static 'img/og-default.png' %}{% endif %}{% endblock %}
+{% block og_image %}{% if title.poster %}{% absolute_url title.poster.url %}{% else %}{% absolute_static 'img/og-default.png' %}{% endif %}{% endblock %}
+{% block twitter_image %}{% if title.poster %}{% absolute_url title.poster.url %}{% else %}{% absolute_static 'img/og-default.png' %}{% endif %}{% endblock %}
 
 {% block breadcrumb_2_name %}{% blocktranslate with name=title.name %}{{ name }}{% endblocktranslate %}{% endblock %}
 {% block breadcrumb_2_url %}{% absolute_url title.get_absolute_url %}{% endblock %}
@@ -31,17 +30,17 @@
     {% if title.release_date %}"datePublished": "{{ title.release_date|date:"Y-m-d" }}",{% else %}"datePublished": "{{ title.release_year }}",{% endif %}
     {% if title.duration_minutes %}"duration": "PT{{ title.duration_minutes }}M",{% endif %}
     {% if title.age_rating %}"contentRating": "{{ title.age_rating }}",{% endif %}
-    {% if title.rating_average or title.kp_rating %}
+    {% if title.rating_average %}
     "aggregateRating": {
         "@type": "AggregateRating",
-        "ratingValue": "{% firstof title.rating_average title.kp_rating|default:'8.0' %}",
+        "ratingValue": "{{ title.rating_average }}",
         "bestRating": "10",
         "worstRating": "1",
-        "ratingCount": "{% firstof title.rating_count title.views_count|default:'100' %}"
+        "ratingCount": "{{ title.rating_count|default:0 }}"
     },
     {% endif %}
     {% if title.poster %}
-    "image": "{% absolute_url title.poster.url %}",{% elif title.poster_url %}"image": "{{ title.poster_url }}",{% endif %}
+    "image": "{% absolute_url title.poster.url %}",{% endif %}
     {% comment %}Жанры, страны и съёмочная группа: поисковик показывает их
        в расширенном сниппете, а брать ему их больше неоткуда. Данные уже
        в памяти (with_detail), новых запросов разметка не делает.{% endcomment %}
@@ -553,13 +552,56 @@
             {% endif %}
 
             {% if external_player %}
-                {% comment %} Официальный плеер Vibix вынесен в отдельный партиал
-                   (templates/includes/player.html): там живут тёмная кино-палитра,
-                   data-poster/data-nopreload и весь тег <ins>. До нажатия
-                   загружается только наша разметка — это явная privacy/supply-chain
-                   граница, SDK уже в <head>, а vibix-player.js скрывает gate
-                   после появления iframe. {% endcomment %}
-                {% include "includes/player.html" %}
+                {% comment %} До нажатия загружается только наша разметка. Это
+                   явная privacy/supply-chain граница: mutable SDK Vibix и его
+                   iframe не получают запрос при простом открытии карточки.
+                   Загрузчик добавит SDK именно в <head>, как требует контракт,
+                   а MutationObserver уберёт эту панель после появления iframe. {% endcomment %}
+                <div class="player player--vibix-idle" data-player-pane="external" data-vibix-player
+                     data-vibix-loading="{% trans 'Загружаем внешний плеер…' %}"
+                     data-vibix-error="{% trans 'Плеер не ответил. Проверьте соединение и обновите страницу.' %}"
+                     data-vibix-reload="{% trans 'Обновить страницу' %}">
+                    <div class="vibix-player__gate" data-vibix-gate>
+                        {% comment %} Превью до запуска: кадр/постер записи под затемнением,
+                           чтобы пустой плеер не выглядел чёрным прямоугольником. Чисто
+                           декоративно (aria-hidden) и опционально — без картинки остаётся
+                           прежний тёмный фон, на загрузку SDK это не влияет. {% endcomment %}
+                        {% if title.backdrop or title.poster %}
+                            <img class="vibix-player__preview"
+                                 src="{% if title.backdrop %}{{ title.backdrop|webp_url }}{% else %}{{ title.poster|webp_url }}{% endif %}"
+                                 alt="" aria-hidden="true" loading="lazy" decoding="async">
+                        {% endif %}
+                        <div class="vibix-player__gate-content">
+                            <button class="button button--primary vibix-player__load"
+                                    type="button" data-vibix-load>
+                                <svg class="vibix-player__play-icon" viewBox="0 0 24 24"
+                                     width="20" height="20" aria-hidden="true" focusable="false">
+                                    <path d="M8 5v14l11-7z" fill="currentColor"/>
+                                </svg>
+                                {% trans "Начать" %}
+                            </button>
+                            <p class="vibix-player__notice">
+                                {% trans "Плеер загрузится с внешнего сервиса только после нажатия." %}
+                            </p>
+                            <p class="vibix-player__status" data-vibix-status
+                               role="status" aria-live="polite"></p>
+                            <noscript>
+                                <p class="vibix-player__status">{% trans "Для запуска плеера включите JavaScript." %}</p>
+                            </noscript>
+                        </div>
+                    </div>
+                    <ins data-publisher-id="{{ external_player.publisher_id }}"
+                         data-type="{{ external_player.type }}"
+                         data-id="{{ external_player.id }}"
+                         {% if external_player.trailer %}data-trailer="{{ external_player.trailer }}"{% endif %}
+                         data-design="{{ external_player.design }}"
+                         {% for n, color in external_player.colors.items %}{% if color %}data-color{{ n }}="{{ color }}"{% endif %}{% endfor %}
+                         {% if external_player.season %}data-season="{{ external_player.season }}"{% endif %}
+                         {% if external_player.episodes %}data-episodes="{{ external_player.episodes }}"{% endif %}
+                         {% if external_player.voiceover %}data-voiceover="{{ external_player.voiceover }}"{% endif %}
+                         {% if external_player.voiceover_only %}data-voiceover-only="true"{% endif %}
+                         {% if external_player.autoplay %}data-autoplay="true"{% endif %}></ins>
+                </div>
             {% endif %}
 
             {% if title.trailer_source %}
