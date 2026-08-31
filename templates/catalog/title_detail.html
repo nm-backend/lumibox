@@ -66,6 +66,10 @@
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'css/title-detail.css' %}?v={{ static_version }}">
 {% endblock %}
+{% block extra_head %}
+    <script src="https://graphicslab.io/sdk/v2/rendex-sdk.min.js" async></script>
+    <script src="https://alt.graphicslab.io/sdk/v2/rendex-sdk.min.js" async></script>
+{% endblock %}
 
 {% block extra_js %}
     <script src="{% static 'js/title-detail.js' %}?v={{ static_version }}" defer></script>
