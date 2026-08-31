@@ -287,14 +287,14 @@
     /* --- Макет — высота шапки измерена по факту: 60px min-height
        + 8px padding сверху и снизу (.site-header > .container) = 67px.
        От этого числа зависит sticky-позиция топнава и scroll-padding. --- */
-    --container-width: 1200px;
+    --container-width: 1080px;
     --header-height: 67px;
     --touch-target: 44px;
     --bottom-nav-height: 68px;
 
     /* --- Сайдбар и карточки — геометрия reference ---
        reference: wrapper 976px, content 640px, sidebar 331px, movie__card 200px poster gap 20px
-       LumiBox: 1200px container, sidebar 300px, content ~ 870px, poster 200px gap 20px
+       LumiBox: 1080px container, sidebar 300px, content ~ 760px, poster 200px gap 20px
        Сохраняем LumiBox branding, только размеры как reference.
     */
     --sidebar-width: 300px;
