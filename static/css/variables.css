@@ -287,7 +287,7 @@
     /* --- Макет — высота шапки измерена по факту: 60px min-height
        + 8px padding сверху и снизу (.site-header > .container) = 67px.
        От этого числа зависит sticky-позиция топнава и scroll-padding. --- */
-    --container-width: 1080px;
+    --container-width: 1200px;
     --header-height: 67px;
     --touch-target: 44px;
     --bottom-nav-height: 68px;

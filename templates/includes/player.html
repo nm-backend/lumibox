@@ -1,0 +1,62 @@
+{% load i18n catalog_filters %}
+{% comment %}
+   Официальный плеер Vibix (Rendex SDK) для страницы фильма/сериала.
+
+   Партиал рендерится только когда {% external_player %} настроен (см.
+   TitleDetailView._get_external_player): publisher_id валиден и есть
+   player_id / kp_id / imdb_id.
+
+   Тёмная палитра задаётся настройками VIDEO_SERVICE_DESIGN и
+   VIDEO_SERVICE_COLOR1..5 (см. config/settings/base.py): глубокий фон плеера,
+   тёмная панель, светлый текст и акцент LumiBox pink.
+
+   data-poster="true" — плеер покажет постер/превью до запуска,
+   data-nopreload="true" — видео начнёт грузиться только по клику зрителя.
+
+   До нажатия загружается только наша разметка: это явная
+   privacy/supply-chain граница. SDK уже подключён глобально в <head>
+   (base.html), а vibix-player.js скрывает gate после появления iframe.
+{% endcomment %}
+<div class="player player--vibix-idle" data-player-pane="external" data-vibix-player
+     data-vibix-loading="{% trans 'Загружаем внешний плеер…' %}"
+     data-vibix-error="{% trans 'Плеер не ответил. Проверьте соединение и обновите страницу.' %}"
+     data-vibix-reload="{% trans 'Обновить страницу' %}">
+    <div class="vibix-player__gate" data-vibix-gate>
+        {% if title.backdrop or title.poster %}
+            <img class="vibix-player__preview"
+                 src="{% if title.backdrop %}{{ title.backdrop|webp_url }}{% elif title.poster_url %}{{ title.poster_url }}{% else %}{{ title.poster|webp_url }}{% endif %}"
+                 alt="" aria-hidden="true" loading="lazy" decoding="async">
+        {% endif %}
+        <div class="vibix-player__gate-content">
+            <button class="button button--primary vibix-player__load"
+                    type="button" data-vibix-load>
+                <svg class="vibix-player__play-icon" viewBox="0 0 24 24"
+                     width="20" height="20" aria-hidden="true" focusable="false">
+                    <path d="M8 5v14l11-7z" fill="currentColor"/>
+                </svg>
+                {% trans "Начать" %}
+            </button>
+            <p class="vibix-player__notice">
+                {% trans "Плеер загрузится с внешнего сервиса только после нажатия." %}
+            </p>
+            <p class="vibix-player__status" data-vibix-status
+               role="status" aria-live="polite"></p>
+            <noscript>
+                <p class="vibix-player__status">{% trans "Для запуска плеера включите JavaScript." %}</p>
+            </noscript>
+        </div>
+    </div>
+    <ins data-publisher-id="{{ external_player.publisher_id }}"
+         data-type="{{ external_player.type }}"
+         data-id="{{ external_player.id }}"
+         {% if external_player.trailer %}data-trailer="{{ external_player.trailer }}"{% endif %}
+         data-design="{{ external_player.design }}"
+         {% for n, color in external_player.colors.items %}{% if color %}data-color{{ n }}="{{ color }}"{% endif %}{% endfor %}
+         {% if external_player.season %}data-season="{{ external_player.season }}"{% endif %}
+         {% if external_player.episodes %}data-episodes="{{ external_player.episodes }}"{% endif %}
+         {% if external_player.voiceover %}data-voiceover="{{ external_player.voiceover }}"{% endif %}
+         {% if external_player.voiceover_only %}data-voiceover-only="true"{% endif %}
+         {% if external_player.autoplay %}data-autoplay="true"{% endif %}
+         data-poster="true"
+         data-nopreload="true"></ins>
+</div>

@@ -20,7 +20,7 @@ Vibix нельзя описывать одним доменом. Для инте
 | `https://dev.plugins.vibix.org/` | Dev-контур DLE-плагина | Не используется |
 | `https://static.vibix.org/` | Статический host без публичного root-контракта | Не используется напрямую |
 | `https://demo.vibix.org/` | Сейчас не является рабочим demo-контрактом | Не используется |
-| `https://graphicslab.io/sdk/v2/rendex-sdk.min.js` | Mutable SDK браузерного плеера | Только после клика зрителя |
+| `https://graphicslab.io/sdk/v2/rendex-sdk.min.js` | Mutable SDK браузерного плеера | Глобально в `<head>` из `base.html` (`async`); трафик только на страницах сайта |
 | `https://*.kinescopecdn.net` | Текущий iframe/CDN-контур SDK | Разрешён в CSP для frame/connect |
 | `https://*.videoframe2.com` | Прежний/вспомогательный iframe-контур | Разрешён в CSP для frame/connect |
 | `https://sync.videoframe2.com/` | WatchParty script/WebSocket | Не подключён |
@@ -175,11 +175,14 @@ Publisher ID обязан быть числовым. Design ограничен `
 
 ### Lazy loading и privacy boundary
 
-Шаблон сразу рендерит только `<ins>` с публичными ID и локальный
-`static/js/vibix-player.js`. Внешний SDK **не** загружается при открытии
-карточки. После кнопки «Запустить плеер Vibix» загрузчик:
+Rendex SDK подключён глобально в `<head>` из `base.html` (`async`): контракт
+плеера требует скрипт на странице до инициализации `<ins>`. Видео при этом
+не предзагружается — `data-nopreload="true"` и `data-poster="true"` в партиале
+`templates/includes/player.html` откладывают запросы до действия зрителя.
+Gate с кнопкой «Начать» рендерит только `<ins>` с публичными ID и локальный
+`static/js/vibix-player.js`. После кнопки загрузчик:
 
-1. добавляет SDK в `<head>`;
+1. убеждается, что Rendex SDK уже в `<head>` (он подключён глобально из base.html);
 2. наблюдает за заменой `<ins>` на iframe;
 3. показывает loading/error state с 20-секундным timeout;
 4. не передаёт `VIBIX_API_TOKEN` браузеру;

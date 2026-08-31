@@ -350,7 +350,8 @@ class TitleDetailViewTests(TestCase):
 
     def test_external_player_autoplay_off_by_default(self):
         title = create_title(player_id="4427")
-        response = self.client.get(title.get_absolute_url())
+        with self.settings(VIDEO_SERVICE_AUTOPLAY=False):
+            response = self.client.get(title.get_absolute_url())
         self.assertNotContains(response, "data-autoplay=")
 
     def test_external_player_autoplay_when_enabled(self):
@@ -369,11 +370,27 @@ class TitleDetailViewTests(TestCase):
         self.assertNotContains(response, "watch-party.js")
 
     def test_external_player_renders_design_and_colors(self):
+        """Тёмная кино-палитра: глубокий фон, панель, акцент LumiBox pink."""
         title = create_title(kp_id="326")
-        response = self.client.get(title.get_absolute_url())
+        with self.settings(
+            VIDEO_SERVICE_DESIGN="1",
+            VIDEO_SERVICE_COLOR1="#181a1b",
+            VIDEO_SERVICE_COLOR2="#ffffff",
+            VIDEO_SERVICE_COLOR3="#2b2e31",
+            VIDEO_SERVICE_COLOR4="#e94560",
+            VIDEO_SERVICE_COLOR5="#111213",
+        ):
+            response = self.client.get(title.get_absolute_url())
         self.assertContains(response, 'data-design="1"')
-        self.assertContains(response, 'data-color1="#ff8a1f"')
-        self.assertContains(response, 'data-color5="#0b0b0c"')
+        self.assertContains(response, 'data-color1="#181a1b"')
+        self.assertContains(response, 'data-color3="#2b2e31"')
+        self.assertContains(response, 'data-color4="#e94560"')
+        self.assertContains(response, 'data-color5="#111213"')
+        # Оранжевая палитра устарела — её не должно быть в HTML.
+        self.assertNotContains(response, 'data-color1="#ff8a1f"')
+        # Отложенная быстрая загрузка: постер и отключённый preload.
+        self.assertContains(response, 'data-poster="true"')
+        self.assertContains(response, 'data-nopreload="true"')
 
     def test_external_player_rejects_unknown_design(self):
         title = create_title(kp_id="326")

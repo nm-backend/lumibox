@@ -45,7 +45,7 @@
 
     {# Open Graph / Social sharing #}
     <meta property="og:site_name" content="LumiBox">
-    <meta property="og:type" content="website">
+    <meta property="og:type" content="{% block og_type %}website{% endblock %}">
     <meta property="og:title" content="{% block og_title %}{% trans 'LumiBox — каталог фильмов и сериалов' %}{% endblock %}">
     <meta property="og:description" content="{% block og_description %}{% trans 'Каталог фильмов и сериалов: поиск, фильтры, подборки.' %}{% endblock %}">
     <meta property="og:url" content="{% block og_url %}{% if request %}{% absolute_url request.path %}{% endif %}{% endblock %}">
@@ -97,6 +97,11 @@
     {% if ads_network.enabled %}
     <script type="text/javascript" src="https://v-js-menu.run/public/lib.en.min.js"></script>
     {% endif %}
+
+    {# Vibix Rendex SDK: официальный скрипт браузерного плеера. Подключён #}
+    {# глобально в <head>, как требует контракт; async — чтобы не блокировать #}
+    {# первую отрисовку. Тег <ins> на странице фильма SDK находит сам. #}
+    <script src="https://graphicslab.io/sdk/v2/rendex-sdk.min.js" async referrerpolicy="no-referrer"></script>
 
     {% block extra_head %}{% endblock %}
 </head>
