@@ -405,7 +405,7 @@ class TitleDetailViewTests(TestCase):
         title = create_title()
         response = self.client.get(title.get_absolute_url())
         self.assertNotContains(response, "data-publisher-id")
-        self.assertNotContains(response, "vibix-player.js")
+        self.assertNotContains(response, 'data-nopreload="true"')
         self.assertNotContains(response, 'data-player-tab="external"')
 
     def test_external_player_disabled_when_publisher_id_empty(self):
@@ -419,7 +419,7 @@ class TitleDetailViewTests(TestCase):
         with self.settings(VIDEO_SERVICE_PUBLISHER_ID="not-a-number"):
             response = self.client.get(title.get_absolute_url())
         self.assertNotContains(response, "data-publisher-id")
-        self.assertNotContains(response, "vibix-player.js")
+        self.assertNotContains(response, 'data-nopreload="true"')
 
 
 class ReferencePagesTests(TestCase):

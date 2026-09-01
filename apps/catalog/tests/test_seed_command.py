@@ -53,8 +53,8 @@ class SeedCatalogTests(TestCase):
         self.assertContains(response, 'data-publisher-id="678503345"')
         self.assertContains(response, 'data-type="kp"')
         self.assertContains(response, 'data-id="427198"')
-        self.assertContains(response, "vibix-player.js")
-        self.assertContains(response, "data-vibix-load")
+        self.assertContains(response, 'data-nopreload="true"')
+        self.assertContains(response, 'data-poster="true"')
 
     def test_drafts_stay_drafts(self):
         """

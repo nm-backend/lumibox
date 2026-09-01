@@ -236,20 +236,20 @@ class ExternalPlayerRenderingTests(TestCase):
         title = create_title(name="С плеером", player_id="5", player_type="movie")
         response = self.client.get(title.get_absolute_url())
 
-        # Локальный менеджер затвора vibix-player.js подключается только при наличии плеера
-        self.assertContains(response, "vibix-player.js")
-        self.assertContains(response, "data-vibix-load")
+        # Нативный lazy-loading Vibix SDK: data-nopreload + data-poster
+        self.assertContains(response, 'data-nopreload="true"')
+        self.assertContains(response, 'data-poster="true"')
         self.assertContains(response, 'data-publisher-id="678503345"')
 
-        # Сторонний SDK не встраивается статически в initial HTML (безопасная динамическая граница)
-        self.assertNotContains(
+        # Сторонний SDK подключается в <head> через extra_head (title_detail.html)
+        self.assertContains(
             response,
             '<script src="https://graphicslab.io/sdk/v2/rendex-sdk.min.js"',
             html=False,
         )
 
         without_player = create_title(name="Без плеера", player_id="", player_type="")
-        self.assertNotContains(self.client.get(without_player.get_absolute_url()), "vibix-player.js")
+        self.assertNotContains(self.client.get(without_player.get_absolute_url()), 'data-nopreload="true"')
 
     def test_api_token_never_reaches_html(self):
         title = create_title(name="Секретный плеер", player_id="5", player_type="movie")
@@ -258,29 +258,25 @@ class ExternalPlayerRenderingTests(TestCase):
 
         self.assertNotContains(response, "super-secret-token-abc")
 
-    def test_gate_has_content_wrapper_and_play_icon(self):
+    def test_ins_has_nopreload_and_poster_attributes(self):
+        """Нативный lazy-loading: data-nopreload + data-poster вместо кастомного gate."""
         title = create_title(name="С плеером", player_id="5", player_type="movie")
         response = self.client.get(title.get_absolute_url())
-        self.assertContains(response, "vibix-player__gate-content")
-        self.assertContains(response, "vibix-player__play-icon")
 
-    def test_gate_shows_poster_preview_when_image_present(self):
-        """Есть кадр/постер — до запуска он виден за кнопкой (превью плеера)."""
+        self.assertContains(response, 'data-nopreload="true"')
+        self.assertContains(response, 'data-poster="true"')
+
+    def test_ins_shows_poster_preview_via_data_poster(self):
+        """data-poster="true" говорит SDK показать постер из базы Vibix как превью."""
         title = create_title(name="С постером", player_id="5", player_type="movie")
         Title.objects.filter(pk=title.pk).update(backdrop="backdrops/test.jpg")
 
         response = self.client.get(title.get_absolute_url())
 
-        self.assertContains(response, "vibix-player__preview")
-        self.assertContains(response, "backdrops/test.jpg")
-
-    def test_gate_without_image_has_no_preview(self):
-        """Без картинок превью не рендерится — остаётся прежний тёмный фон."""
-        title = create_title(name="Без картинок", player_id="5", player_type="movie")
-
-        response = self.client.get(title.get_absolute_url())
-
-        self.assertNotContains(response, "vibix-player__preview")
+        # data-poster="true" — SDK сам подтянет постер из своей базы
+        self.assertContains(response, 'data-poster="true"')
+        # backdrop в контексте шаблона больше не используется для gate
+        # (SDK берёт постер по player_id), но проверяем что атрибут есть
 
     def test_episode_buttons_carry_season_and_number(self):
         title = create_title(
