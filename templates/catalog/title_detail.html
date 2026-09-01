@@ -67,8 +67,7 @@
     <link rel="stylesheet" href="{% static 'css/title-detail.css' %}?v={{ static_version }}">
 {% endblock %}
 {% block extra_head %}
-    <script src="https://graphicslab.io/sdk/v2/rendex-sdk.min.js" async></script>
-    <script src="https://alt.graphicslab.io/sdk/v2/rendex-sdk.min.js" async></script>
+    <script src="https://graphicslab.io/sdk/v2/rendex-sdk.min.js"></script>
 {% endblock %}
 
 {% block extra_js %}
@@ -604,7 +603,7 @@
                          {% if external_player.episodes %}data-episodes="{{ external_player.episodes }}"{% endif %}
                          {% if external_player.voiceover %}data-voiceover="{{ external_player.voiceover }}"{% endif %}
                          {% if external_player.voiceover_only %}data-voiceover-only="true"{% endif %}
-                         {% if external_player.autoplay %}data-autoplay="true"{% endif %}></ins>
+                        {% if external_player.autoplay %}data-autoplay="true"{% endif %}></ins>
                 </div>
             {% endif %}
 
