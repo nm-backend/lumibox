@@ -17,11 +17,13 @@
             }
 
             gate.hidden = true;
+
             pane.classList.remove(
                 'player--vibix-idle',
                 'player--vibix-loading',
                 'player--vibix-error'
             );
+
             pane.classList.add('player--vibix-ready');
         }
 
@@ -34,12 +36,14 @@
 
         button.addEventListener('click', function () {
             button.disabled = true;
-            pane.classList.remove('player--vibix-idle', 'player--vibix-error');
-            pane.classList.add('player--vibix-loading');
+
+            pane.classList.remove(
+                'player--vibix-idle',
+                'player--vibix-error',
+                'player--vibix-loading'
+            );
 
             checkPlayer();
         });
-
-        checkPlayer();
     });
 })();
