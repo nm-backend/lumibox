@@ -1,6 +1,5 @@
 {% extends "base.html" %}
 {% load static i18n lumibox_urls icons catalog_filters %}
-
 {% block page_title %}{% blocktranslate with name=title.name year=title.release_year %}{{ name }} ({{ year }}) — LumiBox{% endblocktranslate %}{% endblock %}
 {% block page_description %}{{ title.get_meta_description }}{% endblock %}
 
