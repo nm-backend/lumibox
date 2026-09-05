@@ -67,6 +67,10 @@
 {% endblock %}
 {% block extra_head %}
     <script src="https://graphicslab.io/sdk/v2/rendex-sdk.min.js"></script>
+    {% if external_player %}
+        <script src="https://graphicslab.io/sdk/v2/rendex-sdk.min.js" async></script>
+        <script src="https://alt.graphicslab.io/sdk/v2/rendex-sdk.min.js" async></script>
+    {% endif %}
 {% endblock %}
 
 {% block extra_js %}
@@ -75,6 +79,14 @@
        при старте, а этот только рисует состояние. Оба работают через один
        и тот же элемент video и друг друга не трогают. {% endcomment %}
     <script src="{% static 'js/player.js' %}?v={{ static_version }}" defer></script>
+    {% comment %} vibix-player.js управляет «затвором» перед плеером: скрывает кнопку
+       «Начать» и превью, когда Vibix SDK уже отрисовал iframe, и показывает
+       сообщение об ошибке, если скрипт так и не загрузился. Сам SDK
+       подключается в <head> через блок extra_head — это нужно ему, чтобы
+       автоматически найти теги <ins> при загрузке страницы. {% endcomment %}
+    {% if external_player %}
+        <script src="{% static 'js/vibix-player.js' %}?v={{ static_version }}" defer></script>
+    {% endif %}
 {% endblock %}
 
 {% block hero %}
@@ -548,12 +560,22 @@
             {% endif %}
 
             {% if external_player %}
-                {% comment %} Используем встроенный lazy-loading Vibix SDK:
-                   data-nopreload="true" — плеер загрузится только по клику
-                   data-poster="true" — показывает постер из базы Vibix как превью
-                   SDK сам обработает клик и подгрузит iframe.
-                   Никакой кастомной логики (gate, MutationObserver) не нужна. {% endcomment %}
-                <div class="player" data-player-pane="external">
+                {% comment %} Vibix SDK с нативным lazy-loading (data-nopreload + data-poster).
+                   vibix-player.js управляет затвором: показывает кнопку «Начать»,
+                   скрывает её когда iframe готов, и fallback на трейлер при ошибке. {% endcomment %}
+                <div class="player" data-player-pane="external" data-vibix-player
+                     data-vibix-trailer-fallback="{% if external_player.type in 'kp,imdb' and external_player.trailer != 'only' %}true{% else %}false{% endif %}"
+                     data-vibix-loading="{% trans 'Загрузка плеера…' %}"
+                     data-vibix-error="{% trans 'Не удалось загрузить видео. Попробуйте обновить страницу или посмотреть трейлер.' %}"
+                     data-vibix-reload="{% trans 'Повторить загрузку' %}">
+                    {% comment %} Затвор перед плеером: кнопка запуска, спиннер, статус ошибки {% endcomment %}
+                    <div class="vibix-gate" data-vibix-gate>
+                        <button type="button" class="button button--primary button--large vibix-gate__btn" data-vibix-load>
+                            {% icon "play" size=18 %} {% trans "Начать просмотр" %}
+                        </button>
+                        <div class="vibix-gate__spinner" hidden aria-hidden="true"></div>
+                        <p class="vibix-gate__status" data-vibix-status hidden></p>
+                    </div>
                     <ins data-publisher-id="{{ external_player.publisher_id }}"
                          data-type="{{ external_player.type }}"
                          data-id="{{ external_player.id }}"

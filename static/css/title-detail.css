@@ -920,7 +920,7 @@
     position: relative;
 }
 
-.vibix-player__gate {
+.vibix-gate {
     position: absolute;
     z-index: var(--z-raised);
     inset: 0;
@@ -936,40 +936,11 @@
         #07080d;
 }
 
-.vibix-player__gate[hidden] {
+.vibix-gate[hidden] {
     display: none;
 }
 
-/* Кадр/постер записи под кнопкой запуска. Абсолютный слой — из flex-потока
-   выпадает, поэтому центрирование кнопки не трогает. Затемняющий скрим кладём
-   поверх картинки (::after), а содержимое поднимаем над обоими слоями. */
-.vibix-player__preview {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    z-index: 0;
-}
-
-.vibix-player__gate::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    z-index: 1;
-    background: radial-gradient(circle at 50% 42%, rgba(7, 8, 13, 0.45), rgba(7, 8, 13, 0.78));
-}
-
-.vibix-player__gate-content {
-    position: relative;
-    z-index: 2;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--space-3);
-}
-
-.vibix-player__load {
+.vibix-gate__btn {
     min-width: min(260px, 100%);
     display: inline-flex;
     align-items: center;
@@ -977,30 +948,7 @@
     gap: var(--space-2);
 }
 
-.vibix-player__play-icon {
-    flex: none;
-}
-
-.vibix-player__notice,
-.vibix-player__status {
-    max-width: 520px;
-    margin: 0;
-    color: var(--color-text-muted);
-    font-size: var(--text-sm);
-}
-
-.vibix-player__status:empty {
-    display: none;
-}
-
-.player--vibix-loading .vibix-player__load {
-    visibility: hidden;
-}
-
-.player--vibix-loading .vibix-player__gate::before {
-    content: "";
-    position: relative;
-    z-index: 2;
+.vibix-gate__spinner {
     width: 44px;
     height: 44px;
     border: 3px solid var(--color-border);
@@ -1009,8 +957,32 @@
     animation: vplayer-spin 0.9s linear infinite;
 }
 
-.player--vibix-error .vibix-player__status {
+.vibix-gate__status {
+    max-width: 520px;
+    margin: 0;
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
+}
+
+.vibix-gate__status:empty {
+    display: none;
+}
+
+/* Состояния панели */
+.player--vibix-loading .vibix-gate__btn {
+    visibility: hidden;
+}
+
+.player--vibix-loading .vibix-gate__spinner {
+    display: block;
+}
+
+.player--vibix-error .vibix-gate__status {
     color: var(--color-error);
+}
+
+.player--vibix-ready .vibix-gate {
+    display: none;
 }
 
 .player-panel {

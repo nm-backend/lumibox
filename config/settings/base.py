@@ -54,12 +54,12 @@ env = environ.Env(
     VIDEO_SERVICE_API_KEY=(str, ""),
     # Оформление внешнего плеера: дизайн (1-6 по документации сервиса)
     # и цвета для кастомизируемых дизайнов (1 и 6). Умолчания повторяют
-    # фирменную палитру LumiBox: тёмный фон #0b0b0c и акцент LumiBox pink #e94560.
+    # палитру сайта: тёмный фон #0b0b0c и янтарный акцент #ff8a1f.
     VIDEO_SERVICE_DESIGN=(str, "1"),
-    VIDEO_SERVICE_COLOR1=(str, "#e94560"),
+    VIDEO_SERVICE_COLOR1=(str, "#ff8a1f"),
     VIDEO_SERVICE_COLOR2=(str, "#ffffff"),
-    VIDEO_SERVICE_COLOR3=(str, "#ff758f"),
-    VIDEO_SERVICE_COLOR4=(str, "#c92a42"),
+    VIDEO_SERVICE_COLOR3=(str, "#ffb057"),
+    VIDEO_SERVICE_COLOR4=(str, "#e06d00"),
     VIDEO_SERVICE_COLOR5=(str, "#0b0b0c"),
     # Автовоспроизведение внешнего плеера (data-autoplay). Браузеры
     # блокируют запуск со звуком без действия зрителя, поэтому
