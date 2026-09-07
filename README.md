@@ -10,9 +10,7 @@ CSS-фреймворков и SPA — только Django Templates, чисты�
 JavaScript без сборки.
 
 Проект поднимается одной командой: `docker compose up --build -d`.
-
 ---
-
 ## Возможности
 
 **Каталог**
