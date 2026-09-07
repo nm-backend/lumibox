@@ -65,13 +65,6 @@
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'css/title-detail.css' %}?v={{ static_version }}">
 {% endblock %}
-{% block extra_head %}
-    <script src="https://graphicslab.io/sdk/v2/rendex-sdk.min.js"></script>
-    {% if external_player %}
-        <script src="https://graphicslab.io/sdk/v2/rendex-sdk.min.js" async></script>
-        <script src="https://alt.graphicslab.io/sdk/v2/rendex-sdk.min.js" async></script>
-    {% endif %}
-{% endblock %}
 
 {% block extra_js %}
     <script src="{% static 'js/title-detail.js' %}?v={{ static_version }}" defer></script>
@@ -82,8 +75,9 @@
     {% comment %} vibix-player.js управляет «затвором» перед плеером: скрывает кнопку
        «Начать» и превью, когда Vibix SDK уже отрисовал iframe, и показывает
        сообщение об ошибке, если скрипт так и не загрузился. Сам SDK
-       подключается в <head> через блок extra_head — это нужно ему, чтобы
-       автоматически найти теги <ins> при загрузке страницы. {% endcomment %}
+       подключается в <head> один раз (base.html) — это нужно ему, чтобы
+       автоматически найти теги <ins> при загрузке страницы; этот модуль
+       лишь умеет догрузить alt-фоллбек при сбое основного URI. {% endcomment %}
     {% if external_player %}
         <script src="{% static 'js/vibix-player.js' %}?v={{ static_version }}" defer></script>
     {% endif %}
@@ -583,12 +577,12 @@
                          data-poster="true"
                          {% if external_player.trailer %}data-trailer="{{ external_player.trailer }}"{% endif %}
                          data-design="{{ external_player.design }}"
-                         {% for n, color in external_player.colors.items %}{% if color %}data-color{{ n }}="{{ color }}"{% endif %}{% endfor %}
-                         {% if external_player.season %}data-season="{{ external_player.season }}"{% endif %}
-                         {% if external_player.episodes %}data-episodes="{{ external_player.episodes }}"{% endif %}
-                         {% if external_player.voiceover %}data-voiceover="{{ external_player.voiceover }}"{% endif %}
-                         {% if external_player.voiceover_only %}data-voiceover-only="true"{% endif %}
-                        {% if external_player.autoplay %}data-autoplay="true"{% endif %}></ins>
+                         {% for n, color in external_player.colors.items %}{% if color %} data-color{{ n }}="{{ color }}"{% endif %}{% endfor %}
+                         {% if external_player.season %} data-season="{{ external_player.season }}"{% endif %}
+                         {% if external_player.episodes %} data-episodes="{{ external_player.episodes }}"{% endif %}
+                         {% if external_player.voiceover %} data-voiceover="{{ external_player.voiceover }}"{% endif %}
+                         {% if external_player.voiceover_only %} data-voiceover-only="true"{% endif %}
+                         {% if external_player.autoplay %} data-autoplay="true"{% endif %}></ins>
                 </div>
             {% endif %}
 

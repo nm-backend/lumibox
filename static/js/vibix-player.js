@@ -24,8 +24,7 @@
     var MAX_RETRY_ATTEMPTS = 2;
  
     function sdkLoaded() {
-        return !!document.querySelector('script[data-lumibox-vibix-sdk]')
-            || !!document.querySelector('script[src*="graphicslab.io"]');
+        return typeof window.RendexSDK !== 'undefined';
     }
  
     function logEvent(pane, event, details) {
@@ -205,9 +204,44 @@
             }
             waitForIframe();
  
-            if (sdkLoaded()) return;
+            ensureSdk(0);
+        }
  
-            appendSdkScript(0);
+        function sdkNode(index) {
+            var src = SDK_URLS[index];
+            var nodes = document.querySelectorAll('script[src*="rendex-sdk.min.js"]');
+            for (var i = 0; i < nodes.length; i++) {
+                if (nodes[i].src === src) {
+                    return nodes[i];
+                }
+            }
+            return null;
+        }
+ 
+        function ensureSdk(index) {
+            if (sdkLoaded()) return;
+            if (index >= SDK_URLS.length) {
+                showError(new Error('SDK load failed'));
+                return;
+            }
+ 
+            // Скрипт уже подключён в <head> (base.html): не плодим копию,
+            // а ждём его события. load — SDK определился, error — пробуем alt.
+            var existing = sdkNode(index);
+            if (existing) {
+                existing.addEventListener('load', function () {
+                    if (!sdkLoaded()) {
+                        ensureSdk(index + 1);
+                    }
+                }, { once: true });
+                existing.addEventListener('error', function () {
+                    existing.remove();
+                    ensureSdk(index + 1);
+                }, { once: true });
+                return;
+            }
+ 
+            appendSdkScript(index);
         }
  
         function appendSdkScript(index) {
@@ -216,13 +250,14 @@
             script.async = true;
             script.referrerPolicy = 'no-referrer';
             script.dataset.lumiboxVibixSdk = '1';
+            script.addEventListener('load', function () {
+                if (!sdkLoaded()) {
+                    ensureSdk(index + 1);
+                }
+            }, { once: true });
             script.addEventListener('error', function () {
                 script.remove();
-                if (index + 1 < SDK_URLS.length) {
-                    appendSdkScript(index + 1);
-                } else {
-                    showError(new Error('SDK load failed'));
-                }
+                ensureSdk(index + 1);
             }, { once: true });
             document.head.appendChild(script);
         }

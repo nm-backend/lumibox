@@ -241,18 +241,17 @@ class ExternalPlayerRenderingTests(TestCase):
         self.assertContains(response, 'data-poster="true"')
         self.assertContains(response, 'data-publisher-id="678503345"')
 
-        # Сторонний SDK подключается в <head> через extra_head (title_detail.html)
-        # SDK Vibix в <head> — система сама найдёт теги <ins> при загрузке.
+        # SDK Vibix подключён в <head> один раз (base.html) — система сама
+        # найдёт теги <ins> при загрузке. Повторные теги из title_detail
+        # убраны: пять копий одного скрипта ломали инициализацию плеера.
         self.assertContains(
             response,
             '<script src="https://graphicslab.io/sdk/v2/rendex-sdk.min.js"',
             html=False,
         )
-        self.assertContains(
-            response,
-            '<script src="https://alt.graphicslab.io/sdk/v2/rendex-sdk.min.js"',
-            html=False,
-        )
+        # alt.graphicslab.io — только фоллбек в js/vibix-player.js и не должен
+        # грузиться одновременно с основным SDK (дубли ломали плеер).
+        self.assertNotContains(response, "alt.graphicslab.io")
         # vibix-player.js управляет затвором и fallback-загрузкой.
         self.assertContains(response, "vibix-player.js")
         self.assertContains(response, "data-vibix-load")

@@ -15,6 +15,10 @@ import environ
 # Этот файл: config/settings/base.py, поэтому поднимаемся на три уровня вверх.
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
+# Читаем .env из корня проекта.
+# В продакшене файла может не быть — тогда переменные придут из окружения сервера.
+environ.Env.read_env(BASE_DIR / ".env", overwrite=True)
+
 # Описываем переменные окружения и их типы.
 # Второй элемент кортежа — значение по умолчанию, если переменной нет.
 env = environ.Env(
@@ -33,6 +37,11 @@ env = environ.Env(
     # явной настройки плеер не рендерится: использовать чужой example ID
     # как production default нельзя.
     VIBIX_PUBLISHER_ID=(str, ""),
+    # Креды для login_vibix — автоматического получения токена, когда
+    # VIBIX_API_TOKEN пуст (например, токен истёк и его удалили из .env).
+    # Без них авто-аутентификация не может восстановить доступ к API.
+    VIBIX_USERNAME=(str, ""),
+    VIBIX_PASSWORD=(str, ""),
     # Выделенный production API. Те же OpenAPI-маршруты проксируются через
     # vibix.org, но api.vibix.org — самостоятельный API-контур с рабочей
     # страницей входа; адрес всё равно можно переопределить для аккаунта.
@@ -69,12 +78,8 @@ env = environ.Env(
     # "true" — трейлер, когда полное видео в каталоге сервиса отсутствует
     # (запасной сценарий: вместо заглушки зритель увидит трейлер);
     # "only" — всегда только трейлер; пустая строка отключает параметр.
-    VIDEO_SERVICE_TRAILER=(str, ""),
+    VIDEO_SERVICE_TRAILER=(str, "true"),
 )
-
-# Читаем .env из корня проекта.
-# В продакшене файла может не быть — тогда переменные придут из окружения сервера.
-environ.Env.read_env(BASE_DIR / ".env")
 
 # Секретный ключ обязателен и никогда не хранится в коде.
 # Если переменной нет — проект упадёт сразу, а не втихую с небезопасным ключом.
@@ -240,6 +245,10 @@ REDIS_URL = env("REDIS_URL")
 VIBIX_API_TOKEN = env("VIBIX_API_TOKEN") or env("VIDEO_SERVICE_API_KEY")
 VIBIX_PUBLISHER_ID = env("VIBIX_PUBLISHER_ID") or env("VIDEO_SERVICE_PUBLISHER_ID")
 VIBIX_API_BASE_URL = env("VIBIX_API_BASE_URL")
+# Креды использует только login_vibix (авто-получение токена при пустом
+# VIBIX_API_TOKEN). Никогда не попадают в HTML, шаблоны и логи.
+VIBIX_USERNAME = env("VIBIX_USERNAME")
+VIBIX_PASSWORD = env("VIBIX_PASSWORD")
 
 # Алиасы для кода, написанного до появления VIBIX_*.
 VIDEO_SERVICE_PUBLISHER_ID = VIBIX_PUBLISHER_ID
