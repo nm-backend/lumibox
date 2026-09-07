@@ -591,7 +591,6 @@ docker compose exec redis redis-cli ping        # ожидаем PONG
 docker compose config --quiet
 docker compose -f docker-compose.prod.yml config --quiet
 ```
-
 ### Удаление
 
 ```bash
@@ -604,7 +603,6 @@ docker compose down -v
 # Дополнительно удалить собранные образы
 docker compose down -v --rmi local
 ```
-
 После `down -v` следующий запуск будет как первый: пустая база, нужно снова
 выполнить `seed_catalog` и `createsuperuser`.
 
