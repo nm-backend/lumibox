@@ -878,11 +878,6 @@
     background: var(--color-surface);
 }
 
-[data-theme="light"] .vibix-player__notice,
-[data-theme="light"] .vibix-player__status {
-    color: var(--color-text-muted);
-}
-
 @media (max-width: 900px) {
     [data-theme="light"] .film-hero__scrim {
         background: linear-gradient(180deg, rgba(245, 245, 247, 0.6) 0%, var(--color-surface) 100%);
@@ -910,79 +905,6 @@
     height: 100%;
     border: 0;
     background: #000;
-}
-
-/* Vibix загружается только по действию зрителя. До нажатия поверх пустого
-   <ins> лежит понятная privacy-граница; во время загрузки остаются статус и
-   спиннер. После появления iframe локальный JS скрывает gate без :has(),
-   поэтому состояние одинаково работает и в старых браузерах. */
-.player[data-player-pane="external"] {
-    position: relative;
-}
-
-.vibix-gate {
-    position: absolute;
-    z-index: var(--z-raised);
-    inset: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: var(--space-3);
-    padding: var(--space-5);
-    text-align: center;
-    background:
-        radial-gradient(circle at 50% 45%, rgba(var(--color-accent-rgb), 0.12), transparent 45%),
-        #07080d;
-}
-
-.vibix-gate[hidden] {
-    display: none;
-}
-
-.vibix-gate__btn {
-    min-width: min(260px, 100%);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--space-2);
-}
-
-.vibix-gate__spinner {
-    width: 44px;
-    height: 44px;
-    border: 3px solid var(--color-border);
-    border-top-color: var(--color-accent);
-    border-radius: 50%;
-    animation: vplayer-spin 0.9s linear infinite;
-}
-
-.vibix-gate__status {
-    max-width: 520px;
-    margin: 0;
-    color: var(--color-text-muted);
-    font-size: var(--text-sm);
-}
-
-.vibix-gate__status:empty {
-    display: none;
-}
-
-/* Состояния панели */
-.player--vibix-loading .vibix-gate__btn {
-    visibility: hidden;
-}
-
-.player--vibix-loading .vibix-gate__spinner {
-    display: block;
-}
-
-.player--vibix-error .vibix-gate__status {
-    color: var(--color-error);
-}
-
-.player--vibix-ready .vibix-gate {
-    display: none;
 }
 
 .player-panel {
