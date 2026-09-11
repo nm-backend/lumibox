@@ -241,20 +241,20 @@ class ExternalPlayerRenderingTests(TestCase):
         self.assertContains(response, 'data-poster="true"')
         self.assertContains(response, 'data-publisher-id="678503345"')
 
-        # SDK Vibix подключён в <head> один раз (base.html) — система сама
-        # найдёт теги <ins> при загрузке. Повторные теги из title_detail
-        # убраны: пять копий одного скрипта ломали инициализацию плеера.
+        # Актуальная инструкция Vibix требует оба асинхронных SDK в <head>.
+        # Они сами находят теги <ins> и запускают data-nopreload по клику.
         self.assertContains(
             response,
-            '<script src="https://graphicslab.io/sdk/v2/rendex-sdk.min.js"',
+            '<script src="https://graphicslab.io/sdk/v2/rendex-sdk.min.js" async></script>',
             html=False,
         )
-        # alt.graphicslab.io — только фоллбек в js/vibix-player.js и не должен
-        # грузиться одновременно с основным SDK (дубли ломали плеер).
-        self.assertNotContains(response, "alt.graphicslab.io")
-        # vibix-player.js управляет затвором и fallback-загрузкой.
-        self.assertContains(response, "vibix-player.js")
-        self.assertContains(response, "data-vibix-load")
+        self.assertContains(
+            response,
+            '<script src="https://alt.graphicslab.io/sdk/v2/rendex-sdk.min.js" async></script>',
+            html=False,
+        )
+        self.assertNotContains(response, "vibix-player.js")
+        self.assertNotContains(response, "data-vibix-load")
 
         without_player = create_title(name="Без плеера", player_id="", player_type="")
         self.assertNotContains(self.client.get(without_player.get_absolute_url()), 'data-nopreload="true"')

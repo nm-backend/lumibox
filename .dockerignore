@@ -5,6 +5,9 @@
 .venv/
 venv/
 node_modules/*
+.vscode/*
+
+
 
 .git/
 .gitignore
