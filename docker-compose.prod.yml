@@ -53,7 +53,7 @@ services:
       # Vibix: без проброса этих переменных контейнер их не видит,
       # даже когда они заданы в .env на сервере — compose читает .env
       # только для подстановок ${...} в этом файле.
-      VIBIX_API_TOKEN: ${VIBIX_API_TOKEN:-29903|SFqlngwoWYr4ohjsr2dYKirtPz8fMIv8I1yXACeZdcd3921b}
+      VIBIX_API_TOKEN: ${VIBIX_API_TOKEN:-30622|9uPgz492FRk6uUVYoX0DPi7hhhTEiqWYed3eehx064906eb3}
       VIBIX_PUBLISHER_ID: ${VIBIX_PUBLISHER_ID:-678503345}
       VIBIX_API_BASE_URL: ${VIBIX_API_BASE_URL:-https://vibix.org/api/v1}
     restart: unless-stopped
@@ -90,7 +90,7 @@ services:
       DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
       DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:?Задайте DJANGO_ALLOWED_HOSTS в .env}
       # Воркер выполняет ежедневную синхронизацию с Vibix — ему нужны те же ключи.
-      VIBIX_API_TOKEN: ${VIBIX_API_TOKEN:-29903|SFqlngwoWYr4ohjsr2dYKirtPz8fMIv8I1yXACeZdcd3921b}
+      VIBIX_API_TOKEN: ${VIBIX_API_TOKEN:-30622|9uPgz492FRk6uUVYoX0DPi7hhhTEiqWYed3eehx064906eb3}
       VIBIX_PUBLISHER_ID: ${VIBIX_PUBLISHER_ID:-678503345}
       VIBIX_API_BASE_URL: ${VIBIX_API_BASE_URL:-https://vibix.org/api/v1}
     volumes:
