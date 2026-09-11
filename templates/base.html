@@ -3,11 +3,11 @@
 <html lang="{{ LANGUAGE_CODE }}" data-theme="">
 <head>
     {% comment %}
-        SDK плеера Vibix. Один скрипт в <head> — система сама находит теги <ins>.
-        Резервный адрес грузится только как фоллбек клиентским скриптом vibix-player.js
-        при сбое основного.
+        Актуальная инструкция Vibix требует оба асинхронных SDK в <head>.
+        SDK сам находит теги <ins> в body и поддерживает data-nopreload.
     {% endcomment %}
-<script src="https://graphicslab.io/sdk/v2/rendex-sdk.min.js"></script>
+<script src="https://graphicslab.io/sdk/v2/rendex-sdk.min.js" async></script>
+<script src="https://alt.graphicslab.io/sdk/v2/rendex-sdk.min.js" async></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="color-scheme" content="dark light">
