@@ -4,6 +4,11 @@
 # Виртуальное окружение
 .venv/
 venv/
+
+# .vscode
+.vscode/*
+
+# Node JS
 node_modules/*
 # Python
 __pycache__/

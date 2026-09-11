@@ -20,7 +20,7 @@ Vibix нельзя описывать одним доменом. Для инте
 | `https://dev.plugins.vibix.org/` | Dev-контур DLE-плагина | Не используется |
 | `https://static.vibix.org/` | Статический host без публичного root-контракта | Не используется напрямую |
 | `https://demo.vibix.org/` | Сейчас не является рабочим demo-контрактом | Не используется |
-| `https://graphicslab.io/sdk/v2/rendex-sdk.min.js` | Mutable SDK браузерного плеера | Только после клика зрителя |
+| `https://graphicslab.io/sdk/v2/rendex-sdk.min.js` и `alt.graphicslab.io` | SDK браузерного плеера | Загружаются асинхронно в `<head>`; сам плеер — после клика при `data-nopreload` |
 | `https://*.kinescopecdn.net` | Текущий iframe/CDN-контур SDK | Разрешён в CSP для frame/connect |
 | `https://*.videoframe2.com` | Прежний/вспомогательный iframe-контур | Разрешён в CSP для frame/connect |
 | `https://sync.videoframe2.com/` | WatchParty script/WebSocket | Не подключён |
@@ -175,16 +175,10 @@ Publisher ID обязан быть числовым. Design ограничен `
 
 ### Lazy loading и privacy boundary
 
-Шаблон рендерит `<ins>` с публичными ID, локальный `static/js/vibix-player.js`
-и один тег SDK в `<head>` (base.html) — так SDK сам находит теги `<ins>` при
-загрузке страницы, как требует официальная документация Vibix. После кнопки
-«Запустить плеер Vibix» загрузчик:
-
-1. ждёт уже подключённый SDK и при его сбое догружает резервный URI
-   (`alt.graphicslab.io`) — дубли в `<head>` не создаются;
-2. наблюдает за заменой `<ins>` на iframe;
-3. показывает loading/error state с 20-секундным timeout;
-4. не передаёт `VIBIX_API_TOKEN` браузеру;
+Шаблон рендерит `<ins>` с публичными ID и двумя асинхронными тегами SDK в
+`<head>` (base.html), как требует актуальная инструкция Vibix. `data-poster`
+показывает превью, а `data-nopreload` передаёт обработку клика самому SDK,
+который создаёт iframe. `VIBIX_API_TOKEN` браузеру не передаётся.
 5. корректно сохраняет выбранную до запуска серию в `data-season` и
    `data-episodes`.
 

@@ -126,7 +126,8 @@ OpenAPI Vibix. Это справочный материал, а не единс�
 
 В `<head>`:
 ```html
-<script src="https://graphicslab.io/sdk/v2/rendex-sdk.min.js"></script>
+<script src="https://graphicslab.io/sdk/v2/rendex-sdk.min.js" async></script>
+<script src="https://alt.graphicslab.io/sdk/v2/rendex-sdk.min.js" async></script>
 ```
 
 **Пример использования:**
@@ -205,7 +206,8 @@ WebSocket-контракт не прошёл origin/auth/privacy review.
   data-id="VIDEO_ID"
   data-sync="true"></ins>
 
-<script src="https://graphicslab.io/sdk/v2/rendex-sdk.min.js"></script>
+<script src="https://graphicslab.io/sdk/v2/rendex-sdk.min.js" async></script>
+<script src="https://alt.graphicslab.io/sdk/v2/rendex-sdk.min.js" async></script>
 <script src="https://sync.videoframe2.com/sync-lib.js"></script>
 <script>
 new WatchParty({ iframe: '#vibix-frame-id' });
@@ -222,7 +224,7 @@ new WatchParty({ iframe: '#vibix-frame-id' });
 | `/publisher/videos/kp/{id}` | `fetch_video_by_kp()` в `video_service_api.py` |
 | `/serials/kp/{id}` (без /publisher) | `fetch_serial_by_kp()` + `VIDEO_SERVICE_SERIALS_API_BASE` |
 | `Authorization: Bearer {API_KEY}` | `get_vibix_api_token()`; токен только из окружения |
-| `rendex-sdk.min.js` | `vibix-player.js` добавляет SDK в `<head>` только после клика зрителя |
+| `rendex-sdk.min.js` | Оба асинхронных URL из актуальной инструкции подключены в `<head>`; SDK сам запускает `data-nopreload` после клика |
 | `data-type="kp" data-id="326"` | Fallback в `_get_external_player()`, когда нет проверенного `player_id` |
 | `data-design` (1–6) | Валидируется и берётся из `VIDEO_SERVICE_DESIGN` |
 | `vibix_union` реклама | Отдельный legacy-контур, выключен (`ADS_NETWORK_ENABLED=False`) и не входит в ядро |

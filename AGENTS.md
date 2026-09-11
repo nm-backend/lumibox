@@ -46,8 +46,9 @@ podman-compose logs web    # entrypoint: миграции → каталог →
 
 ## Recent Changes
 
+- **Актуализация SDK Vibix по инструкции партнёрского кабинета**: текущая инструкция требует оба асинхронных SDK (`graphicslab.io` и `alt.graphicslab.io`) в `<head>`. LumiBox теперь следует ей напрямую: удалены локальный overlay/gate и `vibix-player.js`, которые перекрывали нативный клик `data-nopreload` и могли не дать SDK создать iframe. Разметка `<ins>` и параметры (`movie|series|kp|imdb`, poster, season, episodes, voiceover, design) уже соответствовали контракту.
 - **Исправление плеера Vibix на продакшене**: найдена главная причина неработающего плеера — у многих фильмов в базе данных было заполнено поле `player_id`, но поле `player_type` было пустым. Без `player_type` логика `_get_external_player()` не может определить тип плеера, и плеер не работает. Добавлена management команда `fix_player_types.py` для автоматического исправления: она находит все записи с `player_id` но без `player_type` и заполняет `player_type` на основе поля `is_series` (movie для фильмов, series для сериалов). Проверено на продакшене: после установки `player_type="movie"` для "Дьявол носит Prada 2" плеер начал работать корректно.
-- **Исправление SDK плеера Vibix**: удалён глобальный тестовый тег из `base.html` (data-id="8036", data-type="series"), который конфликтовал с реальными плеерами на страницах фильмов. SDK Vibix находил этот глобальный тег вместо конкретных плееров, что вызывало ошибку "Извините, запрашиваемый контент ещё не добавлен". Также исправлена загрузка SDK: согласно инструкции должен быть один скрипт без `async`, а резервный скрипт `alt.graphicslab.io` должен загружаться динамически через JavaScript при ошибке. Теперь в `base.html` только основной скрипт `graphicslab.io` без `async`, а резервный загружается через `vibix-player.js` при сбое. Проверено: теги плеера рендерятся с правильными параметрами (player_id, player_type, publisher_id), старый тестовый тег отсутствует.
+- **Предыдущее исправление SDK Vibix (заменено актуальной инструкцией)**: удалён глобальный тестовый тег из `base.html` (data-id="8036", data-type="series"), который конфликтовал с реальными плеерами на страницах фильмов. Проверка партнёрской инструкции позже показала, что способ с одним синхронным SDK устарел.
 - **Полный каталог в локальной dev-БД + починка авто-логина Vibix**: правка `config/settings/base.py` — добавлены `VIBIX_USERNAME`/`VIBIX_PASSWORD` в `env.Env()` и проброс в settings; раньше `login_vibix()` не мог получить креды из `.env`, и документированный auto-fallback токена никогда не работал. Плюс ротация протухшего `VIBIX_API_TOKEN` в `.env` через `login_vibix()`. После этого локально импортирован весь каталог издателя (`sync_vibix --create-missing`, возобновляемым запуском после сетевого обрыва): 29 941 запись, DRAFT по умолчанию, `player_id` заполнен у 29 940/29 941 (единственная без — «Одна ночь», kp 5509288: на стороне Vibix embed-данных плеера нет вообще).
 - **Массовый импорт каталога Vibix (`--create-missing`)**: новый режим в `sync_vibix` обходит весь список издателя и создаёт отсутствующие записи. Дедуп по kp_id (снимок + частичный уникальный индекс `title_kp_id_uniq_when_filled`, миграция 0026 с дедупликацией старых дублей), батчи по 500 через bulk_create, блокировка от параллельных прогонов (`VideoServiceSyncState.locked_at`, TTL 12 ч, `--unlock`), DRAFT по умолчанию, постеры через URL-поля `poster_url/backdrop_url` (без скачивания), серверный фильтр `type movie|serial` в клиенте, dry-run, прогресс, детальный отчёт, Celery-задача `create_missing_catalog`. Ядро: `bulk_create_from_catalog()` в `video_service_sync.py`. Проверено: 821 тест, ruff/mypy чистые, масштабный тест 5000 записей ≈2500 зап/с, возобновление после обрыва, живой импорт страниц каталога.
 - **Секреты**: из `.env.example` удалён реальный Vibix-токен (считать скомпрометированным — ротировать!), исправлен `VIBIX_API_BASE_URL` на `https://api.vibix.org/api/v1`.
@@ -56,6 +57,11 @@ podman-compose logs web    # entrypoint: миграции → каталог →
 - **Automated Verification**: Added comprehensive test suite `apps/catalog/tests/test_vibix_e2e.py` and Playwright browser E2E test `tests_e2e_playwright.js` verifying player gate button, SDK injection, and 6 mobile viewports (320px–1440px) with zero overflow.
 
 ## Session Memory
+
+### Session 2026-09-11 — Актуализация подключения Vibix
+- Пользователь прислал актуальную инструкцию партнёрского кабинета: обязательны оба скрипта с `async`: `graphicslab.io/sdk/v2/rendex-sdk.min.js` и `alt.graphicslab.io/sdk/v2/rendex-sdk.min.js`.
+- Разметка LumiBox `<ins data-publisher-id data-type data-id>` и параметры `series`, `kp`, `imdb`, `data-poster`, `data-nopreload`, сезоны и озвучки соответствуют инструкции.
+- Корень сбоя: ранее оставлялся один SDK без `async`, а локальный `vibix-player.js` накрывал нативный постер кнопкой и не пересылал клик на `<ins>`. При `data-nopreload` это могло оставить iframe несозданным до таймаута. Перешли на штатную лёгкую интеграцию SDK.
 
 - Vibix API base URL: `https://api.vibix.org/api/v1`
 - Publisher ID: `678503345` (User ID `1184`)
@@ -96,4 +102,3 @@ podman-compose logs web    # entrypoint: миграции → каталог →
 - **start.sh**: добавлена поддержка Podman как fallback для Docker, исправлена генерация `$ADMINPASS`.
 - **AGENTS.md**: добавлен раздел `Team Setup` с инструкциями запуска для команды.
 - Локальный запуск через `env -i` + nohup работает, но для команды рекомендуется `podman-compose up --build -d`.
-
