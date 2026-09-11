@@ -4,7 +4,7 @@
 # Виртуальное окружение
 .venv/
 venv/
-
+node_modules/*
 # Python
 __pycache__/
 *.py[cod]
