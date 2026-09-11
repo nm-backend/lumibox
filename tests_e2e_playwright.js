@@ -32,28 +32,12 @@ async function runE2ETests() {
         const titleText = await page.textContent('h1');
         console.log('Title text:', titleText.trim());
 
-        const gateBtn = await page.$('[data-vibix-load]');
-        console.log('Found Vibix Load Gate Button:', !!gateBtn);
-
-        // SDK теперь загружается из <head> при загрузке страницы.
-        const sdkScript = await page.$('script[src*="rendex-sdk.min.js"]');
-        console.log('Rendex SDK present in head:', !!sdkScript);
-
-        if (gateBtn) {
-            console.log('Clicking Vibix gate button...');
-            await gateBtn.click();
-            await page.waitForTimeout(3000);
-
-            const sdkScriptAfter = await page.$('script[src*="rendex-sdk.min.js"]');
-            console.log('Rendex SDK injected in head after click:', !!sdkScriptAfter);
-
-            const iframe = await page.$('iframe');
-            console.log('Iframe element created in DOM:', !!iframe);
-            if (iframe) {
-                const src = await iframe.getAttribute('src');
-                console.log('Iframe src:', src);
-            }
-        }
+        const sdkScripts = await page.$$('script[src*="rendex-sdk.min.js"]');
+        const asyncScripts = await Promise.all(sdkScripts.map(script => script.evaluate(node => node.async)));
+        const playerTag = await page.$('ins[data-publisher-id][data-nopreload="true"]');
+        console.log('Rendex SDK scripts in head:', sdkScripts.length);
+        console.log('Both SDK scripts are async:', asyncScripts.every(Boolean));
+        console.log('Native Vibix lazy player tag found:', !!playerTag);
 
         // 2. Test Series Detail Page
         console.log('\n--- 2. Testing Series Detail Page (Game of Thrones) ---');
