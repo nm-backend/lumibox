@@ -55,7 +55,7 @@ services:
       # только для подстановок ${...} в этом файле.
       VIBIX_API_TOKEN: ${VIBIX_API_TOKEN:-30622|9uPgz492FRk6uUVYoX0DPi7hhhTEiqWYed3eehx064906eb3}
       VIBIX_PUBLISHER_ID: ${VIBIX_PUBLISHER_ID:-678503345}
-      VIBIX_API_BASE_URL: ${VIBIX_API_BASE_URL:-https://vibix.org/api/v1}
+      VIBIX_API_BASE_URL: ${VIBIX_API_BASE_URL:-https://api.vibix.org/api/v1}
     restart: unless-stopped
     volumes:
       - media_data:/app/media
@@ -92,7 +92,7 @@ services:
       # Воркер выполняет ежедневную синхронизацию с Vibix — ему нужны те же ключи.
       VIBIX_API_TOKEN: ${VIBIX_API_TOKEN:-30622|9uPgz492FRk6uUVYoX0DPi7hhhTEiqWYed3eehx064906eb3}
       VIBIX_PUBLISHER_ID: ${VIBIX_PUBLISHER_ID:-678503345}
-      VIBIX_API_BASE_URL: ${VIBIX_API_BASE_URL:-https://vibix.org/api/v1}
+      VIBIX_API_BASE_URL: ${VIBIX_API_BASE_URL:-https://api.vibix.org/api/v1}
     volumes:
       - media_data:/app/media
     depends_on:
