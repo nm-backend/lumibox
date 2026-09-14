@@ -547,7 +547,8 @@
             {% if external_player %}
                 {% comment %} data-nopreload — штатная отложенная загрузка Vibix:
                    SDK показывает постер и создаёт iframe после клика зрителя. {% endcomment %}
-                <div class="player" data-player-pane="external">
+            {# 
+                   <div class="player" data-player-pane="external">
                     <ins data-publisher-id="{{ external_player.publisher_id }}"
                          data-type="{{ external_player.type }}"
                          data-id="{{ external_player.id }}"
@@ -559,7 +560,9 @@
                          {% if external_player.voiceover %} data-voiceover="{{ external_player.voiceover }}"{% endif %}
                          {% if external_player.voiceover_only %} data-voiceover-only="true"{% endif %}
                          {% if external_player.autoplay %} data-autoplay="true"{% endif %}></ins>
-                </div>
+                </div> #}
+                <ins data-publisher-id="678503345" data-type="movie" data-id="4427" data-design="1" data-color1="#56CEAA" data-color2="#FFFFFF" data-color3="#AEC7BC" data-color4="#42BD88" data-color5="#000000"></ins>
+
             {% endif %}
 
             {% if title.trailer_source %}
