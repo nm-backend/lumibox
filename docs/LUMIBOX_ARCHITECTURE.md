@@ -170,8 +170,9 @@ serial endpoint.
 3. IMDb `tt...` с типом `imdb`;
 4. numeric `player_id` + `movie|series` для записей без KP/IMDb.
 
-Publisher ID обязан быть числовым. Design ограничен `1..6`, trailer —
-`true|only`. Для прямого series embed передаются season/episode; сопоставленная
+Publisher ID обязан быть числовым. Design ограничен `1..6`. `data-trailer`
+не передаётся: фильмы открываются обычным embed из актуальной инструкции
+Vibix. Для прямого series embed передаются season/episode; сопоставленная
 озвучка передаётся `data-voiceover`.
 
 ### Lazy loading и privacy boundary

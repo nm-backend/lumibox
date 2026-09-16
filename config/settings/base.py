@@ -74,11 +74,9 @@ env = environ.Env(
     # блокируют запуск со звуком без действия зрителя, поэтому
     # по умолчанию выключено.
     VIDEO_SERVICE_AUTOPLAY=(bool, False),
-    # Показ трейлера для kp/imdb-эмбедов (data-trailer). Значения:
-    # "true" — трейлер, когда полное видео в каталоге сервиса отсутствует
-    # (запасной сценарий: вместо заглушки зритель увидит трейлер);
-    # "only" — всегда только трейлер; пустая строка отключает параметр.
-    VIDEO_SERVICE_TRAILER=(str, "true"),
+    # Legacy setting; current Vibix partner instructions for LumiBox use the
+    # regular kp/imdb embed and do not emit data-trailer.
+    VIDEO_SERVICE_TRAILER=(str, ""),
 )
 
 # Секретный ключ обязателен и никогда не хранится в коде.

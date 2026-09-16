@@ -234,8 +234,7 @@ class TitleDetailViewTests(TestCase):
         self.assertContains(response, 'data-publisher-id="678503345"')
         self.assertContains(response, 'data-type="kp"')
         self.assertContains(response, 'data-id="326"')
-        # kp/imdb-фолбэк: плеер покажет трейлер, если видео нет в каталоге.
-        self.assertContains(response, 'data-trailer="true"')
+        self.assertNotContains(response, "data-trailer=")
 
     def test_external_player_falls_back_to_imdb(self):
         title = create_title(imdb_id="tt0111161")
@@ -250,22 +249,9 @@ class TitleDetailViewTests(TestCase):
         self.assertContains(response, 'data-type="imdb"')
         self.assertContains(response, 'data-id="tt0111161"')
 
-    def test_external_player_trailer_off_by_setting(self):
-        title = create_title(kp_id="326")
-        with self.settings(VIDEO_SERVICE_TRAILER=""):
-            response = self.client.get(title.get_absolute_url())
-        self.assertContains(response, 'data-type="kp"')
-        self.assertNotContains(response, "data-trailer=")
-
-    def test_external_player_trailer_only_mode(self):
+    def test_external_player_ignores_trailer_mode(self):
         title = create_title(imdb_id="tt0111161")
         with self.settings(VIDEO_SERVICE_TRAILER="only"):
-            response = self.client.get(title.get_absolute_url())
-        self.assertContains(response, 'data-trailer="only"')
-
-    def test_external_player_drops_unknown_trailer_mode(self):
-        title = create_title(kp_id="326")
-        with self.settings(VIDEO_SERVICE_TRAILER="unexpected"):
             response = self.client.get(title.get_absolute_url())
         self.assertNotContains(response, "data-trailer=")
 

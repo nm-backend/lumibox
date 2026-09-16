@@ -646,12 +646,6 @@ class TitleDetailView(DetailView):
             "id": player_id,
         }
 
-        # data-trailer относится к режимам разрешения по внешнему ID.
-        # Неизвестное значение не передаём в mutable SDK как новый режим.
-        trailer = settings.VIDEO_SERVICE_TRAILER.strip().lower()
-        if player_type in {"kp", "imdb"} and trailer in {"true", "only"}:
-            player["trailer"] = trailer
-
         if player_type in {"movie", "series"}:
             voiceover_ids = self._external_voiceover_ids()
             if voiceover_ids:
