@@ -550,9 +550,18 @@
                 
                 {% if external_player %}
                     <div class="player" data-player-pane="external">
-                        <ins data-publisher-id="678503345"
-                            data-type="imdb"
-                            data-id="tt1375666"></ins>
+                        <ins data-publisher-id="{{ external_player.publisher_id }}"
+                            data-type="{{ external_player.type }}"
+                            data-id="{{ external_player.id }}"
+                            {% if external_player.design %}data-design="{{ external_player.design }}"{% endif %}
+                            {% if external_player.voiceover %}data-voiceover="{{ external_player.voiceover }}"{% endif %}
+                            {% if external_player.voiceover_only %}data-voiceover-only="true"{% endif %}
+                            {% if external_player.season %}data-season="{{ external_player.season }}"{% endif %}
+                            {% if external_player.episodes %}data-episodes="{{ external_player.episodes }}"{% endif %}
+                            {% if external_player.autoplay %}data-autoplay="true"{% endif %}
+                            {% for n, color in external_player.colors.items %}
+                                {% if color %}data-color{{ n }}="{{ color }}"{% endif %}
+                            {% endfor %}></ins>
                     </div>
                 {% endif %}
 
