@@ -548,20 +548,13 @@
                 
                 
                 
-                  {% if external_player %}
-                    <div class="player" data-player-pane="external">
-                        <iframe
-                            src="https://river-3-329.kinescopecdn.net/{{ external_player.publisher_id }}/embed-kp/{{ external_player.id }}?design={{ external_player.design }}{% for n, color in external_player.colors.items %}{% if color %}&color{{ n }}={{ color|urlencode }}{% endif %}{% endfor %}&poster=true&nopreload=true&lang=ru"
-                            width="100%"
-                            height="370"
-                            frameborder="0"
-                            allow="autoplay; fullscreen; picture-in-picture; encrypted-media"
-                            referrerpolicy="origin"
-                            allowfullscreen
-                            style="display:block;width:100%;border:0;">
-                        </iframe>
-                    </div>
-                    {% endif %}
+                {% if external_player %}
+                        <div class="player" data-player-pane="external">
+                            <ins data-publisher-id="678503345"
+                                data-type="kp"
+                                data-id="{{ external_player.id }}"></ins>
+                        </div>
+                {% endif %}
 
             {% if title.trailer_source %}
                 <div class="player" data-player-pane="trailer" hidden>
