@@ -225,7 +225,7 @@ new WatchParty({ iframe: '#vibix-frame-id' });
 | `/serials/kp/{id}` (без /publisher) | `fetch_serial_by_kp()` + `VIDEO_SERVICE_SERIALS_API_BASE` |
 | `Authorization: Bearer {API_KEY}` | `get_vibix_api_token()`; токен только из окружения |
 | `rendex-sdk.min.js` | Оба асинхронных URL из актуальной инструкции подключены в `<head>`; SDK сам запускает `data-nopreload` после клика |
-| `data-type="kp" data-id="326"` | Fallback в `_get_external_player()`, когда нет проверенного `player_id` |
+| `data-type="kp" data-id="326"` | Приоритетный браузерный embed в `_get_external_player()` для фильмов с KP ID; series embed сохраняется для серий |
 | `data-design` (1–6) | Валидируется и берётся из `VIDEO_SERVICE_DESIGN` |
 | `vibix_union` реклама | Отдельный legacy-контур, выключен (`ADS_NETWORK_ENABLED=False`) и не входит в ядро |
 | Микроразметка | Общая Movie/TVSeries JSON-LD реализована; специальные поля Vibix не хранятся |

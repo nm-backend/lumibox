@@ -269,13 +269,12 @@ class TitleDetailViewTests(TestCase):
             response = self.client.get(title.get_absolute_url())
         self.assertNotContains(response, "data-trailer=")
 
-    def test_external_player_prefers_internal_id_over_kp(self):
+    def test_external_player_prefers_kp_over_internal_id(self):
         title = create_title(kp_id="447301", player_id="4427", player_type="movie")
         response = self.client.get(title.get_absolute_url())
-        self.assertContains(response, 'data-type="movie"')
-        self.assertContains(response, 'data-id="4427"')
-        self.assertNotContains(response, 'data-id="447301"')
-        # movie/serial-эмбед по внутреннему ID: data-trailer не нужен.
+        self.assertContains(response, 'data-type="kp"')
+        self.assertContains(response, 'data-id="447301"')
+        self.assertNotContains(response, 'data-id="4427"')
         self.assertNotContains(response, 'data-trailer=')
 
     def test_external_player_serial_type(self):

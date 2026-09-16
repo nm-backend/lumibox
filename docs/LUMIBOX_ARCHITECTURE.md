@@ -165,9 +165,10 @@ serial endpoint.
 
 Страница не обращается к серверному API Vibix. Приоритет публичного embed:
 
-1. numeric `player_id` + `movie|series`;
+1. для сериалов — numeric `player_id` + `series`, чтобы передать сезон/серию;
 2. numeric `kp_id` с типом `kp`;
-3. IMDb `tt...` с типом `imdb`.
+3. IMDb `tt...` с типом `imdb`;
+4. numeric `player_id` + `movie|series` для записей без KP/IMDb.
 
 Publisher ID обязан быть числовым. Design ограничен `1..6`, trailer —
 `true|only`. Для прямого series embed передаются season/episode; сопоставленная
@@ -179,15 +180,15 @@ Publisher ID обязан быть числовым. Design ограничен `
 `<head>` (base.html), как требует актуальная инструкция Vibix. `data-poster`
 показывает превью, а `data-nopreload` передаёт обработку клика самому SDK,
 который создаёт iframe. `VIBIX_API_TOKEN` браузеру не передаётся.
-5. корректно сохраняет выбранную до запуска серию в `data-season` и
-   `data-episodes`.
+Для прямого series embed выбранная до запуска серия сохраняется в
+`data-season` и `data-episodes`.
 
 Это важно, потому что SDK обфусцирован и изменяется по неизменному URL. В
 публичных сборках наблюдались разные digests и iframe-инфраструктура
 `*.kinescopecdn.net` / `*.videoframe2.com`. SRI на mutable URL использовать
-нельзя без фиксации конкретного разрешённого артефакта; вместо ложной
-гарантии применяется один проверенный URI, резервный фоллбек, строгая CSP
-и timeout UX.
+нельзя без фиксации конкретного разрешённого артефакта; вместо этого
+используются только URL из актуальной инструкции Vibix, а CSP ограничивает
+разрешённые контуры SDK/iframe/connect.
 
 CSP разрешает SDK с `graphicslab.io` и iframe/connect только с известных
 контуров `*.kinescopecdn.net` и `*.videoframe2.com`. Media уже разрешено по

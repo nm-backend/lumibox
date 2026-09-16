@@ -586,13 +586,16 @@ class TitleDetailView(DetailView):
 
         Серверный API здесь не вызывается: открытие страницы не должно
         зависеть от сети Vibix и ждать его retry/timeout. Синхронизация
-        заранее сохраняет проверенный ``player_id`` из ``embed_code``.
-        Если его ещё нет, SDK умеет разрешить KP/IMDb ID в браузере.
+        заранее сохраняет ``player_id`` из ``embed_code``. Но этот ID
+        привязан к состоянию каталога Vibix и может устареть; актуальная
+        инструкция партнёрского кабинета поддерживает публичное разрешение
+        по KP/IMDb ID прямо в SDK.
 
         Приоритет источников:
-        1. внутренний ID плеера, полученный синхронизацией;
+        1. для сериалов — внутренний ID плеера, чтобы передать сезон/серию;
         2. Kinopoisk ID;
-        3. IMDb ID.
+        3. IMDb ID;
+        4. внутренний ID плеера для записей без KP/IMDb.
         """
         publisher_id = settings.VIDEO_SERVICE_PUBLISHER_ID.strip()
         # Контракт SDK принимает числовой publisher ID. Невалидная
@@ -611,7 +614,11 @@ class TitleDetailView(DetailView):
         if not internal_type:
             internal_type = "series" if self.object.is_series else "movie"
 
-        if internal_id.isdigit() and internal_type in {"movie", "series"}:
+        has_internal_embed = (
+            internal_id.isdigit() and internal_type in {"movie", "series"}
+        )
+
+        if self.object.is_series and has_internal_embed:
             player_type, player_id = internal_type, internal_id
         elif self.object.kp_id.strip().isdigit():
             player_type, player_id = "kp", self.object.kp_id.strip()
@@ -619,6 +626,8 @@ class TitleDetailView(DetailView):
             imdb_id = self.object.imdb_id.strip().lower()
             if imdb_id.startswith("tt") and imdb_id[2:].isdigit():
                 player_type, player_id = "imdb", imdb_id
+            elif has_internal_embed:
+                player_type, player_id = internal_type, internal_id
 
         if player_type is None or player_id is None:
             return None
