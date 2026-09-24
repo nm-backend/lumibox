@@ -4,6 +4,22 @@
 {% block body_class %}lb-body{% endblock %}
 
 {% block page_title %}{% trans "LumiBox — смотреть фильмы и сериалы онлайн" %}{% endblock %}
+{% block extra_meta %}
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "LumiBox",
+    "url": "https://lumibox.site",
+    "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://lumibox.site/search?q={search_term}",
+        "query-input": "required name=search_term"
+    }
+}
+</script>
+{% endblock %}
+
 
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'css/home_feed.css' %}?v={{ static_version }}">
