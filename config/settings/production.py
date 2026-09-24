@@ -180,7 +180,7 @@ SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = "DENY"
 
 # Referrer-Policy: не передаём URL страницы на внешние сайты.
-SECURE_REFERRER_POLICY = "same-origin"
+SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
 
 # Cookie CSRF и сессии — только HTTP (не читаются из JavaScript).
 # CSRF_COOKIE_SAMESITE = 'Lax' уже проставлен по умолчанию в Django.
