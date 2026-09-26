@@ -50,20 +50,22 @@
 
         </div>
 
+        {# ---------- Реквизиты: разработка ---------- #}
         <div class="footer-credits">
-            <p class="footer-credits__item">
+            <div class="footer-credits__dev">
                 <span class="footer-credits__label">{% trans "Разработка" %}</span>
-                <a class="footer-credits__link" href="https://github.com/nm-backend" target="_blank" rel="noopener noreferrer">
-                    {% icon "github" size=14 %} GitHub: nm-backend
-                </a>
-            </p>
-            <span class="footer-credits__sep" aria-hidden="true">·</span>
-            <p class="footer-credits__item">
-                <span class="footer-credits__label">{% trans "Руководитель проекта" %}</span>
-                <a class="footer-credits__link" href="https://t.me/sonder1r" target="_blank" rel="noopener noreferrer">
-                    {% trans "Telegram: @sonder1r" %}
-                </a>
-            </p>
+                <div class="footer-credits__author">
+                    <span class="footer-credits__name">Musajanov Nurullo</span>
+                    <div class="footer-credits__socials">
+                        <a class="footer-credits__social" href="https://github.com/nm-backend" target="_blank" rel="noopener noreferrer" aria-label="GitHub" title="GitHub">
+                            {% icon "github" size=18 %}
+                        </a>
+                        <a class="footer-credits__social" href="https://t.me/nm_2110" target="_blank" rel="noopener noreferrer" aria-label="Telegram" title="Telegram">
+                            {% icon "telegram" size=18 %}
+                        </a>
+                    </div>
+                </div>
+            </div>
         </div>
 
         {# ---------- Trust signals / Юридическая информация ---------- #}
@@ -80,14 +82,6 @@
                 {% now "Y" as current_year %}
                 {% blocktranslate %}© {{ current_year }} LumiBox.{% endblocktranslate %}
             </p>
-            <div class="footer-bottom__links">
-                <a class="footer-bottom__telegram-link" href="https://t.me/lumiboxxx" target="_blank" rel="noopener noreferrer" aria-label="{% trans 'Telegram' %}">
-                    <svg class="footer-bottom__telegram-icon" viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
-                        {% icon "send" size=18 %}
-                    </svg>
-                    {% trans "Telegram" %}
-                </a>
-            </div>
         </div>
     </div>
 </footer>

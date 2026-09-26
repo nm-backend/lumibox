@@ -129,3 +129,46 @@ class StaticPagesTests(TestCase):
             with self.subTest(page=name):
                 response = self.client.get(reverse(name))
                 self.assertContains(response, "css/forms.css")
+
+
+class FooterMarkupTests(TestCase):
+    """
+    Проверка актуальной структуры подвала сайта (footer):
+    - Блок разработчика: 'Musajanov Nurullo', ссылки на GitHub и Telegram с SVG-иконками
+    - Отсутствие устаревших формулировок ('Руководитель проекта', 'GitHub: nm-backend')
+    - Отсутствие дублирующей ссылки на Telegram внизу
+    - Наличие доверительных и правовых ссылок (18+, Политика конфиденциальности,
+      Правообладателям, Пользовательское соглашение, Лицензия MIT)
+    - Наличие копирайта LumiBox
+    - Наличие разделов навигации (Каталог, Разделы, Информация)
+    """
+
+    def test_footer_structure_and_links(self):
+        response = self.client.get(reverse("catalog:home"), HTTP_HOST="localhost")
+        self.assertEqual(response.status_code, 200)
+
+        # Проверка разработчика
+        self.assertContains(response, "Musajanov Nurullo")
+        self.assertContains(response, 'href="https://github.com/nm-backend"')
+        self.assertContains(response, 'href="https://t.me/nm_2110"')
+        self.assertContains(response, "icon--github")
+        self.assertContains(response, "icon--telegram")
+
+        # Проверка отсутствия старых формулировок и дублей
+        self.assertNotContains(response, "Руководитель проекта")
+        self.assertNotContains(response, "GitHub: nm-backend")
+        self.assertNotContains(response, "footer-bottom__telegram-link")
+
+        # Проверка trust-сигналов и копирайта
+        self.assertContains(response, "18+")
+        self.assertContains(response, "Политика конфиденциальности")
+        self.assertContains(response, "Правообладателям")
+        self.assertContains(response, "Пользовательское соглашение")
+        self.assertContains(response, "Лицензия MIT")
+        self.assertContains(response, "LumiBox")
+
+        # Проверка разделов
+        self.assertContains(response, "Каталог")
+        self.assertContains(response, "Разделы")
+        self.assertContains(response, "Информация")
+

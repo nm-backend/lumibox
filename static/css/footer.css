@@ -103,51 +103,80 @@
     color: var(--color-accent);
 }
 
-/* ---------- Реквизиты: разработка и руководитель проекта ---------- */
+/* ---------- Реквизиты: разработка ---------- */
 
 .footer-credits {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: var(--space-2) var(--space-4);
     margin-top: var(--space-6);
     padding: var(--space-4) 0;
     border-top: 1px solid var(--color-border);
     border-bottom: 1px solid var(--color-border);
 }
 
-.footer-credits__item {
-    display: inline-flex;
-    align-items: center;
+.footer-credits__dev {
+    display: flex;
+    flex-direction: column;
     gap: var(--space-2);
-    margin: 0;
 }
 
 .footer-credits__label {
+    display: inline-block;
     color: var(--color-text-dim);
-    font-size: var(--text-xs);
+    font-size: var(--text-2xs);
+    font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.06em;
+    letter-spacing: 0.08em;
+    line-height: 1;
 }
 
-.footer-credits__link {
+.footer-credits__author {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    gap: var(--space-3);
+    flex-wrap: wrap;
+}
+
+.footer-credits__name {
     color: var(--color-text);
-    font-family: var(--font-mono);
     font-size: var(--text-sm);
-    text-decoration: none;
-    transition: color var(--transition-fast), text-shadow var(--transition-fast);
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
 }
 
-.footer-credits__link:hover {
-    color: var(--color-accent);
-    text-shadow: 0 0 14px rgba(var(--color-accent-rgb), 0.45);
+.footer-credits__socials {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    flex-shrink: 0;
 }
 
-.footer-credits__sep {
+.footer-credits__social {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    min-height: 32px;
+    border-radius: var(--radius-sm);
     color: var(--color-text-muted);
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--color-border);
+    text-decoration: none;
+    transition: color var(--transition-fast), border-color var(--transition-fast), background var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.footer-credits__social:hover {
+    color: var(--color-accent);
+    border-color: rgba(var(--color-accent-rgb), 0.35);
+    background: rgba(var(--color-accent-rgb), 0.08);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(var(--color-accent-rgb), 0.15);
+}
+
+.footer-credits__social:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+    border-color: var(--color-accent);
 }
 
 /* ---------- Trust-блок ---------- */
@@ -176,13 +205,12 @@
     color: var(--color-accent);
 }
 
-/* ---------- Нижняя строка: © и Telegram ---------- */
+/* ---------- Нижняя строка: © ---------- */
 
 .footer-bottom {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    justify-content: space-between;
     gap: var(--space-3);
     padding-top: var(--space-3);
 }
@@ -191,31 +219,6 @@
     margin: 0;
     color: var(--color-text-dim);
     font-size: var(--text-xs);
-}
-
-.footer-bottom__links {
-    display: flex;
-    align-items: center;
-    gap: var(--space-4);
-}
-
-.footer-bottom__telegram-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    color: var(--color-text-muted);
-    font-size: var(--text-xs);
-    text-decoration: none;
-    transition: color var(--transition-fast), text-shadow var(--transition-fast);
-}
-
-.footer-bottom__telegram-link:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 3px 10px rgba(30, 150, 200, 0.4), 0 0 16px rgba(30, 150, 200, 0.2);
-}
-
-.footer-bottom__telegram-icon {
-    flex-shrink: 0;
 }
 
 /* ---------- Адаптив ---------- */
@@ -246,17 +249,11 @@
     }
 
     .footer-credits {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: var(--space-2);
+        padding: var(--space-3) 0;
     }
 
-    .footer-credits__sep {
-        display: none;
-    }
-
-    .footer-bottom {
-        flex-direction: column;
-        align-items: flex-start;
+    .footer-trust {
+        gap: var(--space-2) var(--space-4);
+        padding: var(--space-3) 0 var(--space-2);
     }
 }

@@ -46,6 +46,7 @@ podman-compose logs web    # entrypoint: миграции → каталог →
 
 ## Recent Changes
 
+- **Редизайн и улучшение footer**: подвал сайта приведен к более чистому, премиальному и профессиональному виду без изменения остального дизайна. Блок разработчика обновлён: убраны «РУКОВОДИТЕЛЬ ПРОЕКТА» и текстовый формат «GitHub: nm-backend», выведено имя `Musajanov Nurullo` с двумя минималистичными ссылками-иконками (SVG GitHub и Telegram), ведущими на `https://github.com/nm-backend` и `https://t.me/nm_2110`. Убран дублирующий Telegram из правого нижнего угла подвала. В `icons.svg` добавлен символ `icon-telegram` (stroke-based вектор в общем стиле Feather/Tabler). Сохранены все правовые ссылки (18+, Политика конфиденциальности, Правообладателям, Пользовательское соглашение, Лицензия MIT) и копирайт © 2026 LumiBox. Проверена адаптивность на десктопе (1440px), планшете (768px) и смартфонах (375px, 320px) — элементы не ломают строку и не вызывают переполнения. Добавлен тест `FooterMarkupTests` в `apps/core/tests_views_extended.py`.
 - **Vibix: приоритет KP/IMDb над устаревшим movie player_id**: на продакшен-странице `Начало` SDK уже загружался корректно, но HTML отдавал `data-type="movie" data-id="4427"`, после чего Vibix показывал «контент ещё не добавлен». Причина — сохранённый ранее `player_id` может устареть или быть неактуальным для аккаунта, а текущая инструкция Vibix официально поддерживает `data-type="kp"`/`imdb`. Для фильмов `_get_external_player()` теперь сначала отдаёт KP, затем IMDb, и только потом внутренний `player_id`; для сериалов валидный `series` embed остаётся приоритетным, чтобы сохранять сезон/серию.
 - **Vibix trailer mode removed from embed**: после деплоя `Начало` уже отдавало `data-type="kp" data-id="447301"`, но также `data-trailer="true"`. Атрибут убран из `_get_external_player()` полностью, чтобы фильмы открывались обычным KP embed из актуальной инструкции Vibix независимо от старого окружения.
 - **Актуализация SDK Vibix по инструкции партнёрского кабинета**: текущая инструкция требует оба асинхронных SDK (`graphicslab.io` и `alt.graphicslab.io`) в `<head>`. LumiBox теперь следует ей напрямую: удалены локальный overlay/gate и `vibix-player.js`, которые перекрывали нативный клик `data-nopreload` и могли не дать SDK создать iframe. Разметка `<ins>` и параметры (`movie|series|kp|imdb`, poster, season, episodes, voiceover, design) уже соответствовали контракту.
@@ -59,6 +60,14 @@ podman-compose logs web    # entrypoint: миграции → каталог →
 - **Automated Verification**: Added comprehensive test suite `apps/catalog/tests/test_vibix_e2e.py` and Playwright browser E2E test `tests_e2e_playwright.js` verifying player gate button, SDK injection, and 6 mobile viewports (320px–1440px) with zero overflow.
 
 ## Session Memory
+
+### Session 2026-09-26 — Редизайн и оптимизация footer
+- Обновлен `templates/includes/footer.html`: блок `.footer-credits` переведён на отображение `.footer-credits__label` («РАЗРАБОТКА»), `.footer-credits__name` («Musajanov Nurullo») и `.footer-credits__socials` с кликабельными ссылками-иконками GitHub и Telegram.
+- Из `footer-bottom` удалена отдельная дублирующая ссылка на Telegram.
+- Обновлен `static/css/footer.css` (и скопирован в `staticfiles/css/footer.css`): новые классы `.footer-credits__dev`, `.footer-credits__author`, `.footer-credits__social` с деликатными hover-состояниями (подсветка акцентным цветом `--color-accent`, мягкий фон, тень и сдвиг на 1px).
+- В `static/img/icons.svg` (и `staticfiles/img/icons.svg`) добавлен символ `icon-telegram` в едином 24x24 стиле проекта.
+- Проведено тестирование верстки и сняты контрольные скриншоты во всех брейкпоинтах (320px, 375px, 768px, 1440px).
+- Все тесты `apps.core.tests_views_extended` успешно пройдены.
 
 ### Session 2026-09-11 — Актуализация подключения Vibix
 - Пользователь прислал актуальную инструкцию партнёрского кабинета: обязательны оба скрипта с `async`: `graphicslab.io/sdk/v2/rendex-sdk.min.js` и `alt.graphicslab.io/sdk/v2/rendex-sdk.min.js`.
