@@ -104,10 +104,18 @@
     <div class="container film-hero__inner">
         <div class="film-hero__poster">
             {% if title.poster %}
-                <img class="film-hero__poster-image" src="{{ title.poster|webp_url }}" alt="{% blocktranslate with name=title.name %}Постер: {{ name }}{% endblocktranslate %}" decoding="async">
-            {% else %}
-                <span class="card__placeholder" aria-hidden="true">{{ title.name|first }}</span>
+                <img class="film-hero__poster-image" src="{{ title.poster|webp_url }}"
+                     alt="{% blocktranslate with name=title.name %}Постер: {{ name }}{% endblocktranslate %}"
+                     decoding="async"
+                     onerror="this.classList.add('is-hidden'); this.closest('.film-hero__poster').querySelector('.card__placeholder')?.classList.add('is-visible');">
             {% endif %}
+            <span class="card__placeholder lb-poster-fallback lb-poster-fallback--hero{% if not title.poster %} is-visible{% endif %}" aria-hidden="true">
+                <span class="lb-poster-fallback__badge">
+                    {% icon "movie" size=36 %}
+                </span>
+                <span class="lb-poster-fallback__title">{{ title.name }}</span>
+                <span class="lb-poster-fallback__brand">LumiBox</span>
+            </span>
         </div>
 
         <div class="film-hero__body">
@@ -835,10 +843,15 @@
                 <a class="similar-card" href="{{ similar.get_absolute_url }}" title="{{ similar.name }}">
                     <span class="similar-card__poster">
                         {% if similar.poster %}
-                            <img class="similar-card__image" src="{{ similar.poster|webp_url }}" alt="" loading="lazy" decoding="async">
-                        {% else %}
-                            <span class="similar-card__placeholder">{{ similar.name|first }}</span>
+                            <img class="similar-card__image" src="{{ similar.poster|webp_url }}" alt="" loading="lazy" decoding="async"
+                                 onerror="this.classList.add('is-hidden'); this.closest('.similar-card__poster').querySelector('.similar-card__placeholder')?.classList.add('is-visible');">
                         {% endif %}
+                        <span class="similar-card__placeholder lb-poster-fallback{% if not similar.poster %} is-visible{% endif %}" aria-hidden="true">
+                            <span class="lb-poster-fallback__badge">
+                                {% icon "movie" size=20 %}
+                            </span>
+                            <span class="lb-poster-fallback__title">{{ similar.name }}</span>
+                        </span>
                     </span>
                     <span class="similar-card__name">{{ similar.name }}</span>
                 </a>
@@ -863,10 +876,15 @@
                 <a class="similar-card" href="{{ part.get_absolute_url }}" title="{{ part.name }}">
                     <span class="similar-card__poster">
                         {% if part.poster %}
-                            <img class="similar-card__image" src="{{ part.poster|webp_url }}" alt="" loading="lazy" decoding="async">
-                        {% else %}
-                            <span class="similar-card__placeholder">{{ part.name|first }}</span>
+                            <img class="similar-card__image" src="{{ part.poster|webp_url }}" alt="" loading="lazy" decoding="async"
+                                 onerror="this.classList.add('is-hidden'); this.closest('.similar-card__poster').querySelector('.similar-card__placeholder')?.classList.add('is-visible');">
                         {% endif %}
+                        <span class="similar-card__placeholder lb-poster-fallback{% if not part.poster %} is-visible{% endif %}" aria-hidden="true">
+                            <span class="lb-poster-fallback__badge">
+                                {% icon "movie" size=20 %}
+                            </span>
+                            <span class="lb-poster-fallback__title">{{ part.name }}</span>
+                        </span>
                     </span>
                     <span class="similar-card__name">{{ part.name }}</span>
                 </a>
@@ -879,16 +897,21 @@
 {% comment %}SEO-текст внизу детальной страницы — после контента
    и рекомендаций, перед рекламой и футером.{% endcomment %}
 {% with kind=title.get_type_display|lower %}
-<div class="lb-seo">
-    <h2>{% blocktranslate with name=title.name %}Смотреть {{ name }} онлайн — LumiBox{% endblocktranslate %}</h2>
-    <p>{% blocktranslate with name=title.name kind=kind year=title.release_year %}«{{ name }}» — {{ kind }}
-        {{ year }} года. Смотрите онлайн в хорошем качестве{% endblocktranslate %}{% if title.quality %}{% blocktranslate with quality=title.quality %},
-        {{ quality }}{% endblocktranslate %}{% endif %}{% if title.voice_acting %}{% blocktranslate with voice=title.get_voice_acting_display %}, в озвучке «{{ voice }}»{% endblocktranslate %}{% endif %}.
-        {% trans "Удобный плеер, полное описание, актёры и съёмочная группа, кадры и отзывы зрителей — всё на LumiBox." %}</p>
-    <p>{% blocktranslate with name=title.name %}Смотреть «{{ name }}» можно бесплатно и без регистрации на любом
-        устройстве: компьютер, планшет или смартфон. Оценки, похожие фильмы и персональные рекомендации
-        помогут выбрать, что посмотреть дальше.{% endblocktranslate %}</p>
-</div>
+<section class="lb-seo" aria-labelledby="lb-seo-title">
+    <h2 id="lb-seo-title" class="lb-seo__title">
+        <span class="lb-seo__icon" aria-hidden="true">{% icon "movie" size=20 %}</span>
+        <span>{% blocktranslate with name=title.name %}Смотреть {{ name }} онлайн — LumiBox{% endblocktranslate %}</span>
+    </h2>
+    <div class="lb-seo__content">
+        <p>{% blocktranslate with name=title.name kind=kind year=title.release_year %}«{{ name }}» — {{ kind }}
+            {{ year }} года. Смотрите онлайн в хорошем качестве{% endblocktranslate %}{% if title.quality %}{% blocktranslate with quality=title.quality %},
+            {{ quality }}{% endblocktranslate %}{% endif %}{% if title.voice_acting %}{% blocktranslate with voice=title.get_voice_acting_display %}, в озвучке «{{ voice }}»{% endblocktranslate %}{% endif %}.
+            {% trans "Удобный плеер, полное описание, актёры и съёмочная группа, кадры и отзывы зрителей — всё на LumiBox." %}</p>
+        <p>{% blocktranslate with name=title.name %}Смотреть «{{ name }}» можно бесплатно и без регистрации на любом
+            устройстве: компьютер, планшет или смартфон. Оценки, похожие фильмы и персональные рекомендации
+            помогут выбрать, что посмотреть дальше.{% endblocktranslate %}</p>
+    </div>
+</section>
 {% endwith %}
 
 {% include "includes/ad_slot.html" %}

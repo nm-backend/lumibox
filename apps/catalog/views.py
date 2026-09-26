@@ -618,7 +618,7 @@ class TitleDetailView(DetailView):
             internal_id.isdigit() and internal_type in {"movie", "series"}
         )
 
-        if self.object.is_series and has_internal_embed:
+        if (self.object.is_series or internal_type == "series") and has_internal_embed:
             player_type, player_id = internal_type, internal_id
         elif self.object.kp_id.strip().isdigit():
             player_type, player_id = "kp", self.object.kp_id.strip()

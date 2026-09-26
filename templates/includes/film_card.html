@@ -58,14 +58,18 @@
                              width="180" height="270"
                              alt=""
                              loading="lazy"
-                             decoding="async">
+                             decoding="async"
+                             onerror="this.classList.add('is-hidden'); this.closest('.film-card__poster').querySelector('.film-card__fallback')?.classList.add('is-visible');">
                     </picture>
                     {% endwith %}
-                {% else %}
-                    <span class="film-card__fallback" aria-hidden="true">
-                        {% icon "movie" size=28 %}
-                    </span>
                 {% endif %}
+                <span class="film-card__fallback lb-poster-fallback{% if not title.poster %} is-visible{% endif %}" aria-hidden="true">
+                    <span class="lb-poster-fallback__badge">
+                        {% icon "movie" size=26 %}
+                    </span>
+                    <span class="lb-poster-fallback__title">{{ title.name }}</span>
+                    <span class="lb-poster-fallback__brand">LumiBox</span>
+                </span>
 
                 <span class="film-card__play" aria-hidden="true">
                     {% icon "play" size=22 %}

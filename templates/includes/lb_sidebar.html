@@ -1,4 +1,4 @@
-{% load i18n catalog_filters %}
+{% load i18n catalog_filters icons %}
 
 {% comment %}
    Боковая панель каталога — одна на весь сайт.
@@ -21,7 +21,7 @@
                 <section class="sb-card" aria-labelledby="sb-categories">
                     <h2 class="sb-card__title" id="sb-categories">{% trans "Категории" %}</h2>
                     <nav aria-label="{% trans "Навигация по каталогу" %}">
-                        <ul class="sb-list">
+                        <ul class="sb-list sb-list--genres">
                             {% for genre in genres|slice:":16" %}
                                 <li class="sb-list__item">
                                     <a class="sb-list__link" href="{% url 'catalog:genre_titles' genre.slug %}" title="{{ genre.name }}">
@@ -48,7 +48,11 @@
                                 <li class="sb-films__item">
                                     <a class="sb-films__link" href="{{ title.get_absolute_url }}">
                                         {% if title.poster %}
-                                            <img class="sb-films__poster" src="{{ title.poster|webp_url }}" width="54" height="64" alt="" loading="lazy">
+                                            <img class="sb-films__poster" src="{{ title.poster|webp_url }}" width="54" height="64" alt="" loading="lazy"
+                                                 onerror="this.classList.add('is-hidden'); this.nextElementSibling.classList.add('is-visible');">
+                                            <span class="sb-films__placeholder" aria-hidden="true">{% icon "movie" size=18 %}</span>
+                                        {% else %}
+                                            <span class="sb-films__placeholder is-visible" aria-hidden="true">{% icon "movie" size=18 %}</span>
                                         {% endif %}
                                         <span class="sb-films__main">
                                             <span class="sb-films__name">{{ title.name }}</span>
@@ -70,7 +74,7 @@
                 {# ---------- Годы, страны, сериалы ---------- #}
                 <section class="sb-card" aria-labelledby="sb-years">
                     <h2 class="sb-card__title" id="sb-years">{% trans "По году" %}</h2>
-                    <ul class="sb-list sb-list--compact">
+                    <ul class="sb-list sb-list--compact sb-list--years">
                         {% for year in lb_years|slice:":9" %}
                             <li class="sb-list__item">
                                 <a class="sb-list__link" href="{% url 'catalog:year_titles' year %}"
@@ -80,15 +84,21 @@
                     </ul>
                 </section>
 
+                {% comment %} Страны — самый длинный «хвост» колонки и самый редкий
+                   повод для клика: он свёрнут по умолчанию, но остаётся
+                   в одном нажатии, доступном с клавиатуры без JavaScript. {% endcomment %}
                 {% if lb_country_links %}
-                <section class="sb-card" aria-labelledby="sb-countries">
-                    <h2 class="sb-card__title" id="sb-countries">{% trans "По странам" %}</h2>
-                    <ul class="sb-list sb-list--compact">
+                <details class="sb-card sb-card--collapsible">
+                    <summary class="sb-card__title sb-card__title--row sb-card__summary">
+                        <span>{% trans "По странам" %}</span>
+                        <span class="sb-card__chevron" aria-hidden="true">{% icon "chevron-up" size=16 %}</span>
+                    </summary>
+                    <ul class="sb-list sb-list--compact sb-list--countries">
                         {% for url, label in lb_country_links %}
                             <li class="sb-list__item"><a class="sb-list__link" href="{{ url }}">{{ label }}</a></li>
                         {% endfor %}
                     </ul>
-                </section>
+                </details>
                 {% endif %}
 
                 {% if lb_series_links %}
@@ -115,7 +125,11 @@
                                     <a class="sb-films__link" href="{{ title.get_absolute_url }}">
                                         <span class="sb-films__rank" aria-hidden="true">{{ forloop.counter }}</span>
                                         {% if title.poster %}
-                                            <img class="sb-films__poster" src="{{ title.poster|webp_url }}" width="54" height="64" alt="" loading="lazy">
+                                            <img class="sb-films__poster" src="{{ title.poster|webp_url }}" width="54" height="64" alt="" loading="lazy"
+                                                 onerror="this.classList.add('is-hidden'); this.nextElementSibling.classList.add('is-visible');">
+                                            <span class="sb-films__placeholder" aria-hidden="true">{% icon "movie" size=18 %}</span>
+                                        {% else %}
+                                            <span class="sb-films__placeholder is-visible" aria-hidden="true">{% icon "movie" size=18 %}</span>
                                         {% endif %}
                                         <span class="sb-films__main">
                                             <span class="sb-films__name">{{ title.name }}</span>
@@ -140,7 +154,11 @@
                                 <li class="sb-films__item">
                                     <a class="sb-films__link" href="{{ title.get_absolute_url }}">
                                         {% if title.poster %}
-                                            <img src="{{ title.poster|webp_url }}" width="83" height="123" alt="" loading="lazy">
+                                            <img src="{{ title.poster|webp_url }}" width="83" height="123" alt="" loading="lazy"
+                                                 onerror="this.classList.add('is-hidden'); this.nextElementSibling.classList.add('is-visible');">
+                                            <span class="sb-films__placeholder sb-films__placeholder--poster" aria-hidden="true">{% icon "movie" size=24 %}</span>
+                                        {% else %}
+                                            <span class="sb-films__placeholder sb-films__placeholder--poster is-visible" aria-hidden="true">{% icon "movie" size=24 %}</span>
                                         {% endif %}
                                         <span class="sb-films__name">{{ title.name }}</span>
                                     </a>
@@ -176,7 +194,11 @@
                                 <li class="sb-films__item">
                                     <a class="sb-films__link" href="{{ title.get_absolute_url }}">
                                         {% if title.poster %}
-                                            <img class="sb-films__poster" src="{{ title.poster|webp_url }}" width="54" height="64" alt="" loading="lazy">
+                                            <img class="sb-films__poster" src="{{ title.poster|webp_url }}" width="54" height="64" alt="" loading="lazy"
+                                                 onerror="this.classList.add('is-hidden'); this.nextElementSibling.classList.add('is-visible');">
+                                            <span class="sb-films__placeholder" aria-hidden="true">{% icon "movie" size=18 %}</span>
+                                        {% else %}
+                                            <span class="sb-films__placeholder is-visible" aria-hidden="true">{% icon "movie" size=18 %}</span>
                                         {% endif %}
                                         <span class="sb-films__main">
                                             <span class="sb-films__name">{{ title.name }}<span class="sb-films__year">{{ title.release_year }}</span></span>

@@ -57,6 +57,7 @@
 }
 
 .film-hero__poster {
+    position: relative;
     aspect-ratio: 2 / 3;
     overflow: clip;
     display: grid;
@@ -606,6 +607,9 @@
 }
 
 .similar-card__poster {
+    /* position: relative — якорь для заглушки постера: она лежит абсолютно
+       и без позиционированного родителя растянулась бы на всю страницу. */
+    position: relative;
     aspect-ratio: 2 / 3;
     border-radius: var(--radius-sm);
     overflow: clip;
@@ -624,13 +628,6 @@
 
 .similar-card:hover .similar-card__image {
     transform: scale(1.06);
-}
-
-.similar-card__placeholder {
-    font-size: var(--text-heading);
-    font-weight: 700;
-    color: var(--color-text-dim);
-    text-transform: uppercase;
 }
 
 .similar-card__name {

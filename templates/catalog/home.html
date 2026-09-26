@@ -1,4 +1,4 @@
-﻿{% extends "base.html" %}
+{% extends "base.html" %}
 {% load static i18n catalog_filters icons %}
 
 {% block body_class %}lb-body{% endblock %}
@@ -66,22 +66,27 @@
         </div>
 
         {# ---------- SEO-текст (footerText) ---------- #}
-        <div class="lb-seo">
-            <h2>{% trans "LumiBox — фильмы и сериалы онлайн" %}</h2>
-            {% comment %} movies/series вынесены через with: внутри blocktranslate
-               Django ищет плейсхолдер по имени верхнего уровня, и переменная
-               с точкой ({{ statistics.movies_count }}) не находится — вместо
-               числа подставлялась пустая строка. {% endcomment %}
-            <p>{% blocktranslate with movies=statistics.movies_count series=statistics.series_count %}Рады приветствовать на LumiBox всех любителей интересного и качественного кино!
-                У нас более {{ movies }} фильмов и {{ series }} сериалов онлайн.
-                Вы любите кинематограф так же, как мы? Постоянно следите за выходом новинок?
-                Тогда заходите к нам чаще — мы каждый день пополняем каталог свежими премьерами.
-                Удобный поиск, фильтры по жанрам, годам и странам, персональные рекомендации и избранное —
-                всё это LumiBox.{% endblocktranslate %}</p>
-            <p>{% blocktranslate %}Смотрите любимые фильмы в любое время и на любом устройстве: компьютер, планшет
-                или смартфон. Новинки появляются на сайте сразу после релиза, а классика советского и зарубежного
-                кино всегда в каталоге. Никакой регистрации и подписок — всё бесплатно.{% endblocktranslate %}</p>
-        </div>
+        <section class="lb-seo" aria-labelledby="lb-seo-title">
+            <h2 id="lb-seo-title" class="lb-seo__title">
+                <span class="lb-seo__icon" aria-hidden="true">{% icon "movie" size=20 %}</span>
+                <span>{% trans "LumiBox — фильмы и сериалы онлайн" %}</span>
+            </h2>
+            <div class="lb-seo__content">
+                {% comment %} movies/series вынесены через with: внутри blocktranslate
+                   Django ищет плейсхолдер по имени верхнего уровня, и переменная
+                   с точкой ({{ statistics.movies_count }}) не находится — вместо
+                   числа подставлялась пустая строка. {% endcomment %}
+                <p>{% blocktranslate with movies=statistics.movies_count series=statistics.series_count %}Рады приветствовать на LumiBox всех любителей интересного и качественного кино!
+                    У нас более {{ movies }} фильмов и {{ series }} сериалов онлайн.
+                    Вы любите кинематограф так же, как мы? Постоянно следите за выходом новинок?
+                    Тогда заходите к нам чаще — мы каждый день пополняем каталог свежими премьерами.
+                    Удобный поиск, фильтры по жанрам, годам и странам, персональные рекомендации и избранное —
+                    всё это LumiBox.{% endblocktranslate %}</p>
+                <p>{% blocktranslate %}Смотрите любимые фильмы в любое время и на любом устройстве: компьютер, планшет
+                    или смартфон. Новинки появляются на сайте сразу после релиза, а классика советского и зарубежного
+                    кино всегда в каталоге. Никакой регистрации и подписок — всё бесплатно.{% endblocktranslate %}</p>
+            </div>
+        </section>
 
     </div>
 </div>

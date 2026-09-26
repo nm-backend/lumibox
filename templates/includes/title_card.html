@@ -14,10 +14,16 @@
                  alt="{% blocktranslate with name=title.name %}Постер: {{ name }}{% endblocktranslate %}"
                  loading="lazy"
                  decoding="async"
+                 onerror="this.classList.add('is-hidden'); this.closest('.card__poster').querySelector('.card__placeholder')?.classList.add('is-visible');"
                  itemprop="image">
-        {% else %}
-            <span class="card__placeholder" aria-hidden="true">{{ title.name|first }}</span>
         {% endif %}
+        <span class="card__placeholder lb-poster-fallback{% if not title.poster %} is-visible{% endif %}" aria-hidden="true">
+            <span class="lb-poster-fallback__badge">
+                {% icon "movie" size=24 %}
+            </span>
+            <span class="lb-poster-fallback__title">{{ title.name }}</span>
+            <span class="lb-poster-fallback__brand">LumiBox</span>
+        </span>
 
         <span class="card__badge">{% if title.is_series %}{% trans "Сериал" %}{% else %}{% trans "Фильм" %}{% endif %}</span>
 
