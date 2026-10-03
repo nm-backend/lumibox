@@ -2,9 +2,13 @@
 
 .container {
     width: 100%;
-    max-width: var(--container-width);
+    /* Внешняя ширина контейнера = колонка контента + два боковых отступа.
+       Так --container-width остаётся шириной ИМЕННО контента (1200px), а
+       поля растут с ним, вместо того чтобы вычитаться из него: иначе
+       контент сужался бы при увеличении экрана (1085px@1280 → 1072px@1440). */
+    max-width: calc(var(--container-width) + 2 * var(--page-gutter));
     margin: 0 auto;
-    padding-inline: var(--space-4);
+    padding-inline: var(--page-gutter);
 }
 
 /* ---------- Шапка ----------
@@ -123,38 +127,40 @@
    arena сюда не переносим: разметки с этим классом в проекте больше нет,
    они стали бы мёртвым CSS. */
 
-/* Планшет: поиск 440px, больше воздуха */
-@media (min-width: 768px) and (max-width: 1023px) {
+/* Поиск в шапке: одна плавная ширина вместо трёх ступенчатых max-width
+   (440 → 560 → 640 на границах 1024 и 1440 — поле прыгало на брейкпоинтах).
+   38vw: на 1024px как раз помещается между логотипом и действиями (там
+   появляются telegram/язык), поэтому ширина растёт непрерывно от ~292px
+   на 768 до ~547px на 1440 без обвалов. Только на ≥768: на телефоне поиск
+   раскрывается absolute-панелью на всю ширину и cap ему не нужен. */
+@media (min-width: 768px) {
     .site-header__search {
-        flex: 0 1 auto;
+        /* 50% — база, из которой поле растёт вместе с экраном. */
+        flex: 1 1 50%;
         min-width: 0;
-        max-width: 440px;
+        max-width: clamp(220px, 38vw, 640px);
         display: flex;
         justify-content: center;
+    }
+}
+
+/* Отступ от соседей — по-прежнему по брейкпоинтам. */
+@media (min-width: 768px) and (max-width: 1023px) {
+    .site-header__search {
         margin-inline: var(--space-4);
     }
 }
 
-/* Десктоп: поиск 560px — основной элемент */
+/* Десктоп */
 @media (min-width: 1024px) and (max-width: 1439px) {
     .site-header__search {
-        flex: 0 1 auto;
-        min-width: 0;
-        max-width: 560px;
-        display: flex;
-        justify-content: center;
         margin-inline: var(--space-6);
     }
 }
 
-/* Широкий десктоп: поиск 640px */
+/* Широкий десктоп */
 @media (min-width: 1440px) {
     .site-header__search {
-        flex: 0 1 auto;
-        min-width: 0;
-        max-width: 640px;
-        display: flex;
-        justify-content: center;
         margin-inline: var(--space-8);
     }
 }
@@ -284,7 +290,7 @@
     padding-bottom: var(--space-10);
     overflow-x: clip;
     width: 100%;
-    max-width: var(--container-width);
+    max-width: calc(var(--container-width) + 2 * var(--page-gutter));
     margin-inline: auto;
     box-sizing: border-box;
     /* Горизонтальные отступы — через .container, не здесь, чтобы не дублировать:
@@ -439,7 +445,7 @@
 
 /* Компактная шапка до 1024px: три колонки — логотип | поиск (центр) | действия (право).
    На узких экранах скрываем telegram, язык и кнопку входа (она есть в bottom-nav).
-   Поиск растягивается на доступное пространство — ширина ~70% от шапки. */
+   Ширина поиска задаётся выше, общим правилом для всех ≥768px. */
 @media (max-width: 1023px) {
     .site-header__inner {
         flex-wrap: nowrap;
@@ -450,13 +456,6 @@
 
     .logo {
         flex: 0 0 auto;
-    }
-
-    .site-header__search {
-        flex: 1 1 60%;
-        min-width: 0;
-        display: flex;
-        justify-content: center;
     }
 
     .site-header__actions {
@@ -507,8 +506,6 @@
 @media (max-width: 400px) {
     .site-header__inner {
         gap: var(--space-1);
-        padding-left: var(--space-4);
-        padding-right: var(--space-4);
     }
 
     .site-header__actions {
@@ -528,32 +525,11 @@
 
 /* ---------- Большие мониторы ----------
 
-   Ширина колонки одна и задаётся токеном. Раньше её задавали двумя разными
-   способами: медиазапрос от 1440px ставил жёсткий max-width на .container,
-   а от 1920px менял токен. На широком мониторе работали оба, и побеждало
-   число — токен переставал что-либо значить.
+   Ширина колонки одна и задаётся токеном (--container-width). Горизонтальные
+   отступы задаёт один токен --page-gutter (clamp) в базовом .container —
+   отдельные медиазапросы с шагом 16/32/64px отсюда удалены: между
+   768/1024/1440 отступ меняется плавно, а не ступенями.
 
    Строка текста не должна становиться бесконечной: сверх 1280px растут поля
    по бокам, а не длина строки. Это и есть «просторно», в отличие от
    «растянуто». */
-
-/* Планшеты: отступы 32px */
-@media (min-width: 768px) {
-    .container {
-        padding-inline: var(--space-6);
-    }
-}
-
-/* Десктоп: отступы 40px */
-@media (min-width: 1024px) {
-    .container {
-        padding-inline: var(--space-10);
-    }
-}
-
-/* Широкий десктоп: отступы 48px */
-@media (min-width: 1440px) {
-    .container {
-        padding-inline: var(--space-10);
-    }
-}

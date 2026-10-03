@@ -287,14 +287,20 @@
     /* --- Макет — высота шапки измерена по факту: 60px min-height
        + 8px padding сверху и снизу (.site-header > .container) = 67px.
        От этого числа зависит sticky-позиция топнава и scroll-padding. --- */
-    --container-width: 1080px;
+    --container-width: 1200px;
+    /* Горизонтальный отступ страницы. Один токен вместо ступеней 16/32/64:
+       плавно растёт от 16px (320px) до 64px (1440px), крайние значения
+       совпадают со старыми, но промежуточные ширины больше не «прыгают». */
+    --page-gutter: clamp(16px, 4.5vw, 64px);
     --header-height: 67px;
     --touch-target: 44px;
-    --bottom-nav-height: 68px;
+    /* Реальная высота .bottom-nav на телефоне = 75px (padding 8+8 + ссылка
+       44 + текст 15). 68px давал 7px контента под панелью. */
+    --bottom-nav-height: 75px;
 
-    /* --- Сайдбар и карточки — геометрия reference ---
+    /*      --- Сайдбар и карточки — геометрия reference ---
        reference: wrapper 976px, content 640px, sidebar 331px, movie__card 200px poster gap 20px
-       LumiBox: 1080px container, sidebar 300px, content ~ 760px, poster 200px gap 20px
+       LumiBox: 1200px container, sidebar 300px, content ~ 880px, poster 200px gap 20px
        Сохраняем LumiBox branding, только размеры как reference.
     */
     --sidebar-width: 300px;

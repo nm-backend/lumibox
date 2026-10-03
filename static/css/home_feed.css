@@ -14,6 +14,11 @@
 /* Геометрия reference: лента — gap 20px как movie__card, карточка — padding 20px horizontal как movie 5px 20px 10px */
 .film-feed {
     display: grid;
+    /* minmax(0, 1fr), а не 1fr: трек с auto-минимумом раздувается до
+       min-content карточки (грид «постер+текст» ≈290px на 320px экране)
+       и вылезает за контейнер — раньше это резалось overflow-x: clip
+       у .site-main. */
+    grid-template-columns: minmax(0, 1fr);
     gap: var(--space-5);
 }
 
@@ -137,12 +142,13 @@
     border-color: rgba(var(--color-accent-rgb), 0.35);
 }
 
-/* Без !important: мобильные правки ниже стояли безуспешно — 180px
-   постера плюс 20px зазора оставляли текстовой колонке 36px на экране
-   320px, а значения метаданных (dd) сжимались в нулевую ширину. */
+/* Один плавный трек вместо трёх фиксированных значений по брейкпоинтам:
+   постер растёт пропорционально карточке (~110px на 320px, ~245px на
+   1440px), а текстовая колонка minmax(0,1fr) не выталкивает карточку за
+   её границы — на 320px сумма треков раньше давала 266px при 236px. */
 .film-card__body {
     display: grid;
-    grid-template-columns: 180px 1fr;
+    grid-template-columns: clamp(110px, 30%, 380px) minmax(0, 1fr);
     gap: 20px;
     align-items: start;
 }
@@ -263,7 +269,6 @@
 
 .film-card__foot {
     display: flex !important;
-    justify-content: space-between !important;
     align-items: center !important;
     margin-top: auto !important;
     padding-top: 12px !important;
@@ -284,6 +289,9 @@
     display: flex;
     align-items: center;
     gap: var(--space-1);
+    /* Действия прижаты вправо автоматически: так перенос строк в .foot
+       (flex-wrap) больше не расталкивает чипы и кнопки по краям. */
+    margin-left: auto;
 }
 
 .film-card__action {
@@ -311,7 +319,12 @@
     gap: var(--space-2);
 }
 
-/* ---------- Мобильные — сохраняем ритм, не делаем огромные дыры ---------- */
+/* ---------- Мобильные — сохраняем ритм, не делаем огромные дыры ----------
+
+   Иерархия контента на телефоне: постер и текст — главное, кнопки и чипы —
+   служебное. Постер поднят со 124px до 150px, круглые иконки уменьшены,
+   кнопка «Смотреть» стала компактной, чтобы служебный блок не спорил
+   с контентом по визуальному весу. */
 
 @media (max-width: 768px) {
     .film-feed {
@@ -324,6 +337,26 @@
         padding: 14px 16px;
     }
 
+    .film-card__actions {
+        gap: var(--space-1);
+    }
+
+    /* Кнопка «Смотреть» — компактное главное действие строки, а не баннер:
+       на 390px она была ~150px и спорила по весу с постером. Плотность
+       задаём padding/размером шрифта; min-height не трогаем — его даёт
+       .button (44px), и это же правило действует на десктопе. */
+    .film-card__watch {
+        padding: 6px 14px;
+        font-size: var(--text-xs);
+    }
+
+    /* Круглые иконки 40px: размер приходит из базового правила — без
+       отдельного значения на телефоне, чтобы высота не прыгала на 700px. */
+    .film-card__chips {
+        font-size: 11px;
+        color: var(--color-text-dim);
+    }
+
     .film-card__head {
         flex-direction: column-reverse;
         gap: var(--space-1);
@@ -332,12 +365,6 @@
 
     .film-card__badges {
         margin-bottom: var(--space-3);
-    }
-
-    .film-card__body {
-        grid-template-columns: minmax(90px, 130px) minmax(0, 1fr);
-        gap: var(--space-3);
-        min-height: auto;
     }
 
     .film-card__info {
@@ -370,19 +397,14 @@
     }
 }
 
-@media (max-width: 400px) {
+/* Только совсем узкие экраны (≤360px): компактнее вёрстка карточки,
+   ширина постера берётся из общего clamp(). */
+@media (max-width: 360px) {
     .film-feed {
         gap: 10px;
     }
 
     .film-card {
         padding: 12px;
-    }
-
-    /* На 320px колонка текста — самое узкое место карточки: постер
-       ограничен 124px, чтобы описанию и значениям осталось ~120px. */
-    .film-card__body {
-        grid-template-columns: minmax(104px, 124px) minmax(0, 1fr);
-        gap: 12px;
     }
 }

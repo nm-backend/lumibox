@@ -25,20 +25,85 @@
     <link rel="stylesheet" href="{% static 'css/home_feed.css' %}?v={{ static_version }}">
 {% endblock %}
 
+{% block hero %}
+<div class="lb-home">
+    <div class="lb-hero-wrap">
+
+        <h1 class="visually-hidden">{% trans "Смотреть фильмы и сериалы онлайн бесплатно" %}</h1>
+
+        {# ---------- Hero: фичерит недели ---------- #}
+        {% comment %}
+           Первый экран главной: крупный постер, название, жанры, описание и
+           «Смотреть». Отличает главную от каталога, где первый экран — чипы и
+           панель фильтров. Клик по постеру/кнопке ведёт на страницу фильма.
+           Пустой state (нет опубликованных) просто не рисует блок.
+        {% endcomment %}
+        {% if home_titles.0 %}
+            <section class="lb-hero" aria-label="{% trans 'Выбор редакции' %}">
+                <a class="lb-hero__poster" href="{{ home_titles.0.get_absolute_url }}" aria-hidden="true" tabindex="-1">
+                    {% if home_titles.0.poster %}
+                        <img src="{{ home_titles.0.poster|webp_url }}" width="360" height="540" alt="" loading="eager" fetchpriority="high"
+                             onerror="this.classList.add('is-hidden'); this.closest('.lb-hero__poster').querySelector('.card__placeholder')?.classList.add('is-visible');">
+                    {% endif %}
+                    <span class="card__placeholder lb-poster-fallback lb-poster-fallback--hero{% if not home_titles.0.poster %} is-visible{% endif %}" aria-hidden="true">
+                        <span class="lb-poster-fallback__badge">{% icon "movie" size=36 %}</span>
+                        <span class="lb-poster-fallback__title">{{ home_titles.0.name }}</span>
+                        <span class="lb-poster-fallback__brand">LumiBox</span>
+                    </span>
+                </a>
+                <div class="lb-hero__body">
+                    <p class="lb-hero__eyebrow">{% trans "Выбор редакции" %}</p>
+                    <p class="lb-hero__name">
+                        <a href="{{ home_titles.0.get_absolute_url }}">{{ home_titles.0.name }}</a>
+                        {% if home_titles.0.release_year %}<span class="lb-hero__year">{{ home_titles.0.release_year }}</span>{% endif %}
+                    </p>
+                    {% if home_titles.0.genres.all %}
+                        <p class="lb-hero__meta">
+                            {% for genre in home_titles.0.genres.all|slice:":3" %}{{ genre.name }}{% if not forloop.last %} · {% endif %}{% endfor %}
+                        </p>
+                    {% endif %}
+                    {% if home_titles.0.short_description %}
+                        <p class="lb-hero__desc">{{ home_titles.0.short_description }}</p>
+                    {% endif %}
+                    <a class="button button--primary button--large lb-hero__watch" href="{{ home_titles.0.get_absolute_url }}">
+                        {% icon "play" size=16 %}{% trans "Смотреть" %}
+                    </a>
+                </div>
+            </section>
+        {% endif %}
+
+        {# ---------- Тренды: ряд крупных карточек ---------- #}
+        {% if home_titles|length > 1 %}
+            <section class="lb-row" aria-label="{% trans 'Популярное за неделю' %}">
+                <div class="section__header">
+                    <h2 class="section__title">{% trans "Популярное за неделю" %}</h2>
+                </div>
+                <div class="lb-row__track">
+                    {% for title in home_titles|slice:"1:9" %}
+                        {% include "includes/title_card.html" %}
+                    {% endfor %}
+                </div>
+            </section>
+        {% endif %}
+
+    </div>
+</div>
+{% endblock %}
+
 {% block content %}
 <div class="lb-home">
     <div class="lb-wrap">
-
-        <h1 class="visually-hidden">{% trans "Смотреть фильмы и сериалы онлайн бесплатно" %}</h1>
 
         {# ---------- Сайдбар слева + лента детальных карточек справа ---------- #}
         <div class="lb-contentwrap lb-contentwrap--home">
 
             {% include "includes/lb_sidebar.html" %}
 
+
+
             <section class="lb-main" id="lb-content" aria-label="{% trans 'Каталог фильмов' %}">
 
-                <h2 class="visually-hidden">{% trans "Каталог фильмов" %}</h2>
+                <h2 class="section__title">{% trans "Новое и обсуждаемое" %}</h2>
 
                 {% comment %} Лента детальных карточек: постер + метаданные
                    + строка действий, как пост ленты медиа-портала. {% endcomment %}
@@ -62,8 +127,6 @@
 
             {# ---------- Горизонтальное рекламное место (между лентой и SEO) ---------- #}
             {% include "includes/ad_slot.html" %}
-
-        </div>
 
         {# ---------- SEO-текст (footerText) ---------- #}
         <section class="lb-seo" aria-labelledby="lb-seo-title">

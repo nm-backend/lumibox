@@ -1842,6 +1842,11 @@
 
 .genre-chip {
     flex: 0 0 auto;
+    /* Одно значение на все экраны: раньше на ≤900px паддинг 12px давал
+       44px, а на десктопе оставалось 36px — высота чипа прыгала на 900px. */
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
     padding: var(--space-2) var(--space-4);
     background: var(--color-surface);
     border: 1px solid var(--color-border);

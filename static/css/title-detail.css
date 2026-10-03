@@ -9,7 +9,10 @@
     position: relative;
     overflow: clip;
     margin-top: var(--space-1);
-    padding: var(--space-8) var(--space-5) var(--space-7);
+    /* Горизонтальные поля — тот же --page-gutter, что у .container:
+       hero живёт в block hero ВНЕ контейнера, поэтому берёт токен сам
+       иначе заголовок/постер уезжает левее хлебных крошек на 4–36px. */
+    padding: var(--space-8) var(--page-gutter) var(--space-7);
     background-color: var(--color-surface);
 }
 
@@ -53,7 +56,7 @@
     grid-template-columns: 280px 1fr;
     gap: var(--space-7);
     align-items: start;
-    padding: 0 var(--space-2);
+    padding: 0;
 }
 
 .film-hero__poster {
@@ -171,6 +174,17 @@
     gap: var(--space-4);
     margin-top: var(--space-7);
     padding-bottom: var(--space-2);
+}
+
+/* Один CTA на всех ширинах. Раньше правило жило в @media (max-width:900px)
+   с flex: 1 1 100% — до 900px кнопка растягивалась до min(доступно, 340),
+   а на десктопе оставалась авто-ширины 215px: ступень 340 → 215 ровно на
+   границе 900/901. Один clamp снимает прыжок. Никакого flex-grow: без него
+   строка растягивала кнопку до всей ширины блока и ломала и потолок 340px,
+   и монотонность. */
+.film-hero__actions > .button--large {
+    width: clamp(260px, 34vw, 340px);
+    max-width: 100%;
 }
 
 .film-hero__specs {
@@ -539,9 +553,9 @@
 
 @media (max-width: 900px) {
     .film-hero {
-        padding-top: var(--space-6);
-        padding-left: var(--space-3);
-        padding-right: var(--space-3);
+        /* Было space-6: верхний отступ съедал 32px, которые на телефоне
+           нужны, чтобы плеер поднимался выше сгиба. */
+        padding-top: var(--space-4);
     }
 
     .film-hero__inner {
@@ -550,11 +564,39 @@
     }
 
     .film-hero__poster {
-        width: 160px;
+        /* Плавная ширина вместо фиксированных 190px: постер растёт вместе
+           с экраном (150 → 280), а на границе 900/901 совпадает с
+           десктопной колонкой 280px — ступени на брейкпоинте нет. */
+        width: clamp(150px, 32vw, 280px);
+    }
+
+    .film-hero__specs {
+        /* Зазор 12 вместо 16: на телефоне строки спеков стоят впритык. */
+        gap: var(--space-3);
+    }
+
+    .film-hero__spec {
+        /* Один спек — одна строка: «Великобритания, США» переносилось на
+           два ряда и блок спеков был почти вдвое выше. Длинный список
+           студий обрезается по колонке, а не тянет hero вниз. */
+        max-width: 100%;
+        overflow: hidden;
+        white-space: nowrap;
     }
 
     .film-hero__scrim {
         background: linear-gradient(180deg, rgba(11, 13, 18, 0.6) 0%, var(--color-bg) 100%);
+    }
+}
+
+/* Планшет 560–900: постер слева, текст справа — тот же двухколоночный
+   приём, что на десктопе, только колонка постера плавная. Ниже 560px
+   ширины не хватает даже на 150px постера рядом с текстом, там hero
+   остаётся в одну колонку. */
+@media (min-width: 560px) and (max-width: 900px) {
+    .film-hero__inner {
+        grid-template-columns: clamp(150px, 32vw, 280px) minmax(0, 1fr);
+        gap: var(--space-6);
     }
 }
 
@@ -967,7 +1009,7 @@
     margin: 0;
     padding: 0 var(--space-2) var(--space-2);
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(clamp(180px, 42%, 300px), 1fr));
     gap: var(--space-2);
 }
 
@@ -1034,17 +1076,30 @@
         flex-direction: column;
     }
 
+    /* Иерархия мобильного hero: название → кнопки → мета → описание.
+       Раньше между названием и кнопками стояли слоган, мета и жанры —
+       490px служебного текста, и «Смотреть фильм» уходила за сгиб. */
     .film-hero__name { order: 1; }
-    .film-hero__tagline { order: 2; }
-    .film-hero__actions { order: 3; margin-top: var(--space-4); }
-    .film-hero__meta { order: 4; }
-    .film-hero__description { order: 5; }
-    .film-hero__specs { order: 6; }
+    /* Оригинальное название имеет order по умолчанию 0 и всплывало ВЫШЕ
+       русского — «Фильм начинается один раз» стоял первым строками. */
+    .film-hero__original { order: 1; }
+    .film-hero__actions { order: 2; margin-top: var(--space-4); }
+    .film-hero__meta { order: 3; margin-top: var(--space-3); }
+    .film-hero__genres { order: 4; margin-top: var(--space-3); }
+    .film-hero__tagline { order: 5; margin-top: var(--space-3); }
+    .film-hero__description { order: 6; margin-top: var(--space-3); }
+    .film-hero__specs { order: 7; margin-top: var(--space-3); }
 
-    /* Главная кнопка на всю ширину: в неё надо попадать не целясь. */
-    .film-hero__actions > .button--large {
-        flex: 1 1 100%;
+    /* Вторичные действия («В избранное», «Смотреть позже», «Поделиться») —
+       компактный ряд вместо стопки на всю ширину: кнопки лежат внутри <form>,
+       поэтому селектор без «>». Блок действий сжимается с 244px по высоте
+       до ~130px и перестаёт конкурировать с постером и названием. */
+    .film-hero__actions .button--ghost {
+        flex: 1 1 auto;
         justify-content: center;
+        min-height: 40px;
+        padding: 8px 10px;
+        font-size: var(--text-xs);
     }
 }
 
