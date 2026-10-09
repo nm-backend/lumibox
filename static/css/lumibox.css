@@ -17,6 +17,12 @@
 
 .lb-body {
     background: var(--color-bg);
+    /* Отступ внизу для фиксированной нижней навигации и safe-area-inset-bottom.
+       env(safe-area-inset-bottom) динамически подстраивается под высоту
+       индикатора домашнего экрана iPhone (через Notch/Dynamic Island).
+       8px дополнительный отступ гарантирует доступность кнопок просмотра
+       и трейлера при прокрутке до низа страницы. */
+    padding-bottom: max(env(safe-area-inset-bottom), 8px);
 }
 
 /* На главной заголовки уже единообразные (Inter, без uppercase) —
@@ -78,6 +84,16 @@
     .lb-body .site-main {
         padding-top: var(--space-3);
     }
+}
+
+/* ---------- Fixed bottom navigation support ---------- */
+/* Добавляем отступ внизу, чтобы фиксированная навигация не перекрывала
+   кнопки просмотра и трейлера при прокрутке до низа страницы.
+   env(safe-area-inset-bottom) динамически подстраивается под высоту
+   индикатора домашнего экрана iPhone (Notch/Dynamic Island).
+   8px дополнительный отступ гарантирует доступность элементов. */
+.lb-body {
+    padding-bottom: max(env(safe-area-inset-bottom), 8px);
 }
 
 /* ---------- Тонкая тёмная полоса вверху ---------- */

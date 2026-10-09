@@ -153,14 +153,36 @@
         </div>
 
         <div class="film-card__actions">
-            <a class="film-card__action film-card__action--favorite" href="{{ title.get_absolute_url }}"
-               aria-label="{% blocktranslate with name=title.name %}В избранное: {{ name }}{% endblocktranslate %}">
-                {% icon "heart" size=16 %}
-            </a>
-            <a class="film-card__action" href="{{ title.get_absolute_url }}"
-               aria-label="{% blocktranslate with name=title.name %}Смотреть позже: {{ name }}{% endblocktranslate %}">
-                {% icon "bookmark" size=16 %}
-            </a>
+            <!-- Favorite form -->
+            <form method="post" action="{% url 'library:toggle_favorite' title.slug %}" data-favorite-form
+                  data-label-on="{% trans 'В избранном' %}"
+                  data-label-off="{% trans 'В избранное' %}"
+                  data-toast-on="{% trans 'Добавлено в избранное' %}"
+                  data-toast-off="{% trans 'Убрано из избранного' %}">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ request.path }}">
+                <button class="film-card__action film-card__action--favorite button--ghost"
+                        type="submit" data-favorite-button>
+                    {% icon "heart" size=16 %}
+                    <span data-button-label>{% if is_favorite %}{% trans "В избранном" %}{% else %}{% trans "В избранное" %}{% endif %}</span>
+                </button>
+            </form>
+
+            <!-- Watchlist form -->
+            <form method="post" action="{% url 'library:toggle_watchlist' title.slug %}" data-watchlist-form
+                  data-label-on="{% trans 'В списке' %}"
+                  data-label-off="{% trans 'Смотреть позже' %}"
+                  data-toast-on="{% trans 'Добавлено в «Смотреть позже»' %}"
+                  data-toast-off="{% trans 'Убрано из «Смотреть позже»' %}">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ request.path }}">
+                <button class="film-card__action button--ghost"
+                        type="submit" data-watchlist-button>
+                    {% icon "bookmark" size=16 %}
+                </button>
+            </form>
+
+            <!-- Watch button - navigates to detail page -->
             <a class="button button--primary film-card__watch" href="{{ title.get_absolute_url }}">
                 {% icon "play" size=16 %}{% trans "Смотреть" %}
             </a>
