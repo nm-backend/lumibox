@@ -500,6 +500,7 @@ nav.lb-topnav-bar a.lb-topnav__link--active:hover {
    у выдачи 280px на каждом экране — на 1440px это две колонки постеров. */
 .lb-contentwrap {
     margin-top: var(--space-1);
+    gap: var(--space-3);
 }
 
 .lb-main {
