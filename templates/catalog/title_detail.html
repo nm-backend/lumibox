@@ -9,8 +9,8 @@
 {% block twitter_description %}{{ title.short_description|default:title.get_meta_description }}{% endblock %}
 
 {% comment %}
-   В предпросмотр ссылки ставим постер самого фильма, а не общую заглушку:
-   именно её показывают Telegram, WhatsApp и соцсети при отправке ссылки.
+    В предпросмотр ссылки ставим постер самого фильма, а не общую заглушку:
+    именно её показывают Telegram, WhatsApp и соцсети при отправке ссылки.
 {% endcomment %}
 {% block og_image %}{% if title.poster %}{% absolute_url title.poster.url %}{% else %}{% absolute_static 'img/og-default.png' %}{% endif %}{% endblock %}
 {% block twitter_image %}{% if title.poster %}{% absolute_url title.poster.url %}{% else %}{% absolute_static 'img/og-default.png' %}{% endif %}{% endblock %}
@@ -41,8 +41,8 @@
     {% if title.poster %}
     "image": "{% absolute_url title.poster.url %}",{% endif %}
     {% comment %}Жанры, страны и съёмочная группа: поисковик показывает их
-       в расширенном сниппете, а брать ему их больше неоткуда. Данные уже
-       в памяти (with_detail), новых запросов разметка не делает.{% endcomment %}
+        в расширенном сниппете, а брать ему их больше неоткуда. Данные уже
+        в памяти (with_detail), новых запросов разметка не делает.{% endcomment %}
     {% if title.genres.all %}
     "genre": [{% for genre in title.genres.all %}"{{ genre.name|escapejs }}"{% if not forloop.last %}, {% endif %}{% endfor %}],{% endif %}
     {% if title.countries.all %}
@@ -69,15 +69,15 @@
 {% block extra_js %}
     <script src="{% static 'js/title-detail.js' %}?v={{ static_version }}" defer></script>
     {% comment %} player.js после title-detail.js: тот подставляет источник
-       при старте, а этот только рисует состояние. Оба работают через один
-       и тот же элемент video и друг друга не трогают. {% endcomment %}
+        при старте, а этот только рисует состояние. Оба работают через один
+        и тот же элемент video и друг друга не трогают. {% endcomment %}
     <script src="{% static 'js/player.js' %}?v={{ static_version }}" defer></script>
 {% endblock %}
 
 {% block hero %}
     {% comment %} Крошки в контейнере: блок hero рендерится вне общей колонки,
-       и без обёртки они прижимались к самому краю окна — на широком экране
-       строка висела в стороне от остального содержимого. {% endcomment %}
+        и без обёртки они прижимались к самому краю окна — на широком экране
+        строка висела в стороне от остального содержимого. {% endcomment %}
     <div class="container">
         {% url 'catalog:title_list' as titles_url %}
         {% if title.is_series %}
@@ -88,9 +88,9 @@
     </div>
 
 {% comment %} data-title-slug здесь, а не только на .player-section: аналитика ищет этот
-   атрибут по всей странице, а секция плеера рендерится лишь у записей с видео.
-   Из-за этого событие view_item не уходило для тайтлов без плеера — то есть
-   как раз для тех, где важно понять, почему их не смотрят. Шапка есть всегда. {% endcomment %}
+    атрибут по всей странице, а секция плеера рендерится лишь у записей с видео.
+    Из-за этого событие view_item не уходило для тайтлов без плеера — то есть
+    как раз для тех, где важно понять, почему их не смотрят. Шапка есть всегда. {% endcomment %}
 <section class="film-hero" data-title-slug="{{ title.slug }}">
     {% if title.backdrop %}
         <img class="film-hero__backdrop" src="{{ title.backdrop|webp_url }}" alt="" aria-hidden="true" loading="eager" fetchpriority="high">
@@ -173,8 +173,8 @@
                 {% if title.rating_count %}
                     <span class="film-hero__dot" aria-hidden="true">·</span>
                     {% comment %} Склонение считаем в with: фильтр внутри blocktranslate
-                       становится частью имени плейсхолдера и не резолвится —
-                       слово «оценок» просто не печаталось. {% endcomment %}
+                        становится частью имени плейсхолдера и не резолвится —
+                        слово «оценок» просто не печаталось. {% endcomment %}
                     <span>{% blocktranslate with count=title.rating_count word=title.rating_count|ru_plural:"оценка,оценки,оценок" %}{{ count }} {{ word }}{% endblocktranslate %}</span>
                 {% endif %}
             </div>
@@ -201,9 +201,9 @@
                         {% for i in "0123456789"|make_list %}
                             <label class="star-rating__star" data-value="{{ forloop.counter }}" data-star>
                                 {% comment %} Номер выносим в with: forloop.counter — точечная
-                                   переменная, внутри blocktrans она не резолвится,
-                                   и скринридер объявлял все десять кнопок как
-                                   «Оценка » без номера. {% endcomment %}
+                                    переменная, внутри blocktrans она не резолвится,
+                                    и скринридер объявлял все десять кнопок как
+                                    «Оценка » без номера. {% endcomment %}
                                 <input type="radio" name="star_rating" value="{{ forloop.counter }}"
                                        class="visually-hidden" aria-label="{% blocktrans with value=forloop.counter %}Оценка {{ value }}{% endblocktrans %}">
                                 <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path d="M10 1.5l2.47 5.01 5.53.8-4 3.9.95 5.49L10 13.5l-4.95 2.6.95-5.49-4-3.9 5.53-.8L10 1.5z"/></svg>
@@ -218,23 +218,23 @@
 
             <div class="film-hero__actions">
                 {% comment %} Переход к плееру — первое действие карточки.
-                   Сам плеер лежит примерно на 1000-м пикселе (на телефоне это
-                   больше экрана), и до этой ссылки главной кнопкой страницы
-                   про фильм была «Смотреть трейлер»: зритель, пришедший
-                   смотреть кино, первым делом видел предложение посмотреть
-                   рекламу этого кино. Обычная якорная ссылка, без скрипта:
-                   работает и до загрузки js, и при открытии в новой вкладке.
+                    Сам плеер лежит примерно на 1000-м пикселе (на телефоне это
+                    больше экрана), и до этой ссылки главной кнопкой страницы
+                    про фильм была «Смотреть трейлер»: зритель, пришедший
+                    смотреть кино, первым делом видел предложение посмотреть
+                    рекламу этого кино. Обычная якорная ссылка, без скрипта:
+                    работает и до загрузки js, и при открытии в новой вкладке.
                 {% endcomment %}
                 {% if external_player %}
                     {% comment %} Полный фильм/сериал из внешнего плеера (Vibix) —
-                       главный источник: кнопка ведёт на его вкладку. {% endcomment %}
+                        главный источник: кнопка ведёт на его вкладку. {% endcomment %}
                     <a class="button button--primary button--large" href="#player">
                         {% icon "play" size=14 %}
                         {% trans "Смотреть фильм" %}
                     </a>
                 {% elif youtube_video_url %}
                     {% comment %} Полная версия на YouTube — главный источник MVP:
-                       кнопка ведёт на вкладку плеера с этим роликом. {% endcomment %}
+                        кнопка ведёт на вкладку плеера с этим роликом. {% endcomment %}
                     <a class="button button--primary button--large" href="#player">
                         {% icon "play" size=14 %}
                         {% trans "Смотреть фильм" %}
@@ -246,7 +246,7 @@
                     </a>
                 {% elif has_youtube %}
                     {% comment %} Сериал с эпизодами на YouTube, но без своих
-                       файлов: кнопка ведёт на вкладку плеера серий. {% endcomment %}
+                        файлов: кнопка ведёт на вкладку плеера серий. {% endcomment %}
                     <a class="button button--primary button--large" href="#player">
                         {% icon "play" size=14 %}
                         {% trans "Смотреть серии" %}
@@ -261,9 +261,9 @@
                 {% endif %}
 
                 {% comment %} Подписи и тексты уведомлений передаём через data-*:
-                   перевод делает шаблон, а не скрипт. До этого восемь строк
-                   были зашиты в favorite.js и на английской с кыргызской
-                   версиями оставались русскими. {% endcomment %}
+                    перевод делает шаблон, а не скрипт. До этого восемь строк
+                    были зашиты в favorite.js и на английской с кыргызской
+                    версиями оставались русскими. {% endcomment %}
                 {% if user.is_authenticated %}
                     <form method="post" action="{% url 'library:toggle_favorite' title.slug %}" data-favorite-form
                           data-label-on="{% trans 'В избранном' %}"
@@ -274,10 +274,6 @@
                         <input type="hidden" name="next" value="{{ request.path }}">
                         <button class="button button--ghost {% if is_favorite %}button--active{% endif %}" type="submit" data-favorite-button aria-label="{% if is_favorite %}{% trans "В избранном" %}{% else %}{% trans "В избранное" %}{% endif %}">
                             {% if is_favorite %}{% icon "heart-filled" size=16 %}{% else %}{% icon "heart" size=16 %}{% endif %}
-<<<<<<< HEAD
-=======
-                            <!-- <span data-button-label>{% if is_favorite %}{% trans "В избранном" %}{% else %}{% trans "В избранное" %}{% endif %}</span> -->
->>>>>>> 5c05520f5a79ab5176f5e1552c51a0941946aaa8
                         </button>
                     </form>
 
@@ -355,16 +351,16 @@
     {% if has_playback or external_player or has_youtube %}
         {% comment %}Секция «Смотреть онлайн».
 
-           Источники приходят из PlaybackSource: у фильма они висят на записи,
-           у сериала — на каждой серии, и у одной серии их столько, сколько
-           озвучек залил редактор. Вкладка «Плеер 2» исчезла вместе с полем
-           player_url_2: теперь любой дополнительный источник — просто ещё
-           одна строка в той же таблице.
+            Источники приходят из PlaybackSource: у фильма они висят на записи,
+            у сериала — на каждой серии, и у одной серии их столько, сколько
+            озвучек залил редактор. Вкладка «Плеер 2» исчезла вместе с полем
+            player_url_2: теперь любой дополнительный источник — просто ещё
+            одна строка в той же таблице.
 
-           Секцию показываем и без своих источников, когда есть внешний
-           плеер: для таких записей его вкладка — единственный
-           способ посмотреть. Внутренние оболочки рендерим только при
-           has_playback — иначе primary_source пуст и разметка падает.{% endcomment %}
+            Секцию показываем и без своих источников, когда есть внешний
+            плеер: для таких записей его вкладка — единственный
+            способ посмотреть. Внутренние оболочки рендерим только при
+            has_playback — иначе primary_source пуст и разметка падает.{% endcomment %}
         <section class="player-section"
                  id="player"
                  data-player-section
@@ -372,34 +368,34 @@
                  data-resume-position="{{ resume_position|default:0 }}"
                  aria-label="{% trans 'Смотреть онлайн' %}">
             {% comment %} Заголовок секции стоит над плеером, а не под ним:
-               подпись «Смотреть онлайн» печаталась ниже кадра и объясняла
-               то, что зритель уже увидел. {% endcomment %}
+                подпись «Смотреть онлайн» печаталась ниже кадра и объясняла
+                то, что зритель уже увидел. {% endcomment %}
             <h2 class="player-section__title">{% trans "Смотреть онлайн" %}</h2>
 
             {% comment %} Переключатель источников показываем, только когда
-               есть из чего выбирать: больше одного своего источника, либо
-               трейлер, либо внешний плеер. Одинокая вкладка «Смотреть»
-               висела над кадром как отдельная кнопка неясного назначения. {% endcomment %}
+                есть из чего выбирать: больше одного своего источника, либо
+                трейлер, либо внешний плеер. Одинокая вкладка «Смотреть»
+                висела над кадром как отдельная кнопка неясного назначения. {% endcomment %}
             {% if external_player or title_players|length > 1 or title.trailer_source or has_youtube %}
                 <div class="player-tabs" data-player-tabs role="tablist" aria-label="{% trans 'Источники видео' %}">
                     {% if external_player %}
                         {% comment %} Внешний плеер (Vibix) — основной источник
-                           «Смотреть фильм». Идёт первым и открыт по умолчанию.
-                           Когда он настроен, это единственный плеер полной
-                           версии: вкладки YouTube и своих файлов не рисуем,
-                           чтобы на странице было ровно два плеера —
-                           фильм и трейлер. {% endcomment %}
+                            «Смотреть фильм». Идёт первым и открыт по умолчанию.
+                            Когда он настроен, это единственный плеер полной
+                            версии: вкладки YouTube и своих файлов не рисуем,
+                            чтобы на странице было ровно два плеера —
+                            фильм и трейлер. {% endcomment %}
                         <button class="player-tabs__tab player-tabs__tab--active" type="button" data-player-tab="external" role="tab" aria-selected="true">{% trans "Смотреть фильм" %}</button>
                     {% elif has_youtube %}
                         {% comment %} Полная версия на YouTube — источник MVP,
-                           когда внешний плеер не настроен. {% endcomment %}
+                            когда внешний плеер не настроен. {% endcomment %}
                         <button class="player-tabs__tab player-tabs__tab--active" type="button" data-player-tab="youtube" role="tab" aria-selected="true">{% if youtube_video_url %}{% trans "Смотреть фильм" %}{% else %}{% trans "Смотреть серии" %}{% endif %}</button>
                     {% elif has_playback %}
-                        <button class="player-tabs__tab player-tabs__tab--active" type="button" data-player-tab="player1" data-player-index="0" role="tab" aria-selected="true">{% trans "Смотреть онлайн" %}</button>
+                        <button class="player-tabs__tab player-tabs__tab--active" type="button" data-player-tab="player1" data-player-index="0" role="tab" aria-selected="true">{% trans "Смотреть" %}</button>
                     {% endif %}
                     {% if not external_player %}
                         {% for player in title_players|slice:"1:" %}
-                            <button class="player-tabs__tab" type="button" data-player-tab="player1" data-player-index="{{ forloop.counter }}" role="tab" aria-selected="false">{% blocktranslate with n=forloop.counter|add:1 %}Плеер {{ n }}{% endblocktranslate %}</button>
+                            <button class="player-tabs__tab" type="button" data-player-tab="player1" data-player-index="{{ forloop.counter }}" role="tab" aria-selected="false">{% blocktranslate with index=forloop.counter %}Источник {{ index }}{% endblocktranslate %}</button>
                         {% endfor %}
                     {% endif %}
                     {% if title.trailer_source %}
@@ -409,17 +405,17 @@
             {% endif %}
 
             {% comment %}Обе оболочки в разметке сразу: у записи бывают источники
-               обоих типов (свой файл и внешний плеер), и переключение озвучки
-               может менять тип. Пересобирать элемент скриптом дороже и рискованнее,
-               чем спрятать один и показать другой. Адрес внешнего плеера
-               подставляется по надобности — пустой iframe ничего не грузит.{% endcomment %}
+                обоих типов (свой файл и внешний плеер), и переключение озвучки
+                может менять тип. Пересобирать элемент скриптом дороже и рискованнее,
+                чем спрятать один и показать другой. Адрес внешнего плеера
+                подставляется по надобности — пустой iframe ничего не грузит.{% endcomment %}
             {% if has_youtube and not external_player %}
                 {% comment %} Вкладка YouTube MVP: полный фильм (youtube_video_url)
-                   или серия — у сериала адрес подставляет title-detail.js из
-                   активной кнопки серии, поэтому src здесь пустой.
-                   Собирается бэкендом из ID ролика: произвольный iframe-адрес
-                   или чужой домен сюда попасть не могут. Показывается только
-                   когда внешний плеер не настроен. {% endcomment %}
+                    или серия — у сериала адрес подставляет title-detail.js из
+                    активной кнопки серии, поэтому src здесь пустой.
+                    Собирается бэкендом из ID ролика: произвольный iframe-адрес
+                    или чужой домен сюда попасть не могут. Показывается только
+                    когда внешний плеер не настроен. {% endcomment %}
                 <div class="player" data-player-pane="youtube">
                     <iframe class="player__frame player__frame--youtube"
                             data-youtube-frame
@@ -435,13 +431,13 @@
             {% if has_playback and not external_player %}
             <div class="player" data-player-pane="player1"{% if has_youtube %} hidden{% endif %}>
                 {% comment %} Оболочка со своими контролами. Атрибут controls
-                   в разметке остаётся: без js зритель получит нативную панель
-                   браузера и всё равно посмотрит кино. Снимает его player.js —
-                   то есть отсутствие скрипта портит вид, но не ломает просмотр.
+                    в разметке остаётся: без js зритель получит нативную панель
+                    браузера и всё равно посмотрит кино. Снимает его player.js —
+                    то есть отсутствие скрипта портит вид, но не ломает просмотр.
 
-                   tabindex на оболочке нужен для клавиатуры: пробел, стрелки,
-                   F и M работают, когда фокус внутри плеера, а не на странице
-                   вообще — иначе пробел одновременно листал бы страницу.
+                    tabindex на оболочке нужен для клавиатуры: пробел, стрелки,
+                    F и M работают, когда фокус внутри плеера, а не на странице
+                    вообще — иначе пробел одновременно листал бы страницу.
                 {% endcomment %}
                 <div class="vplayer" data-vplayer tabindex="-1"
                      {% if primary_source.kind != "file" %}hidden{% endif %}>
@@ -458,9 +454,9 @@
                             data-label-pause="{% trans 'Пауза' %}"
                             aria-label="{% trans 'Смотреть' %}">
                         {% comment %} Кружок рисует обёртка, а не сама иконка:
-                           тег {% templatetag openblock %} icon {% templatetag closeblock %} задаёт размер инлайновым стилем,
-                           и при box-sizing: border-box отступы съедали всю
-                           площадь глифа — на кадре оставался пустой кружок.
+                            тег {% templatetag openblock %} icon {% templatetag closeblock %} задаёт размер инлайновым стилем,
+                            и при box-sizing: border-box отступы съедали всю
+                            площадь глифа — на кадре оставался пустой кружок.
                         {% endcomment %}
                         <span class="vplayer__big-icon vplayer__icon--play">{% icon "play" size=28 %}</span>
                         <span class="vplayer__big-icon vplayer__icon--pause">{% icon "pause" size=28 %}</span>
@@ -537,7 +533,7 @@
             {% endif %}
 
             {% comment %}Выбор озвучки. Показываем только когда есть из чего
-               выбирать: одна кнопка «Дубляж» без альтернативы — шум.{% endcomment %}
+                выбирать: одна кнопка «Дубляж» без альтернативы — шум.{% endcomment %}
             {% if playback_voices|length > 1 and not external_player %}
                 <div class="player-voices" role="group" aria-label="{% trans 'Озвучка' %}">
                     <span class="player-voices__label">{% trans "Озвучка:" %}</span>
@@ -554,26 +550,24 @@
                 {{ playback_data|json_script:"playback-data" }}
             {% endif %}
 
-                       
-                
-                {% comment %} Заглушка способ убрать{% endcomment %}
-                
-                {% if external_player %}
-                    <div class="player" data-player-pane="external">
-                        <ins data-publisher-id="{{ external_player.publisher_id }}"
-                            data-type="{{ external_player.type }}"
-                            data-id="{{ external_player.id }}"
-                            {% if external_player.design %}data-design="{{ external_player.design }}"{% endif %}
-                            {% if external_player.voiceover %}data-voiceover="{{ external_player.voiceover }}"{% endif %}
-                            {% if external_player.voiceover_only %}data-voiceover-only="true"{% endif %}
-                            {% if external_player.season %}data-season="{{ external_player.season }}"{% endif %}
-                            {% if external_player.episodes %}data-episodes="{{ external_player.episodes }}"{% endif %}
-                            {% if external_player.autoplay %}data-autoplay="true"{% endif %}
-                            {% for n, color in external_player.colors.items %}
-                                {% if color %}data-color{{ n }}="{{ color }}"{% endif %}
-                            {% endfor %}></ins>
-                    </div>
-                {% endif %}
+            {% if external_player %}
+                <div class="player" data-player-pane="external">
+                    <ins data-publisher-id="{{ external_player.publisher_id }}"
+                        data-type="{{ external_player.type }}"
+                        data-id="{{ external_player.id }}"
+                        data-nopreload="true"
+                        data-poster="true"
+                        {% if external_player.design %}data-design="{{ external_player.design }}"{% endif %}
+                        {% if external_player.voiceover %}data-voiceover="{{ external_player.voiceover }}"{% endif %}
+                        {% if external_player.voiceover_only %}data-voiceover-only="true"{% endif %}
+                        {% if external_player.season %}data-season="{{ external_player.season }}"{% endif %}
+                        {% if external_player.episodes %}data-episodes="{{ external_player.episodes }}"{% endif %}
+                        {% if external_player.autoplay %}data-autoplay="true"{% endif %}
+                        {% for n, color in external_player.colors.items %}
+                            {% if color %}data-color{{ n }}="{{ color }}"{% endif %}
+                        {% endfor %}></ins>
+                </div>
+            {% endif %}
 
             {% if title.trailer_source %}
                 <div class="player" data-player-pane="trailer" hidden>
@@ -604,7 +598,7 @@
                 </p>
                 {% if resume_episode %}
                     <p class="player-panel__resume">
-                        {% blocktranslate with s=resume_episode.season_number e=resume_episode.episode_number %}Продолжить с S{{ s }}E{{ e }}{% endblocktranslate %}{% if resume_position %}{% blocktranslate with t=resume_position|lb_timecode %}, с {{ t }}{% endblocktranslate %}{% endif %}
+                        {% blocktranslate with s=resume_episode.season_number e=resume_episode.episode_number %}Продолжить с S{{ s }}E{{ e }}{% endblocktranslate %}{% if resume_position %} · {{ resume_position|duration_to_minutes }}{% endif %}
                     </p>
                 {% endif %}
 
@@ -619,7 +613,7 @@
                             <ul class="player-season__list">
                                 {% for episode in season.list %}
                                     <li>
-                                        <button class="player-episode{% if resume_episode %}{% if episode.pk == resume_episode.pk %} player-episode--active{% endif %}{% elif forloop.parentloop.counter == 1 and forloop.counter == 1 %} player-episode--active{% endif %}"
+                                        <button class="player-episode{% if resume_episode %}{% if episode.pk == resume_episode.pk %} player-episode--active{% endif %}{% elif forloop.parentloop.counter0 == 0 and forloop.first %} player-episode--active{% endif %}"
                                                 type="button"
                                                 data-episode
                                                 data-episode-id="{{ episode.pk }}"
@@ -666,10 +660,10 @@
             {# Tab: About #}
             <div class="tab-content tab-content--active" data-tab-content="about">
                 {% comment %}Трейлер отсюда убран. Он рендерился на странице трижды:
-                   вкладкой плеера, здесь и в модальном окне — три <video>/<iframe>
-                   на один и тот же ролик. Остались два осмысленных места: вкладка
-                   рядом с основным видео и модалка по кнопке в шапке. Для хостов
-                   вне белого списка кнопка ведёт наружу — этот случай ниже.{% endcomment %}
+                    вкладкой плеера, здесь и в модальном окне — три <video>/<iframe>
+                    на один и тот же ролик. Остались два осмысленных места: вкладка
+                    рядом с основным видео и модалка по кнопке в шапке. Для хостов
+                    вне белого списка кнопка ведёт наружу — этот случай ниже.{% endcomment %}
                 {% if title.trailer_source == "url" and not title.trailer_embed_url %}
                     <p class="player-fallback">
                         {% trans "Трейлер размещён на стороннем сервисе." %}
@@ -679,7 +673,7 @@
                 {% endif %}
 
                 {% comment %} Заголовок «О проекте» убран: он дословно повторял
-                   подпись активной вкладки прямо под ней. {% endcomment %}
+                    подпись активной вкладки прямо под ней. {% endcomment %}
                 <section class="section">
                     <dl class="spec-list">
                         {% if title.voice_acting %}
@@ -695,7 +689,7 @@
                             <dd class="spec-list__value">
                                 <div class="badge-list">
                                     {% for country in title.countries.all %}
-                                        <a class="badge" href="{% url 'catalog:country_titles' country.slug %}">{{ country.name }}</a>
+                                        <a class="badge" href="{% url 'catalog:country_titles' country.slug %}">{{ country.name }}</a>{% if not forloop.last %}, {% endif %}
                                     {% endfor %}
                                 </div>
                             </dd>
@@ -705,7 +699,7 @@
                             <dd class="spec-list__value">
                                 <div class="badge-list">
                                     {% for studio in title.studios.all %}
-                                        <a class="badge" href="{% url 'catalog:studio_detail' studio.slug %}">{{ studio.name }}</a>
+                                        <a class="badge" href="{% url 'catalog:studio_detail' studio.slug %}">{{ studio.name }}</a>{% if not forloop.last %}, {% endif %}
                                     {% endfor %}
                                 </div>
                             </dd>
@@ -813,15 +807,15 @@
     </div>
 
     {% comment %} Правая колонка убрана. В ней жил единственный блок
-       «Поделиться», который дублировал кнопку в шапке фильма, — и ради трёх
-       иконок держалась колонка в 300px, из-за чего описание и характеристики
-       сжимались. Ссылка на Telegram и VK переехала вниз, к жалобе.
+        «Поделиться», который дублировал кнопку в шапке фильма, — и ради трёх
+        иконок держалась колонка в 300px, из-за чего описание и характеристики
+        сжимались. Ссылка на Telegram и VK переехала вниз, к жалобе.
     {% endcomment %}
 </div>
 
 {% comment %} Второстепенные действия — отдельной строкой под содержимым.
-   «Пожаловаться» стояло в шапке в одном ряду с «В избранное» и выглядело
-   таким же обычным действием, хотя нужно единицам и в крайнем случае.
+    «Пожаловаться» стояло в шапке в одном ряду с «В избранное» и выглядело
+    таким же обычным действием, хотя нужно единицам и в крайнем случае.
 {% endcomment %}
 <div class="detail-secondary">
     <a class="detail-secondary__link" href="https://t.me/share/url?url={{ request.build_absolute_uri|urlencode }}&text={{ title.name|urlencode }}"
@@ -834,9 +828,9 @@
 </div>
 
 {% comment %}Блок «Рекомендуем посмотреть» — секция в контенте,
-   после детального лейаута (вкладки и характеристики), с вертикальными
-   постерами 2:3 и названием под ними. На мобильном — горизонтальная
-   лента.{% endcomment %}
+    после детального лейаута (вкладки и характеристики), с вертикальными
+    постерами 2:3 и названием под ними. На мобильном — горизонтальная
+    лента.{% endcomment %}
 {% if similar_titles %}
     <section class="similar-section" aria-label="{% trans 'Рекомендуем посмотреть' %}">
         <h2 class="section__title">{% trans "Рекомендуем посмотреть" %}</h2>
@@ -866,8 +860,8 @@
 {% endif %}
 
 {% comment %}«Все части» франшизы. Отдельно от «Похожего» и намеренно:
-   похожее — вкусовая рекомендация, франшиза — факт, поэтому и порядок
-   здесь по годам выхода, а не по совпадению жанров.{% endcomment %}
+    похожее — вкусовая рекомендация, франшиза — факт, поэтому и порядок
+    здесь по годам выхода, а не по совпадению жанров.{% endcomment %}
 {% if franchise_titles %}
     <section class="similar-section" aria-label="{% trans 'Все части' %}">
         <h2 class="section__title">
@@ -897,7 +891,7 @@
 {% endif %}
 
 {% comment %}SEO-текст внизу детальной страницы — после контента
-   и рекомендаций, перед рекламой и футером.{% endcomment %}
+    и рекомендаций, перед рекламой и футером.{% endcomment %}
 {% with kind=title.get_type_display|lower %}
 <section class="lb-seo" aria-labelledby="lb-seo-title">
     <h2 id="lb-seo-title" class="lb-seo__title">
@@ -907,8 +901,8 @@
     <div class="lb-seo__content">
         <p>{% blocktranslate with name=title.name kind=kind year=title.release_year %}«{{ name }}» — {{ kind }}
             {{ year }} года. Смотрите онлайн в хорошем качестве{% endblocktranslate %}{% if title.quality %}{% blocktranslate with quality=title.quality %},
-            {{ quality }}{% endblocktranslate %}{% endif %}{% if title.voice_acting %}{% blocktranslate with voice=title.get_voice_acting_display %}, в озвучке «{{ voice }}»{% endblocktranslate %}{% endif %}.
-            {% trans "Удобный плеер, полное описание, актёры и съёмочная группа, кадры и отзывы зрителей — всё на LumiBox." %}</p>
+            {{ quality }}{% endblocktranslate %}{% endif %}{% if title.voice_acting %}{% blocktranslate with voice=title.get_voice_acting_display %}, в озвучке «{{ voice }}»{% endblocktranslate %}{% endif %}.</p>
+        <p>{% trans "Удобный плеер, полное описание, актёры и съёмочная группа, кадры и отзывы зрителей — всё на LumiBox." %}</p>
         <p>{% blocktranslate with name=title.name %}Смотреть «{{ name }}» можно бесплатно и без регистрации на любом
             устройстве: компьютер, планшет или смартфон. Оценки, похожие фильмы и персональные рекомендации
             помогут выбрать, что посмотреть дальше.{% endblocktranslate %}</p>
