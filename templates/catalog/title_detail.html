@@ -274,7 +274,7 @@
                         <input type="hidden" name="next" value="{{ request.path }}">
                         <button class="button button--ghost {% if is_favorite %}button--active{% endif %}" type="submit" data-favorite-button>
                             {% if is_favorite %}{% icon "heart-filled" size=16 %}{% else %}{% icon "heart" size=16 %}{% endif %}
-                            <span data-button-label>{% if is_favorite %}{% trans "В избранном" %}{% else %}{% trans "В избранное" %}{% endif %}</span>
+                            <!-- <span data-button-label>{% if is_favorite %}{% trans "В избранном" %}{% else %}{% trans "В избранное" %}{% endif %}</span> -->
                         </button>
                     </form>
 
