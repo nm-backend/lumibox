@@ -162,13 +162,13 @@
                 {% csrf_token %}
                 <input type="hidden" name="next" value="{{ request.path }}">
                 <button class="film-card__action film-card__action--favorite button--ghost"
-                        type="submit" data-favorite-button>
+                        type="submit" data-favorite-button
+                        aria-label="{% if is_favorite %}{% trans "В избранном" %}{% else %}{% trans "В избранное" %}{% endif %}">
                     {% if is_favorite %}
                         {% icon "heart-filled" size=16 %}
                     {% else %}
                         {% icon "heart" size=16 %}
                     {% endif %}
-                    <span data-button-label>{% if is_favorite %}{% trans "В избранном" %}{% else %}{% trans "В избранное" %}{% endif %}</span>
                 </button>
             </form>
 

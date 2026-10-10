@@ -272,9 +272,8 @@
                           data-toast-off="{% trans 'Убрано из избранного' %}">
                         {% csrf_token %}
                         <input type="hidden" name="next" value="{{ request.path }}">
-                        <button class="button button--ghost {% if is_favorite %}button--active{% endif %}" type="submit" data-favorite-button>
+                        <button class="button button--ghost {% if is_favorite %}button--active{% endif %}" type="submit" data-favorite-button aria-label="{% if is_favorite %}{% trans "В избранном" %}{% else %}{% trans "В избранное" %}{% endif %}">
                             {% if is_favorite %}{% icon "heart-filled" size=16 %}{% else %}{% icon "heart" size=16 %}{% endif %}
-                            <span data-button-label>{% if is_favorite %}{% trans "В избранном" %}{% else %}{% trans "В избранное" %}{% endif %}</span>
                         </button>
                     </form>
 
@@ -285,9 +284,8 @@
                           data-toast-off="{% trans 'Убрано из «Смотреть позже»' %}">
                         {% csrf_token %}
                         <input type="hidden" name="next" value="{{ request.path }}">
-                        <button class="button button--ghost {% if is_watchlist %}button--active{% endif %}" type="submit" data-watchlist-button>
+                        <button class="button button--ghost {% if is_watchlist %}button--active{% endif %}" type="submit" data-watchlist-button aria-label="{% if is_watchlist %}{% trans "В списке" %}{% else %}{% trans "Смотреть позже" %}{% endif %}">
                             {% icon "bookmark" size=16 %}
-                            <span data-button-label>{% if is_watchlist %}{% trans "В списке" %}{% else %}{% trans "Смотреть позже" %}{% endif %}</span>
                         </button>
                     </form>
                 {% else %}
