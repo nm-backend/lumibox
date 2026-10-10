@@ -1429,6 +1429,22 @@ nav.lb-topnav-bar a.lb-topnav__link--active:hover {
 
 /* Топбар: янтарная волосяная линия снизу, ссылка с мерцающим подчёркиванием */
 
+.
+
+/* ---------- Mobile: Telegram link in header ---------- */
+@media (max-width: 480px) {
+    .telegram-header-link {
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+        margin-left: var(--space-2);
+        font-size: var(--text-sm);
+    }
+    .telegram-header-link:hover,
+    .telegram-header-link:focus-visible {
+        color: var(--color-accent);
+    }
+}
 .lb-topbar {
     border-bottom-color: rgba(var(--color-accent-rgb), 0.22);
     background: linear-gradient(180deg, var(--color-dark-surface) 0%, var(--color-dark-bg) 100%);
