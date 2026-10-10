@@ -695,7 +695,7 @@
     }
 
     body {
-        padding-bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom, 0px));
+        padding-bottom: max(env(safe-area-inset-bottom), 16px);
     }
 }
 

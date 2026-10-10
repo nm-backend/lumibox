@@ -465,7 +465,6 @@
         gap: var(--space-2);
     }
 
-    .telegram-header-link,
     .lang-menu {
         display: none;
     }
