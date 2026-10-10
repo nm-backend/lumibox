@@ -284,20 +284,20 @@
     --transition-spring: 400ms cubic-bezier(0.34, 1.56, 0.64, 1);
     --transition-exit: 200ms cubic-bezier(0.4, 0, 1, 1);
 
-    /* --- Макет — высота шапки измерена по факту: 60px min-height
-       + 8px padding сверху и снизу (.site-header > .container) = 67px.
-       От этого числа зависит sticky-позиция топнава и scroll-padding. --- */
-    --container-width: 1080px;
-    --header-height: 67px;
+    /* --- Макет — геометрия ---
+       Container 976px, header 33px
+       LumiBox сохраняет детальные карточки, меняется только контейнер и header
+    */
+    --container-width: 976px;
+    --header-height: 33px;
     --touch-target: 44px;
     --bottom-nav-height: 68px;
 
-    /* --- Сайдбар и карточки — геометрия reference ---
-       reference: wrapper 976px, content 640px, sidebar 331px, movie__card 200px poster gap 20px
-       LumiBox: 1080px container, sidebar 300px, content ~ 760px, poster 200px gap 20px
-       Сохраняем LumiBox branding, только размеры как reference.
+    /* --- Сайдбар и карточки — геометрия ---
+       content ~640px, sidebar ~331px, poster 200px gap 20px
+       Сохраняем LumiBox branding, только размеры как reference
     */
-    --sidebar-width: 300px;
+    --sidebar-width: 331px;
     --sidebar-gap: 20px;
     --card-gap: 20px;
     --card-padding: 16px;

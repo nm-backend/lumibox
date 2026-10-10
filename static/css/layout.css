@@ -18,8 +18,7 @@
     top: 0;
     z-index: var(--z-header);
     width: 100%;
-    height: auto;
-    min-height: var(--header-height);
+    height: var(--header-height);
     background-color: var(--color-surface);
     -webkit-backdrop-filter: blur(20px) saturate(180%);
     backdrop-filter: blur(20px) saturate(180%);
@@ -30,13 +29,28 @@
     box-sizing: border-box;
 }
 
+/* Mobile: auto height for proper content fit */
+@media (max-width: 1024px) {
+    .site-header {
+        height: auto;
+        min-height: var(--header-height);
+    }
+}
+
 .site-header > .container {
     display: flex;
     flex-direction: row;
     align-items: center;
     gap: var(--space-3);
-    padding-top: var(--space-2);
-    padding-bottom: var(--space-2);
+    height: 100%;
+}
+
+/* Mobile: compact header */
+@media (max-width: 1024px) {
+    .site-header > .container {
+        padding-top: var(--space-1);
+        padding-bottom: var(--space-1);
+    }
 }
 
 /* При прокрутке шапка становится непрозрачной и отбрасывает тень —
