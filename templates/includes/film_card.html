@@ -169,6 +169,7 @@
                     {% else %}
                         {% icon "heart" size=16 %}
                     {% endif %}
+                    <span data-button-label>{% if is_favorite %}{% trans "В избранном" %}{% else %}{% trans "В избранное" %}{% endif %}</span>
                 </button>
             </form>
 
