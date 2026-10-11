@@ -54,7 +54,8 @@ class TitleQuerySet(models.QuerySet):
 
     def published(self):
         # Получаем только то, что редактор опубликовал
-        return self.filter(status=self.model.Status.PUBLISHED)
+        # Исключаем аниме (тип удалён, но на всякий случай фильтруем)
+        return self.filter(status=self.model.Status.PUBLISHED).exclude(type="anime")
 
     def movies(self):
         return self.filter(type=self.model.Type.MOVIE)

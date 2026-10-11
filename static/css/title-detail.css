@@ -1047,8 +1047,8 @@
         justify-content: center;
     }
 
-    /* На средних мобильных width (от ~375px) — кнопки в одну строку с gap.
-       На очень узких — fallback в колонку выше. */
+    /* На средних мобильных width (от ~375px) — кнопки просмотра и трейлера в одну строку.
+       Остальные ghost-кнопки на следующей строке. */
     @media (min-width: 375px) and (max-width: 480px) {
         /* film-hero__body оставляем column, кнопки раскладываем через actions */
         .film-hero__body {
@@ -1059,14 +1059,22 @@
             display: flex;
             gap: var(--space-2);
             justify-content: flex-start;
+            flex-wrap: wrap;
         }
 
-        .film-hero__actions > .button--large,
-        .film-hero__actions > button.button--ghost.button--large {
+        /* Кнопки просмотра и трейлера в одну строку */
+        .film-hero__actions > .button--primary.button--large,
+        .film-hero__actions > .button--ghost.button--large {
             flex: 1 1 0;
             min-width: 0;
             min-height: var(--touch-target);
             white-space: nowrap;
+        }
+
+        /* Остальные ghost-кнопки (избранное, watchlist, share) в колонку */
+        .film-hero__actions > .button--ghost:not(.button--large) {
+            flex: 1 1 100%;
+            min-width: 0;
         }
     }
 
