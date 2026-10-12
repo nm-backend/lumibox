@@ -1618,9 +1618,19 @@
     line-height: 1.6;
 }
 
-.button--active {
+/*
+  Выбранное состояние кнопки: акцентная обводка, цвет и мягкая заливка.
+  Раньше здесь были только обводка и цвет, а общие :hover-правила ниже по
+  файлу возвращали серый — активная кнопка читалась как выключенная именно
+  под курсором. Заливка отличает выбранную кнопку от просто наведённой,
+  а не только цветом обводки.
+*/
+.button--active,
+.button--active:hover,
+.button--active:focus-visible {
     border-color: var(--color-accent);
     color: var(--color-accent);
+    background: rgba(var(--color-accent-rgb), 0.12);
 }
 
 /* ---------- Age badge (used on home page hero and detail page) ---------- */

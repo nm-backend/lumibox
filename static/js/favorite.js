@@ -12,6 +12,9 @@
   через data-*. Раньше восемь русских строк были зашиты прямо здесь, и на
   английской с кыргызской версиями кнопка после нажатия отвечала
   по-русски — gettext до скрипта не достаёт.
+
+  Состояние кнопки меняется после ответа сервера, а не по нажатию: пока
+  сервер не подтвердил сохранение, показывать «в избранном» нельзя.
 */
 
 const BUTTON_KINDS = {
@@ -19,13 +22,80 @@ const BUTTON_KINDS = {
         formSelector: "[data-favorite-form]",
         buttonSelector: "[data-favorite-button]",
         responseKey: "is_favorite",
+        // Заполненный вариант есть только у сердца. Для закладки оба
+        // состояния — один и тот же символ: выбранное показывает класс
+        // button--active (акцентная обводка и заливка), а не подмена иконки.
+        iconOn: "heart-filled",
+        iconOff: "heart",
     },
     watchlist: {
         formSelector: "[data-watchlist-form]",
         buttonSelector: "[data-watchlist-button]",
         responseKey: "is_watchlist",
+        iconOn: "bookmark",
+        iconOff: "bookmark",
     },
 };
+
+/*
+  Подменяет символ иконки внутри кнопки.
+
+  Адрес спрайта берём из уже отрисованного <use>: в нём есть версия
+  (?v=...), и собирать строку заново здесь значило бы продублировать
+  логику версионирования из templatetag. Меняем только фрагмент.
+*/
+function swapIcon(button, name) {
+    const use = button.querySelector("svg use");
+    if (!use) {
+        return;
+    }
+
+    const href = use.getAttribute("href") || use.getAttribute("xlink:href");
+    if (!href) {
+        return;
+    }
+
+    const next = href.replace(/#icon-[^#]+$/, `#icon-${name}`);
+    if (next === href) {
+        return;
+    }
+
+    use.setAttribute("href", next);
+    if (use.hasAttribute("xlink:href")) {
+        use.setAttribute("xlink:href", next);
+    }
+}
+
+/*
+  Синхронизирует подписи кнопки с её состоянием.
+
+  aria-label читает скринридер, title — подсказку при наведении мышью.
+  Раньше обновлялся только спрятанный <span>, а атрибуты оставались
+  от первой отрисовки: после нажатия незрячий пользователь слышал
+  прежнюю подпись, а наведение показывало прежний текст.
+*/
+function setLabels(button, form, isActive) {
+    const next = isActive ? form.dataset.labelOn : form.dataset.labelOff;
+    if (!next) {
+        return;
+    }
+
+    button.setAttribute("aria-label", next);
+    button.setAttribute("title", next);
+
+    // Видимая подпись есть не у всех кнопок: у круглых иконок в карточке
+    // её нет вовсе. Если она есть — обновляем и её.
+    const visible = button.querySelector("[data-button-label]");
+    if (visible) {
+        visible.textContent = next;
+    }
+}
+
+function notify(message, type) {
+    if (message && typeof window.showToast === "function") {
+        window.showToast(message, type);
+    }
+}
 
 document.addEventListener("submit", async (event) => {
     const config = Object.values(BUTTON_KINDS).find((kind) =>
@@ -39,6 +109,15 @@ document.addEventListener("submit", async (event) => {
     const button = form.querySelector(config.buttonSelector);
     if (!button) {
         // Кнопка не нашлась (разметка изменилась) — отдаём отправку браузеру.
+        return;
+    }
+
+    // Гостю POST не имеет смысла: сервер ответит редиректом на /login/,
+    // и посетитель уедет со страницы, хотя нажал всего одну кнопку.
+    // Говорим об этом прямо и остаёмся на месте.
+    if (form.dataset.loginRequired) {
+        event.preventDefault();
+        notify(form.dataset.loginRequired, "info");
         return;
     }
 
@@ -57,29 +136,22 @@ document.addEventListener("submit", async (event) => {
         });
 
         if (!response.ok) {
-            throw new Error("Запрос не удался");
+            throw new Error(`HTTP ${response.status}`);
         }
 
         const data = await response.json();
         const isActive = Boolean(data[config.responseKey]);
 
         button.classList.toggle("button--active", isActive);
-
-        // Подписи берём из разметки — там их перевёл шаблон.
-        const label = button.querySelector("[data-button-label]");
-        if (label) {
-            const next = isActive ? form.dataset.labelOn : form.dataset.labelOff;
-            if (next) label.textContent = next;
-        }
-
-        if (typeof window.showToast === 'function') {
-            const toast = isActive ? form.dataset.toastOn : form.dataset.toastOff;
-            if (toast) window.showToast(toast, isActive ? 'success' : 'info');
-        }
+        swapIcon(button, isActive ? config.iconOn : config.iconOff);
+        setLabels(button, form, isActive);
+        notify(isActive ? form.dataset.toastOn : form.dataset.toastOff, isActive ? "success" : "info");
     } catch {
-        // Что-то пошло не так — отправляем форму обычным способом.
-        // Пользователь получит результат, просто с перезагрузкой.
-        form.submit();
+        // Состояние не трогаем: показать «сохранено», когда сервер отказал,
+        // хуже всего. И не отправляем форму сами — обычная отправка уходит
+        // со страницы (гостя уводит на вход, вошедшего перезагружает),
+        // а пользователь нажал одну кнопку. Честнее сказать об ошибке.
+        notify(form.dataset.toastError, "error");
     } finally {
         button.disabled = false;
     }

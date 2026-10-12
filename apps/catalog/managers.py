@@ -2,6 +2,42 @@ from django.db import models
 from django.db.models import F
 
 
+def card_state_prefetches(prefix="", user=None):
+    """
+    Отметки «в избранном» и «смотреть позже» для кнопок карточки.
+
+    Принимает: prefix — путь до Title из текущей модели ("" для самого
+    Title, "title__" — когда запрос строится от Participation).
+    user — владелец отметок.
+    Возвращает: список аргументов для prefetch_related (пустой для гостя).
+
+    Кнопки карточки рисуются по сохранённому состоянию. Без этой подгрузки
+    после перезагрузки страницы уже добавленный фильм выглядел бы
+    невыбранным, и повторное нажатие удаляло бы его из избранного вместо
+    того, чтобы открыть, что фильм там уже лежит. Один запрос на связь
+    и только для вошедших — гостю подгружать нечего.
+    """
+    if user is None or not user.is_authenticated:
+        return []
+
+    from django.db.models import Prefetch
+
+    from apps.library.models import Favorite, Watchlist
+
+    return [
+        Prefetch(
+            f"{prefix}favorite_set",
+            queryset=Favorite.objects.filter(user=user),
+            to_attr="favorite_item",
+        ),
+        Prefetch(
+            f"{prefix}watchlist_set",
+            queryset=Watchlist.objects.filter(user=user),
+            to_attr="watchlist_item",
+        ),
+    ]
+
+
 def story_card_prefetches(prefix="", user=None):
     """
     Связи, без которых шаблон includes/story_card.html идёт в базу сам.
@@ -36,6 +72,7 @@ def story_card_prefetches(prefix="", user=None):
                 to_attr="progress_item",
             )
         )
+    prefetches.extend(card_state_prefetches(prefix, user))
     return prefetches
 
 
@@ -194,6 +231,26 @@ class TitleQuerySet(models.QuerySet):
                 to_attr="progress_item",
             )
         )
+
+    def with_card_state(self, user):
+        """
+        Отмечает записи, которые пользователь уже сохранил.
+
+        Принимает: пользователя.
+        Возвращает: QuerySet с отметками для кнопок карточки каталога.
+
+        Список карточек рисует сердечко и закладку по этим отметкам: без них
+        после перезагрузки страницы сохранённый фильм выглядел бы
+        нетронутым. Стоит двух запросов на страницу списка и только для
+        вошедших. Повторный вызов ничего не делает: prefetch того же
+        атрибута вторым queryset'ом Django считает ошибкой.
+        """
+        already = {
+            getattr(p, "to_attr", p) for p in self._prefetch_related_lookups
+        }
+        if "favorite_item" in already:
+            return self
+        return self.prefetch_related(*card_state_prefetches("", user))
 
     def in_collection(self, collection):
         """

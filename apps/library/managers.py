@@ -42,6 +42,8 @@ class UserTitleRelationQuerySet(models.QuerySet):
             )
         )
         if user is not None and user.is_authenticated:
+            from apps.catalog.managers import card_state_prefetches
+
             prefetches.append(
                 Prefetch(
                     "title__watchhistory_set",
@@ -51,4 +53,8 @@ class UserTitleRelationQuerySet(models.QuerySet):
                     to_attr="progress_item",
                 )
             )
+            # Отметки «в избранном» и «смотреть позже» для кнопок карточки:
+            # без них на страницах избранного, «смотреть позже» и в профиле
+            # сердечки рисовались бы как нетронутые, хотя фильм уже сохранён.
+            prefetches.extend(card_state_prefetches("title__", user))
         return self.select_related("title").prefetch_related(*prefetches)

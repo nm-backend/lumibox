@@ -305,6 +305,30 @@
     background: var(--color-surface-hover);
 }
 
+/*
+  Сохранённое состояние кнопки: сердце или закладка уже добавлены.
+  Раньше класс button--active ставился разметкой и скриптом, но в этой
+  таблице стилей его никто не читал — кнопка оставалась серой, и после
+  нажатия на экране не менялось ничего, кроме формы иконки.
+  Два класса в селекторе — чтобы перебить и базовый .film-card__action,
+  и .button--ghost из components.css.
+*/
+.film-card__action.button--active,
+.film-card__action--favorite.button--active {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+    background: rgba(var(--color-accent-rgb), 0.12);
+}
+
+/* Наведение на выбранную кнопку не должно возвращать её в серое:
+   иначе под курсором состояние читается наоборот. */
+.film-card__action.button--active:hover,
+.film-card__action--favorite.button--active:hover {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+    background: rgba(var(--color-accent-rgb), 0.18);
+}
+
 .film-card__watch {
     display: inline-flex;
     align-items: center;

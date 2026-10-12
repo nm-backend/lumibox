@@ -196,7 +196,7 @@ class HomeView(TemplateView):
                 .filter(pk__in=ids)
                 .with_related()
                 .with_crew()
-                .with_progress(self.request.user)
+                .with_progress(self.request.user).with_card_state(self.request.user)
             }
             context["home_titles"] = [fresh.get(t.pk, t) for t in context["home_titles"]]
 
@@ -240,7 +240,7 @@ class TitleListView(ElidedPaginationMixin, ListView):
             Title.objects.published()
             .with_related()
             .with_crew()
-            .with_progress(self.request.user)
+            .with_progress(self.request.user).with_card_state(self.request.user)
         )
 
     def get_queryset(self):
@@ -977,7 +977,7 @@ class StudioDetailView(ElidedPaginationMixin, ListView):
             Title.objects.published()
             .with_related()
             .with_crew()
-            .with_progress(self.request.user)
+            .with_progress(self.request.user).with_card_state(self.request.user)
             .filter(studios=self.studio)
         )
 
@@ -1021,7 +1021,7 @@ class FranchiseDetailView(ElidedPaginationMixin, ListView):
             Title.objects.published()
             .with_related()
             .with_crew()
-            .with_progress(self.request.user)
+            .with_progress(self.request.user).with_card_state(self.request.user)
             .filter(franchise=self.franchise)
             .order_by("release_year", "pk")
         )
@@ -1076,7 +1076,7 @@ class AwardDetailView(ElidedPaginationMixin, ListView):
             Title.objects.published()
             .with_related()
             .with_crew()
-            .with_progress(self.request.user)
+            .with_progress(self.request.user).with_card_state(self.request.user)
             .filter(award_entries__award=self.award)
             .annotate(award_year=Max("award_entries__year"))
             .order_by(F("award_year").desc(nulls_last=True), "name")
@@ -1116,7 +1116,7 @@ class SearchView(ElidedPaginationMixin, ListView):
             search_titles(self.query, limit=None)
             .with_related()
             .with_crew()
-            .with_progress(self.request.user)
+            .with_progress(self.request.user).with_card_state(self.request.user)
         )
 
     def get_context_data(self, **kwargs):
@@ -1277,7 +1277,7 @@ class CollectionDetailView(ElidedPaginationMixin, ListView):
             Title.objects.published()
             .with_related()
             .with_crew()
-            .with_progress(self.request.user)
+            .with_progress(self.request.user).with_card_state(self.request.user)
             .in_collection(self.collection)
         )
 

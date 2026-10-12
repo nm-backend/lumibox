@@ -153,23 +153,37 @@
         </div>
 
         <div class="film-card__actions">
+            {% comment %} Круглые кнопки-иконки 40×40. Подписи здесь нет намеренно:
+               раньше внутри круга лежал <span data-button-label> с текстом
+               «В избранное», он занимал ~81px и вылезал за круг — заезжал на
+               соседнюю кнопку, а сама иконка прижималась к правому краю.
+               Подпись живёт в aria-label и title: скринридер и подсказка при
+               наведении получают её, геометрия остаётся ровной.
+               favorite.js обновляет оба атрибута после ответа сервера. {% endcomment %}
             <!-- Favorite form -->
             <form method="post" action="{% url 'library:toggle_favorite' title.slug %}" data-favorite-form
                   data-label-on="{% trans 'В избранном' %}"
                   data-label-off="{% trans 'В избранное' %}"
                   data-toast-on="{% trans 'Добавлено в избранное' %}"
-                  data-toast-off="{% trans 'Убрано из избранного' %}">
+                  data-toast-off="{% trans 'Убрано из избранного' %}"
+                  data-toast-error="{% trans 'Не удалось сохранить. Попробуйте ещё раз' %}"
+                  {% if not user.is_authenticated %}data-login-required="{% trans 'Войдите, чтобы добавлять фильмы в избранное' %}"{% endif %}>
                 {% csrf_token %}
                 <input type="hidden" name="next" value="{{ request.path }}">
-                <button class="film-card__action film-card__action--favorite button--ghost"
+                {% comment %} Отметку о сохранении карточка берёт из favorite_item —
+                   её ставит prefetch (with_card_state у каталога и with_title
+                   у списков пользователя). is_favorite оставлен вторым
+                   вариантом: шаблон может передать состояние явно, если
+                   карточка рисуется из другого источника. {% endcomment %}
+                <button class="film-card__action film-card__action--favorite button--ghost{% if is_favorite or title.favorite_item %} button--active{% endif %}"
                         type="submit" data-favorite-button
-                        aria-label="{% if is_favorite %}{% trans "В избранном" %}{% else %}{% trans "В избранное" %}{% endif %}">
-                    {% if is_favorite %}
+                        aria-label="{% if is_favorite or title.favorite_item %}{% trans "В избранном" %}{% else %}{% trans "В избранное" %}{% endif %}"
+                        title="{% if is_favorite or title.favorite_item %}{% trans "В избранном" %}{% else %}{% trans "В избранное" %}{% endif %}">
+                    {% if is_favorite or title.favorite_item %}
                         {% icon "heart-filled" size=16 %}
                     {% else %}
                         {% icon "heart" size=16 %}
                     {% endif %}
-                    <span data-button-label>{% if is_favorite %}{% trans "В избранном" %}{% else %}{% trans "В избранное" %}{% endif %}</span>
                 </button>
             </form>
 
@@ -178,11 +192,18 @@
                   data-label-on="{% trans 'В списке' %}"
                   data-label-off="{% trans 'Смотреть позже' %}"
                   data-toast-on="{% trans 'Добавлено в «Смотреть позже»' %}"
-                  data-toast-off="{% trans 'Убрано из «Смотреть позже»' %}">
+                  data-toast-off="{% trans 'Убрано из «Смотреть позже»' %}"
+                  data-toast-error="{% trans 'Не удалось сохранить. Попробуйте ещё раз' %}"
+                  {% if not user.is_authenticated %}data-login-required="{% trans 'Войдите, чтобы сохранять фильмы на потом' %}"{% endif %}>
                 {% csrf_token %}
                 <input type="hidden" name="next" value="{{ request.path }}">
-                <button class="film-card__action button--ghost"
-                        type="submit" data-watchlist-button>
+                {% comment %} Заполненной закладки в наборе иконок нет — состояние
+                   показывает класс button--active (акцентная обводка и заливка),
+                   а не подмена символа. Подпись меняется в aria-label и title. {% endcomment %}
+                <button class="film-card__action button--ghost{% if is_watchlist or title.watchlist_item %} button--active{% endif %}"
+                        type="submit" data-watchlist-button
+                        aria-label="{% if is_watchlist or title.watchlist_item %}{% trans "В списке" %}{% else %}{% trans "Смотреть позже" %}{% endif %}"
+                        title="{% if is_watchlist or title.watchlist_item %}{% trans "В списке" %}{% else %}{% trans "Смотреть позже" %}{% endif %}">
                     {% icon "bookmark" size=16 %}
                 </button>
             </form>

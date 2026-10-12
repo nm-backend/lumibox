@@ -72,8 +72,12 @@
     padding-right: var(--space-6);
 }
 
+/* Внутри рамок border-box: 1px нижней рамки шапки входит в её min-height,
+   поэтому внутренней строке остаётся на этот пиксель меньше. Без вычета шапка
+   получалась 61px, а строка разделов фиксировалась на 60 — при прокрутке
+   навигация заезжала под шапку на 1px. */
 .site-header__inner {
-    min-height: var(--header-height);
+    min-height: calc(var(--header-height) - 1px);
 }
 
 .lb-body .site-main {
@@ -1445,6 +1449,16 @@ nav.lb-topnav-bar a.lb-topnav__link--active:hover {
         color: var(--color-accent);
     }
 }
+
+/* На самых узких экранах Telegram уходит из шапки: она дублирует ссылку в меню
+   и подвале, а без неё ряд действий наконец вмещается целиком (на 320px он
+   вылезал за правый край на ~27px у вошедшего пользователя). Остальные кнопки
+   сохраняют тач-таргет 44px — уменьшать их нельзя. */
+@media (max-width: 400px) {
+    .telegram-header-link {
+        display: none;
+    }
+}
 .lb-topbar {
     border-bottom-color: rgba(var(--color-accent-rgb), 0.22);
     background: linear-gradient(180deg, var(--color-dark-surface) 0%, var(--color-dark-bg) 100%);
@@ -1998,12 +2012,15 @@ nav.lb-topnav-bar a.lb-topnav__link--active:hover {
    Сайдбар нужен и на каталоге (структура кино-портала), 
    поэтому сетка и виджеты переехали сюда. 
    В home_feed.css осталась только лента детальных карточек. */
-/* Двухколоночная сетка — геометрия reference: wrapper 976 = content 640 + sidebar 331 gap ~5px
-   LumiBox: 1080 container = 300 sidebar + 756 main + 24 gap — компактно как reference */
+/* Двухколоночная сетка: сайдбар фиксированной ширины плюс лента карточек.
+   Зазор — 16px, а не 32px: на 1440px это было 331 + 32 + 485, и между
+   колонками зияла полоса шире, чем отступы внутри самих виджетов.
+   Колонки шире он не делает — gap отнимает место у ленты, поэтому
+   уменьшение зазора отдаёт карточкам ещё 16px. */
 .lb-contentwrap--home {
     display: grid;
     grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
-    gap: var(--space-6);
+    gap: var(--space-4);
     align-items: start;
     margin-top: var(--space-1);
 }
@@ -2012,7 +2029,10 @@ nav.lb-topnav-bar a.lb-topnav__link--active:hover {
     grid-column: 1;
     grid-row: auto;
     position: sticky;
-    top: calc(var(--header-height) + var(--space-4));
+    /* Под липкой связкой «шапка + строка разделов»: раньше здесь было
+       calc(--header-height + 16px), и колонка заезжала под навигацию на ~41px,
+       когда 33px шапка плюс 57px строка разделов занимали 90px сверху. */
+    top: calc(var(--sticky-content-top) + var(--space-2));
     display: grid;
     /* Групп в колонке до десяти: 20px между ними — это уже видимая
        пауза, без которой виджеты сливаются в один длинный столбик. */

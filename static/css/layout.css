@@ -18,11 +18,17 @@
     top: 0;
     z-index: var(--z-header);
     width: 100%;
-    height: var(--header-height);
+    /* min-height, а не height: раньше здесь стояла жёсткая высота токена, и когда
+       токен стал 33px, содержимое шапки (44px логотип, ~50px поиск) полезло
+       за её границы. Теперь шапка сама вырастает под содержимое. */
+    min-height: var(--header-height);
+    height: auto;
     background-color: var(--color-surface);
     -webkit-backdrop-filter: blur(20px) saturate(180%);
     backdrop-filter: blur(20px) saturate(180%);
-    border-bottom: 1px solid var(--color-border);
+    /* Линия между шапкой и строкой разделов — на своём месте (в пустом месте
+       под содержимым) и на ступень заметнее обычной рамки поверхностей. */
+    border-bottom: 1px solid var(--color-border-strong);
     transition: box-shadow var(--transition), border-bottom-color var(--transition),
                 background-color var(--transition);
     color: var(--color-text);
@@ -374,13 +380,10 @@
     transform: rotate(15deg);
 }
 
-/* ---------- Мобильные: высота шапки 61px ---------- */
-/* На маленьких экранах шапка компактнее — 61px вместо 67px. */
-@media (max-width: 480px) {
-    :root {
-        --header-height: 61px;
-    }
-}
+/* Отдельного мобильного значения --header-height больше нет: на узких экранах
+   шапка получает ту же min-height 60px, а её фактическую высоту задаёт
+   содержимое (около 59–62px). Разные числа для мобильного и десктопа
+   рассинхронизировали sticky-позиции. */
 
 /* ---------- Светлая тема: шапка и внутренние элементы ---------- */
 

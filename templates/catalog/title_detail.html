@@ -269,15 +269,12 @@
                           data-label-on="{% trans 'В избранном' %}"
                           data-label-off="{% trans 'В избранное' %}"
                           data-toast-on="{% trans 'Добавлено в избранное' %}"
-                          data-toast-off="{% trans 'Убрано из избранного' %}">
+                          data-toast-off="{% trans 'Убрано из избранного' %}"
+                          data-toast-error="{% trans 'Не удалось сохранить. Попробуйте ещё раз' %}">
                         {% csrf_token %}
                         <input type="hidden" name="next" value="{{ request.path }}">
-                        <button class="button button--ghost {% if is_favorite %}button--active{% endif %}" type="submit" data-favorite-button aria-label="{% if is_favorite %}{% trans "В избранном" %}{% else %}{% trans "В избранное" %}{% endif %}">
+                        <button class="button button--ghost {% if is_favorite %}button--active{% endif %}" type="submit" data-favorite-button title="{% if is_favorite %}{% trans "В избранном" %}{% else %}{% trans "В избранное" %}{% endif %}" aria-label="{% if is_favorite %}{% trans "В избранном" %}{% else %}{% trans "В избранное" %}{% endif %}">
                             {% if is_favorite %}{% icon "heart-filled" size=16 %}{% else %}{% icon "heart" size=16 %}{% endif %}
-<<<<<<< HEAD
-=======
-                            <!-- <span data-button-label>{% if is_favorite %}{% trans "В избранном" %}{% else %}{% trans "В избранное" %}{% endif %}</span> -->
->>>>>>> 5c05520f5a79ab5176f5e1552c51a0941946aaa8
                         </button>
                     </form>
 
@@ -285,10 +282,11 @@
                           data-label-on="{% trans 'В списке' %}"
                           data-label-off="{% trans 'Смотреть позже' %}"
                           data-toast-on="{% trans 'Добавлено в «Смотреть позже»' %}"
-                          data-toast-off="{% trans 'Убрано из «Смотреть позже»' %}">
+                          data-toast-off="{% trans 'Убрано из «Смотреть позже»' %}"
+                          data-toast-error="{% trans 'Не удалось сохранить. Попробуйте ещё раз' %}">
                         {% csrf_token %}
                         <input type="hidden" name="next" value="{{ request.path }}">
-                        <button class="button button--ghost {% if is_watchlist %}button--active{% endif %}" type="submit" data-watchlist-button aria-label="{% if is_watchlist %}{% trans "В списке" %}{% else %}{% trans "Смотреть позже" %}{% endif %}">
+                        <button class="button button--ghost {% if is_watchlist %}button--active{% endif %}" type="submit" data-watchlist-button title="{% if is_watchlist %}{% trans "В списке" %}{% else %}{% trans "Смотреть позже" %}{% endif %}" aria-label="{% if is_watchlist %}{% trans "В списке" %}{% else %}{% trans "Смотреть позже" %}{% endif %}">
                             {% icon "bookmark" size=16 %}
                         </button>
                     </form>
