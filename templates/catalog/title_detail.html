@@ -558,9 +558,17 @@
                 
                 {% if external_player %}
                     <div class="player" data-player-pane="external">
+                        {% comment %} data-nopreload и data-poster — часть разметки,
+                           которую ждёт SDK Vibix: первый отдаёт инициализацию
+                           плеера (без него тег <ins> не превращается в iframe),
+                           второй показывает постер из базы сервиса как превью.
+                           Атрибуты статичны: они описывают поведение SDK,
+                           а не данные конкретной записи. {% endcomment %}
                         <ins data-publisher-id="{{ external_player.publisher_id }}"
                             data-type="{{ external_player.type }}"
                             data-id="{{ external_player.id }}"
+                            data-nopreload="true"
+                            data-poster="true"
                             {% if external_player.design %}data-design="{{ external_player.design }}"{% endif %}
                             {% if external_player.voiceover %}data-voiceover="{{ external_player.voiceover }}"{% endif %}
                             {% if external_player.voiceover_only %}data-voiceover-only="true"{% endif %}

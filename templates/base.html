@@ -114,7 +114,15 @@
     <div class="cinema-glow" aria-hidden="true"></div>
     <div class="grain-overlay" aria-hidden="true"></div>
 
-   
+    {% comment %} Корневой тег рекламной сети из инструкции Vibix: лоадер
+       (подключён в <head>) ищет его по фиксированному id="vibix_union"
+       и подставляет форматы из data-add_types. Пока флаг выключен,
+       ни тега, ни лоадера на странице нет. {% endcomment %}
+    {% if ads_network.enabled %}
+    <ins id="vibix_union"
+         data-publisher_id="{{ ads_network.publisher_id }}"
+         data-add_types="{{ ads_network.add_types }}"></ins>
+    {% endif %}
 
     {% include "includes/ad_rail.html" with side="left" %}
     {% include "includes/ad_rail.html" with side="right" %}

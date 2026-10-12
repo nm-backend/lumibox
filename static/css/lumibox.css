@@ -1433,15 +1433,18 @@ nav.lb-topnav-bar a.lb-topnav__link--active:hover {
 
 /* Топбар: янтарная волосяная линия снизу, ссылка с мерцающим подчёркиванием */
 
-.
+/* ---------- Mobile: Telegram link in header ----------
 
-/* ---------- Mobile: Telegram link in header ---------- */
+   Здесь раньше стояла одинокая точка — остаток от удалённого селектора.
+   Браузер считает её началом правила и вместе с ним съедает следующий блок:
+   эти стили не применялись никогда. Поля `margin-left` тут тоже нет: ссылка
+   стоит в общем ряду действий, и лишние 8px сверх зазора ряда давали разный
+   ритм между иконками (16px против 8px).
+
+   display не переопределяем: круг 44×44 рисует основная раскладка, а в flex
+   свойство place-items не работает и иконка съехала бы из центра. */
 @media (max-width: 480px) {
     .telegram-header-link {
-        display: flex;
-        align-items: center;
-        gap: var(--space-2);
-        margin-left: var(--space-2);
         font-size: var(--text-sm);
     }
     .telegram-header-link:hover,
@@ -1450,15 +1453,10 @@ nav.lb-topnav-bar a.lb-topnav__link--active:hover {
     }
 }
 
-/* На самых узких экранах Telegram уходит из шапки: она дублирует ссылку в меню
-   и подвале, а без неё ряд действий наконец вмещается целиком (на 320px он
-   вылезал за правый край на ~27px у вошедшего пользователя). Остальные кнопки
-   сохраняют тач-таргет 44px — уменьшать их нельзя. */
-@media (max-width: 400px) {
-    .telegram-header-link {
-        display: none;
-    }
-}
+/* На самых узких экранах Telegram-ссылка остаётся в шапке: это единственная
+   точка входа в канал в верхней части мобильного интерфейса (в подвале и в
+   нижней навигации её нет). Место для неё освобождает аватар — его правила
+   в @media (max-width: 400px) в layout.css. */
 .lb-topbar {
     border-bottom-color: rgba(var(--color-accent-rgb), 0.22);
     background: linear-gradient(180deg, var(--color-dark-surface) 0%, var(--color-dark-bg) 100%);
