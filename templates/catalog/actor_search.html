@@ -57,7 +57,8 @@
                             <div class="actor-group__header">
                                 <div class="actor-group__person">
                                     {% if item.person.photo %}
-                                        <img class="avatar avatar--md" src="{{ item.person.photo.url }}" alt="" loading="lazy" decoding="async">
+                                        {# Кружок 36px: файл с камеры сюда ни к чему. #}
+                                        <img class="avatar avatar--md" src="{{ item.person.photo|webp_url:100 }}" alt="" loading="lazy" decoding="async">
                                     {% else %}
                                         <span class="avatar avatar--md avatar--placeholder" aria-hidden="true">{{ item.person.initial }}</span>
                                     {% endif %}

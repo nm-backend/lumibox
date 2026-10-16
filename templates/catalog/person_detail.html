@@ -19,7 +19,8 @@
     <div class="profile-header">
         <div class="avatar avatar--large">
             {% if person.photo %}
-                <img class="avatar__image" src="{{ person.photo.url }}" alt="{% blocktranslate with name=person.name %}Фото: {{ name }}{% endblocktranslate %}" loading="lazy" decoding="async">
+                {# Кружок 88px: хватает копии в 200px, файл с камеры — нет. #}
+                <img class="avatar__image" src="{{ person.photo|webp_url:200 }}" alt="{% blocktranslate with name=person.name %}Фото: {{ name }}{% endblocktranslate %}" loading="lazy" decoding="async">
             {% else %}
                 <span aria-hidden="true">{{ person.initial }}</span>
             {% endif %}

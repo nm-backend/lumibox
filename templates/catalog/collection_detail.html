@@ -16,7 +16,22 @@
 
     <div class="collection-hero">
         {% if collection.cover %}
-            <img class="collection-hero__image" src="{{ collection.cover|webp_url }}" alt="" loading="lazy" decoding="async">
+            {% comment %} Обложка подборки в шапке: 240px рядом с текстом
+               и во всю ширину на узком экране, где шапка встаёт в колонку.
+               Раньше сюда шёл полный файл обложки, которого при такой
+               отдаче не видно вовсе. {% endcomment %}
+            {% with srcset=collection.cover|webp_srcset %}
+                <picture>
+                    {% if srcset %}
+                        <source type="image/webp"
+                                srcset="{{ srcset }}"
+                                sizes="(min-width: 721px) 240px, 100vw">
+                    {% elif collection.cover|webp_url != collection.cover.url %}
+                        <source type="image/webp" srcset="{{ collection.cover|webp_url }}">
+                    {% endif %}
+                    <img class="collection-hero__image" src="{{ collection.cover.url }}" alt="" loading="lazy" decoding="async">
+                </picture>
+            {% endwith %}
         {% endif %}
 
         <div class="collection-hero__body">

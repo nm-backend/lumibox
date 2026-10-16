@@ -11,6 +11,38 @@ from apps.reviews.models import Comment, Review
 from apps.reviews.services import save_comment, save_review
 
 
+def parse_parent_id(raw):
+    """
+    Номер комментария-родителя из скрытого поля.
+
+    Поле заполняет скрипт, но значение приходит от клиента и может быть
+    любым. Раньше строка уходила прямо в filter(pk=...): на «abc» Django
+    падал с ValueError, на 30-значном числе SQLite — с переполнением
+    (Python int too large to convert to SQLite INTEGER), а PostgreSQL —
+    с выходом за диапазон bigint; в ответ человек получал страницу 500.
+    Нераспознанное значение означает обычный комментарий верхнего уровня:
+    падать из-за испорченного скрытого поля незачем.
+
+    Принимает: строку из POST (или None).
+    Возвращает: положительный номер в пределах bigint или None.
+    """
+    if not raw:
+        return None
+
+    try:
+        value = int(raw.strip())
+    except (AttributeError, TypeError, ValueError):
+        return None
+
+    # 2**63 - 1 — верхняя граница bigint: всё, что больше, роняет запрос
+    # ещё до выборки. Проверка не зависит от движка: и SQLite, и PostgreSQL
+    # такое число не принимают.
+    if not 0 < value <= 2**63 - 1:
+        return None
+
+    return value
+
+
 def render_title_page(request, title, **bound_forms):
     """
     Перерисовывает страницу фильма с формой, в которой остались ошибки.
@@ -105,8 +137,8 @@ class CommentCreateView(LoginRequiredMixin, View):
         # Родителя берём из POST, но обязательно сверяем с записью:
         # сам сервис отбросит чужого и схлопнет ответ на ответ.
         parent = None
-        parent_id = request.POST.get("parent")
-        if parent_id:
+        parent_id = parse_parent_id(request.POST.get("parent"))
+        if parent_id is not None:
             parent = Comment.objects.published().filter(pk=parent_id).first()
 
         save_comment(

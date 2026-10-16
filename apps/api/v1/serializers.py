@@ -4,6 +4,12 @@ from rest_framework import serializers
 from apps.catalog.models import Collection, Country, Genre, Participation, Person, Title
 from apps.reviews.models import Comment, Review
 
+# Нулевой байт в тексте отсекает штатный валидатор Django: CharField получает
+# ProhibitNullCharactersValidator сам, а ModelSerializer переносит валидаторы
+# поля модели в поле сериализатора. Свой точно такой же валидатор здесь стоял
+# раньше — защиты он не добавлял, зато клиент получал два сообщения об одной
+# и той же ошибке.
+
 
 class ReferenceSerializer(serializers.ModelSerializer):
     """Жанр или страна в кратком виде — для вложения в карточку записи."""
@@ -149,6 +155,33 @@ class StrictIntegerField(serializers.IntegerField):
         return super().to_internal_value(data)
 
 
+class BigIntPkField(serializers.IntegerField):
+    """
+    Номер связанной записи в пределах bigint.
+
+    Пара min_value/max_value у pk_field не работает: у PrimaryKeyRelatedField
+    DRF вызывает pk_field.to_internal_value, минуя run_validation, — то есть
+    валидаторы диапазона не запускаются вообще. Слова «не больше 2**63-1»
+    в описании поля оставались обещанием: 30-значный номер уходил в запрос
+    к базе, и PostgreSQL отвечал «value out of range for type bigint», а
+    клиент получал 500 вместо 400. Поэтому диапазон проверяем здесь.
+    """
+
+    default_error_messages = {
+        "invalid": "Ожидалось целое число.",
+        "out_of_range": "Номер вне допустимого диапазона.",
+    }
+
+    def to_internal_value(self, data):
+        # bool — подкласс int, но JSON true не является номером комментария.
+        if isinstance(data, bool):
+            self.fail("invalid")
+        value = super().to_internal_value(data)
+        if not 1 <= value <= 2**63 - 1:
+            self.fail("out_of_range")
+        return value
+
+
 class RateRequestSerializer(serializers.Serializer):
     rating = StrictIntegerField(min_value=1, max_value=10)
 
@@ -164,6 +197,22 @@ class CommentSerializer(serializers.ModelSerializer):
 
     author = serializers.CharField(source="user.display_name", read_only=True)
     replies = serializers.SerializerMethodField()
+
+    # Номер родителя уходит в запрос к базе, поэтому диапазон ограничен
+    # здесь: число больше bigint роняет запрос (и SQLite, и PostgreSQL),
+    # и клиент получил бы 500 вместо 400.
+    parent = serializers.PrimaryKeyRelatedField(
+        queryset=Comment.objects.all(),
+        required=False,
+        allow_null=True,
+        pk_field=BigIntPkField(),
+        error_messages={
+            # Текст по умолчанию рассказывает про «первичный ключ» — это
+            # внутреннее устройство, клиенту нужен номер комментария.
+            "does_not_exist": "Комментарий с таким номером не найден.",
+            "incorrect_type": "Ожидался номер комментария.",
+        },
+    )
 
     class Meta:
         model = Comment

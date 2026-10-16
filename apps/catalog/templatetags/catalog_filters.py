@@ -46,15 +46,35 @@ def _has_webp(storage, name: str) -> bool:
 
 
 @register.filter
-def webp_url(value):
+def webp_url(value, width=None):
     """URL WebP-версии изображения, если она существует, иначе оригинал.
 
     WebP-копии создаются сигналом при сохранении (apps.catalog.webp),
     весят в ~3 раза меньше JPG. Использование: {{ title.poster|webp_url }}.
     Ожидает ImageFieldFile; безопасен для пустых полей.
+
+    Необязательная ширина выбирает уменьшенную копию: {{ title.poster|webp_url:200 }}.
+    Без неё поведение прежнее — полный WebP. Зачем ширина: миниатюра 54×64
+    получала самый большой файл из всех (у одного постера он весил 1.6 МБ),
+    потому что фильтр всегда отдавал копию в натуральную величину. Порядок
+    отступления: нужная ширина → полный WebP → оригинал. Уменьшенных копий
+    может не быть (картинки, загруженные до появления нарезки) — тогда
+    лучше большая копия, чем ничего: адрес всё равно рабочий.
     """
     if not value or not getattr(value, "name", None):
         return ""
+
+    from apps.catalog.webp import webp_name
+
+    try:
+        wanted = int(width) if width is not None else 0
+    except (TypeError, ValueError):
+        wanted = 0
+    if wanted > 0:
+        candidate = webp_name(value.name, wanted)
+        if _has_webp(value.storage, candidate):
+            return value.storage.url(candidate)
+
     if _has_webp(value.storage, value.name):
         base, _ = value.name.rsplit(".", 1)
         return value.storage.url(f"{base}.webp")

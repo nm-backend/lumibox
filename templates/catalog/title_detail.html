@@ -1,11 +1,16 @@
 {% extends "base.html" %}
 {% load static i18n lumibox_urls icons catalog_filters %}
-{% block page_title %}{% blocktranslate with name=title.name year=title.release_year %}{{ name }} ({{ year }}) — LumiBox{% endblocktranslate %}{% endblock %}
+{% comment %}
+   Год в заголовке вкладки и в предпросмотре ссылки — только когда он есть.
+   Без проверки запись без года давала «Название (None)»: шаблон печатает
+   само значение, а у пустого поля это слово None, а не пустая строка.
+{% endcomment %}
+{% block page_title %}{% if title.release_year %}{% blocktranslate with name=title.name year=title.release_year %}{{ name }} ({{ year }}) — LumiBox{% endblocktranslate %}{% else %}{{ title.name }} — LumiBox{% endif %}{% endblock %}
 {% block page_description %}{{ title.get_meta_description }}{% endblock %}
 
-{% block og_title %}{{ title.name }} ({{ title.release_year }}) — LumiBox{% endblock %}
+{% block og_title %}{{ title.name }}{% if title.release_year %} ({{ title.release_year }}){% endif %} — LumiBox{% endblock %}
 {% block og_description %}{{ title.short_description|default:title.get_meta_description }}{% endblock %}
-{% block twitter_title %}{{ title.name }} ({{ title.release_year }}) — LumiBox{% endblock %}
+{% block twitter_title %}{{ title.name }}{% if title.release_year %} ({{ title.release_year }}){% endif %} — LumiBox{% endblock %}
 {% block twitter_description %}{{ title.short_description|default:title.get_meta_description }}{% endblock %}
 
 {% comment %}
@@ -26,7 +31,10 @@
     "name": "{{ title.name|escapejs }}",
     "{% if title.is_series %}alternateName{% else %}alternativeHeadline{% endif %}": "{{ title.original_name|escapejs }}",
     "description": "{{ title.short_description|default:title.get_meta_description|escapejs }}",
-    {% if title.release_date %}"datePublished": "{{ title.release_date|date:"Y-m-d" }}",{% else %}"datePublished": "{{ title.release_year }}",{% endif %}
+    {% comment %} Дата выпуска — только когда она есть. Поле печаталось напрямую,
+       и у записи без года в структурированные данные уходило "None": поиск
+       показывает такую дату как настоящую, а это заведомо неверно. {% endcomment %}
+    {% if title.release_date %}"datePublished": "{{ title.release_date|date:"Y-m-d" }}",{% elif title.release_year %}"datePublished": "{{ title.release_year }}-01-01",{% endif %}
     {% if title.duration_minutes %}"duration": "PT{{ title.duration_minutes }}M",{% endif %}
     {% if title.age_rating %}"contentRating": "{{ title.age_rating }}",{% endif %}
     {% if title.rating_average %}
@@ -93,7 +101,10 @@
    как раз для тех, где важно понять, почему их не смотрят. Шапка есть всегда. {% endcomment %}
 <section class="film-hero" data-title-slug="{{ title.slug }}">
     {% if title.backdrop %}
-        <img class="film-hero__backdrop" src="{{ title.backdrop|webp_url }}" alt="" aria-hidden="true" loading="eager" fetchpriority="high">
+        {% comment %} Задник — фоновый, поверх него всегда градиент: 1280px хватает
+           на любой экран, а полный файл отдавался бы и на телефоне. Для
+           картинок без нарезки фильтр вернёт прежний большой адрес. {% endcomment %}
+        <img class="film-hero__backdrop" src="{{ title.backdrop|webp_url:1280 }}" alt="" aria-hidden="true" loading="eager" fetchpriority="high">
     {% endif %}
     <div class="film-hero__scrim" aria-hidden="true"></div>
 
@@ -104,10 +115,26 @@
     <div class="container film-hero__inner">
         <div class="film-hero__poster">
             {% if title.poster %}
-                <img class="film-hero__poster-image" src="{{ title.poster|webp_url }}"
-                     alt="{% blocktranslate with name=title.name %}Постер: {{ name }}{% endblocktranslate %}"
-                     decoding="async"
-                     onerror="this.classList.add('is-hidden'); this.closest('.film-hero__poster').querySelector('.card__placeholder')?.classList.add('is-visible');">
+                {% comment %} Постер в шапке — 280px на настольном экране и 160px
+                   на телефоне. Раньше сюда шёл полный файл (у одного постера
+                   он весил 1.6 МБ) — самый заметный кандидат в LCP страницы.
+                   Теперь браузер сам выбирает копию по srcset, а для картинок
+                   без нарезки остаётся прежний полный WebP. {% endcomment %}
+                {% with srcset=title.poster|webp_srcset %}
+                    <picture>
+                        {% if srcset %}
+                            <source type="image/webp"
+                                    srcset="{{ srcset }}"
+                                    sizes="(min-width: 901px) 280px, 160px">
+                        {% elif title.poster|webp_url != title.poster.url %}
+                            <source type="image/webp" srcset="{{ title.poster|webp_url }}">
+                        {% endif %}
+                        <img class="film-hero__poster-image" src="{{ title.poster.url }}"
+                             alt="{% blocktranslate with name=title.name %}Постер: {{ name }}{% endblocktranslate %}"
+                             decoding="async"
+                             onerror="this.classList.add('is-hidden'); this.closest('.film-hero__poster').querySelector('.card__placeholder')?.classList.add('is-visible');">
+                    </picture>
+                {% endwith %}
             {% endif %}
             <span class="card__placeholder lb-poster-fallback lb-poster-fallback--hero{% if not title.poster %} is-visible{% endif %}" aria-hidden="true">
                 <span class="lb-poster-fallback__badge">
@@ -145,8 +172,10 @@
                 {% endif %}
 
                 <span>{{ title.get_type_display }}</span>
-                <span class="film-hero__dot" aria-hidden="true">·</span>
-                <span>{{ title.release_year }}</span>
+                {% if title.release_year %}
+                    <span class="film-hero__dot" aria-hidden="true">·</span>
+                    <span>{{ title.release_year }}</span>
+                {% endif %}
 
                 {% if title.duration_minutes %}
                     <span class="film-hero__dot" aria-hidden="true">·</span>
@@ -445,7 +474,7 @@
                      {% if primary_source.kind != "file" %}hidden{% endif %}>
                     <video class="player__video vplayer__video" controls preload="metadata"
                            playsinline
-                           {% if title.backdrop %}poster="{{ title.backdrop|webp_url }}"{% endif %}
+                           {% if title.backdrop %}poster="{{ title.backdrop|webp_url:640 }}"{% endif %}
                            data-player-video>
                         <source {% if primary_source.kind == "file" %}src="{{ primary_source.src }}"{% endif %}
                                 type="video/mp4" data-player-source>
@@ -692,10 +721,14 @@
                             <dt class="spec-list__label">{% trans "Озвучка / Перевод" %}</dt>
                             <dd class="spec-list__value">{{ title.get_voice_acting_display }}</dd>
                         {% endif %}
-                        <dt class="spec-list__label">{% if title.release_date %}{% trans "Дата выхода" %}{% else %}{% trans "Год" %}{% endif %}</dt>
-                        <dd class="spec-list__value">
-                            {% if title.release_date %}{{ title.release_date|date:"j E Y" }}{% else %}{{ title.release_year }}{% endif %}
-                        </dd>
+                        {% if title.release_date or title.release_year %}
+                            {% comment %} Раньше строка печаталась всегда: без года
+                               получалась подпись «Год» с пустым значением. {% endcomment %}
+                            <dt class="spec-list__label">{% if title.release_date %}{% trans "Дата выхода" %}{% else %}{% trans "Год" %}{% endif %}</dt>
+                            <dd class="spec-list__value">
+                                {% if title.release_date %}{{ title.release_date|date:"j E Y" }}{% else %}{{ title.release_year }}{% endif %}
+                            </dd>
+                        {% endif %}
                         {% if title.countries.all %}
                             <dt class="spec-list__label">{% trans "Страны" %}</dt>
                             <dd class="spec-list__value">
@@ -787,7 +820,7 @@
                                         <a class="crew" href="{{ participation.person.get_absolute_url }}">
                                             <span class="avatar">
                                                 {% if participation.person.photo %}
-                                                    <img class="avatar__image" src="{{ participation.person.photo.url }}" alt="" loading="lazy">
+                                                    <img class="avatar__image" src="{{ participation.person.photo|webp_url:100 }}" alt="" loading="lazy">
                                                 {% else %}
                                                     <span aria-hidden="true">{{ participation.person.initial }}</span>
                                                 {% endif %}
@@ -851,7 +884,7 @@
                 <a class="similar-card" href="{{ similar.get_absolute_url }}" title="{{ similar.name }}">
                     <span class="similar-card__poster">
                         {% if similar.poster %}
-                            <img class="similar-card__image" src="{{ similar.poster|webp_url }}" alt="" loading="lazy" decoding="async"
+                            <img class="similar-card__image" src="{{ similar.poster|webp_url:200 }}" alt="" loading="lazy" decoding="async"
                                  onerror="this.classList.add('is-hidden'); this.closest('.similar-card__poster').querySelector('.similar-card__placeholder')?.classList.add('is-visible');">
                         {% endif %}
                         <span class="similar-card__placeholder lb-poster-fallback{% if not similar.poster %} is-visible{% endif %}" aria-hidden="true">
@@ -884,7 +917,7 @@
                 <a class="similar-card" href="{{ part.get_absolute_url }}" title="{{ part.name }}">
                     <span class="similar-card__poster">
                         {% if part.poster %}
-                            <img class="similar-card__image" src="{{ part.poster|webp_url }}" alt="" loading="lazy" decoding="async"
+                            <img class="similar-card__image" src="{{ part.poster|webp_url:200 }}" alt="" loading="lazy" decoding="async"
                                  onerror="this.classList.add('is-hidden'); this.closest('.similar-card__poster').querySelector('.similar-card__placeholder')?.classList.add('is-visible');">
                         {% endif %}
                         <span class="similar-card__placeholder lb-poster-fallback{% if not part.poster %} is-visible{% endif %}" aria-hidden="true">
@@ -911,8 +944,11 @@
         <span>{% blocktranslate with name=title.name %}Смотреть {{ name }} онлайн — LumiBox{% endblocktranslate %}</span>
     </h2>
     <div class="lb-seo__content">
-        <p>{% blocktranslate with name=title.name kind=kind year=title.release_year %}«{{ name }}» — {{ kind }}
-            {{ year }} года. Смотрите онлайн в хорошем качестве{% endblocktranslate %}{% if title.quality %}{% blocktranslate with quality=title.quality %},
+        {% comment %} Абзац собирается из кусков: год входит в него только когда
+           он есть, иначе текст обещал зрителю «фильм 0 года». Замечание про
+           однострочность {# #}: многострочный такой комментарий Django не
+           разбирает и печатает как текст страницы — проверено тестом ниже. {% endcomment %}
+        <p>{% blocktranslate with name=title.name kind=kind %}«{{ name }}» — {{ kind }}{% endblocktranslate %}{% if title.release_year %} {% blocktranslate with year=title.release_year %}{{ year }} года{% endblocktranslate %}{% endif %}. {% trans "Смотрите онлайн в хорошем качестве" %}{% if title.quality %}{% blocktranslate with quality=title.quality %},
             {{ quality }}{% endblocktranslate %}{% endif %}{% if title.voice_acting %}{% blocktranslate with voice=title.get_voice_acting_display %}, в озвучке «{{ voice }}»{% endblocktranslate %}{% endif %}.
             {% trans "Удобный плеер, полное описание, актёры и съёмочная группа, кадры и отзывы зрителей — всё на LumiBox." %}</p>
         <p>{% blocktranslate with name=title.name %}Смотреть «{{ name }}» можно бесплатно и без регистрации на любом

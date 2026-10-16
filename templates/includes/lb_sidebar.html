@@ -48,7 +48,7 @@
                                 <li class="sb-films__item">
                                     <a class="sb-films__link" href="{{ title.get_absolute_url }}">
                                         {% if title.poster %}
-                                            <img class="sb-films__poster" src="{{ title.poster|webp_url }}" width="54" height="64" alt="" loading="lazy"
+                                            <img class="sb-films__poster" src="{{ title.poster|webp_url:200 }}" width="54" height="64" alt="" loading="lazy"
                                                  onerror="this.classList.add('is-hidden'); this.nextElementSibling.classList.add('is-visible');">
                                             <span class="sb-films__placeholder" aria-hidden="true">{% icon "movie" size=18 %}</span>
                                         {% else %}
@@ -59,7 +59,7 @@
                                             <span class="sb-films__meta">
                                                 {% if title.release_date %}
                                                     {{ title.release_date|date:"j E Y" }}
-                                                {% else %}
+                                                {% elif title.release_year %}
                                                     {{ title.release_year }}
                                                 {% endif %}
                                             </span>
@@ -125,7 +125,7 @@
                                     <a class="sb-films__link" href="{{ title.get_absolute_url }}">
                                         <span class="sb-films__rank" aria-hidden="true">{{ forloop.counter }}</span>
                                         {% if title.poster %}
-                                            <img class="sb-films__poster" src="{{ title.poster|webp_url }}" width="54" height="64" alt="" loading="lazy"
+                                            <img class="sb-films__poster" src="{{ title.poster|webp_url:200 }}" width="54" height="64" alt="" loading="lazy"
                                                  onerror="this.classList.add('is-hidden'); this.nextElementSibling.classList.add('is-visible');">
                                             <span class="sb-films__placeholder" aria-hidden="true">{% icon "movie" size=18 %}</span>
                                         {% else %}
@@ -154,7 +154,7 @@
                                 <li class="sb-films__item">
                                     <a class="sb-films__link" href="{{ title.get_absolute_url }}">
                                         {% if title.poster %}
-                                            <img src="{{ title.poster|webp_url }}" width="83" height="123" alt="" loading="lazy"
+                                            <img src="{{ title.poster|webp_url:200 }}" width="83" height="123" alt="" loading="lazy"
                                                  onerror="this.classList.add('is-hidden'); this.nextElementSibling.classList.add('is-visible');">
                                             <span class="sb-films__placeholder sb-films__placeholder--poster" aria-hidden="true">{% icon "movie" size=24 %}</span>
                                         {% else %}
@@ -194,14 +194,14 @@
                                 <li class="sb-films__item">
                                     <a class="sb-films__link" href="{{ title.get_absolute_url }}">
                                         {% if title.poster %}
-                                            <img class="sb-films__poster" src="{{ title.poster|webp_url }}" width="54" height="64" alt="" loading="lazy"
+                                            <img class="sb-films__poster" src="{{ title.poster|webp_url:200 }}" width="54" height="64" alt="" loading="lazy"
                                                  onerror="this.classList.add('is-hidden'); this.nextElementSibling.classList.add('is-visible');">
                                             <span class="sb-films__placeholder" aria-hidden="true">{% icon "movie" size=18 %}</span>
                                         {% else %}
                                             <span class="sb-films__placeholder is-visible" aria-hidden="true">{% icon "movie" size=18 %}</span>
                                         {% endif %}
                                         <span class="sb-films__main">
-                                            <span class="sb-films__name">{{ title.name }}<span class="sb-films__year">{{ title.release_year }}</span></span>
+                                            <span class="sb-films__name">{{ title.name }}{% if title.release_year %}<span class="sb-films__year">{{ title.release_year }}</span>{% endif %}</span>
                                             <span class="sb-films__meta">
                                                 {{ title.get_type_display }}
                                                 {% if title.voice_acting %} · {{ title.get_voice_acting_display }}{% endif %}

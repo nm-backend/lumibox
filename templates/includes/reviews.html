@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load i18n catalog_filters %}
 
 <section class="section" id="reviews">
     <h2 class="section__title">{% trans "Отзывы" %} {% if title.rating_count %}<span class="section__count">{{ title.rating_count }}</span>{% endif %}</h2>
@@ -41,7 +41,7 @@
                 <li class="review">
                     <div class="avatar">
                         {% if review.user.avatar %}
-                            <img class="avatar__image" src="{{ review.user.avatar.url }}" alt="" loading="lazy" decoding="async">
+                            <img class="avatar__image" src="{{ review.user.avatar|webp_url:100 }}" alt="" loading="lazy" decoding="async">
                         {% else %}
                             <span aria-hidden="true">{{ review.user.initial }}</span>
                         {% endif %}

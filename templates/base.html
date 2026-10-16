@@ -1,4 +1,4 @@
-{% load static i18n lumibox_urls icons %}<!DOCTYPE html>
+{% load static i18n lumibox_urls icons catalog_filters %}<!DOCTYPE html>
 {% get_current_language as LANGUAGE_CODE %}
 <html lang="{{ LANGUAGE_CODE }}" data-theme="">
 <head>
@@ -179,7 +179,7 @@
                         <summary class="user-menu__trigger" aria-label="{% trans 'Меню пользователя' %}">
                             <span class="avatar">
                                 {% if user.avatar %}
-                                    <img class="avatar__image" src="{{ user.avatar.url }}" alt="" loading="lazy" decoding="async">
+                                    <img class="avatar__image" src="{{ user.avatar|webp_url:100 }}" alt="" loading="lazy" decoding="async">
                                 {% else %}
                                     <span aria-hidden="true">{{ user.initial }}</span>
                                 {% endif %}

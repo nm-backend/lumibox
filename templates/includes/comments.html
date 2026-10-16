@@ -44,7 +44,7 @@
                 <li class="lb-comment">
                     <div class="avatar">
                         {% if comment.user.avatar %}
-                            <img class="avatar__image" src="{{ comment.user.avatar.url }}" alt="" loading="lazy" decoding="async">
+                            <img class="avatar__image" src="{{ comment.user.avatar|webp_url:100 }}" alt="" loading="lazy" decoding="async">
                         {% else %}
                             <span aria-hidden="true">{{ comment.user.initial }}</span>
                         {% endif %}
@@ -80,7 +80,7 @@
                                     <li class="lb-comment lb-comment--reply">
                                         <div class="avatar avatar--small">
                                             {% if reply.user.avatar %}
-                                                <img class="avatar__image" src="{{ reply.user.avatar.url }}" alt="" loading="lazy" decoding="async">
+                                                <img class="avatar__image" src="{{ reply.user.avatar|webp_url:100 }}" alt="" loading="lazy" decoding="async">
                                             {% else %}
                                                 <span aria-hidden="true">{{ reply.user.initial }}</span>
                                             {% endif %}

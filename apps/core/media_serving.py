@@ -51,8 +51,6 @@ class _RangeReader:
 def serve_public_media(request, path, document_root=None):
     """Отдаёт файл с поддержкой Range; приватные пути — 404."""
     normalized_path = path.replace("\\", "/").lstrip("/")
-    if normalized_path.startswith("private_media/"):
-        raise Http404("Файл доступен только через защищённый маршрут.")
 
     document_root = os.path.abspath(document_root or "")
     full_path = os.path.abspath(os.path.join(document_root, normalized_path))
@@ -60,6 +58,22 @@ def serve_public_media(request, path, document_root=None):
     # Защита от обхода каталога: путь обязан остаться внутри MEDIA_ROOT.
     if not full_path.startswith(document_root + os.sep) and full_path != document_root:
         raise Http404("Файл не найден.")
+
+    # Приватные файлы закрыты от прямой раздачи. Проверяем уже разобранный
+    # путь, а не строку из адреса.
+    #
+    # Раньше префикс сверялся с тем, что пришло в URL, до склейки с MEDIA_ROOT.
+    # Строка «x/../private_media/secret.txt» на «private_media/» не начинается,
+    # проверка пропускала её, а os.path.abspath схлопывал «..» позже — файл
+    # уходил наружу с кодом 200. Достаточно было открыть
+    # /media/x/%2e%2e/private_media/<файл>.
+    #
+    # normcase: на Windows регистр в путях не значим, и «Private_media/…»
+    # указывал бы на ту же папку. На Linux сравнение ничего не меняет.
+    private_root = os.path.normcase(os.path.join(document_root, "private_media"))
+    private_path = os.path.normcase(full_path)
+    if private_path == private_root or private_path.startswith(private_root + os.sep):
+        raise Http404("Файл доступен только через защищённый маршрут.")
 
     if not os.path.isfile(full_path):
         raise Http404("Файл не найден.")

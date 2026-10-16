@@ -3,8 +3,11 @@
 <a class="collection-card" href="{{ collection.get_absolute_url }}">
     <span class="collection-card__cover">
         {% if collection.cover %}
+            {% comment %} Обложка карточки 16:9 шириной до ~400px: полный файл сюда
+               не нужен, у подборок есть копия в 400px. Без неё фильтр вернёт
+               прежний адрес. {% endcomment %}
             <img class="collection-card__image"
-                 src="{{ collection.cover|webp_url }}"
+                 src="{{ collection.cover|webp_url:400 }}"
                  alt=""
                  loading="lazy">
         {% else %}

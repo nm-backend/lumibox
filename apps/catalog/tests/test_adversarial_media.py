@@ -61,12 +61,16 @@ class PrivateMediaTests(TestCase):
         self.private_dir.mkdir(parents=True, exist_ok=True)
         self.secret = self.private_dir / "secret.txt"
         self.secret.write_bytes(b"TOP-SECRET-CONTENT")
+        # Сосед с похожим именем: он публичный, и запрет не должен его задевать.
+        self.lookalike = root / "private_media_notes.txt"
+        self.lookalike.write_bytes(b"PUBLIC-CONTENT")
 
     def tearDown(self):
-        try:
-            self.secret.unlink(missing_ok=True)
-        except PermissionError:
-            pass
+        for path in (self.secret, self.lookalike):
+            try:
+                path.unlink(missing_ok=True)
+            except PermissionError:
+                pass
 
     def test_private_media_file_404(self):
         response = self.client.get(f"{MEDIA_URL}private_media/secret.txt")
@@ -75,6 +79,36 @@ class PrivateMediaTests(TestCase):
     def test_private_media_encoded_slash_404(self):
         response = self.client.get(f"{MEDIA_URL}private_media%2fsecret.txt")
         self.assertEqual(response.status_code, 404)
+
+    def test_private_media_via_parent_segment_404(self):
+        """«..» не должен открывать приватную папку в обход запрета.
+
+        Проверка префикса шла по строке из адреса: «x/../private_media/…»
+        на «private_media/» не начинается, а abspath убирал «..» позже.
+        Файл отдавался с кодом 200.
+        """
+        response = self.client.get(f"{MEDIA_URL}x/../private_media/secret.txt")
+        self.assertEqual(response.status_code, 404)
+
+    def test_private_media_via_encoded_parent_segment_404(self):
+        """То же с закодированными точками — так шлёт обычный браузер."""
+        response = self.client.get(f"{MEDIA_URL}x/%2e%2e/private_media/secret.txt")
+        self.assertEqual(response.status_code, 404)
+
+    def test_private_media_via_current_dir_segment_404(self):
+        response = self.client.get(f"{MEDIA_URL}./private_media/secret.txt")
+        self.assertEqual(response.status_code, 404)
+
+    def test_private_media_case_variant_404(self):
+        """Windows не различает регистр — обход через «Private_media» тоже закрыт."""
+        response = self.client.get(f"{MEDIA_URL}Private_media/secret.txt")
+        self.assertEqual(response.status_code, 404)
+
+    def test_public_lookalike_name_is_served(self):
+        """Запрет бьёт ровно по папке private_media, а не по похожим именам."""
+        response = self.client.get(f"{MEDIA_URL}private_media_notes.txt")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(_body(response), b"PUBLIC-CONTENT")
 
 
 class RangeTests(TestCase):

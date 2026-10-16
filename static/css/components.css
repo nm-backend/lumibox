@@ -616,9 +616,14 @@
     gap: var(--space-1);
     padding: var(--space-2) var(--space-3);
     padding-bottom: max(var(--space-2), env(safe-area-inset-bottom));
-    background: var(--glass-bg);
-    backdrop-filter: blur(var(--glass-blur));
-    -webkit-backdrop-filter: blur(var(--glass-blur));
+    /* Непрозрачный фон, а не стекло. Сквозь полупрозрачную полосу
+       просвечивали кнопки контента — «Смотреть позже», «Поделиться»,
+       кнопки на карточках, — и выглядели нажимаемыми, хотя тап по ним
+       забирало меню: человек целился в «Поделиться», а уезжал в каталог.
+       Тот же приём, что у шапки при прокрутке (см. .site-header--scrolled). */
+    background-color: var(--color-surface);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
     border-top: 1px solid var(--glass-border);
     animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     /* Горизонтальный скролл если не помещается */
@@ -694,8 +699,10 @@
         display: flex;
     }
 
+    /* Запас под фиксированной полосой: без него последние 60px каждой
+       страницы остаются внутри полосы и до них не доскроллить. */
     body {
-        padding-bottom: max(env(safe-area-inset-bottom), 16px);
+        padding-bottom: var(--bottom-nav-reserve);
     }
 }
 
@@ -1780,7 +1787,12 @@
 
 @media (max-width: 720px) {
     .scroll-top {
-        bottom: calc(76px + env(safe-area-inset-bottom));
+        /* Стоит над нижней полосой: её высота плюс её нижний паддинг.
+           Раньше число 76 было вписано руками — теперь из того же
+           токена, что и запас под страницей. */
+        bottom: calc(
+            var(--bottom-nav-height) + var(--space-2) + env(safe-area-inset-bottom)
+        );
         right: var(--space-4);
         width: 40px;
         height: 40px;

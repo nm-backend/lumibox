@@ -1,0 +1,42 @@
+{% extends "error_base.html" %}
+{% load i18n icons %}
+
+{% comment %}
+    Страница отказа проверки CSRF.
+
+    Django ищет именно шаблон 403_csrf.html и, не найдя его, рисует свою
+    служебную страницу. Она не английская (строки переводятся), но чужая:
+    серое оформление фреймворка, разметка с <html lang="en"> на русском
+    тексте — скринридер читает её английским голосом, — обращение
+    «CSRF-cookie», «same-orign» и совет посетителю «включить отладочный
+    режим, установив значение переменной DEBUG=True».
+
+    Ни ошибки в логах, ни 500 при этом не будет: страницу видит обычный
+    человек, который открыл форму отзыва или профиля раньше, чем истёк
+    защитный токен, и вернулся к ней (или отключил cookie). Поэтому здесь
+    тот же каркас, что и у остальных ошибок, и объяснение, что делать.
+{% endcomment %}
+
+{% block error_meta_title %}{% trans "Форма устарела (403) — LumiBox" %}{% endblock %}
+{% block error_meta_description %}{% trans "Отправка не прошла проверку безопасности: обновите страницу и попробуйте снова." %}{% endblock %}
+
+{% block error_code %}403{% endblock %}
+{% block error_subtitle %}{% trans "Форма устарела" %}{% endblock %}
+{% block error_title %}{% trans "Отправка не прошла проверку безопасности" %}{% endblock %}
+{% block error_text %}{% trans "Страница была открыта слишком долго, и защитный токен формы устарел. Так сайт убеждается, что запрос отправлен вами, а не чужой страницей. Текст, который вы написали, не потерялся: вернитесь назад, обновите страницу и отправьте ещё раз. Если ошибка повторяется — включите cookie для этого сайта." %}{% endblock %}
+
+{% block error_actions %}
+    <a class="button button--primary" href="{% url 'catalog:home' %}">{% icon "home" size=14 %} {% trans "На главную" %}</a>
+    <a class="button button--ghost" href="{% url 'users:login' %}">{% icon "user" size=14 %} {% trans "Войти" %}</a>
+{% endblock %}
+
+{% block error_extra %}
+    <div class="error-page__search">
+        <form class="search" action="{% url 'catalog:search' %}" method="get" role="search">
+            <label class="visually-hidden" for="search-error-csrf">{% trans "Поиск по каталогу" %}</label>
+            <input class="search__input" id="search-error-csrf" type="search" name="q"
+                   placeholder="{% trans 'Название, жанр, человек…' %}" autocomplete="off">
+            <button class="search__submit" type="submit" aria-label="{% trans 'Найти' %}">{% icon "search" size=16 %}</button>
+        </form>
+    </div>
+{% endblock %}

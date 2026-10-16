@@ -308,7 +308,17 @@
     --sticky-content-top: calc(var(--header-height) + var(--topnav-height));
 
     --touch-target: 44px;
+
+    /* Высота фиксированной нижней полосы (≤720px) без её нижнего паддинга:
+       59px пункт меню + 8px верхний паддинг + 1px рамка. */
     --bottom-nav-height: 68px;
+    /* Место, которое полоса занимает внизу экрана. Из него считается
+       padding-bottom страницы (см. @media ≤720px в components.css и
+       lumibox.css): без него последние 60px каждой страницы остаются
+       под полосой, и до них не доскроллить. */
+    --bottom-nav-reserve: calc(
+        var(--bottom-nav-height) + max(var(--space-2), env(safe-area-inset-bottom))
+    );
 
     /* --- Сайдбар и карточки — геометрия ---
        content ~640px, sidebar ~331px, poster 200px gap 20px

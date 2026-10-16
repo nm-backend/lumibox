@@ -61,7 +61,7 @@
                                 <a class="crew" href="{{ person.get_absolute_url }}">
                                     <span class="avatar">
                                         {% if person.photo %}
-                                            <img class="avatar__image" src="{{ person.photo|webp_url }}" alt="" loading="lazy" decoding="async">
+                                            <img class="avatar__image" src="{{ person.photo|webp_url:100 }}" alt="" loading="lazy" decoding="async">
                                         {% else %}
                                             <span aria-hidden="true">{{ person.initial }}</span>
                                         {% endif %}

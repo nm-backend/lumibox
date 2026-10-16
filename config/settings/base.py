@@ -415,6 +415,11 @@ REST_FRAMEWORK = {
     # За Nginx поставить 1 через DJANGO_NUM_PROXIES, иначе все посетители
     # склеятся в один ключ по адресу самого Nginx.
     "NUM_PROXIES": NUM_PROXIES,
+    # Тексты отказов. Django и DRF отвечают на «не найдено» служебной фразой
+    # на английском («No Title matches the given query.»), а отказ CSRF —
+    # подсказкой «CSRF Failed: ...». Обработчик подменяет их русскими: клиент
+    # должен получать ответ, а не обрывок внутреннего устройства.
+    "EXCEPTION_HANDLER": "apps.api.v1.exceptions.api_exception_handler",
     # Схему OpenAPI строит drf-spectacular, разбирая сериализаторы и вьюсеты.
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
