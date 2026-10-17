@@ -438,19 +438,22 @@ class TitleHeroStructureTests(TestCase):
         poster_end = html.find("</div>", poster_at)
         self.assertLess(poster_end, body_at)
 
-    def test_hero_actions_hold_the_main_button_and_share(self):
+    def test_hero_actions_hold_the_controls_directly(self):
         """Кнопки лежат прямыми детьми `.film-hero__actions`.
 
         Мобильные правила раскладывают их через `> .button` и `> form`;
         лишняя обёртка вокруг ряда кнопок оставила бы их без размеров
-        и вернула перекрытие нижней полосой.
+        и вернула перекрытие нижней полосой. Проверяем на кнопках, которые
+        есть всегда (плеер зависит от настроек издания), поэтому тест
+        не зависит от .env и совпадает с CI.
         """
-        title = create_title(kp_id="326")
+        title = create_title()
         html = self.client.get(title.get_absolute_url()).content.decode("utf-8")
-        actions = html.split('class="film-hero__actions"', 1)[1]
+        actions = html.split('class="film-hero__actions"', 1)[1].split('class="film-hero__specs"')[0]
 
-        self.assertIn('href="#player"', actions)
         self.assertIn("data-share", actions)
+        self.assertIn("В избранное", actions)
+        self.assertIn("Смотреть позже", actions)
 
 
 class ReferencePagesTests(TestCase):
