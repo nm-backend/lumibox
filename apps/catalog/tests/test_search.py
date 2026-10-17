@@ -22,6 +22,7 @@ from apps.core.test_factories import (
     create_person,
     create_title,
 )
+from apps.core.text import MAX_QUERY_LENGTH, clean_query
 
 
 class SearchTitlesServiceTests(TestCase):
@@ -263,3 +264,102 @@ class SearchSuggestApiTests(TestCase):
         payload = self.client.get(self.url, {"q": "Одинаковое", "limit": 3}).json()
 
         self.assertEqual(len(payload), 3)
+
+
+class ControlCharacterTests(TestCase):
+    """
+    Управляющие символы в поисковой строке не должны доходить до базы.
+
+    PostgreSQL отказывается принимать NUL (0x00) в параметрах запроса:
+    драйвер поднимает ValueError, и страница отвечает 500. SQLite такую
+    строку пропускает, поэтому локальный прогон дефект не ловил — его
+    поймал CI на PostgreSQL. Здесь проверяется само требование (в SQL
+    не уходит управляющих символов), а не поведение конкретной СУБД,
+    так что падение воспроизводится и на SQLite.
+    """
+
+    PAYLOAD = "\x00\x01\x02"
+
+    def setUp(self):
+        create_title(name="Начало", original_name="Inception")
+
+    def _params_without_control(self, callback):
+        """Выполняет запрос и возвращает все параметры SQL для проверки."""
+        captured = []
+
+        def wrapper(execute, sql, params, many, context):
+            captured.append(params)
+            return execute(sql, params, many, context)
+
+        with connection.execute_wrapper(wrapper):
+            response = callback()
+
+        flat = " ".join(str(part) for params in captured for part in (params or ()))
+        return response, flat
+
+    def test_clean_query_strips_control_characters(self):
+        self.assertEqual(clean_query("\x00\x01Начало\x02"), "Начало")
+        self.assertEqual(clean_query("На\u200bчало"), "Начало")  # мягкий перенос
+        self.assertEqual(clean_query(None), "")
+        self.assertEqual(clean_query("   "), "")
+        # Запрос длиннее лимита обрезается, а не отвергается.
+        self.assertEqual(len(clean_query("ы" * 500)), MAX_QUERY_LENGTH)
+
+    def test_search_page_never_sends_control_characters_to_sql(self):
+        response, params = self._params_without_control(
+            lambda: self.client.get(reverse("catalog:search"), {"q": self.PAYLOAD})
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn("\x00", params)
+
+    def test_cleaning_does_not_break_a_real_query(self):
+        """Мусор рядом со словом не должен отменять сам поиск."""
+        queryset = search_titles("Начало\x00\x01")
+
+        self.assertEqual(queryset.count(), 1)
+
+    def test_catalog_filter_never_sends_control_characters_to_sql(self):
+        response, params = self._params_without_control(
+            lambda: self.client.get(reverse("catalog:title_list"), {"q": self.PAYLOAD})
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn("\x00", params)
+
+    def test_actor_search_never_sends_control_characters_to_sql(self):
+        for extra in ({}, {"json": "1"}):
+            with self.subTest(json=bool(extra)):
+                response, params = self._params_without_control(
+                    lambda: self.client.get(
+                        reverse("catalog:actor_search"),
+                        {"q": self.PAYLOAD, **extra},
+                        headers={"X-Requested-With": "XMLHttpRequest"} if extra else {},
+                    )
+                )
+
+                self.assertEqual(response.status_code, 200)
+                self.assertNotIn("\x00", params)
+
+    def test_api_search_never_sends_control_characters_to_sql(self):
+        response, params = self._params_without_control(
+            lambda: self.client.get("/api/v1/titles/search/", {"q": self.PAYLOAD})
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn("\x00", params)
+
+    def test_api_search_filter_never_sends_control_characters_to_sql(self):
+        """
+        У списка записей поиск идёт через DRF SearchFilter (?search=).
+
+        У него своя проверка значения (CharField отказывается от NUL), но
+        до неё дело доходит только если NUL уцелел в строке запроса —
+        этим занимается middleware, и здесь проверяется результат.
+        """
+        response, params = self._params_without_control(
+            lambda: self.client.get("/api/v1/titles/", {"search": self.PAYLOAD})
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn("\x00", params)

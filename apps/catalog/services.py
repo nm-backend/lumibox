@@ -14,6 +14,7 @@ from django.db.models import Avg, Count, F, Q
 
 from apps.catalog.models import Collection, Country, Title
 from apps.catalog.models.person import Participation
+from apps.core.text import clean_query
 
 # Ключ кэша главной. Константа, а не строка по месту: сбрасывать кэш
 # нужно из другого модуля, и опечатка там осталась бы незамеченной.
@@ -453,7 +454,10 @@ def search_titles(query, limit=None):
     нужно тому, кто запускает проект локально на SQLite
     (run_local_windows.bat) и удивляется пустой выдаче.
     """
-    query = (query or "").strip()
+    # clean_query, а не strip(): PostgreSQL падает на NUL в параметрах
+    # запроса, а управляющие символы приходят из сломанных ссылок
+    # и скриптов — см. apps/core/text.py.
+    query = clean_query(query)
     if len(query) < SEARCH_MIN_LENGTH:
         return Title.objects.none()
 
@@ -486,7 +490,7 @@ def search_persons(query, limit=12):
     """
     from apps.catalog.models import Person
 
-    query = (query or "").strip()
+    query = clean_query(query)
     if len(query) < SEARCH_MIN_LENGTH:
         return Person.objects.none()
 

@@ -6,8 +6,12 @@
 отсутствие или ослабление должно быть замечено тестами.
 """
 
-from django.test import Client, TestCase, override_settings
+from django.db import connection
+from django.http import HttpResponse
+from django.test import Client, RequestFactory, TestCase, override_settings
 from django.urls import reverse
+
+from apps.core.middleware import QueryStringSanitizerMiddleware
 
 
 class CSPMiddlewareTests(TestCase):
@@ -139,3 +143,87 @@ class RequestIdMiddlewareTests(TestCase):
         first = self.client.get("/").headers["X-Request-ID"]
         second = self.client.get("/").headers["X-Request-ID"]
         self.assertNotEqual(first, second)
+
+
+class QueryStringSanitizerTests(TestCase):
+    """
+    NUL в строке запроса не должен доходить до базы.
+
+    PostgreSQL отказывается принимать символ NUL (0x00) в параметрах
+    запроса — драйвер поднимает ValueError, и страница отвечает 500.
+    SQLite такую строку пропускает, поэтому проверяем не код ответа
+    (он и до правки был 200), а сами параметры SQL: в них не должно
+    остаться NUL. Так тест падает и на SQLite — то есть проверяет то же
+    требование, из-за которого падал CI на PostgreSQL.
+    """
+
+    def _sql_params(self, callback):
+        """Выполняет запрос и собирает все параметры SQL за время запроса."""
+        captured = []
+
+        def wrapper(execute, sql, params, many, context):
+            captured.append(params)
+            return execute(sql, params, many, context)
+
+        with connection.execute_wrapper(wrapper):
+            response = callback()
+
+        flat = " ".join(str(part) for params in captured for part in (params or ()))
+        return response, flat
+
+    def test_middleware_removes_nul_from_query_parameters(self):
+        """
+        Прямая проверка middleware: до вьюхи параметр доходит без NUL.
+
+        Это и есть канарейка: без middleware здесь останется «a\x00b»,
+        и тест падает — в отличие от проверок по SQL, где часть путей
+        и без чистки обходится своими валидаторами.
+        """
+        seen = {}
+
+        def view(request):
+            seen.update(dict(request.GET.items()))
+            return HttpResponse("ok")
+
+        response = QueryStringSanitizerMiddleware(view)(RequestFactory().get("/?q=a%00b&page=2"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(seen["q"], "ab")
+        self.assertEqual(seen["page"], "2")
+
+    def test_search_page_does_not_pass_nul_to_sql(self):
+        response, params = self._sql_params(
+            lambda: self.client.get(reverse("catalog:search"), {"q": "\x00\x01\x02"})
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn("\x00", params)
+
+    def test_catalog_genre_filter_does_not_pass_nul_to_sql(self):
+        """
+        Жанр ищется по slug — это тоже параметр из адреса.
+
+        Без middleware проверка поля уходила в базу с NUL внутри:
+        на SQLite незаметно, на PostgreSQL — 500.
+        """
+        response, params = self._sql_params(
+            lambda: self.client.get(reverse("catalog:title_list"), {"genre": "drama\x00"})
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn("\x00", params)
+
+    def test_api_filter_does_not_pass_nul_to_sql(self):
+        response, params = self._sql_params(
+            lambda: self.client.get("/api/v1/titles/", {"genres__slug": "\x00drama"})
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn("\x00", params)
+
+    def test_clean_value_is_kept(self):
+        """Чистка не портит само слово: мусор убирается, запрос остаётся."""
+        response = self.client.get(reverse("catalog:search"), {"q": "Начало\x00"})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["query"], "Начало")

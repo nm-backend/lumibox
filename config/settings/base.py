@@ -150,6 +150,9 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     # ID запроса: X-Request-ID в ответе и request_id в логах и Sentry.
     "apps.core.middleware.RequestIdMiddleware",
+    # NUL в строке запроса роняет PostgreSQL (ответ 500) — вычищаем его
+    # до того, как параметры попадут в фильтры и к базе.
+    "apps.core.middleware.QueryStringSanitizerMiddleware",
     # Сжатие ответов gzip — уменьшает размер HTML/JSON/CSS/JS.
     "django.middleware.gzip.GZipMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",

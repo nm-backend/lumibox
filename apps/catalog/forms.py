@@ -4,6 +4,7 @@ from django.core.cache import cache
 from django.db.models import F, Q
 
 from apps.catalog.models import Country, Genre, Title, VoiceOver
+from apps.core.text import clean_query
 
 # Ключ кэша списка годов. Константа: сбрасывать его нужно из signals.py.
 YEAR_CHOICES_CACHE_KEY = "catalog:year_choices:v1"
@@ -151,6 +152,14 @@ class CatalogFilterForm(forms.Form):
         required=False,
         choices=list(SORT_OPTIONS.items()),
     )
+
+    def clean_q(self):
+        """Убирает управляющие символы: PostgreSQL на них отвечает ошибкой.
+
+        Проверка стоит в форме, а не во вьюхе, потому что через неё идёт
+        и подсказка в шапке, и фильтр каталога — одна точка на два входа.
+        """
+        return clean_query(self.cleaned_data["q"])
 
     def filter(self, queryset):
         """Применяет к queryset только те фильтры, которые заполнены."""

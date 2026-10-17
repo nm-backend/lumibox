@@ -36,6 +36,7 @@ from apps.catalog.services import (
     search_persons,
     search_titles,
 )
+from apps.core.text import clean_query
 from apps.core.views import ElidedPaginationMixin
 from apps.library.models import Favorite, WatchHistory, Watchlist
 from apps.library.services import remember_view
@@ -1104,7 +1105,9 @@ class SearchView(ElidedPaginationMixin, ListView):
     paginate_by = 24
 
     def get_queryset(self):
-        self.query = self.request.GET.get("q", "").strip()
+        # clean_query, а не strip(): NUL и прочие управляющие символы
+        # PostgreSQL принимать отказывается — без очистки запрос отвечал 500.
+        self.query = clean_query(self.request.GET.get("q", ""))
         # Ограничение снимаем: на своей странице зритель ждёт полную выдачу,
         # а не шесть подсказок. Пагинация дальше сама режет её на страницы.
         #
@@ -1139,7 +1142,7 @@ class ActorSearchView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        q = self.request.GET.get("q", "").strip()
+        q = clean_query(self.request.GET.get("q", ""))
 
         context["query"] = q
         context["results"] = None
@@ -1192,7 +1195,7 @@ class ActorSearchView(TemplateView):
     def get(self, request, *args, **kwargs):
         # AJAX-запрос: возвращаем JSON с подсказками
         if request.headers.get("X-Requested-With") == "XMLHttpRequest":
-            q = request.GET.get("q", "").strip()
+            q = clean_query(request.GET.get("q", ""))
             if len(q) < 2:
                 return JsonResponse({"results": []})
 

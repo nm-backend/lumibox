@@ -56,6 +56,43 @@ class RequestIdMiddleware:
         return response
 
 
+class QueryStringSanitizerMiddleware:
+    """Убирает NUL из GET-параметров до того, как они дойдут до базы.
+
+    PostgreSQL не принимает символ NUL (0x00) ни в данных, ни в параметрах
+    запроса: драйвер поднимает ValueError, и страница отвечает 500. SQLite
+    такую строку пропускает, поэтому локальный прогон этого не видел —
+    дефект поймал CI на PostgreSQL (запрос /search/?q=%00%01%02).
+
+    Чистим именно строку запроса, а не тело: в POST текст разбирают формы
+    и API-сериализаторы, которые отказывают по-русски («Данные содержат
+    запрещённый символ: ноль-байт»). В адресе NUL не бывает осмысленным:
+    его нельзя набрать, он приходит из сломанной ссылки или чужого скрипта.
+
+    Место в середине цепочки — до всего, что читает request.GET (включая
+    фильтры каталога, пагинацию и django-filter в API), но уже после
+    SecurityMiddleware.
+    """
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        # Ищем NUL именно в разобранных значениях: в строке запроса он
+        # приезжает закодированным (%00), и проверка по сырому QUERY_STRING
+        # не находит его вовсе — на этом первая версия молча не работала.
+        query = request.GET
+        if any("\x00" in value for value in query.values()):
+            cleaned = query.copy()
+            for key in list(cleaned.keys()):
+                cleaned.setlist(key, [value.replace("\x00", "") for value in cleaned.getlist(key)])
+            # request.GET — обычное свойство с кэшем: подмена до первого
+            # обращения к нему доходит до всех вьюх и middleware ниже.
+            request.GET = cleaned
+
+        return self.get_response(request)
+
+
 class ContentSecurityPolicyMiddleware:
     """
     Adds Content-Security-Policy header to every response.
