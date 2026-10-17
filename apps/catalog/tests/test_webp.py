@@ -392,9 +392,11 @@ class SmallSlotTests(MediaFilesTestCase):
                 self.assertIn(width, SIZED_VARIANTS.get(key, ()))
 
 
-# sizes повторяют вёрстку: у постерa в шапке фильма 280px до 900px и 160px
-# ниже, у обложки подборки — 240px рядом с текстом и вся ширина в колонке.
-title_hero_sizes = "(min-width: 901px) 280px, 160px"
+# sizes повторяют вёрстку: у постера в шапке фильма 280px на десктопе,
+# 160px на планшете и 128px на телефоне (там он стоит в левой колонке
+# рядом с названием), у обложки подборки — 240px рядом с текстом
+# и вся ширина в колонке.
+title_hero_sizes = "(min-width: 901px) 280px, (min-width: 721px) 160px, 128px"
 collection_hero_sizes = "(min-width: 721px) 240px, 100vw"
 
 

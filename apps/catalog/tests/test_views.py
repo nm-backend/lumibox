@@ -407,6 +407,52 @@ class TitleDetailViewTests(TestCase):
         self.assertNotContains(response, 'data-nopreload="true"')
 
 
+class TitleHeroStructureTests(TestCase):
+    """Структура шапки фильма, от которой зависит мобильная раскладка.
+
+    На телефоне (static/css/title-detail.css, @media ≤720px) постер стоит
+    в левой колонке, а название — рядом с ним: `.film-hero__body` получает
+    `display: contents`, поэтому его дети становятся ячейками той же сетки.
+
+    Это работает только пока постер и тело шапки — СОСЕДИ внутри
+    `.film-hero__inner`. Если постер перенести внутрь тела (или наоборот),
+    вложенная сетка тихо перестанет складываться: постер снова встанет
+    отдельной строкой, кнопки уедут вниз и на 375×667 окажутся под
+    фиксированной нижней полосой — ровно та беда, которую правили.
+    CSS такое не заметит, поэтому проверяем разметку.
+    """
+
+    def test_posters_and_body_are_siblings_inside_hero(self):
+        title = create_title()
+        html = self.client.get(title.get_absolute_url()).content.decode("utf-8")
+
+        self.assertIn("film-hero__inner", html)
+        poster_at = html.find('class="film-hero__poster"')
+        body_at = html.find('class="film-hero__body"')
+        self.assertGreater(poster_at, -1)
+        self.assertGreater(body_at, -1)
+        self.assertLess(poster_at, body_at)
+
+        # Постер закрывается ДО тела шапки: значит, он ему не родитель
+        # и не потомок, а сосед — иначе `display: contents` не сработает.
+        poster_end = html.find("</div>", poster_at)
+        self.assertLess(poster_end, body_at)
+
+    def test_hero_actions_hold_the_main_button_and_share(self):
+        """Кнопки лежат прямыми детьми `.film-hero__actions`.
+
+        Мобильные правила раскладывают их через `> .button` и `> form`;
+        лишняя обёртка вокруг ряда кнопок оставила бы их без размеров
+        и вернула перекрытие нижней полосой.
+        """
+        title = create_title(kp_id="326")
+        html = self.client.get(title.get_absolute_url()).content.decode("utf-8")
+        actions = html.split('class="film-hero__actions"', 1)[1]
+
+        self.assertIn('href="#player"', actions)
+        self.assertIn("data-share", actions)
+
+
 class ReferencePagesTests(TestCase):
     def test_genre_page_lists_its_titles(self):
         genre = create_genre(name="Драма", slug="drama")

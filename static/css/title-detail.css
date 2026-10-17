@@ -1027,7 +1027,12 @@
    На экране 800px они стояли на 698-м пикселе — формально видно, но у фильма
    с длинной аннотацией уезжали за сгиб, и главное действие страницы про кино
    приходилось искать прокруткой. Порядок задаём flex-ом только на телефоне:
-   на десктопе колонка широкая, всё помещается и без перестановки. */
+   на десктопе колонка широкая, всё помещается и без перестановки.
+
+   Порядок задан ВСЕМ блокам шапки. Раньше у оригинального названия, бейджей
+   жанров и блока оценки `order` не было вовсе, то есть они шли первыми и
+   стояли над заголовком: кнопки уезжали на 636-й пиксель при высоте экрана
+   667px, и главное действие фильма оказывалось под нижней полосой. */
 @media (max-width: 900px) {
     .film-hero__body {
         display: flex;
@@ -1035,59 +1040,121 @@
     }
 
     .film-hero__name { order: 1; }
-    .film-hero__tagline { order: 2; }
-    .film-hero__actions { order: 3; margin-top: var(--space-4); }
-    .film-hero__meta { order: 4; }
-    .film-hero__description { order: 5; }
-    .film-hero__specs { order: 6; }
+    .film-hero__actions { order: 2; margin-top: var(--space-4); }
+    .film-hero__tagline { order: 3; }
+    .film-hero__original { order: 4; }
+    .film-hero__genres { order: 5; }
+    .film-hero__meta { order: 6; }
+    .film-hero__description { order: 7; }
+    .film-hero__rating-section { order: 8; }
+    .film-hero__specs { order: 9; }
 
     /* Главная кнопка на всю ширину: в неё надо попадать не целясь. */
     .film-hero__actions > .button--large {
         flex: 1 1 100%;
         justify-content: center;
     }
+}
 
-    /* На средних мобильных width (от ~375px) — кнопки просмотра и трейлера в одну строку.
-       Остальные ghost-кнопки на следующей строке. */
-    @media (min-width: 375px) and (max-width: 480px) {
-        /* film-hero__body оставляем column, кнопки раскладываем через actions */
-        .film-hero__body {
-            flex-direction: column;
-        }
+/* ---------- Первый экран фильма: постер слева, название справа ----------
 
-        .film-hero__actions {
-            display: flex;
-            gap: var(--space-2);
-            justify-content: flex-start;
-            flex-wrap: wrap;
-        }
+   На телефоне постер 160×240 стоял отдельной строкой. Вместе с шапкой сайта
+   это отнимало у первого экрана около 400px, и на 375×667 кнопка «Смотреть
+   фильм» попадала под фиксированную нижнюю полосу (она занимает 76px),
+   а на 390×844 под ней оказывалась «Поделиться»: человек видел верх кнопки
+   и не мог в неё попасть — тап забирала полоса.
 
-        /* Кнопки просмотра и трейлера в одну строку */
-        .film-hero__actions > .button--primary.button--large,
-        .film-hero__actions > .button--ghost.button--large {
-            flex: 1 1 0;
-            min-width: 0;
-            min-height: var(--touch-target);
-            white-space: nowrap;
-        }
-
-        /* Остальные ghost-кнопки (избранное, watchlist, share) в колонку */
-        .film-hero__actions > .button--ghost:not(.button--large) {
-            flex: 1 1 100%;
-            min-width: 0;
-        }
+   Полосу не прячем при прокрутке и страницу не сдвигаем: нижняя навигация
+   остаётся на месте (иначе она «прыгает» под пальцем и уводит случайные
+   тапы), а первый экран становится компактнее. Постер уходит в левую
+   колонку шириной 128px, название встаёт справа от него, кнопки и текст —
+   во всю ширину под ними. Благодаря этому на 320×640 все четыре кнопки
+   целиком выше полосы, а не только верхняя. */
+@media (max-width: 720px) {
+    .film-hero {
+        padding-top: var(--space-4);
     }
 
-    /* На самых узких экранах до 375px оставляем колонку */
-    @media (max-width: 374px) {
-        .film-hero__body {
-            flex-direction: column;
-        }
+    .film-hero__inner {
+        grid-template-columns: 128px 1fr;
+        gap: var(--space-3);
+    }
 
-        .film-hero__actions > .button--large {
-            flex: 1 1 100%;
-            justify-content: center;
-        }
+    /* Постер 128×192 вместо 160×240: на телефоне он всё равно стоял один
+       в своей строке, а 48px высоты здесь дороже размера картинки. */
+    .film-hero__poster {
+        width: 100%;
+        grid-column: 1;
+        grid-row: 1;
+    }
+
+    /* Тело шапки перестаёт быть отдельным блоком: его дети становятся
+       ячейками той же сетки. Так заголовок может стоять рядом с постером,
+       хотя в разметке он лежит внутри тела (порядок `order` при этом
+       продолжает работать — сетка расставляет ячейки по нему). */
+    .film-hero__body {
+        display: contents;
+    }
+
+    .film-hero__name {
+        grid-column: 2;
+        grid-row: 1;
+        align-self: center;
+    }
+
+    .film-hero__actions,
+    .film-hero__tagline,
+    .film-hero__original,
+    .film-hero__genres,
+    .film-hero__meta,
+    .film-hero__description,
+    .film-hero__rating-section,
+    .film-hero__specs {
+        grid-column: 1 / -1;
+    }
+
+    /* Отступ сверху даёт межстрочный зазор сетки (12px), второй не нужен:
+       каждый лишний пиксель здесь — это пиксель, на который кнопки
+       приближаются к нижней полосе. */
+    .film-hero__actions {
+        margin-top: 0;
+        gap: var(--space-2);
+    }
+
+    /* Мелкие кнопки (избранное, «Смотреть позже», «Поделиться») делят строку
+       по своей ширине, главные занимают строку целиком. Раньше правило
+       «две кнопки в ряд» на 375–480px не срабатывало у вошедших: кнопки
+       избранного лежат внутри <form>, и селектор `> .button--ghost` до них
+       не доставал. */
+    .film-hero__actions > .button:not(.button--large),
+    .film-hero__actions > form {
+        flex: 0 1 auto;
+        min-width: 0;
+    }
+
+    .film-hero__actions > form {
+        display: flex;
+    }
+
+    .film-hero__actions > form > .button {
+        flex: 1 1 100%;
+    }
+
+    /* Заглушка постера в уменьшенном боксе: знак и подпись не должны
+       упираться в край 128-пиксельной картинки. */
+    .film-hero__poster .lb-poster-fallback--hero {
+        padding: var(--space-3) var(--space-2);
+    }
+
+    .film-hero__poster .lb-poster-fallback--hero .lb-poster-fallback__badge {
+        width: 40px;
+        height: 40px;
+        margin-bottom: var(--space-2);
+    }
+
+    .film-hero__poster .lb-poster-fallback--hero .lb-poster-fallback__title {
+        font-size: var(--text-xs);
+        -webkit-line-clamp: 3;
     }
 }
 
